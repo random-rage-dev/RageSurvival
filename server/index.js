@@ -38,7 +38,6 @@ mp.events.add("ServerAccount:Register", function(player, username, hash_password
 });
 
 mp.events.add("Player:Loaded", function(player) {
-    let turfs = Gangwar.getTurfs();
     console.log("Player Loaded " + player.name)
     player.call("GangAreas:Create", [turfs]);
 });
@@ -59,25 +58,8 @@ mp.events.add("Player:Crouch", (player) => {
 
 mp.events.add("playerDeath", function(player, reason, killer) {
     player.data.isCrouched = false;
-    reason = getDeathReason(reason);
     if (players[player.id]) {
-        if (players[player.id].isDead() == 0) {
-            if ((reason == "flatten") || (reason == "rotor")) {
-                if ((players[player.id]) && (players[killer.id])) {
-                    players[player.id].death(players[killer.id], killer.weapon, reason);
-                } else {
-                    players[player.id].death(false);
-                }
-            } else {
-                players[player.id]._health = 0;
-                players[player.id]._armor = 0
-                if (killer == undefined) {
-                    killer = player;
-                }
-                players[player.id].hit(players[killer.id], killer.weapon, undefined)
-                this.cancel = true;
-            }
-        }
+        players[player.id].death(false);
     }
 });
 

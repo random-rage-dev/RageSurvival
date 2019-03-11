@@ -10,7 +10,7 @@ class mongodb {
     _setup() {
         var self = this;
         self._conncted = false;
-        mongoose.connect('mongodb://localhost/gangwar?authSource=admin', {
+        mongoose.connect('mongodb://localhost/ragezombies?authSource=admin', {
             useCreateIndex: true,
             useNewUrlParser: true/*,
             user: 'RootGangwar',
@@ -19,9 +19,6 @@ class mongodb {
         self._db = mongoose.connection;
         self._db.on('error', console.error.bind(console, 'connection error:'));
         self._dbUserModel = mongoose.model('User', schema.user);
-        self._dbKillModel = mongoose.model('Kills', schema.kills);
-        self._dbWeaponInventoryModel = mongoose.model('WeaponInventory', schema.weapon_inventory);
-        self._dbTurfModel = mongoose.model('Turfs', schema.turfs);
 
         self._db.once('open', function() {
             self._conncted = true;
@@ -31,15 +28,6 @@ class mongodb {
     }
     getUserModel() {
         return this._dbUserModel;
-    }
-    getKillModel() {
-        return this._dbKillModel;
-    }
-    getWeaponInventoryModel() {
-        return this._dbWeaponInventoryModel;
-    }
-    getTurfModel() {
-        return this._dbTurfModel;
     }
 }
 module.exports = new mongodb();

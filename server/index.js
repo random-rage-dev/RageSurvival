@@ -1,4 +1,5 @@
 var PlayerClass = require("./users/player.js")
+var ItemPickups = require("./world/pickups.js")
 
 var players = [];
 mp.events.add("ServerAccount:Ready", function(player) {

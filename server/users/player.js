@@ -115,100 +115,27 @@ var Player = class {
     }
     death(killer, weapon, reason) {
         let self = this;
-        if (killer == false) {
-            killer = self;
-            weapon = self._player.weapon;
-            self._damage.push({
-                hitter: self._userId,
-                weapon: weapon,
-                damage: self._player.health
-            })
-        }
-        self.killStreak("clear")
-        self._player.removeAllWeapons();
-        self.killBlip();
-        let getKillString = "You got killed by " + killer._player.name;
-        if (reason == "flatten") {
-            getKillString = "You got ran over by " + killer._player.name;
-        }
-        self._player.call("Player:Death", [getKillString]);
-        mp.events.call("Combat:Kill", killer._player, self._player, weapon)
-        mp.events.call("Combat:Killed", self._player, killer._player, weapon)
-        self.log("Death", killer._userId)
-        self._player.setVariable("spawned", false)
-        self._player.health = 0;
-        self._death = 1;
-        // Calc DMG per Player
-        let dmg = self._damage;
-        let dmg_players = self._damage.reduce(function(w, current) {
-            if (current.hitter != self._userId) {
-                if (!w[current.hitter.toString()]) {
-                    w[current.hitter] = 0;
-                }
-                w[current.hitter] += current.damage;
-            }
-            return w;
-        }, [])
-        mp.events.call("Combat:Rewards", dmg_players, killer._player)
-        let weapons = self._weapons.map(item => item.hash).filter(function(item, pos, self) {
-            return self.indexOf(item) == pos;
-        });
-        async.eachLimit(weapons, 1, function(weapon, callback) {
-            WeaponInventory.findOneAndUpdate({
-                user_id: self._userId,
-                equiped: true,
-                weapon: weapon
-            }, {
-                $inc: {
-                    'duration': -1
-                }
-            }).exec(function(err, res) {
-                if (err) return callback(err);
-                return callback();
-            });
-        }, function(err) {
-            if (err) return self.error(err);
-            let kill = new Kills({
-                timestamp: new Date().getTime(),
-                killer_id: killer._userId,
-                victim_id: self._userId,
-                weapon_id: weapon,
-                damage_given: self._damage
-            })
-            kill.save(function(err) {
-                if (err) return self.error(err);
-                // saved! 
-                setTimeout(function() {
+        setTimeout(function() {
                     self.spawn();
                 }, 1000);
-            });
-        });
     }
     spawn() {
         var self = this;
-        let spawnpoints = Teams[self._team].getSpawns();
-        let spoint = spawnpoints[Math.floor(Math.random() * spawnpoints.length)];
-        self._player.spawn(spoint.vector);
-        self._player.model = mp.joaat(Teams[self._team].skins[self._skin].name);
-        self._player.heading = spoint.heading;
+        self._player.spawn(new mp.Vector3(417.1167907714844,6480.19091796875,28.80876350402832));
+        self._player.model = mp.joaat("mp_m_freemode_01");
+        self._player.heading = 90;
         self._health = 100;
         self._armor = 25;
         self._player.health = 100 + self._health;
         self._player.armour = self._armor;
         self._damage = [];
         self._death = 0;
-        self._player.setVariable("level", self.getLevelData().level)
-        self._player.setVariable("team_color", Teams[self._team]._color_blip)
-        self._player.setVariable("team_rgb_color", Teams[self._team].teamcolor)
-        self._player.setVariable("team", self._team)
-        self._player.setVariable("team_name", Teams[self._team].name)
         self._player.setVariable("spawned", true)
         self._player.setVariable("invincible", true)
         self._player.alpha = 255;
         self._player.call("Cam:Hide")
         self._player.call("Player:Spawn");
         self._spawnedTimestamp = Date.now();
-        self.loadWeapons();
     }
     hit(hitter, weapon, bone) {
         var self = this;
@@ -216,16 +143,13 @@ var Player = class {
             if ((Date.now() - self._spawnedTimestamp) / 1000 > 15) {
                 if ((self._health > 0) && (self.isDead() == 0)) {
                     let mul = 1;
-                    if (bone != undefined) {
-                        mul = Damage.getBoneMul(bone);
-                    }
-                    let damage = Math.floor(Damage.getWeaponDamage(weapon) * (mul || 1));
+                    //if (bone != undefined) {
+                    //    mul = Damage.getBoneMul(bone);
+                    //}
+                    let damage = 0// Math.floor(Damage.getWeaponDamage(weapon) * (mul || 1));
                     self.log("weapon", weapon)
                     self.log("damage", damage)
                     self.log("hitter", hitter._player.name)
-                    if (hitter.team == self.team) {
-                        damage *= 0.25;
-                    }
                     if (self._player.health > self._health) {
                         self._player.health = self._health;
                     }
@@ -288,11 +212,8 @@ var Player = class {
         }, async function(err, arr) {
             if (arr.length) {
                 let cUser = arr[0];
-                self._exp = cUser.exp;
-                self.money = cUser.money;
                 self._playtime = cUser.playtime;
                 self._warns = cUser.warns;
-                self._rank = cUser.rank;
                 self._userId = cUser.user_id;
                 //self.spawn();
                 self._player.setVariable("user_id", self._userId)

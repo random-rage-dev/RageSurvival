@@ -7,11 +7,9 @@ const loadClipSet = (clipSetName) => {
     while (!mp.game.streaming.hasClipSetLoaded(clipSetName)) mp.game.wait(0);
 };
 
-// load clip sets
 loadClipSet(movementClipSet);
 loadClipSet(strafeClipSet); 
 
-// apply clip sets if streamed player is crouching
 mp.events.add("entityStreamIn", (entity) => {
     if (entity.type === "player" && entity.getVariable("isCrouched")) {
         entity.setMovementClipset(movementClipSet, clipSetSwitchTime);
@@ -19,7 +17,6 @@ mp.events.add("entityStreamIn", (entity) => {
     }
 });
  
-// apply/reset clip sets when isCrouched changes for a streamed player
 mp.events.addDataHandler("isCrouched", (entity, value) => {
     if (entity.type !== "player") return;
 
@@ -32,7 +29,6 @@ mp.events.addDataHandler("isCrouched", (entity, value) => {
     }
 });
 
-// CTRL key to toggle crouching
 mp.keys.bind(0x11, false, () => {
     mp.events.callRemote("Player:Crouch");
 });

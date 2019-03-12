@@ -2,6 +2,8 @@ require("./vector.js")
 console.log = function(...a) {
     mp.gui.chat.push("DEBUG:" + a.join(" "))
 };
+
+
 var streamedPools = [];
 class LootPool {
     constructor(data) {
@@ -12,12 +14,12 @@ class LootPool {
         self._lootData = data;
         self._pickupObjects = [];
         self.initLootObjects()
-        mp.events.add("render", () => {
-            self.render()
-        });
     }
     set data(new_data) {
         this._lootData = new_data;
+    }
+    get position() {
+         return new mp.Vector3(this._lootData.pos.x, this._lootData.pos.y, this._lootData.pos.z);   
     }
     getLootPool() {
         return this._lootData.items;
@@ -42,6 +44,7 @@ class LootPool {
             let rot_x = front_pos.rotPoint(back_pos);
             let rot_y = left_pos.rotPoint(right_pos);
             let pos = offset_pos.ground();
+            pos.z += 1;
             let obj = mp.objects.new(mp.game.joaat(item.model), pos, {
                 rotation: new mp.Vector3(0, 0, base_rot),
                 alpha: 255,
@@ -49,8 +52,8 @@ class LootPool {
             });
             obj.placeOnGroundProperly();
             let rotobj = obj.getRotation(0);
-            let posobj = obj.getCoords(false);           
-
+            let posobj = obj.getCoords(false);
+            obj.setCollision(false, true);
             obj.setCoords(posobj.x + item.offset.pos.x, posobj.y + item.offset.pos.y, (posobj.z - obj.getHeightAboveGround()) + item.offset.pos.z, false, false, false, false);
             obj.setRotation(rotobj.x + item.offset.rot.x, rotobj.y + item.offset.rot.y, rotobj.z, 0, true);
             self._pickupObjects.push({
@@ -61,12 +64,6 @@ class LootPool {
     }
     render() {
         let self = this;
-        mp.game.graphics.drawText("Loot Pool", [self._lootData.pos.x, self._lootData.pos.y, self._lootData.pos.z], {
-            font: 2,
-            color: [255, 255, 255, 185],
-            scale: [0.4, 0.4],
-            outline: true
-        });
     }
     unload(id) {
         let self = this;
@@ -94,21 +91,44 @@ mp.events.add("Loot:Unload", (id) => {
         delete streamedPools[id];
     }
 });
-mp.events.add("Loot:Reload", (id,new_data) => {
+mp.events.add("Loot:Reload", (id, new_data) => {
     if (streamedPools[id]) {
         console.log("Reload LootPool", id);
         streamedPools[id].data = new_data
     }
 });
+mp.events.add("render", () => {
+    /*Display Items*/
+    Object.keys(streamedPools).forEach(function(key) {
+        let pool = streamedPools[key]
+        if (pool.isInRange() == true) {
+            let pos = pool.position;
 
+            let Angle_Item = 360 / pool.getLootPool().length;
+            pool.getLootPool().forEach(function(item,index) {
+                let offset_pos = pos.findRot(0, 0.5, Angle_Item * index).ground();
 
+                mp.game.graphics.drawText(item.name, [offset_pos.x,offset_pos.y,offset_pos.z + 0.3], { 
+                  font: 4, 
+                  color: [255, 255, 255, 185], 
+                  scale: [0.3, 0.3], 
+                  outline: true,
+                  centre:true
+                });
+            })
+        }
+
+    });
+});
 mp.keys.bind(0x09, false, () => {
+
+mp.game.gameplay.setWeatherTypeNow("SMOG");
+mp.game.time.setClockTime(2, 0, 0);
     console.log("LoL");
     console.log(Object.keys(streamedPools));
     Object.keys(streamedPools).forEach(function(key) {
         let pool = streamedPools[key]
         if (pool.isInRange() == true) {
-            
             console.log(JSON.stringify(pool.getLootPool()));
         }
     })

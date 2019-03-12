@@ -48,9 +48,7 @@ var Loottable = class {
     }
     getRandomItem(items) {
         let self = this;
-        //usable_items[Math.floor(Math.random() * usable_items.length)]
-
-
+        return items[Math.floor(Math.random() * items.length)]
     }
     getItemsForSpawn(tier, count) {
         let self = this;

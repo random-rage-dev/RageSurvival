@@ -23,12 +23,26 @@ var user = mongoose.Schema({
 }, {
     autoIndex: true
 });
-
+var inventory = mongoose.Schema({
+    owner_type: {
+        type: String,
+        default: "Player"
+    },
+    owner_id: Number,
+    name: String,
+    amount: Number
+}, {
+    autoIndex: true
+});
 user.index({
     user_id: 1,
     name: 1
 });
-
+inventory.index({
+    owner_id: 1,
+    name: 1
+});
 module.exports = {
-    user: user
+    user: user,
+    inventory: inventory
 };

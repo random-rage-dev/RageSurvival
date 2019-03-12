@@ -9,7 +9,7 @@ const loadClipSet = (clipSetName) => {
 
 // load clip sets
 loadClipSet(movementClipSet);
-loadClipSet(strafeClipSet);
+loadClipSet(strafeClipSet); 
 
 // apply clip sets if streamed player is crouching
 mp.events.add("entityStreamIn", (entity) => {

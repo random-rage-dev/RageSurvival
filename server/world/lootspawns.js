@@ -1,5 +1,5 @@
 /*
-*  Tiers : low,medium,high,...
+*  Tiers : Residential,Industrial,Farm,Military,Other,Food,...
 */
 var positions = [{
     id: 1,

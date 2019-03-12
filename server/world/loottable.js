@@ -4,12 +4,12 @@ var loot_tiers = [];
  *  Tiers : Residential,Industrial,Farm,Military,Other,Food,...
  */
 loot_tiers["Residential"] = {
-    "Residential": 80,
+    "Residential": 70,
     "Industrial": 5,
     "Farm": 3.5,
     "Military": 1.5,
     "Other": 5,
-    "Food": 5
+    "Food": 15
 };
 var Loottable = class {
     constructor() {
@@ -24,8 +24,16 @@ var Loottable = class {
     getRarityThreshold(tier) {
         let self = this;
         let threshold = loot_tiers[tier];
-        let random_int = getRandomInt(0, 100);
-        let tier = Object.keys(threshold).reduce(function(k, v) {
+        if (threshold == undefined) threshold = {
+            "Residential": 70,
+            "Industrial": 5,
+            "Farm": 3.5,
+            "Military": 1.5,
+            "Other": 5,
+            "Food": 15
+        };
+        let random_int = Math.floor(Math.random() * (100 - 0));
+        tier = Object.keys(threshold).reduce(function(k, v) {
             if (typeof k == "number") {
                 k += threshold[v];
                 if (k >= random_int) {
@@ -36,10 +44,10 @@ var Loottable = class {
             }
             return k;
         }, 0)
-
         return tier;
     }
     getItemsForSpawn(tier, count) {
+        let self = this;
         let items_for_spawn = [];
         for (var i = 0; i < count; i++) {
             let r_tier = self.getRarityThreshold(tier);
@@ -47,8 +55,9 @@ var Loottable = class {
                 return item.tier == r_tier;
             })
             let random_item = usable_items[Math.floor(Math.random() * usable_items.length)];
-            console.log("random item", random_item)
-            items_for_spawn.push(random_item);
+            if (random_item != undefined) {
+                items_for_spawn.push(random_item);
+            }
         }
         return items_for_spawn;
     }

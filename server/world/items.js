@@ -4,11 +4,11 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min)) + min;
 }
 /*
- *  Tiers : low,medium,high,...
+ *  Tiers : Residential,Industrial,Farm,Military,Other,Food,...
  */
 var items = [{
     name: "Shotgun",
-    tier: "low",
+    tier: "Residential",
     model: "w_sg_pumpshotgun",
     offset: {
         pos: new mp.Vector3(0, 0, 0.02),
@@ -16,7 +16,7 @@ var items = [{
     }
 }, {
     name: "12 Gauge Shells",
-    tier: "low",
+    tier: "Residential",
     model: "w_sg_assaultshotgun_mag1",
     amount: function() {return getRandomInt(5, 15)},
     offset: {
@@ -25,7 +25,7 @@ var items = [{
     }
 }, {
     name: "Micro SMG",
-    tier: "low",
+    tier: "Industrial",
     model: "w_sb_microsmg",
     offset: {
         pos: new mp.Vector3(0, 0, 0.02),
@@ -33,7 +33,7 @@ var items = [{
     }
 },{
     name: "9mm Bullets",
-    tier: "low",
+    tier: "Industrial",
     model: "w_sb_microsmg_mag1",
     amount: function() {return getRandomInt(10, 25)},
     offset: {
@@ -42,7 +42,7 @@ var items = [{
     }
 }, {
     name: "Assault Rifle",
-    tier: "medium",
+    tier: "Military",
     model: "w_ar_assaultrifle",
     offset: {
         pos: new mp.Vector3(0, 0, 0.02),
@@ -50,7 +50,7 @@ var items = [{
     }
 },{
     name: "5.56m Bullets",
-    tier: "medium",
+    tier: "Military",
     model: "w_ar_assaultrifle_mag1",
     amount: function() {return getRandomInt(10, 25)},
     offset: {
@@ -59,7 +59,7 @@ var items = [{
     }
 }, {
     name: "Drank",
-    tier: "low",
+    tier: "Food",
     model: "bkr_prop_coke_powderbottle_02",
     amount: function() {return getRandomInt(1, 4)},
     offset: {
@@ -68,7 +68,7 @@ var items = [{
     }
 }, {
     name: "Drank Fresh",
-    tier: "medium",
+    tier: "Food",
     model: "bkr_prop_coke_powderbottle_01",
     amount: function() {
         return getRandomInt(3, 15)

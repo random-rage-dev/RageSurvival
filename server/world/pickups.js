@@ -44,6 +44,7 @@ var Pickups = class {
         loot_spawns.forEach(function(spawn) {
             let count = LootTable.getItemCountForSpawn(spawn.tier);
             let items = LootTable.getItemsForSpawn(spawn.tier, count);
+            console.log("items",items)
             items = items.map(function(a) {
                 if (typeof a.amount === "function") {
                     a.amount = a.amount();

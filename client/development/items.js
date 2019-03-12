@@ -24,7 +24,8 @@ class LootPool {
         let Angle_Item = 360 / self._lootData.items.length;
         self._lootData.items.forEach(function(item, index) {
             let offset_pos = center.findRot(0, 0.5, Angle_Item * index);
-            let base_rot = Angle_Item * index;
+            let base_rot = (Angle_Item * index) + Math.floor(Math.random() * (360 - 0));
+            if (base_rot > 360) base_rot -= 360;
             var left_pos = offset_pos.findRot(0, 0.1, base_rot + 180).ground();
             var right_pos = offset_pos.findRot(0, 0.1, base_rot + 0).ground();
             var front_pos = offset_pos.findRot(0, 0.1, base_rot + 270).ground();
@@ -33,7 +34,7 @@ class LootPool {
             let rot_y = left_pos.rotPoint(right_pos);
             let pos = offset_pos.ground();
             let obj = mp.objects.new(mp.game.joaat(item.model), pos, {
-                rotation: new mp.Vector3(0, 0, Angle_Item * index),
+                rotation: new mp.Vector3(0, 0, base_rot),
                 alpha: 255,
                 dimension: 0
             });
@@ -79,6 +80,6 @@ mp.events.add("Loot:Unload", (id) => {
     if (streamedPools[id]) {
         console.log("Unload LootPool", id);
         streamedPools[id].unload(id)
-        //delete streamedPools[id];
+        delete streamedPools[id];
     }
 });

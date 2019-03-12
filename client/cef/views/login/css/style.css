@@ -1,6 +1,6 @@
 @font-face {
     font-family: "BebasNeue";
-    src: url('../../source/fonts/BebasNeue-Regular.ttf');
+    src: url('../../../source/fonts/BebasNeue-Regular.ttf');
 }
 body {
     background-size: 100%;

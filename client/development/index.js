@@ -3,7 +3,7 @@ require("./crouch.js")
 require("./items.js")
 var natives = require("./natives.js")
 var CEFBrowser = require("./browser.js");
-var Browser = new CEFBrowser("package://gangwar_client/cef/index.html");
+var Browser = new CEFBrowser("package://RageZombies/cef/views/login/index.html");
 
 function clearBlips() {
     natives.SET_THIS_SCRIPT_CAN_REMOVE_BLIPS_CREATED_BY_ANY_SCRIPT(true);

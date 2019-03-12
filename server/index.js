@@ -1,13 +1,13 @@
 var PlayerClass = require("./users/player.js")
 var ItemPickups = require("./world/pickups.js")
-
+    
 var players = [];
-mp.events.add("ServerAccount:Ready", function(player) {
+mp.events.add("ServerAccount:Ready", function(player) { 
     player.setVariable("loggedIn", false);
     players[player.id] = new PlayerClass(player);
-    player.call("Server:RequestLogin");
+    player.call("Server:RequestLogin");  
     player.position.x = 9000;
-    player.position.y = 9000;
+    player.position.y = 9000; 
 });
 mp.events.add("playerQuit", function(player, exitType, reason) {
     console.log("disconnect")
@@ -40,7 +40,6 @@ mp.events.add("ServerAccount:Register", function(player, username, hash_password
 
 mp.events.add("Player:Loaded", function(player) {
     console.log("Player Loaded " + player.name)
-    player.call("GangAreas:Create", [turfs]);
 });
 mp.events.add('playerChat', (player, message) => {
     if (players[player.id]) {

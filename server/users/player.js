@@ -1,9 +1,9 @@
-var MongoDB = require("../libs/mongodb.js")
+ var MongoDB = require("../libs/mongodb.js")
 var md5 = require("md5")
 var async = require("async")
 var User = MongoDB.getUserModel();
 var Player = class {
-    constructor(player) {
+    constructor(player) {  
         this._setup(player);
     }
     _setup(player) {
@@ -224,6 +224,7 @@ var Player = class {
                 self.log("loaded player data for", self._player.name)
                 console.log(self._player)
                 mp.events.call("Player:Loaded", self._player)
+                self.spawn();
             } else {
                 self.error("Account:Load", "Failed loading player data")
             }

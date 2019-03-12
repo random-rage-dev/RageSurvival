@@ -9,7 +9,7 @@ var Loottable = class {
     getItemCountForSpawn(tier) {
         let self = this;
         /*TODO: Make something better */
-        return Math.random() > 0.5 ? 1 : 2;
+        return Math.random() > 0.5 ? 2 : 6;
     }
     getItemsForSpawn(tier, count) {
     	let items_for_spawn = [];

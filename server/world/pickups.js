@@ -30,7 +30,7 @@ var Pickups = class {
         }
     }
     pickupStreamOut(player, colshape) {
-        let self = this;
+        let self = this; 
         let pickup_id = colshape.getVariable("item_colshape_id");
         console.log("pickup_id", pickup_id);
         if (self._pickups[pickup_id]) {

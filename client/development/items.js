@@ -49,7 +49,8 @@ class LootPool {
             });
             obj.placeOnGroundProperly();
             let rotobj = obj.getRotation(0);
-            let posobj = obj.getCoords(false);
+            let posobj = obj.getCoords(false);           
+
             obj.setCoords(posobj.x + item.offset.pos.x, posobj.y + item.offset.pos.y, (posobj.z - obj.getHeightAboveGround()) + item.offset.pos.z, false, false, false, false);
             obj.setRotation(rotobj.x + item.offset.rot.x, rotobj.y + item.offset.rot.y, rotobj.z, 0, true);
             self._pickupObjects.push({

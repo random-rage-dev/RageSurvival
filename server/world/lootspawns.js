@@ -3,7 +3,7 @@
 */
 var positions = [{
     id: 1,
-    tier: "low",
+    tier: "Residential",
     pos: {
         "x": 421.2219543457031,
         "y": 6473.38916015625,
@@ -11,7 +11,7 @@ var positions = [{
     }
 },{
     id: 2,
-    tier: "low",
+    tier: "Residential",
     pos: {
         "x": 428.2219543457031,
         "y": 6473.38916015625,
@@ -19,7 +19,7 @@ var positions = [{
     }
 },{
     id: 3,
-    tier: "low",
+    tier: "Residential",
     pos: {
         "x": 411.2219543457031,
         "y": 6482.38916015625,
@@ -27,7 +27,7 @@ var positions = [{
     }
 },{
     id: 4,
-    tier: "medium",
+    tier: "Residential",
     pos: {
         "x": 418.1786193847656,
         "y": 6489.0283203125,
@@ -35,7 +35,7 @@ var positions = [{
     }
 },{
     id: 5,
-    tier: "medium",
+    tier: "Residential",
     pos: {
         "x": 406.7309265136719,
         "y": 6490.84912109375,

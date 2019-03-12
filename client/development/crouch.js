@@ -18,10 +18,11 @@ mp.events.add("entityStreamIn", (entity) => {
         entity.setStrafeClipset(strafeClipSet);
     }
 });
-
+ 
 // apply/reset clip sets when isCrouched changes for a streamed player
-mp.events.add("entityDataChange", (entity, key, value) => {
-    if (entity.type !== "player" || key !== "isCrouched") return;
+mp.events.addDataHandler("isCrouched", (entity, value) => {
+    if (entity.type !== "player") return;
+
     if (value) {
         entity.setMovementClipset(movementClipSet, clipSetSwitchTime);
         entity.setStrafeClipset(strafeClipSet);

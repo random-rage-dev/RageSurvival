@@ -9,13 +9,22 @@ class LootPool {
     }
     _setup(data) {
         let self = this;
-        console.log("LootPool", JSON.stringify(data));
         self._lootData = data;
         self._pickupObjects = [];
         self.initLootObjects()
         mp.events.add("render", () => {
             self.render()
         });
+    }
+    set data(new_data) {
+        this._lootData = new_data;
+    }
+    getLootPool() {
+        return this._lootData.items;
+    }
+    isInRange() {
+        let self = this;
+        return new mp.Vector3(self._lootData.pos.x, self._lootData.pos.y, self._lootData.pos.z).dist(mp.players.local.position) < 2;
     }
     initLootObjects() {
         let self = this;
@@ -43,10 +52,9 @@ class LootPool {
             let posobj = obj.getCoords(false);
             obj.setCoords(posobj.x + item.offset.pos.x, posobj.y + item.offset.pos.y, (posobj.z - obj.getHeightAboveGround()) + item.offset.pos.z, false, false, false, false);
             obj.setRotation(rotobj.x + item.offset.rot.x, rotobj.y + item.offset.rot.y, rotobj.z, 0, true);
-
             self._pickupObjects.push({
-            	id:self._lootData.id,
-            	obj:obj
+                id: self._lootData.id,
+                obj: obj
             })
         })
     }
@@ -62,11 +70,13 @@ class LootPool {
     unload(id) {
         let self = this;
         console.log("DO UNLOADING");
-        self._pickupObjects.forEach(function(item,i) {
-        	if (item.id == id) {
-        		item.obj.destroy();
-        		self._pickupObjects.splice(i,1);
-        	}
+        self._pickupObjects.forEach(function(item, i) {
+            if (item.id == id) {
+                console.log("remove");
+                item.obj.markForDeletion();
+                item.obj.destroy();
+                delete self._pickupObjects[i];
+            }
         })
     }
 }
@@ -82,4 +92,23 @@ mp.events.add("Loot:Unload", (id) => {
         streamedPools[id].unload(id)
         delete streamedPools[id];
     }
+});
+mp.events.add("Loot:Reload", (id,new_data) => {
+    if (streamedPools[id]) {
+        console.log("Reload LootPool", id);
+        streamedPools[id].data = new_data
+    }
+});
+
+
+mp.keys.bind(0x09, false, () => {
+    console.log("LoL");
+    console.log(Object.keys(streamedPools));
+    Object.keys(streamedPools).forEach(function(key) {
+        let pool = streamedPools[key]
+        if (pool.isInRange() == true) {
+            
+            console.log(JSON.stringify(pool.getLootPool()));
+        }
+    })
 });

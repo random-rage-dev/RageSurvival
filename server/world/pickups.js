@@ -7,7 +7,7 @@ var Pickups = class {
     _setup() {
         var self = this;
         self._pickups = [];
-        self._streamRadius = 100;
+        self._streamRadius = 50;
         self.generatePickups();
         mp.events.add("playerEnterColshape", function(player, colshape) {
             if (colshape.getVariable("item_colshape")) {
@@ -48,16 +48,14 @@ var Pickups = class {
             items = items.map(function(a) {
                 if (typeof a.amount === "function") {
                     a.amount = a.amount();
-                } else {
+                } else if (typeof a.amount !== "number") {
                     a.amount = 1;
                 }
                 return a;
             })
-            console.log(items);
             let colshape = mp.colshapes.newSphere(spawn.pos.x, spawn.pos.y, spawn.pos.z, self._streamRadius, 0);
             colshape.setVariable("item_colshape", true),
-                colshape.setVariable("item_colshape_id", spawn.id);
-                console.log(count);
+            colshape.setVariable("item_colshape_id", spawn.id);
             self._pickups[spawn.id] = {
                 id: spawn.id,
                 pos: spawn.pos,

@@ -46,6 +46,12 @@ var Loottable = class {
         }, 0)
         return tier;
     }
+    getRandomItem(items) {
+        let self = this;
+        //usable_items[Math.floor(Math.random() * usable_items.length)]
+
+
+    }
     getItemsForSpawn(tier, count) {
         let self = this;
         let items_for_spawn = [];
@@ -54,7 +60,7 @@ var Loottable = class {
             let usable_items = Items.filter(function(item) {
                 return item.tier == r_tier;
             })
-            let random_item = usable_items[Math.floor(Math.random() * usable_items.length)];
+            let random_item = self.getRandomItem(usable_items);
             if (random_item != undefined) {
                 items_for_spawn.push(random_item);
             }

@@ -7,9 +7,10 @@ function getRandomInt(min, max) {
  *  Tiers : Residential,Industrial,Farm,Military,Other,Food,...
  */
 var items = [{
-    name: "Shotgun",
+    name: "Pump Shotgun",
     tier: "Residential",
     model: "w_sg_pumpshotgun",
+    chance:15,
     offset: {
         pos: new mp.Vector3(0, 0, 0.02),
         rot: new mp.Vector3(90, 0, 0)
@@ -19,6 +20,7 @@ var items = [{
     tier: "Residential",
     model: "w_sg_assaultshotgun_mag1",
     amount: function() {return getRandomInt(5, 15)},
+    chance:25,
     offset: {
         pos: new mp.Vector3(0, 0, 0.02),
         rot: new mp.Vector3(90, 0, 0)
@@ -37,7 +39,7 @@ var items = [{
     model: "w_sb_microsmg_mag1",
     amount: function() {return getRandomInt(10, 25)},
     offset: {
-        pos: new mp.Vector3(0, 0, 0.02),
+        pos: new mp.Vector3(0, 0, 0.03),
         rot: new mp.Vector3(90, 0, 0)
     }
 }, {
@@ -54,7 +56,7 @@ var items = [{
     model: "w_ar_assaultrifle_mag1",
     amount: function() {return getRandomInt(10, 25)},
     offset: {
-        pos: new mp.Vector3(0, 0, 0.02),
+        pos: new mp.Vector3(0, 0, 0.03),
         rot: new mp.Vector3(90, 0, 0)
     }
 }, {

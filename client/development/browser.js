@@ -1,10 +1,11 @@
+const absolute_path = "package://RageZombies/cef/views/";
 class CEFBrowser {
     constructor(url) {
         this._setup(url);
     }
     _setup(url) {
         let self = this;
-        self.browser = mp.browsers.new(url);
+        self.browser = mp.browsers.new(absolute_path + url);
         self.cursorState = false;
 
     }
@@ -49,6 +50,10 @@ class CEFBrowser {
     cursor(state) {
         this.cursorState = state;
         mp.gui.cursor.visible = state;
+    }
+    load(path) {
+        let self = this;
+        self.browser.url = absolute_path + path;
     }
 }
 module.exports = CEFBrowser;

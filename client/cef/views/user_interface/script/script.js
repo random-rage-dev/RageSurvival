@@ -16,13 +16,13 @@ let Inventory = {
         Inventory.width = $('#inventory').css('grid-template-columns').split(' ').length;
     },
     SetItem: function(item, x, y, flip = false) {
-        let width = item.width
+        let width = item.width;
         let height = item.height;
         if (flip) {
-            console.log("flip",flip);
             width = item.height;
             height = item.width;
         }
+
         if (Inventory.IsFree(x, y, width, height)) {
             console.log(Inventory.GetIndex(x, y));
             for (let i = x; i < x + width; i++) {
@@ -32,6 +32,7 @@ let Inventory = {
             }
         } else {
             // hinweis
+            return false;
         }
     },
     IsFree: function(x, y, width, height) {
@@ -56,7 +57,7 @@ let Inventory = {
 $(function() {
     Inventory.Generate(120);
     Inventory.SetItem(test_item, 7, 0);
-    Inventory.SetItem(test_item, 1, 2,true);
+    Inventory.SetItem(test_item, 1, 2,false);
     // Wird nicht angezeigt. IsFree ist false
     Inventory.SetItem(test_item, 2, 3);
 });

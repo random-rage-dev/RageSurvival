@@ -1,9 +1,8 @@
 var natives = {};
-
 mp.game.graphics.clearDrawOrigin = () => mp.game.invoke('0xFF0B610F6BE0D7AF'); // 26.07.2018 // GTA 1.44 
 natives.START_PLAYER_TELEPORT = (player, x, y, z, heading, p5, p6, p7) => mp.game.invoke("0xAD15F075A4DA0FDE", player, x, y, z, heading, p5, p6, p7);
-natives.CHANGE_PLAYER_PED = (ped,p1,p2) => mp.game.invoke("0x048189FAC643DEEE", ped,p1,p2);
-natives.SET_PED_CURRENT_WEAPON_VISIBLE = (ped,  visible,  deselectWeapon,  p3,  p4) => mp.game.invoke("0x0725A4CCFDED9A70",  ped,  visible,  deselectWeapon,  p3,  p4);
+natives.CHANGE_PLAYER_PED = (ped, p1, p2) => mp.game.invoke("0x048189FAC643DEEE", ped, p1, p2);
+natives.SET_PED_CURRENT_WEAPON_VISIBLE = (ped, visible, deselectWeapon, p3, p4) => mp.game.invoke("0x0725A4CCFDED9A70", ped, visible, deselectWeapon, p3, p4);
 natives.SET_BLIP_SPRITE = (blip, sprite) => mp.game.invoke("0xDF735600A4696DAF", blip, sprite); // SET_BLIP_SPRITE
 natives.SET_BLIP_ALPHA = (blip, a) => mp.game.invoke("0x45FF974EEE1C8734", blip, a); // SET_BLIP_ALPHA
 natives.SET_BLIP_COLOUR = (blip, c) => mp.game.invoke("0x03D7FB09E75D6B7E", blip, c); // SET_BLIP_COLOUR
@@ -17,6 +16,8 @@ natives.GET_FIRST_BLIP_INFO_ID = (i) => mp.game.invoke("0x1BEDE233E6CD2A1F", i);
 natives.GET_NEXT_BLIP_INFO_ID = (i) => mp.game.invoke("0x14F96AA50D6FBEA7", i); // GET_NEXT_BLIP_INFO_ID
 natives.DOES_BLIP_EXIST = (blip) => mp.game.invoke("0xA6DB27D19ECBB7DA", blip); // DOES_BLIP_EXIST
 natives.GET_NUMBER_OF_ACTIVE_BLIPS = () => mp.game.invoke("0x9A3FF3DE163034E8"); // GET_NUMBER_OF_ACTIVE_BLIPS
-natives.SET_BLIP_SCALE = (blip,scale) => mp.game.invoke("0xD38744167B2FA257",blip,scale); // SET_BLIP_SCALE
+natives.SET_BLIP_SCALE = (blip, scale) => mp.game.invoke("0xD38744167B2FA257", blip, scale); // SET_BLIP_SCALE
 natives.SET_ENTITY_NO_COLLISION_ENTITY = (entity1, entity2, collision) => mp.game.invoke("0xA53ED5520C07654A", entity1.handle, entity2.handle, collision); // SET_ENTITY_NO_COLLISION_ENTITY
+natives.GET_CLOSEST_OBJECT_OF_TYPE = (x, y, z, radius, modelHash, isMission, p6, p7) => mp.game.invoke("0xE143FA2249364369", x, y, z, radius, modelHash, isMission, p6, p7); // GET_CLOSEST_OBJECT_OF_TYPE
+natives.DOES_OBJECT_OF_TYPE_EXIST_AT_COORDS = (x, y, z, radius, hash, p5) => mp.game.invoke("0xBFA48E2FF417213F", x, y, z, radius, hash, p5); // DOES_OBJECT_OF_TYPE_EXIST_AT_COORDS
 module.exports = natives;

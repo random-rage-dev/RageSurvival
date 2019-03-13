@@ -1,6 +1,7 @@
 require("./scaleforms/index.js")
 require("./crouch.js")
 require("./items.js")
+require("./gathering.js")
 var natives = require("./natives.js")
 var CEFBrowser = require("./browser.js");
 var Browser = new CEFBrowser("login/index.html");

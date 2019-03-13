@@ -31,6 +31,9 @@ function pointingAt(distance) {
     return result;
 }
 var placed_loot_pool = [];
+mp.events.add('updateLootPool', (loot_pool) => {
+    placed_loot_pool = loot_pool;
+});
 
 function getNearestSpot(vector, dist) {
     let spot = {
@@ -163,12 +166,13 @@ mp.events.add('render', () => {
                     centre: true
                 });
                 if (mp.game.controls.isControlJustPressed(0, controlsIds.Mouse1)) {
-                    placed_loot_pool.push({
+                    /*placed_loot_pool.push({
                         x: pos.x,
                         y: pos.y,
                         z: pos.z,
                         type: getSelectedType()
-                    });
+                    });*/
+                    mp.events.callRemote("LootTable:PlaceSpot", pos.x, pos.y, pos.z, getSelectedType(),placed_loot_pool.length);
                 }
             } else {
                 mp.game.graphics.drawMarker(28, pos.x, pos.y, pos.z, 0, 0, 0, 0, 0, 0, 1.0, 1.0, 1.0, 150, 0, 0, 150, false, false, 2, false, "", "", false);
@@ -200,7 +204,7 @@ mp.events.add('render', () => {
                         centre: true
                     });
                     if (mp.game.controls.isControlJustPressed(0, controlsIds.Mouse2)) {
-                        placed_loot_pool.splice(index, 1);
+                        mp.events.callRemote("LootTable:RemoveSpot", index,placed_loot_pool.length);
                     }
                 } else {
                     mp.game.graphics.drawMarker(28, pos.x, pos.y, pos.z, 0, 0, 0, 0, 0, 0, 1.0, 1.0, 1.0, 0, 0, 150, 150, false, false, 2, false, "", "", false);

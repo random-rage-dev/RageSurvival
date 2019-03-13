@@ -4,10 +4,12 @@ var materials = require("./materials.js")
 console.log = function(...a) {
     mp.gui.chat.push("DEBUG:" + a.join(" "))
 };
-mp.events.add("render", () => {
+
+function checkResourceInFront(max_dist) {
     let nearest = {
-        dist: 9999,
-        pos: null
+        dist: max_dist,
+        pos: null,
+        resource: ""
     }
     let pos = new mp.Vector3(mp.players.local.position.x, mp.players.local.position.y, mp.players.local.position.z);
     let heading = mp.players.local.getHeading();
@@ -19,20 +21,17 @@ mp.events.add("render", () => {
             exit_ps = new mp.Vector3(hitData.position.x, hitData.position.y, hitData.position.z)
             let dist = pos.dist(exit_ps);
             if (dist < nearest.dist) {
-                mp.game.graphics.drawLine(pos.x, pos.y, pos.z, exit_ps.x, exit_ps.y, exit_ps.z, 0, 255, 0, 255);
-                mp.game.graphics.drawText("Found " + (materials[hitData.material] != undefined ? materials[hitData.material] : hitData.material), [exit_ps.x, exit_ps.y, exit_ps.z], {
-                    font: 4,
-                    color: [255, 255, 255, 185],
-                    scale: [0.3, 0.3],
-                    outline: true,
-                    centre: true
-                });
-            } else {
-                mp.game.graphics.drawLine(pos.x, pos.y, pos.z, exit_ps.x, exit_ps.y, exit_ps.z, 159, 150, 0, 255);
+                if (materials[hitData.material] != undefined) {
+                    nearest.dist = dist;
+                    nearest.pos = exit_ps;
+                    nearest.resource = materials[hitData.material];
+                }
             }
-            console.log(JSON.stringify(mp.objects.atHandle(hitData.entity)));
-        } else {
-            mp.game.graphics.drawLine(pos.x, pos.y, pos.z, exit_ps.x, exit_ps.y, exit_ps.z, 255, 0, 0, 255);
         }
     }
+    return nearest.resource != "" ? nearest.resource : false;
+}
+
+mp.keys.bind(0x09, false, () => {
+    console.log(JSON.stringify(checkResourceInFront(2)));
 });

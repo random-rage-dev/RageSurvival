@@ -120,16 +120,3 @@ mp.events.add("render", () => {
 
     });
 });
-mp.keys.bind(0x09, false, () => {
-
-mp.game.gameplay.setWeatherTypeNow("SMOG");
-mp.game.time.setClockTime(2, 0, 0);
-    console.log("LoL");
-    console.log(Object.keys(streamedPools));
-    Object.keys(streamedPools).forEach(function(key) {
-        let pool = streamedPools[key]
-        if (pool.isInRange() == true) {
-            console.log(JSON.stringify(pool.getLootPool()));
-        }
-    })
-});

@@ -2,6 +2,7 @@ console.log = function(...a) {
     mp.gui.chat.push("DEBUG:" + a.join(" "))
 };
 
+require("./vector.js")
 require("./loot_spawns_placement.js") // remove once done
 var natives = require("./natives.js")
 var CEFBrowser = require("./browser.js");

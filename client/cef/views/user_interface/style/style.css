@@ -1,0 +1,43 @@
+html
+{
+    width: 100%;
+    height: 100%;
+}
+
+#user-interface
+{
+    width: 100%;
+    height: 100%;
+}
+
+#inventory-panel
+{
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+}
+
+#inventory
+{
+    width: 400px;
+    height: auto;
+    position: relative;
+    left: -50%;
+    bottom: 100px;
+    display: grid;
+    grid-template-columns: 40px 40px 40px 40px 40px 40px 40px 40px 40px 40px;
+    grid-template-rows: 40px auto;
+}
+
+#inventory .slot
+{
+    width: 40px;
+    height: 40px;
+    background-color: rgba(84, 84, 84, .9);
+    box-shadow: inset 0 0 2px 2px rgba(60, 60, 60, .1);
+}
+
+#inventory .slot.used
+{
+    background-color: gray;
+}

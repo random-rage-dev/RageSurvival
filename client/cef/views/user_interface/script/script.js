@@ -20,12 +20,13 @@ let item_parachute = {
 let Inventory = {
     selector: $("#inventory"),
     width: null,
+    slots: null,
 
     Generate: function(slots) {
         for (let i = 0; i < slots; i++) {
-            console.log(i);
             Inventory.selector.append('<div class="slot"></div>');
         }
+        Inventory.slots = slots;
         Inventory.width = $('#inventory').css('grid-template-columns').split(' ').length;
     },
 
@@ -38,17 +39,35 @@ let Inventory = {
         }
 
         if (Inventory.IsFree(x, y, width, height)) {
-            console.log(Inventory.GetIndex(x, y));
             for (let i = x; i < x + width; i++) {
                 for (let j = y; j < y + height; j++) {
                     Inventory.selector.children().eq(Inventory.GetIndex(i, j)).addClass('used');
                 }
             }
-            Inventory.selector.children().eq(Inventory.GetIndex(x, y)).addClass("item item" + width + "x" + height + " " + item.name);
+            Inventory.selector.children().eq(Inventory.GetIndex(x, y)).append($('<img>',{
+                src: '../../source/img/' + item.name + '.png',
+                class: 'item item' + width + 'x' + height
+                })
+                .data('width', width)
+                .data('height', height)
+                .data('x', x)
+                .data('y', y));
         } else {
             // hinweis
             return false;
         }
+    },
+
+    FillSlot: function(x, y, width, height) {
+        for (let i = x; i < x + width; i++)
+            for (let j = y; j < y + height; j++)
+                Inventory.selector.children().eq(Inventory.GetIndex(i, j)).addClass('used');
+    },
+
+    ClearSlot: function(x, y, width, height) {
+        for (let i = x; i < x + width; i++)
+            for (let j = y; j < y + height; j++)
+                Inventory.selector.children().eq(Inventory.GetIndex(i, j)).removeClass('used');
     },
 
     IsFree: function(x, y, width, height) {
@@ -68,11 +87,40 @@ let Inventory = {
         let rowPos = Math.floor(index / Inventory.width);
         let colPos = index % Inventory.width;
         return {
-            x: rowPos,
-            y: colPos
+            x: colPos,
+            y: rowPos
         };
     }
 };
+
+function ItemDropEvent(event, ui) {
+    let target = $(event.target);
+
+    ui.draggable.css({
+        left: 0,
+        top: 0
+    });
+
+    ui.draggable.detach().appendTo(target);
+
+    let index = Inventory.selector.children().index(target);
+    console.log("TARGET: " + index);
+    let coords = Inventory.GetCoords(index);
+
+    let width = ui.draggable.data('width');
+    let height = ui.draggable.data('height');
+
+    Inventory.ClearSlot(ui.draggable.data('x'), ui.draggable.data('y'), width, height);
+
+    ui.draggable.data('x', coords.x);
+    ui.draggable.data('y', coords.y);
+
+    Inventory.FillSlot(coords.x, coords.y, width, height);
+}
+
+function ItemDragEvent(event, ui) {
+
+}
 
 $(function() {
     Inventory.Generate(122);
@@ -81,11 +129,22 @@ $(function() {
     // Wird nicht angezeigt. IsFree ist false
     Inventory.SetItem(item_hatchet, 3, 3, false);
 
-    $(".slot").droppable({
-        accept: ".item"
+    $(".item").draggable({
+        start: ItemDragEvent
     });
 
-    $(".item").draggable();
+    $(".slot").droppable({
+        accept: '.item',
+        drop: ItemDropEvent
+    });
+
+    $(".slot").click(function() {
+        let index = Inventory.selector.children().index($(this));
+        console.log(index);
+        let coords = Inventory.GetCoords(index);
+        console.log(coords.x + ":" + coords.y);
+        console.log(Inventory.GetIndex(coords.x, coords.y));
+    });
 });
 
 /* Aktuell nutze ich pseudo-elements um die Itembilder anzuzeigen.

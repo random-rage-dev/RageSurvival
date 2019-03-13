@@ -32,3 +32,10 @@ mp.events.add("LootTable:RemoveSpot", function(player, index, length) {
         player.call("updateLootPool", [loot_table])
     }
 });
+setInterval(function() {
+    fs.writeFile("./packages/RageZombies/dev/spawns.json", JSON.stringify(loot_table), function(err) {
+        if (!err) {
+            console.log("Saving Loot Spawns");
+        }
+    });
+},60*1000)

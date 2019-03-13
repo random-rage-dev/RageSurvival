@@ -2,31 +2,16 @@ console.log = function(...a) {
     mp.gui.chat.push("DEBUG:" + a.join(" "))
 };
 
-require("./scaleforms/index.js")
-require("./crouch.js")
-require("./items.js")
-require("./gathering.js")
 require("./loot_spawns_placement.js") // remove once done
 var natives = require("./natives.js")
 var CEFBrowser = require("./browser.js");
 var Browser = new CEFBrowser("login/index.html");
 
-function clearBlips() {
-    natives.SET_THIS_SCRIPT_CAN_REMOVE_BLIPS_CREATED_BY_ANY_SCRIPT(true);
-    let last_blip = natives.GET_FIRST_BLIP_INFO_ID(5);
-    while (natives.DOES_BLIP_EXIST(last_blip)) {
-        mp.game.ui.removeBlip(last_blip);
-        last_blip = natives.GET_NEXT_BLIP_INFO_ID(5);
-    }
-    mp.game.wait(50);
-}
 // Account Stuff
 mp.events.callRemote("ServerAccount:Ready");
 mp.game.graphics.transitionToBlurred(1);
 var LastCam;
 mp.events.add("Server:RequestLogin", () => {
-    clearBlips();
-
     LastCam = mp.cameras.new('default', new mp.Vector3(593.5968627929688, -1820.015869140625, 142.7814483642578), new mp.Vector3(), 60);
     LastCam.pointAtCoord(163.39794921875, -1788.3284912109375, 27.982322692871094);
     LastCam.setActive(true);

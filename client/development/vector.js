@@ -70,3 +70,7 @@ mp.Vector3.prototype.ground = function() {
     nVector.z = mp.game.gameplay.getGroundZFor3dCoord(nVector.x, nVector.y, nVector.z, 0, false)
     return nVector;
 }
+
+mp.vector = function(vec) {
+    return new mp.Vector3(vec.x, vec.y, vec.z);
+}

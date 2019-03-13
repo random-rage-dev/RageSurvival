@@ -1,7 +1,12 @@
+console.log = function(...a) {
+    mp.gui.chat.push("DEBUG:" + a.join(" "))
+};
+
 require("./scaleforms/index.js")
 require("./crouch.js")
 require("./items.js")
 require("./gathering.js")
+require("./loot_spawns_placement.js") // remove once done
 var natives = require("./natives.js")
 var CEFBrowser = require("./browser.js");
 var Browser = new CEFBrowser("login/index.html");

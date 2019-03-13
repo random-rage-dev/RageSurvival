@@ -115,6 +115,13 @@ mp.events.add("render", () => {
                   outline: true,
                   centre:true
                 });
+
+
+
+                        //mp.game.ui.instructionalButtons.InitButtons(offset_pos.x,offset_pos.y,offset_pos.z + 0.3);
+                        //mp.game.ui.instructionalButtons.AddButton(item.name,"t_E");
+                        //mp.game.ui.instructionalButtons.finalizeButtons(1,0,0,0,50);
+                
             })
         }
 

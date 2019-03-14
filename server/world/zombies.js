@@ -19,8 +19,8 @@ var Zombie = class {
             z: z
         })
         self._tagetPos = mp.vector({
-            x: x + 15,
-            y: y + 15,
+            x: x + 2,
+            y: y + 2,
             z: z
         })
         self._target = null;
@@ -214,6 +214,11 @@ var ZombieManager = new class {
     syncZombies() {
         this._allZombies.forEach(function(zombie) {
             zombie.syncRange();
+            zombie._tagetPos = mp.vector({
+                x: zombie.x + 2,
+                y: zombie.y + 2,
+                z: zombie.z
+            })
         })
         this._removedZombies.forEach(function(data) {
             data.players.forEach(function(player) {
@@ -242,8 +247,8 @@ setInterval(function() {
     //console.log("sync");
     ZombieManager.syncZombies();
 }, 1000 / tick_rate);
-//ZombieManager.newZombie(417.1167907714844, 6480.19091796875, 28.80876350402832);
-//ZombieManager.newZombie(412.1167907714844, 6480.19091796875, 28.80876350402832);
+ZombieManager.newZombie(1855.1275634765625, 3713.28759765625, 35.77711868286133);
+ZombieManager.newZombie(1865.1275634765625, 3693.28759765625, 35.77711868286133);
 
 
 mp.events.add("Zombie:ReSync", function(player,id,data) {

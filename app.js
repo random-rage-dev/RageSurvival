@@ -1,8 +1,8 @@
 var fs = require("fs");
 var ncp = require('ncp').ncp;
 var watch = require('node-watch');
-let source_server = "Q:/RageMP/RageZombies/server"
-let dest_server = "A:/RAGEMP/server-files/packages/RageZombies"
+let source_server = "C:/Users/McJackson/Desktop/Projekte/RAGE/RageZombies/server"
+let dest_server = "C:/RAGEMP/server-files/packages/RageZombies"
 ncp(source_server, dest_server, function(err) {
     if (err) {
         return console.error(err);
@@ -24,8 +24,8 @@ watch('./server', {
         console.log('done!');
     });
 });
-let source_client = "Q:/RageMP/RageZombies/client"
-let dest_client = "A:/RAGEMP/server-files/client_packages/RageZombies"
+let source_client = "C:/Users/McJackson/Desktop/Projekte/RAGE/RageZombies/client"
+let dest_client = "C:/RAGEMP/server-files/client_packages/RageZombies"
 let exclude = "development"
 ncp(source_client, dest_client, function(err) {
     if (err) {

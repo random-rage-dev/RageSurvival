@@ -5,6 +5,7 @@ console.log = function(...a) {
 require("./scaleforms/index.js")
 require("./crouch.js")
 require("./items.js")
+require("./zombies.js")
 require("./gathering.js")
 require("./loot_spawns_placement.js") // remove once done
 var natives = require("./natives.js")

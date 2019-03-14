@@ -1,9 +1,6 @@
 require("./vector.js")
 var natives = require("./natives.js")
 var materials = require("./materials.js")
-console.log = function(...a) {
-    mp.gui.chat.push("DEBUG:" + a.join(" "))
-};
 
 function checkResourceInFront(max_dist) {
     let nearest = {

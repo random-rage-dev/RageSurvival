@@ -1,8 +1,4 @@
 require("./vector.js")
-console.log = function(...a) {
-    mp.gui.chat.push("DEBUG:" + a.join(" "))
-};
-
 
 var streamedPools = [];
 class LootPool {

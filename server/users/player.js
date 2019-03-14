@@ -1,8 +1,10 @@
- var MongoDB = require("../libs/mongodb.js")
-var md5 = require("md5")
-var async = require("async")
+var MongoDB = require("../libs/mongodb.js")
 var User = MongoDB.getUserModel();
+var md5 = require("md5");
+var async = require("async");
+
 var Player = class {
+
     constructor(player) {  
         this._setup(player);
     }

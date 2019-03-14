@@ -109,5 +109,6 @@ var Pickups = class {
             }
         }
     }
+
 }
 module.exports = new Pickups();

@@ -242,8 +242,8 @@ setInterval(function() {
     //console.log("sync");
     ZombieManager.syncZombies();
 }, 1000 / tick_rate);
-ZombieManager.newZombie(417.1167907714844, 6480.19091796875, 28.80876350402832);
-ZombieManager.newZombie(412.1167907714844, 6480.19091796875, 28.80876350402832);
+ZombieManager.newZombie(1855.1275634765625, 3713.28759765625, 35.77711868286133);
+ZombieManager.newZombie(1865.1275634765625, 3693.28759765625, 35.77711868286133);
 
 
 mp.events.add("Zombie:ReSync", function(player,id,data) {

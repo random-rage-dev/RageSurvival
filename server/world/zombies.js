@@ -1,4 +1,12 @@
 var tick_rate = 1;
+
+const moveEnums = {
+    1:"walk",
+    2:"run",
+    3:"attack",
+    4:"chase"
+}
+
 var Zombie = class {
     constructor(x, y, z) {
         this._setup(x, y, z);
@@ -18,15 +26,17 @@ var Zombie = class {
             z: z
         })
         self._target = null;
-        self._currentMove = "walk"; /*Valid Types: "walk", "run", "attack","chase"*/
+        self._currentMove = 1; /*Valid Types: see moveEnums*/
         self._health = 100;
         self._range = 50;
         self._leader = "";
         self._dead = false;
         self._syncer = {
             player: undefined,
-            lastResponse: 0
+            lastHeartbeat: 0
         };
+        self._firstTimeSync = [];
+        self._syncedOnce = [];
         self._updatePackage = [];
         self._oldData = {}
         self._updatedPlayers = [];
@@ -126,9 +136,20 @@ var Zombie = class {
     }
     syncRange() {
         let self = this;
+        let o_fts = self._firstTimeSync;
+        self._firstTimeSync = [];
         mp.players.forEachInRange(self._pos, self._range, function(rPlayer) {
+            self._syncedOnce[rPlayer] = true;
             if (!self._updatedPlayers[rPlayer]) {
-                rPlayer.call("zombie:sync", [self._id, self._updatePackage]);
+                if (o_fts[rPlayer]) {
+                    self._firstTimeSync[rPlayer] = true;
+                }
+                if (!self._firstTimeSync[rPlayer]) {
+                    self._firstTimeSync[rPlayer] = true;
+                    rPlayer.call("Zombies:sync", [self._id, self._updatePackage, self._skin]);
+                } else {
+                    rPlayer.call("Zombies:sync", [self._id, self._updatePackage]);
+                }
                 self._updatedPlayers[rPlayer] = true;
             }
         });
@@ -138,6 +159,7 @@ var Zombie = class {
 var ZombieManager = new class {
     constructor() {
         this._allZombies = [];
+        this._removedZombies = [];
     }
     newZombie(x, y, z) {
         let zombie = new Zombie(x, y, z);
@@ -148,15 +170,29 @@ var ZombieManager = new class {
     removeZombie(zombie) {
         let index = this._allZombies.indexOf(zombie);
         if (index > -1) {
+            let id = this._allZombies[index]._id;
+            let synced_players = this._allZombies[index]._syncedOnce;
+
             this._allZombies[index] = null;
             this._allZombies.splice(index, 1);
             delete this._allZombies[index];
             console.log("Removed Zombie")
+            this._removedZombies.push({
+                id: id,
+                players: synced_players
+            });
         }
     }
     syncZombies() {
         this._allZombies.forEach(function(zombie) {
             zombie.syncRange();
+        })
+        this._removedZombies.forEach(function(data) {
+            data.players.forEach(function(player) {
+                if ((player) && (player.name)) {
+                    player.call("Zombies:remove",[data.id])
+                }
+            })
         })
     }
 }
@@ -164,6 +200,4 @@ var ZombieManager = new class {
 setInterval(function() {
     //console.log("sync");
     ZombieManager.syncZombies();
-}, 1000 / tick_rate)
-ZombieManager.newZombie(417.1167907714844, 6480.19091796875, 28.80876350402832)
-module.exports = Zombie;
+}, 1000 / tick_rate) ZombieManager.newZombie(417.1167907714844, 6480.19091796875, 28.80876350402832) module.exports = Zombie;

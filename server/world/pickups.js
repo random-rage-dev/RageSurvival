@@ -51,7 +51,7 @@ var Pickups = class {
                 }
                 return a;
             })
-            let colshape = mp.colshapes.newSphere(spawn.pos.x, spawn.pos.y, spawn.pos.z, self._streamRadius, 0);
+            let colshape = mp.colshapes.newSphere(spawn.x, spawn.y, spawn.z, self._streamRadius, 0);
             colshape.setVariable("item_colshape", true),
             colshape.setVariable("item_colshape_id", spawn.id);
             self._pickups[spawn.id] = {

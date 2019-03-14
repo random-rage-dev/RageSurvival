@@ -94,21 +94,29 @@ let Inventory = {
 };
 
 function ItemDropEvent(event, ui) {
+    ui.helper.data('dropped', true);
+
     let target = $(event.target);
+
+    let index = Inventory.selector.children().index(target);
+    let coords = Inventory.GetCoords(index);
+
+    let width = ui.draggable.data('width');
+    let height = ui.draggable.data('height');
 
     ui.draggable.css({
         left: 0,
         top: 0
     });
 
+    if(coords.x + width > Inventory.width || coords.x < 0 || coords.y < 0) {
+        console.log(event.target);
+        return;
+    }
+
+    console.log(coords.x);
+
     ui.draggable.detach().appendTo(target);
-
-    let index = Inventory.selector.children().index(target);
-    console.log("TARGET: " + index);
-    let coords = Inventory.GetCoords(index);
-
-    let width = ui.draggable.data('width');
-    let height = ui.draggable.data('height');
 
     Inventory.ClearSlot(ui.draggable.data('x'), ui.draggable.data('y'), width, height);
 
@@ -130,12 +138,19 @@ $(function() {
     Inventory.SetItem(item_hatchet, 3, 3, false);
 
     $(".item").draggable({
-        start: ItemDragEvent
+        start: function(event, ui) {
+            ui.helper.data('dropped', false);
+        },
+        stop: function(event, ui) {
+            if(!ui.helper.data('dropped')) {
+
+            }
+        }
     });
 
     $(".slot").droppable({
         accept: '.item',
-        drop: ItemDropEvent
+        drop: ItemDropEvent,
     });
 
     $(".slot").click(function() {

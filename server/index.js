@@ -1,4 +1,5 @@
 require("./libs/vector.js")
+require("./libs/array.js")
 var PlayerClass = require("./users/player.js")
 var ItemPickups = require("./world/pickups.js")
 var Zombies = require("./world/zombies.js")

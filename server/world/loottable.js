@@ -19,7 +19,8 @@ var Loottable = class {
     getItemCountForSpawn(tier) {
         let self = this;
         /*TODO: Make something better */
-        return Math.random() > 0.5 ? 2 : 6;
+
+        return Math.floor(Math.random() * (6 - 0));
     }
     getRarityThreshold(tier) {
         let self = this;

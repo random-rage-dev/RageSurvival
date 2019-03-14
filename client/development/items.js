@@ -97,7 +97,7 @@ mp.events.add("render", () => {
     /*Display Items*/
     Object.keys(streamedPools).forEach(function(key) {
         let pool = streamedPools[key]
-        if (pool.isInRange() == true) {
+        //if (pool.isInRange() == true) {
             let pos = pool.position;
 
             let Angle_Item = 360 / pool.getLootPool().length;
@@ -119,7 +119,7 @@ mp.events.add("render", () => {
                         //mp.game.ui.instructionalButtons.finalizeButtons(1,0,0,0,50);
                 
             })
-        }
+       // }
 
     });
 });

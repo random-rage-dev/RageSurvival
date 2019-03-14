@@ -123,7 +123,7 @@ var Player = class {
     }
     spawn() {
         var self = this;
-        self._player.spawn(new mp.Vector3(1846.9090576171875, 3722.6806640625, 33.168819427490234));
+        self._player.spawn(new mp.Vector3(1845.1275634765625, 3703.28759765625, 33.77711868286133));
         self._player.model = mp.joaat("mp_m_freemode_01");
         self._player.heading = 90;
         self._health = 100;

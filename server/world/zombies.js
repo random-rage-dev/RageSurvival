@@ -19,8 +19,8 @@ var Zombie = class {
             z: z
         })
         self._tagetPos = mp.vector({
-            x: x + 15,
-            y: y + 15,
+            x: x + 2,
+            y: y + 2,
             z: z
         })
         self._target = null;
@@ -214,6 +214,11 @@ var ZombieManager = new class {
     syncZombies() {
         this._allZombies.forEach(function(zombie) {
             zombie.syncRange();
+            zombie._tagetPos = mp.vector({
+                x: zombie.x + 2,
+                y: zombie.y + 2,
+                z: zombie.z
+            })
         })
         this._removedZombies.forEach(function(data) {
             data.players.forEach(function(player) {

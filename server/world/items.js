@@ -4,20 +4,22 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min)) + min;
 }
 /*
- *  Tiers : Residential,Industrial,Farm,Military,Other,Food,...
+ *  types : Residential,Industrial,Farm,Military,Other,Food,...
  */
 var items = [{
     name: "Pump Shotgun",
-    tier: "Residential",
+    type: "Residential",
     model: "w_sg_pumpshotgun",
+    thickness:0.15,
     offset: {
         pos: new mp.Vector3(0, 0, 0.02),
         rot: new mp.Vector3(90, 0, 0)
     }
 }, {
     name: "12 Gauge Shells",
-    tier: "Residential",
+    type: "Residential",
     model: "w_sg_assaultshotgun_mag1",
+    thickness:0.15,
     amount: function() {return getRandomInt(5, 15)},
     offset: {
         pos: new mp.Vector3(0, 0, 0.01),
@@ -25,16 +27,18 @@ var items = [{
     }
 }, {
     name: "Micro SMG",
-    tier: "Industrial",
+    type: "Industrial",
     model: "w_sb_microsmg",
+    thickness:0.15,
     offset: {
         pos: new mp.Vector3(0, 0, 0.02),
         rot: new mp.Vector3(90, 0, 0)
     }
 },{
     name: "9mm Bullets",
-    tier: "Industrial",
+    type: "Industrial",
     model: "w_sb_microsmg_mag1",
+    thickness:0.15,
     amount: function() {return getRandomInt(10, 25)},
     offset: {
         pos: new mp.Vector3(0, 0, 0.01),
@@ -42,16 +46,18 @@ var items = [{
     }
 }, {
     name: "Assault Rifle",
-    tier: "Military",
+    type: "Military",
     model: "w_ar_assaultrifle",
+    thickness:0.15,
     offset: {
         pos: new mp.Vector3(0, 0, 0.02),
         rot: new mp.Vector3(90, 0, 0)
     }
 },{
     name: "5.56m Bullets",
-    tier: "Military",
+    type: "Military",
     model: "w_ar_assaultrifle_mag1",
+    thickness:0.15,
     amount: function() {return getRandomInt(10, 25)},
     offset: {
         pos: new mp.Vector3(0, 0, 0.01),
@@ -59,8 +65,9 @@ var items = [{
     }
 }, {
     name: "Drank",
-    tier: "Food",
+    type: "Food",
     model: "bkr_prop_coke_powderbottle_02",
+    thickness:0.3,
     amount: function() {return getRandomInt(1, 4)},
     offset: {
         pos: new mp.Vector3(0, 0, 0),
@@ -68,8 +75,9 @@ var items = [{
     }
 }, {
     name: "Drank Fresh",
-    tier: "Food",
+    type: "Food",
     model: "bkr_prop_coke_powderbottle_01",
+    thickness:0.35,
     amount: function() {
         return getRandomInt(3, 15)
     },

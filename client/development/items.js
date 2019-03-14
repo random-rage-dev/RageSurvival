@@ -1,5 +1,4 @@
 require("./vector.js")
-
 var streamedPools = [];
 class LootPool {
     constructor(data) {
@@ -15,7 +14,7 @@ class LootPool {
         this._lootData = new_data;
     }
     get position() {
-         return new mp.Vector3(this._lootData.pos.x, this._lootData.pos.y, this._lootData.pos.z);   
+        return new mp.Vector3(this._lootData.pos.x, this._lootData.pos.y, this._lootData.pos.z);
     }
     getLootPool() {
         return this._lootData.items;
@@ -39,7 +38,7 @@ class LootPool {
             var back_pos = offset_pos.findRot(0, 0.1, base_rot + 90).ground();
             let rot_x = front_pos.rotPoint(back_pos);
             let rot_y = left_pos.rotPoint(right_pos);
-            let pos = offset_pos.ground();
+            let pos = offset_pos;
             pos.z += 1;
             let obj = mp.objects.new(mp.game.joaat(item.model), pos, {
                 rotation: new mp.Vector3(0, 0, base_rot),
@@ -50,7 +49,13 @@ class LootPool {
             let rotobj = obj.getRotation(0);
             let posobj = obj.getCoords(false);
             obj.setCollision(false, true);
-            obj.setCoords(posobj.x + item.offset.pos.x, posobj.y + item.offset.pos.y, (posobj.z - obj.getHeightAboveGround()) + item.offset.pos.z, false, false, false, false);
+            obj.freezePosition(true);
+            obj.setPhysicsParams(9000000, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+            if ((item.offset.rot.x > 0) || (item.offset.rot.y > 0)) {
+                obj.setCoords(posobj.x + item.offset.pos.x, posobj.y + item.offset.pos.y, (posobj.z - obj.getHeightAboveGround()) + item.offset.pos.z, false, false, false, false);
+            } else {
+                obj.setCoords(posobj.x + item.offset.pos.x, posobj.y + item.offset.pos.y, posobj.z + item.offset.pos.z, false, false, false, false);
+            }
             obj.setRotation(rotobj.x + item.offset.rot.x, rotobj.y + item.offset.rot.y, rotobj.z, 0, true);
             self._pickupObjects.push({
                 id: self._lootData.id,
@@ -93,33 +98,46 @@ mp.events.add("Loot:Reload", (id, new_data) => {
         streamedPools[id].data = new_data
     }
 });
+var gameplayCam = mp.cameras.new('gameplay');
+
+function pointingAt() {
+    let distance = 5;
+    direction = gameplayCam.getDirection();
+    coords = gameplayCam.getCoord();
+    const farAway = new mp.Vector3((direction.x * distance) + (coords.x), (direction.y * distance) + (coords.y), (direction.z * distance) + (coords.z));
+    const result = mp.raycasting.testPointToPoint(coords, farAway, mp.players.local, -1);
+    if (result === undefined) {
+        return undefined;
+    }
+    return result;
+}
 mp.events.add("render", () => {
     /*Display Items*/
     Object.keys(streamedPools).forEach(function(key) {
         let pool = streamedPools[key]
         //if (pool.isInRange() == true) {
-            let pos = pool.position;
-
-            let Angle_Item = 360 / pool.getLootPool().length;
-            pool.getLootPool().forEach(function(item,index) {
-                let offset_pos = pos.findRot(0, 0.5, Angle_Item * index).ground();
-
-                mp.game.graphics.drawText(item.name, [offset_pos.x,offset_pos.y,offset_pos.z + 0.3], { 
-                  font: 4, 
-                  color: [255, 255, 255, 185], 
-                  scale: [0.3, 0.3], 
-                  outline: true,
-                  centre:true
-                });
-
-
-
-                        //mp.game.ui.instructionalButtons.InitButtons(offset_pos.x,offset_pos.y,offset_pos.z + 0.3);
-                        //mp.game.ui.instructionalButtons.AddButton(item.name,"t_E");
-                        //mp.game.ui.instructionalButtons.finalizeButtons(1,0,0,0,50);
-                
-            })
-       // }
-
+        let pos = pool.position;
+        pos.z += 1;
+        let Angle_Item = 360 / pool.getLootPool().length;
+        let pointAt = pointingAt();
+        pool.getLootPool().forEach(function(item, index) {
+            let offset_pos = pos.findRot(0, 0.5, Angle_Item * index).ground();
+            if ((pointAt) && (pointAt.position)) {
+                if (offset_pos.dist(pointAt.position) <= item.thickness) {
+                    mp.game.ui.showHudComponentThisFrame(14);
+                    mp.game.graphics.drawText("[E] " + ((item.amount != 1) ? item.amount + "x " : "") + item.name, [0.5, 0.55], {
+                        font: 4,
+                        color: [255, 255, 255, 200],
+                        scale: [0.3, 0.3],
+                        outline: true,
+                        centre: true
+                    });
+                }
+            }
+            //mp.game.ui.instructionalButtons.InitButtons(offset_pos.x,offset_pos.y,offset_pos.z + 0.3);
+            //mp.game.ui.instructionalButtons.AddButton(item.name,"t_E");
+            //mp.game.ui.instructionalButtons.finalizeButtons(1,0,0,0,50);
+        })
+        // }
     });
 });

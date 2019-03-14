@@ -34,6 +34,9 @@ var Pickups = class {
             }
         });
     }
+    getAllPickups() {
+        return this._pickups;
+    }    
     pickupStreamIn(player, colshape) {
         let self = this;
         let pickup_id = colshape.getVariable("item_colshape_id");
@@ -55,8 +58,8 @@ var Pickups = class {
         let total_spawns = loot_spawns.length;
         console.log(`generatePickupsSpawns [0/${total_spawns}]`)
         loot_spawns.forEach(function(spawn) {
-            let count = LootTable.getItemCountForSpawn(spawn.tier);
-            let items = LootTable.getItemsForSpawn(spawn.tier, count);
+            let count = LootTable.getItemCountForSpawn(spawn.type);
+            let items = LootTable.getItemsForSpawn(spawn.type, count);
             items = items.map(function(a) {
                 if (typeof a.amount === "function") {
                     a.amount = a.amount();
@@ -66,8 +69,17 @@ var Pickups = class {
                 return a;
             })
             let colshape = mp.colshapes.newSphere(spawn.x, spawn.y, spawn.z, self._streamRadius, 0);
+
+            let blip = mp.blips.new(1, new mp.Vector3(spawn.x, spawn.y, spawn.z),
+                {
+                    name: spawn.type,
+                    color: 3,
+                    shortRange: true,
+                    scale:0.2
+            });
+
             colshape.setVariable("item_colshape", true),
-                colshape.setVariable("item_colshape_id", spawn.id);
+            colshape.setVariable("item_colshape_id", spawn.id);
             self._pickups[spawn.id] = {
                 id: spawn.id,
                 pos: {
@@ -77,7 +89,8 @@ var Pickups = class {
                 },
                 items: items,
                 colshape: colshape,
-                world: true
+                world: true,
+                blip:blip
             }
             console.log(`generatePickupsSpawns [${self._pickups.length-1}/${total_spawns}]`)
         })

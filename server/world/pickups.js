@@ -32,7 +32,6 @@ var Pickups = class {
     pickupStreamOut(player, colshape) {
         let self = this; 
         let pickup_id = colshape.getVariable("item_colshape_id");
-        console.log("pickup_id", pickup_id);
         if (self._pickups[pickup_id]) {
             player.call("Loot:Unload", [pickup_id])
         }
@@ -44,7 +43,6 @@ var Pickups = class {
         loot_spawns.forEach(function(spawn) {
             let count = LootTable.getItemCountForSpawn(spawn.tier);
             let items = LootTable.getItemsForSpawn(spawn.tier, count);
-            console.log("items",items)
             items = items.map(function(a) {
                 if (typeof a.amount === "function") {
                     a.amount = a.amount();

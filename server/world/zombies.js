@@ -1,19 +1,17 @@
-var tick_rate = 1;
-
+var tick_rate = 16;
 const moveEnums = {
-    1:"walk",
-    2:"run",
-    3:"attack",
-    4:"chase"
+    1: "walk",
+    2: "run",
+    3: "attack",
+    4: "chase"
 }
-
 var Zombie = class {
     constructor(x, y, z) {
         this._setup(x, y, z);
     }
     _setup(x, y, z) {
         let self = this;
-        self._id = "Zombie_" + Date.now() + x + "_" + y + "_" + z
+        self._id = "Zombie_" + Date.now();
         self._skin = "u_m_y_zombie_01";
         self._pos = mp.vector({
             x: x,
@@ -21,14 +19,14 @@ var Zombie = class {
             z: z
         })
         self._tagetPos = mp.vector({
-            x: x,
-            y: y,
+            x: x + 15,
+            y: y + 15,
             z: z
         })
         self._target = null;
         self._currentMove = 1; /*Valid Types: see moveEnums*/
         self._health = 100;
-        self._range = 50;
+        self._range = 25;
         self._leader = "";
         self._dead = false;
         self._syncer = {
@@ -49,7 +47,7 @@ var Zombie = class {
         clearInterval(this._updater);
         ZombieManager.removeZombie(this)
     }
-    get hasUpdatedForPlayer(player) {
+    hasUpdatedForPlayer(player) {
         return this._updatedPlayers[player];
     }
     set target(player) {
@@ -110,14 +108,17 @@ var Zombie = class {
             });
             self._updatePackage.push({
                 type: "setSyncer",
-                data: self._syncer.player
+                data: self._syncer.player.name
             });
+            self._oldData = new_data;
         }
     }
     getBestSyncer() {
         let self = this;
         let option = {
-            player: undefined,
+            player: {
+                name: ""
+            },
             dist: self._range,
             ping: 999
         }
@@ -130,9 +131,37 @@ var Zombie = class {
                     dist: dist,
                     ping: ping
                 }
+                console.log("found nearest");
             }
         });
         return option.player;
+    }
+    updatePackage(player, data) {
+        let self = this;
+        if (player.name == self._syncer.player.name) {
+            console.log("Update by Syncer")
+            console.log("Update Package")
+            data.forEach(function(task) {
+                if (task.type == "setTarget") {
+                    self.setTarget(task.data);
+                }
+                if (task.type == "setMove") {
+                    self.setMove(task.data);
+                }
+                if (task.type == "setHealth") {
+                    self.setHealth(task.data);
+                }
+                if (task.type == "setPos") {
+                    self.setPos(task.data);
+                }
+                if (task.type == "setNextPos") {
+                    self.setNextPos(task.data);
+                }
+                if (task.type == "setSyncer") {
+                    self.setSyncer(task.data);
+                }
+            })
+        }
     }
     syncRange() {
         let self = this;
@@ -146,9 +175,9 @@ var Zombie = class {
                 }
                 if (!self._firstTimeSync[rPlayer]) {
                     self._firstTimeSync[rPlayer] = true;
-                    rPlayer.call("Zombies:sync", [self._id, self._updatePackage, self._skin]);
+                    rPlayer.call("Zombies:Sync", [self._id, self._updatePackage, self._skin]);
                 } else {
-                    rPlayer.call("Zombies:sync", [self._id, self._updatePackage]);
+                    rPlayer.call("Zombies:Sync", [self._id, self._updatePackage]);
                 }
                 self._updatedPlayers[rPlayer] = true;
             }
@@ -172,7 +201,6 @@ var ZombieManager = new class {
         if (index > -1) {
             let id = this._allZombies[index]._id;
             let synced_players = this._allZombies[index]._syncedOnce;
-
             this._allZombies[index] = null;
             this._allZombies.splice(index, 1);
             delete this._allZombies[index];
@@ -190,14 +218,41 @@ var ZombieManager = new class {
         this._removedZombies.forEach(function(data) {
             data.players.forEach(function(player) {
                 if ((player) && (player.name)) {
-                    player.call("Zombies:remove",[data.id])
+                    player.call("Zombies:Remove", [data.id])
                 }
             })
         })
+    }
+    getZombieById(id) {
+        let zIndex = this._allZombies.findIndex(function(zombie) {
+            return (zombie != undefined) && (zombie._id == id);
+        });
+        if (zIndex > -1) {
+            return {
+                zombie: this._allZombies[zIndex],
+                index: zIndex
+            };
+        } else {
+            return -1;
+        }
     }
 }
 /*Syncer*/
 setInterval(function() {
     //console.log("sync");
     ZombieManager.syncZombies();
-}, 1000 / tick_rate) ZombieManager.newZombie(417.1167907714844, 6480.19091796875, 28.80876350402832) module.exports = Zombie;
+}, 1000 / tick_rate);
+ZombieManager.newZombie(417.1167907714844, 6480.19091796875, 28.80876350402832);
+ZombieManager.newZombie(412.1167907714844, 6480.19091796875, 28.80876350402832);
+
+
+mp.events.add("Zombie:ReSync", function(player,id,data) {
+    console.log("Zombie:ReSync",JSON.stringify(id),JSON.stringify(data));
+    let zIndex = ZombieManager.getZombieById(id);
+    if (zIndex != -1) {
+        let zombie = zIndex.zombie;
+        zombie.updatePackage(player, JSON.parse(data));
+    }
+
+});
+module.exports = ZombieManager;

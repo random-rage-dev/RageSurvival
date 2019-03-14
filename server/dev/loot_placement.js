@@ -33,6 +33,10 @@ mp.events.add("LootTable:RemoveSpot", function(player, index, length) {
     }
 });
 setInterval(function() {
+    loot_table = loot_table.map(function(a,i) {
+        a.id = i;
+        return a;    
+    })
     fs.writeFile("./packages/RageZombies/dev/spawns.json", JSON.stringify(loot_table), function(err) {
         if (!err) {
             console.log("Saving Loot Spawns");

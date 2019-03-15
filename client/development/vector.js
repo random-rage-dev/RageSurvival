@@ -71,9 +71,8 @@ mp.Vector3.prototype.ground = function() {
     return nVector;
 }
 mp.vector = function(vec) {
-    return new mp.Vector3(vec.x, vec.y, vec.z);
+    return new mp.Vector3(vec.x,vec.y,vec.z);
 }
-
 Array.prototype.shuffle = function()
 {
     var i = this.length;

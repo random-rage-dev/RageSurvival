@@ -39,39 +39,35 @@ class LootPool {
         let center = new mp.Vector3(self._lootData.pos.x, self._lootData.pos.y, self._lootData.pos.z);
         let Angle_Item = 360 / 8;
         self._lootData.items.forEach(function(item, index) {
-            let offset_pos = center.findRot(0, 0.5, Angle_Item * index);
-            let base_rot = (Angle_Item * index) + (offset_pos.rotPoint(center) - 42);
-            if (base_rot > 360) base_rot -= 360;
-            var left_pos = offset_pos.findRot(0, 0.1, base_rot + 180).ground();
-            var right_pos = offset_pos.findRot(0, 0.1, base_rot + 0).ground();
-            var front_pos = offset_pos.findRot(0, 0.1, base_rot + 270).ground();
-            var back_pos = offset_pos.findRot(0, 0.1, base_rot + 90).ground();
-            let rot_x = front_pos.rotPoint(back_pos);
-            let rot_y = left_pos.rotPoint(right_pos);
-            let pos = offset_pos;
-            pos.z += 1;
-            let obj = mp.objects.new(mp.game.joaat(item.model), pos, {
-                rotation: new mp.Vector3(0, 0, base_rot),
-                alpha: 255,
-                dimension: 0
-            });
-            obj.placeOnGroundProperly();
-            let rotobj = obj.getRotation(0);
-            let posobj = obj.getCoords(false);
-            obj.setCollision(false, true);
-            obj.freezePosition(true);
-            obj.setPhysicsParams(9000000, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
-            if ((item.offset.rot.x > 0) || (item.offset.rot.y > 0)) {
-                obj.setCoords(posobj.x + item.offset.pos.x, posobj.y + item.offset.pos.y, (posobj.z - obj.getHeightAboveGround()) + item.offset.pos.z, false, false, false, false);
-            } else {
-                obj.setCoords(posobj.x + item.offset.pos.x, posobj.y + item.offset.pos.y, posobj.z + item.offset.pos.z, false, false, false, false);
+            if (item != null) {
+                let offset_pos = center.findRot(0, 0.5, Angle_Item * index);
+                let base_rot = (Angle_Item * index) + (offset_pos.rotPoint(center) - 42);
+                if (base_rot > 360) base_rot -= 360;
+                let pos = offset_pos;
+                pos.z += 1;
+                let obj = mp.objects.new(mp.game.joaat(item.model), pos, {
+                    rotation: new mp.Vector3(0, 0, base_rot),
+                    alpha: 255,
+                    dimension: 0
+                });
+                obj.placeOnGroundProperly();
+                let rotobj = obj.getRotation(0);
+                let posobj = obj.getCoords(false);
+                obj.setCollision(false, true);
+                obj.freezePosition(true);
+                obj.setPhysicsParams(9000000, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+                if ((item.offset.rot.x > 0) || (item.offset.rot.y > 0)) {
+                    obj.setCoords(posobj.x + item.offset.pos.x, posobj.y + item.offset.pos.y, (posobj.z - obj.getHeightAboveGround()) + item.offset.pos.z, false, false, false, false);
+                } else {
+                    obj.setCoords(posobj.x + item.offset.pos.x, posobj.y + item.offset.pos.y, posobj.z + item.offset.pos.z, false, false, false, false);
+                }
+                obj.setRotation(rotobj.x + item.offset.rot.x, rotobj.y + item.offset.rot.y, rotobj.z, 0, true);
+                self._pickupObjects.push({
+                    uID: item.uID,
+                    id: self._lootData.id,
+                    obj: obj
+                })
             }
-            obj.setRotation(rotobj.x + item.offset.rot.x, rotobj.y + item.offset.rot.y, rotobj.z, 0, true);
-            self._pickupObjects.push({
-                uID: item.uID,
-                id: self._lootData.id,
-                obj: obj
-            })
         })
     }
     unloadItem(uid) {
@@ -137,8 +133,9 @@ mp.events.add("render", () => {
             let Angle_Item = 360 / 8;
             let pointAt = pointingAt();
             pool.getLootPool().forEach(function(item, index) {
-                if (item != undefined) {
+                if (item != null) {
                     let offset_pos = pos.findRot(0, 0.5, Angle_Item * index).ground();
+                    //mp.game.graphics.drawMarker(28, offset_pos.x, offset_pos.y, offset_pos.z, 0, 0, 0, 0, 0, 0, item.thickness, item.thickness, item.thickness, 255, 255, 255, 255, false, false, 2.0, false, "", "", false);
                     if ((pointAt) && (pointAt.position)) {
                         if (offset_pos.dist(pointAt.position) <= item.thickness) {
                             mp.game.controls.disableControlAction(0, 51, true);
@@ -151,17 +148,15 @@ mp.events.add("render", () => {
                                 centre: true
                             });
                             if (mp.game.controls.isDisabledControlJustPressed(0, 51)) { // 51 == "E"
-                                 //Loot:Pickup
+                                //Loot:Pickup
                                 let pile_id = key;
                                 if (pool.id == pile_id) {
+                                    console.log("is Pile Ok");
                                     let name = item.name;
                                     let amount = item.amount;
                                     if (amount > 0) {
-                                        mp.events.callRemote("Loot:Pickup", pile_id, item.name, item.amount);
+                                        mp.events.callRemote("Loot:Pickup", pile_id, item.uID, item.name, item.amount);
                                     }
-
-
-
                                 }
                             }
                         }

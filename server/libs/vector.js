@@ -68,5 +68,5 @@ mp.Vector3.prototype.angle = function(to) {
 
 
 mp.vector = function(vec) {
-    return new mp.Vector3(vec.x, vec.y, vec.z);
+    return new mp.Vector3(vec.x,vec.y,vec.z);
 }

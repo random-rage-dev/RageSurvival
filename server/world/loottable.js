@@ -230,7 +230,7 @@ var Loottable = class {
             }).shuffle();
             let random_item = self.getRandomItem(usable_items);
             if (random_item != undefined) {
-                random_item.uID = (type + "_" + count) +"-"+ Date.now();
+                random_item.uID = 'id-' + Math.random().toString(36).substr(2, 16)+"-"+ Date.now();
                 items_for_spawn.push(random_item);
             }
         }

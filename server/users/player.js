@@ -93,7 +93,7 @@ var Player = class {
     }
     spawn() {
         var self = this;
-        self._player.spawn(new mp.Vector3(1845.1275634765625, 3703.28759765625, 33.77711868286133));
+        self._player.spawn(new mp.Vector3(1964.2689208984375, 3739.28271484375, 32.33523178100586));
         self._player.model = mp.joaat(self._skin);
         self._player.heading = 90;
         self._health = 100;

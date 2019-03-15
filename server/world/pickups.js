@@ -60,7 +60,7 @@ var Pickups = class {
         loot_spawns.forEach(function(spawn) {
             let count = LootTable.getItemCountForSpawn(spawn.type);
             let items = LootTable.getItemsForSpawn(spawn.type, count);
-            items = items.map(function(a) {
+            items = items.map(function(a, i) {
                 if (typeof a.amount === "function") {
                     a.amount = a.amount();
                 } else if (typeof a.amount !== "number") {
@@ -75,8 +75,8 @@ var Pickups = class {
                 shortRange: true,
                 scale: 0.2
             });
-            colshape.setVariable("item_colshape", true),
-                colshape.setVariable("item_colshape_id", spawn.id);
+            colshape.setVariable("item_colshape", true);
+            colshape.setVariable("item_colshape_id", spawn.id);
             self._pickups[spawn.id] = {
                 id: spawn.id,
                 pos: {
@@ -119,22 +119,21 @@ var Pickups = class {
         pickup.colshape.destroy();
         delete self._pickups[id];
     }
-    pickItem(playerInstance, id, item, amount) {
+    pickItem(playerInstance, id, uniqueID,item, amount) {
         let self = this;
         if ((self._pickups[id]) && (self._pickups[id].items.length > 0)) {
             let doesExist = self._pickups[id].items.findIndex(function(e) {
-                return e.name == item && e.amount == amount;
+                return e != null && e.name == item && e.amount == amount && e.uID == uniqueID;
             })
             if (doesExist > -1) {
-                let item_data = self._pickups[id].items[doesExist];
-                self._pickups[id].items.splice(doesExist, 1);
+                self._pickups[id].items[doesExist] = null;
                 /*Add Item to Inventory*/
                 console.log("pick item up", id, item, amount);
                 playerInstance.player.stopAnimation();
-                playerInstance.player.playAnimation("amb@world_human_gardener_plant@male@base", "base", 4, (32|120))
+                playerInstance.player.playAnimation("amb@world_human_gardener_plant@male@base", "base", 4, (32 | 120))
                 setTimeout(function() {
                     playerInstance.player.stopAnimation();
-                },500);
+                }, 500);
                 /*Add Item to Inventory*/
                 if (self._pickups[id].items.length == 0) {
                     self.unloadPickup(id);

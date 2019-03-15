@@ -58,10 +58,10 @@ mp.events.add("Player:Crouch", (player) => {
     }
 });
 /* Pickup, Inventory */
-mp.events.add("Loot:Pickup", (player, lootpile_id, item_name, item_amount) => {
+mp.events.add("Loot:Pickup", (player, lootpile_id, item_id, item_name, item_amount) => {
     if (players[player.id]) {
-        console.log("Loot:Pickup", lootpile_id, item_name, item_amount);
-        ItemPickups.pickItem(players[player.id], lootpile_id, item_name, item_amount)
+        console.log("Loot:Pickup", lootpile_id, item_id, item_name, item_amount);
+        ItemPickups.pickItem(players[player.id], lootpile_id, item_id, item_name, item_amount)
     }
 });
 /* Pickup, Inventory */

@@ -39,8 +39,8 @@ user.index({
     name: 1
 });
 inventory.index({
-    owner_id: 1,
-    name: 1
+    owner_type: 1,
+    owner_id: 1
 });
 module.exports = {
     user: user,

@@ -1,5 +1,6 @@
 var MongoDB = require("../libs/mongodb.js")
 var User = MongoDB.getUserModel();
+var Inventory = MongoDB.getInventoryModel();
 var md5 = require("md5");
 var async = require("async");
 
@@ -11,19 +12,17 @@ var Player = class {
     _setup(player) {
         var self = this;
         self._player = player;
+        self._loggedIn = false;
+        self._spawnedTimestamp = 0;
+        self._inventory = [];
         self._username = "";
-        self._money = 0;
         self._playtime = 0;
         self._warns = 0;
-        self._rank = 0;
         self._userId = 0;
-        self._health = 1;
-        self._armor = 100;
-        self._loggedIn = false;
-        self._skin = 'player_zero';
-        self._skin = 0;
+        self._skin = 'mp_m_freemode_01';
         self._death = 0;
-        self._spawnedTimestamp = 0;
+        self._health = 100;
+        self._armor = 100;
     }
     log(...args) {
         console.log("Account:Log", args)
@@ -86,35 +85,6 @@ var Player = class {
             close: false
         }])
     }
-    killBlip() {
-        var self = this;
-        if (self._killblip) {
-            self._killblip.destroy();
-            self._killblip = null;
-        }
-        self._killblip = mp.blips.new(84, self._player.position, {
-            color: self.getTeam().blipcolor,
-            shortRange: true,
-            scale: 0.8,
-            alpha: 200,
-            name: self._player.name
-        });
-        setTimeout(function() {
-            if (self._killblip) {
-                self._killblip.destroy();
-                self._killblip = null;
-            }
-        }, 10000)
-    }
-    reward(damage, killer) {
-        var self = this;
-        if (damage > 20) {
-            let base_reward = 24
-            let mul = 1 + damage / 125;
-            let reward = base_reward + Math.pow(mul, 5);
-            self.money += Math.floor(reward);
-        }
-    }
     death(killer, weapon, reason) {
         let self = this;
         setTimeout(function() {
@@ -124,7 +94,7 @@ var Player = class {
     spawn() {
         var self = this;
         self._player.spawn(new mp.Vector3(1845.1275634765625, 3703.28759765625, 33.77711868286133));
-        self._player.model = mp.joaat("mp_m_freemode_01");
+        self._player.model = mp.joaat(self._skin);
         self._player.heading = 90;
         self._health = 100;
         self._armor = 25;
@@ -149,40 +119,8 @@ var Player = class {
                     //    mul = Damage.getBoneMul(bone);
                     //}
                     let damage = 0// Math.floor(Damage.getWeaponDamage(weapon) * (mul || 1));
-                    self.log("weapon", weapon)
-                    self.log("damage", damage)
-                    self.log("hitter", hitter._player.name)
-                    if (self._player.health > self._health) {
-                        self._player.health = self._health;
-                    }
-                    if (self._player.armour > self._armor) {
-                        self._player.armour = self._armor;
-                    }
-                    self._health = self._player.health;
-                    self._armor = self._player.armour;
-                    let armor = self._armor - damage;
-                    let health = self._health;
-                    if (armor < 0) {
-                        health += armor;
-                        armor = 0;
-                    }
-                    self._health = health;
-                    if (self._health < 0) {
-                        self._health = 0;
-                    }
-                    self._armor = armor;
+                    
                     hitter.player.call("Combat:HitEntity")
-                    if ((health <= 0) && (self.isDead() == 0)) {
-                        self.death(hitter, weapon);
-                    } else {
-                        self._player.health = self._health + 100;
-                        self._player.armour = self._armor;
-                        self._damage.push({
-                            hitter: hitter.player.getVariable("user_id"),
-                            weapon: weapon,
-                            damage: damage
-                        })
-                    }
                 } else {
                     if ((self.isDead() == 0)) {
                         self.death(hitter, weapon);
@@ -203,6 +141,32 @@ var Player = class {
                 //self._player.removeWeapon(Number(id));
             }
         }
+    }
+    /* Inventory */
+    loadInventory() {
+        let self = this;
+        Inventory.find({
+            owner_type: "player",
+            owner_id:self._userId
+        }, async function(err, arr) {
+            if (arr.length) {
+                let cInventory = arr;
+                self._inventory = [];
+                mp.events.call("Player:Inventory", self._player,self._inventory)
+                self.spawn();
+            } else {
+                self.error("Account:Inventory", "Failed loading player inventory")
+            }
+        }).lean()
+    }
+    hasItem(name,amount) {
+
+    }
+    giveItem(name,amount) {
+
+    }
+    removeItem(name,amount) {
+        
     }
     load(username) {
         var self = this;
@@ -226,6 +190,7 @@ var Player = class {
                 self.log("loaded player data for", self._player.name)
                 console.log(self._player)
                 mp.events.call("Player:Loaded", self._player)
+                self.loadInventory();
                 self.spawn();
             } else {
                 self.error("Account:Load", "Failed loading player data")

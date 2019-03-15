@@ -4,14 +4,13 @@ var PlayerClass = require("./users/player.js")
 var ItemPickups = require("./world/pickups.js")
 var Zombies = require("./world/zombies.js")
 require("./dev/loot_placement.js")
-    
 var players = [];
-mp.events.add("ServerAccount:Ready", function(player) { 
+mp.events.add("ServerAccount:Ready", function(player) {
     player.setVariable("loggedIn", false);
     players[player.id] = new PlayerClass(player);
-    player.call("Server:RequestLogin");  
+    player.call("Server:RequestLogin");
     player.position.x = 9000;
-    player.position.y = 9000; 
+    player.position.y = 9000;
 });
 mp.events.add("playerQuit", function(player, exitType, reason) {
     console.log("disconnect")
@@ -41,7 +40,6 @@ mp.events.add("ServerAccount:Register", function(player, username, hash_password
         players[player.id].register(username, hash_password, salt)
     }
 });
-
 mp.events.add("Player:Loaded", function(player) {
     console.log("Player Loaded " + player.name)
 });
@@ -59,14 +57,20 @@ mp.events.add("Player:Crouch", (player) => {
         player.data.isCrouched = !player.data.isCrouched;
     }
 });
-
+/* Pickup, Inventory */
+mp.events.add("Loot:Pickup", (player, lootpile_id, item_name, item_amount) => {
+    if (players[player.id]) {
+        console.log("Loot:Pickup", lootpile_id, item_name, item_amount);
+        ItemPickups.pickItem(players[player.id], lootpile_id, item_name, item_amount)
+    }
+});
+/* Pickup, Inventory */
 mp.events.add("playerDeath", function(player, reason, killer) {
     player.data.isCrouched = false;
     if (players[player.id]) {
         players[player.id].death(false);
     }
 });
-
 mp.events.addCommand("suicide", (player, f) => {
     if (players[player.id]) {
         players[player.id].death(false)
@@ -84,7 +88,6 @@ mp.events.addCommand("save", (player, f) => {
         })
     }
 });
-
 mp.events.addCommand("pos", (player, f) => {
     let pos = player.position;
     player.outputChatBox(`${pos.x}, ${pos.y}, ${pos.z}`);

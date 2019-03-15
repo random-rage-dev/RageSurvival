@@ -191,7 +191,7 @@ var Loottable = class {
     getItemCountForSpawn(tier) {
         let self = this;
         /*TODO: Make something better */
-        return Math.floor(Math.random() * (4 - 0));
+        return Math.floor(Math.random() * (8 - 1)) + 1;
     }
     getLootDensity(x, y, z) {
         let p = new mp.Vector3(x, y, z);
@@ -230,6 +230,7 @@ var Loottable = class {
             }).shuffle();
             let random_item = self.getRandomItem(usable_items);
             if (random_item != undefined) {
+                random_item.uID = (type + "_" + count) +"-"+ Date.now();
                 items_for_spawn.push(random_item);
             }
         }

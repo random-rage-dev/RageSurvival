@@ -1,6 +1,6 @@
 var LootTable = require("./loottable.js");
 var loot_spawns = require("./lootspawns.js");
-var PickupManager = class {
+var PickupManager = new class {
     constructor() {
         this._setup();
     }
@@ -36,7 +36,7 @@ var Pickups = class {
     }
     getAllPickups() {
         return this._pickups;
-    }    
+    }
     pickupStreamIn(player, colshape) {
         let self = this;
         let pickup_id = colshape.getVariable("item_colshape_id");
@@ -69,17 +69,14 @@ var Pickups = class {
                 return a;
             })
             let colshape = mp.colshapes.newSphere(spawn.x, spawn.y, spawn.z, self._streamRadius, 0);
-
-            let blip = mp.blips.new(1, new mp.Vector3(spawn.x, spawn.y, spawn.z),
-                {
-                    name: spawn.type,
-                    color: 3,
-                    shortRange: true,
-                    scale:0.2
+            let blip = mp.blips.new(1, new mp.Vector3(spawn.x, spawn.y, spawn.z), {
+                name: spawn.type,
+                color: 3,
+                shortRange: true,
+                scale: 0.2
             });
-
             colshape.setVariable("item_colshape", true),
-            colshape.setVariable("item_colshape_id", spawn.id);
+                colshape.setVariable("item_colshape_id", spawn.id);
             self._pickups[spawn.id] = {
                 id: spawn.id,
                 pos: {
@@ -90,20 +87,22 @@ var Pickups = class {
                 items: items,
                 colshape: colshape,
                 world: true,
-                blip:blip
+                blip: blip
             }
-            console.log(`generatePickupsSpawns [${self._pickups.length-1}/${total_spawns}]`)
+            console.log(`generatePickupsSpawns [${self._pickups.length}/${total_spawns}]`)
         })
     }
     updatePickup(id) {
         let self = this;
         let pickup = self._pickups[id];
-        let pos = pickup.pos;
-        mp.players.forEachInRange(new mp.Vector3(pos.x, pos.y, pos.z), self._streamRadius, function(player) {
-            if (pickup.colshape.isPointWithin(player.position)) {
-                player.call("Loot:Reload", [pickup_id, self._pickups[id]])
-            }
-        });
+        if (pickup) {
+            let pos = pickup.pos;
+            mp.players.forEachInRange(new mp.Vector3(pos.x, pos.y, pos.z), self._streamRadius, function(player) {
+                if (pickup.colshape.isPointWithin(player.position)) {
+                    player.call("Loot:Reload", [id, self._pickups[id]])
+                }
+            });
+        }
     }
     unloadPickup(id) {
         let self = this;
@@ -120,16 +119,22 @@ var Pickups = class {
         pickup.colshape.destroy();
         delete self._pickups[id];
     }
-    pickItemUp(id, item) {
+    pickItem(playerInstance, id, item, amount) {
         let self = this;
         if ((self._pickups[id]) && (self._pickups[id].items.length > 0)) {
             let doesExist = self._pickups[id].items.findIndex(function(e) {
-                return e.name == item;
+                return e.name == item && e.amount == amount;
             })
             if (doesExist > -1) {
                 let item_data = self._pickups[id].items[doesExist];
                 self._pickups[id].items.splice(doesExist, 1);
                 /*Add Item to Inventory*/
+                console.log("pick item up", id, item, amount);
+                playerInstance.player.stopAnimation();
+                playerInstance.player.playAnimation("amb@world_human_gardener_plant@male@base", "base", 4, (32|120))
+                setTimeout(function() {
+                    playerInstance.player.stopAnimation();
+                },500);
                 /*Add Item to Inventory*/
                 if (self._pickups[id].items.length == 0) {
                     self.unloadPickup(id);

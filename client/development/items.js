@@ -1,6 +1,4 @@
 require("./vector.js")
-
-
 var streamedPools = [];
 class LootPool {
     constructor(data) {
@@ -23,7 +21,7 @@ class LootPool {
     }
     isInRange() {
         let self = this;
-        return new mp.Vector3(self._lootData.pos.x, self._lootData.pos.y, self._lootData.pos.z).dist(mp.players.local.position) < 5;
+        return new mp.Vector3(self._lootData.pos.x, self._lootData.pos.y, self._lootData.pos.z).dist(mp.players.local.position) < ((mp.players.local.isRunning() == true) ? 7 : 5);
     }
     reload(data) {
         let self = this;
@@ -49,7 +47,7 @@ class LootPool {
     load() {
         let self = this;
         let center = new mp.Vector3(self._lootData.pos.x, self._lootData.pos.y, self._lootData.pos.z);
-        let Angle_Item = 360 / 8; 
+        let Angle_Item = 360 / 8;
         self._lootData.items.forEach(function(item, index) {
             if (item != null) {
                 item.index = index;
@@ -128,6 +126,8 @@ function pointingAt() {
     }
     return result;
 }
+
+let timer_anim;
 mp.events.add("render", () => {
     /*Display Items*/
     let cur_selected = false;
@@ -153,7 +153,7 @@ mp.events.add("render", () => {
                     //mp.game.graphics.drawMarker(28, offset_pos.x, offset_pos.y, offset_pos.z, 0, 0, 0, 0, 0, 0, item.thickness, item.thickness, item.thickness, 255, 255, 255, 255, false, false, 2.0, false, "", "", false);
                     if ((pointAt) && (pointAt.position)) {
                         let dist = (offset_pos.dist(pointAt.position));
-                        if ((dist <= item.thickness) && (cur_selected == false) && (dist < cur_dist)) {
+                        if ((dist <= ((mp.players.local.isRunning() == true) ? item.thickness * 2 : item.thickness)) && (cur_selected == false) && (dist < cur_dist)) {
                             cur_selected = item;
                             cur_dist = dist;
                             pool_data = key;
@@ -184,6 +184,16 @@ mp.events.add("render", () => {
                 let amount = cur_selected.amount;
                 if (amount > 0) {
                     mp.events.callRemote("Loot:Pickup", pool_data, cur_selected.index, cur_selected.name, cur_selected.amount);
+                    //TaskPlayAnim(pP, "mp_common", "givetake1_a", 3.5, -8, -1, 2, 0, 0, 0, 0, 0)
+                    if (timer_anim) {
+                        clearTimeout(timer_anim);
+                        mp.players.local.stopAnimTask("mp_take_money_mg", "stand_cash_in_bag_loop", 1.0);
+                    }
+                    mp.players.local.taskPlayAnim("mp_take_money_mg", "stand_cash_in_bag_loop", 16, 8.0, -1, 49, 0, false, false, false);
+                    //mp.players..playAnimation("mp_take_money_mg", "stand_cash_in_bag_loop", 1.5, (49 | 120))
+                    timer_anim = setTimeout(function() {
+                        mp.players.local.stopAnimTask("mp_take_money_mg", "stand_cash_in_bag_loop", 1.0);
+                    }, 250);
                 }
             }
         }

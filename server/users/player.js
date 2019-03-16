@@ -23,12 +23,19 @@ var Player = class {
         self._death = 0;
         self._health = 100;
         self._armor = 100;
+        self._storage = {};
     }
     log(...args) {
         console.log("Account:Log", args)
     }
     error(...args) {
         console.error("Account:Error", args)
+    }
+    set storage(data) {
+        this._storage = data;
+    }
+    get storage() {
+        return this._storage;
     }
     get id() {
         return this._userId
@@ -168,6 +175,7 @@ var Player = class {
     removeItem(name,amount) {
         
     }
+    /* Inventory */
     load(username) {
         var self = this;
         self._username = username;

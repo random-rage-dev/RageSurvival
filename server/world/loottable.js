@@ -183,11 +183,27 @@ loot_tiers["Land"] = {
     "Craftbar": 0,
     "Land": 0
 };
+
+function uniqueNumber() {
+    var date = Date.now();
+    if (date <= uniqueNumber.previous) {
+        date = ++uniqueNumber.previous;
+    } else {
+        uniqueNumber.previous = date;
+    }
+    return date;
+}
+uniqueNumber.previous = 0;
 var Loottable = class {
     constructor() {
         this._setup();
     }
-    _setup() {}
+    _setup() {
+        this._idPool = [];
+    }
+    getID() {
+        return uniqueNumber();
+    }
     getItemCountForSpawn(tier) {
         let self = this;
         /*TODO: Make something better */
@@ -217,10 +233,10 @@ var Loottable = class {
     getRandomItem(items) {
         let self = this;
         let random_int = Math.floor(Math.random() * (100 - 0));
-        return items[Math.floor(Math.random() * items.length)]
+        let item = items[Math.floor(Math.random() * items.length)];
+        return item;
     }
     getItemsForSpawn(type, count) {
-        console.log("getItemsForSpawn", type);
         let self = this;
         let items_for_spawn = [];
         for (var i = 0; i < count; i++) {
@@ -230,7 +246,6 @@ var Loottable = class {
             }).shuffle();
             let random_item = self.getRandomItem(usable_items);
             if (random_item != undefined) {
-                random_item.uID = 'id-' + Math.random().toString(36).substr(2, 16)+"-"+ Date.now();
                 items_for_spawn.push(random_item);
             }
         }

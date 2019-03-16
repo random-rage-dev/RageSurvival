@@ -21,7 +21,7 @@ var Pickups = class {
     _setup() {
         var self = this;
         self._pickups = [];
-        self._streamRadius = 50;
+        self._streamRadius = 100;
         self.generatePickups();
         mp.events.add("playerEnterColshape", function(player, colshape) {
             if (colshape.getVariable("item_colshape")) {
@@ -34,6 +34,13 @@ var Pickups = class {
             }
         });
     }
+    isEmpty(id) {
+        let self = this;
+        let arr = self._pickups[id].items.filter(function(item) {
+            return item != null;
+        })
+        return arr.length == 0;
+    }
     getAllPickups() {
         return this._pickups;
     }
@@ -42,7 +49,6 @@ var Pickups = class {
         let pickup_id = colshape.getVariable("item_colshape_id");
         console.log("pickup_id", pickup_id);
         if (self._pickups[pickup_id]) {
-            console.log(self._pickups[pickup_id])
             player.call("Loot:Load", [pickup_id, self._pickups[pickup_id]])
         }
     }
@@ -119,23 +125,27 @@ var Pickups = class {
         pickup.colshape.destroy();
         delete self._pickups[id];
     }
-    pickItem(playerInstance, id, uniqueID,item, amount) {
+    pickItem(playerInstance, id, index, item, amount) {
         let self = this;
         if ((self._pickups[id]) && (self._pickups[id].items.length > 0)) {
-            let doesExist = self._pickups[id].items.findIndex(function(e) {
-                return e != null && e.name == item && e.amount == amount && e.uID == uniqueID;
+            let doesExist = self._pickups[id].items.findIndex(function(e, i) {
+                return ((e != null) && (e.name == item) && (e.amount == amount) && (i == index));
             })
             if (doesExist > -1) {
                 self._pickups[id].items[doesExist] = null;
                 /*Add Item to Inventory*/
                 console.log("pick item up", id, item, amount);
-                playerInstance.player.stopAnimation();
-                playerInstance.player.playAnimation("amb@world_human_gardener_plant@male@base", "base", 4, (32 | 120))
-                setTimeout(function() {
-                    playerInstance.player.stopAnimation();
+
+                let storage = playerInstance.storage;
+
+                if (storage.timeout) {clearTimeout(storage.timeout);}
+                playerInstance.player.playAnimation("anim@am_hold_up@male", "shoplift_mid", 1.0, (4))
+                //playerInstance.player.playAnimation("pickup_object", "putdown_low", 1, (32 | 120))
+                storage.timeout = setTimeout(function() {
+                    //playerInstance.player.stopAnimation();
                 }, 500);
                 /*Add Item to Inventory*/
-                if (self._pickups[id].items.length == 0) {
+                if (self.isEmpty(id) == true) {
                     self.unloadPickup(id);
                 } else {
                     self.updatePickup(id)

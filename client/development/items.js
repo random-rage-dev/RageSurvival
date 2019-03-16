@@ -1,4 +1,6 @@
 require("./vector.js")
+
+
 var streamedPools = [];
 class LootPool {
     constructor(data) {
@@ -9,9 +11,6 @@ class LootPool {
         self._lootData = data;
         self._pickupObjects = [];
         self.load()
-    }
-    set data(new_data) {
-        this._lootData = new_data;
     }
     get position() {
         return new mp.Vector3(this._lootData.pos.x, this._lootData.pos.y, this._lootData.pos.z);
@@ -29,24 +28,41 @@ class LootPool {
     reload(data) {
         let self = this;
         self.unload(self.id)
+        let rot_data = [];
+        self._lootData.items.forEach(function(item, index) {
+            if (item != null) {
+                if (rot_data[item.index] == undefined) {
+                    rot_data[item.index] = item.rot;
+                }
+            }
+        });
         self._lootData = data;
+        self._lootData.items = self._lootData.items.map(function(item, index, theArray) {
+            let sArr = item;
+            if (sArr != null) {
+                sArr.rot = rot_data[index] || undefined
+            }
+            return sArr;
+        });
         self.load();
-        //console.log(JSON.stringify(diff));
     }
     load() {
         let self = this;
-        console.log("loot objects init");
         let center = new mp.Vector3(self._lootData.pos.x, self._lootData.pos.y, self._lootData.pos.z);
-        let Angle_Item = 360 / 8;
+        let Angle_Item = 360 / 8; 
         self._lootData.items.forEach(function(item, index) {
             if (item != null) {
+                item.index = index;
                 let offset_pos = center.findRot(0, 0.5, Angle_Item * index);
-                let base_rot = (Angle_Item * index) + (offset_pos.rotPoint(center) - 42);
+                let base_rot = (Angle_Item * index) + (offset_pos.rotPoint(center) + Math.floor(Math.random() * (360 - 0)));
                 if (base_rot > 360) base_rot -= 360;
+                if (item.rot == undefined) {
+                    item.rot = base_rot
+                }
                 let pos = offset_pos;
                 pos.z += 1;
                 let obj = mp.objects.new(mp.game.joaat(item.model), pos, {
-                    rotation: new mp.Vector3(0, 0, base_rot),
+                    rotation: new mp.Vector3(0, 0, item.rot),
                     alpha: 255,
                     dimension: 0
                 });
@@ -63,20 +79,9 @@ class LootPool {
                 }
                 obj.setRotation(rotobj.x + item.offset.rot.x, rotobj.y + item.offset.rot.y, rotobj.z, 0, true);
                 self._pickupObjects.push({
-                    uID: item.uID,
                     id: self._lootData.id,
                     obj: obj
                 })
-            }
-        })
-    }
-    unloadItem(uid) {
-        let self = this;
-        self._pickupObjects.forEach(function(item, i) {
-            if (item.uID == uid) {
-                item.obj.markForDeletion();
-                item.obj.destroy();
-                delete self._pickupObjects[i];
             }
         })
     }
@@ -125,6 +130,9 @@ function pointingAt() {
 }
 mp.events.add("render", () => {
     /*Display Items*/
+    let cur_selected = false;
+    let cur_dist = 999;
+    let pool_data = null;
     Object.keys(streamedPools).forEach(function(key) {
         let pool = streamedPools[key]
         if (pool.isInRange() == true) {
@@ -135,30 +143,20 @@ mp.events.add("render", () => {
             pool.getLootPool().forEach(function(item, index) {
                 if (item != null) {
                     let offset_pos = pos.findRot(0, 0.5, Angle_Item * index).ground();
+                    mp.game.graphics.drawText("Index " + index, [offset_pos.x, offset_pos.y, offset_pos.z], {
+                        font: 4,
+                        color: [255, 255, 255, 200],
+                        scale: [0.3, 0.3],
+                        outline: true,
+                        centre: true
+                    });
                     //mp.game.graphics.drawMarker(28, offset_pos.x, offset_pos.y, offset_pos.z, 0, 0, 0, 0, 0, 0, item.thickness, item.thickness, item.thickness, 255, 255, 255, 255, false, false, 2.0, false, "", "", false);
                     if ((pointAt) && (pointAt.position)) {
-                        if (offset_pos.dist(pointAt.position) <= item.thickness) {
-                            mp.game.controls.disableControlAction(0, 51, true);
-                            mp.game.ui.showHudComponentThisFrame(14);
-                            mp.game.graphics.drawText("[E] " + ((item.amount != 1) ? item.amount + "x " : "") + item.name, [0.5, 0.55], {
-                                font: 4,
-                                color: [255, 255, 255, 200],
-                                scale: [0.3, 0.3],
-                                outline: true,
-                                centre: true
-                            });
-                            if (mp.game.controls.isDisabledControlJustPressed(0, 51)) { // 51 == "E"
-                                //Loot:Pickup
-                                let pile_id = key;
-                                if (pool.id == pile_id) {
-                                    console.log("is Pile Ok");
-                                    let name = item.name;
-                                    let amount = item.amount;
-                                    if (amount > 0) {
-                                        mp.events.callRemote("Loot:Pickup", pile_id, item.uID, item.name, item.amount);
-                                    }
-                                }
-                            }
+                        let dist = (offset_pos.dist(pointAt.position));
+                        if ((dist <= item.thickness) && (cur_selected == false) && (dist < cur_dist)) {
+                            cur_selected = item;
+                            cur_dist = dist;
+                            pool_data = key;
                         }
                     }
                 }
@@ -168,4 +166,26 @@ mp.events.add("render", () => {
             })
         }
     });
+    if ((cur_selected) && (pool_data)) {
+        mp.game.controls.disableControlAction(0, 51, true);
+        mp.game.ui.showHudComponentThisFrame(14);
+        mp.game.graphics.drawText("[E] " + ((cur_selected.amount != 1) ? cur_selected.amount + "x " : "") + cur_selected.name, [0.5, 0.55], {
+            font: 4,
+            color: [255, 255, 255, 200],
+            scale: [0.3, 0.3],
+            outline: true,
+            centre: true
+        });
+        if (mp.game.controls.isDisabledControlJustPressed(0, 51)) { // 51 == "E"
+            //Loot:Pickup
+            if (pool_data) {
+                console.log("is Pile Ok");
+                let name = cur_selected.name;
+                let amount = cur_selected.amount;
+                if (amount > 0) {
+                    mp.events.callRemote("Loot:Pickup", pool_data, cur_selected.index, cur_selected.name, cur_selected.amount);
+                }
+            }
+        }
+    }
 });

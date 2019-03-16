@@ -143,13 +143,6 @@ mp.events.add("render", () => {
             pool.getLootPool().forEach(function(item, index) {
                 if (item != null) {
                     let offset_pos = pos.findRot(0, 0.5, Angle_Item * index).ground();
-                    mp.game.graphics.drawText("Index " + index, [offset_pos.x, offset_pos.y, offset_pos.z], {
-                        font: 4,
-                        color: [255, 255, 255, 200],
-                        scale: [0.3, 0.3],
-                        outline: true,
-                        centre: true
-                    });
                     //mp.game.graphics.drawMarker(28, offset_pos.x, offset_pos.y, offset_pos.z, 0, 0, 0, 0, 0, 0, item.thickness, item.thickness, item.thickness, 255, 255, 255, 255, false, false, 2.0, false, "", "", false);
                     if ((pointAt) && (pointAt.position)) {
                         let dist = (offset_pos.dist(pointAt.position));

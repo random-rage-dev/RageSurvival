@@ -136,7 +136,6 @@ var Pickups = class {
                 /*Add Item to Inventory*/
                 console.log("pick item up", id, item, amount);
 
-
                 /*Add Item to Inventory*/
                 if (self.isEmpty(id) == true) {
                     self.unloadPickup(id);

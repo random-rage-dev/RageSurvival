@@ -1,4 +1,4 @@
-var tick_rate = 16;
+var tick_rate = 4;
 var Zombie = class {
     constructor(id, data, skin) {
         this._setup(id, data, skin);
@@ -23,8 +23,8 @@ var Zombie = class {
         self._target = null;
         self._currentMove = "walk"; /*Valid Types: "walk", "run", "attack","chase"*/
         self._health = 100;
-        self._range = 25;
-        self._acceptedErrorPosition = 2;
+        self._range = 100;
+        self._acceptedErrorPosition = 50;
         self._maxNoHeartbeat = 1 * 1000;
         self._leader = "";
         self._ready = false;
@@ -62,12 +62,14 @@ var Zombie = class {
         return this._lastHeartbeat;
     }
     dead() {
-    	if (this._ped) {
+    	/*
+        if (this._ped) {
 	        this._ped.destroy();
 	        this._ped = null;
 	    }
         clearInterval(this._updater);
         ZombieManager.removeZombie(this, true)
+        */
     }
     setHealth(health) {
         this._health = health;
@@ -177,6 +179,7 @@ var ZombieManager = new class {
         }
     }
     removeZombie(zombie, fromSelf) {
+        /*
         let index = this._allZombies.indexOf(zombie);
         if (fromSelf == true) {
             if (index > -1) {
@@ -188,6 +191,7 @@ var ZombieManager = new class {
         } else {
             this._allZombies[index].dead();
         }
+        */
     }
     getZombieById(id) {
         let zIndex = this._allZombies.findIndex(function(zombie) {

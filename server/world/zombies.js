@@ -1,4 +1,4 @@
-var tick_rate = 16;
+var tick_rate = 4;
 const moveEnums = {
     1: "walk",
     2: "run",
@@ -19,14 +19,14 @@ var Zombie = class {
             z: z
         })
         self._tagetPos = mp.vector({
-            x: x + 15,
-            y: y + 15,
+            x: 2038,
+            y: 3768,
             z: z
         })
         self._target = null;
         self._currentMove = 1; /*Valid Types: see moveEnums*/
         self._health = 100;
-        self._range = 25;
+        self._range = 100;
         self._leader = "";
         self._dead = false;
         self._syncer = {
@@ -44,8 +44,10 @@ var Zombie = class {
         }, 1000 / tick_rate);
     }
     dead() {
+        /*
         clearInterval(this._updater);
         ZombieManager.removeZombie(this)
+        */
     }
     hasUpdatedForPlayer(player) {
         return this._updatedPlayers[player];
@@ -197,6 +199,7 @@ var ZombieManager = new class {
         return zombie;
     }
     removeZombie(zombie) {
+        /*
         let index = this._allZombies.indexOf(zombie);
         if (index > -1) {
             let id = this._allZombies[index]._id;
@@ -210,6 +213,7 @@ var ZombieManager = new class {
                 players: synced_players
             });
         }
+        */
     }
     syncZombies() {
         this._allZombies.forEach(function(zombie) {
@@ -242,8 +246,8 @@ setInterval(function() {
     //console.log("sync");
     ZombieManager.syncZombies();
 }, 1000 / tick_rate);
-ZombieManager.newZombie(417.1167907714844, 6480.19091796875, 28.80876350402832);
-ZombieManager.newZombie(412.1167907714844, 6480.19091796875, 28.80876350402832);
+ZombieManager.newZombie(1964.2689208984375, 3727.28271484375, 32.33523178100586);
+ZombieManager.newZombie(1967.2689208984375, 3729.28271484375, 32.33523178100586);
 
 
 mp.events.add("Zombie:ReSync", function(player,id,data) {

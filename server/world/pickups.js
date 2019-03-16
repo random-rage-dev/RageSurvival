@@ -139,7 +139,7 @@ var Pickups = class {
                 let storage = playerInstance.storage;
 
                 if (storage.timeout) {clearTimeout(storage.timeout);}
-                playerInstance.player.playAnimation("anim@am_hold_up@male", "shoplift_mid", 1.0, (4))
+                playerInstance.player.playAnimation("anim@am_hold_up@male", "shoplift_mid", 1.0, (1|4|32))
                 //playerInstance.player.playAnimation("pickup_object", "putdown_low", 1, (32 | 120))
                 storage.timeout = setTimeout(function() {
                     //playerInstance.player.stopAnimation();

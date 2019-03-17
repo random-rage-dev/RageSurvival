@@ -44,10 +44,13 @@ let Inventory = {
                     Inventory.selector.children().eq(Inventory.GetIndex(i, j)).addClass('used');
                 }
             }
-            Inventory.selector.children().eq(Inventory.GetIndex(x, y)).append($('<img>',{
-                src: '../../source/img/' + item.name + '.png',
-                class: 'item item' + width + 'x' + height
-                })
+
+            let html = '<div class="item item' + width + 'x' + height + '">'
+                + '<img src="../../source/img/' + item.name + '.png">'
+                + '</div>';
+
+
+            Inventory.selector.children().eq(Inventory.GetIndex(x, y)).append($(html)
                 .data('width', width)
                 .data('height', height)
                 .data('x', x)
@@ -140,16 +143,40 @@ $(function() {
     $(".item").draggable({
         start: function(event, ui) {
             ui.helper.data('dropped', false);
+            let width = $(event.target).data('width');
+            let height = $(event.target).data('height');
+
+            $('.item').css('pointer-events', 'none');
+            let lastSlot = -1;
+            let lastCoords = {
+                x: $(event.target).data('x'),
+                y: $(event.target).data('y')
+            };
+            $('.slot').mousemove(function(e) {
+                let index = Inventory.selector.children().index($(e.target));
+                if(index === lastSlot)
+                    return;
+
+                Inventory.ClearSlot(lastCoords.x, lastCoords.y, width, height);
+                let coords = Inventory.GetCoords(index);
+                Inventory.FillSlot(coords.x, coords.y, width, height);
+
+                lastCoords = coords;
+            });
         },
         stop: function(event, ui) {
             if(!ui.helper.data('dropped')) {
-
+                $(this).css({top: 0, left: 0});
             }
+
+            $('.item').css('pointer-events', 'all');
+            $('.slot').unbind();
         }
     });
 
     $(".slot").droppable({
         accept: '.item',
+        tolerance: 'pointer',
         drop: ItemDropEvent,
     });
 
@@ -161,14 +188,3 @@ $(function() {
         console.log(Inventory.GetIndex(coords.x, coords.y));
     });
 });
-
-/* Aktuell nutze ich pseudo-elements um die Itembilder anzuzeigen.
- * Es wird etwas benötigt womit man pseudo-elements bearbeiten kann.
- * Ein möglicher Workaround wäre das variable hinzufügen von <style>-tags in den head:
- *      $('head').append('<style> .item4x2.combatpdw::before {background: url(...) no-repeat; } </style');
- *
- * Andere Möglichkeit wäre alles ins Stylesheet zu packen. Wäre dann aber "hardcoded" und
- * müsste bei neuen Items angepasst werden.
- *
- *
- */

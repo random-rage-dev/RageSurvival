@@ -20,6 +20,7 @@ class mongodb {
         self._db.on('error', console.error.bind(console, 'connection error:'));
         self._dbUserModel = mongoose.model('User', schema.user);
         self._dbInventoryModel = mongoose.model('Inventory', schema.inventory);
+        self._dbBuildingModel = mongoose.model('Buildings', schema.buildings);
 
         self._db.once('open', function() {
             self._conncted = true;
@@ -32,6 +33,9 @@ class mongodb {
     }
     getInventoryModel() {
         return this._dbInventoryModel;
+    }
+    getBuildingModel() {
+        return this._dbBuildingModel;
     }
 }
 module.exports = new mongodb();

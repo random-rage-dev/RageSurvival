@@ -34,6 +34,41 @@ var inventory = mongoose.Schema({
 }, {
     autoIndex: true
 });
+
+var buildings = mongoose.Schema({
+    prop_id:{
+        type:Number,
+        unique:true
+    },
+    health:{
+        type:Number,
+        default:100
+    },
+    model:String,
+    x:Number,
+    y:Number,
+    z:Number,
+    rot_x:Number,
+    rot_y:Number,
+    rot_z:Number,
+    placed:{
+        type:Number,
+        default:Date.now()
+    },
+    last_repair:{
+        type:Number,
+        default:Date.now()
+    },
+    owner_id:Number
+}, {
+    autoIndex: true
+})
+
+building_props.index({
+    prop_id: 1,
+    placed: 1,
+    owner_id: 1
+});
 user.index({
     user_id: 1,
     name: 1
@@ -44,5 +79,6 @@ inventory.index({
 });
 module.exports = {
     user: user,
-    inventory: inventory
+    inventory: inventory,
+    buildings: buildings
 };

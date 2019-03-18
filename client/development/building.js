@@ -31,7 +31,7 @@ mp.events.add("render", () => {
         let max_dist = 20;
         let direction = mp.gameplayCam.getDirection();
         let coords = mp.gameplayCam.getCoord();
-        let farAway = new mp.Vector3((direction.x * distance) + (coords.x), (direction.y * distance) + (coords.y), (direction.z * distance) + (coords.z));
+        let farAway = new mp.Vector3((direction.x * max_dist) + (coords.x), (direction.y * max_dist) + (coords.y), (direction.z * max_dist) + (coords.z));
         let result = mp.raycasting.testPointToPoint(coords, farAway, mp.players.local, -1);
         let targetPos = farAway;
         if (result !== undefined) {

@@ -113,12 +113,11 @@ mp.events.add("Loot:Reload", (id, new_data) => {
         streamedPools[id].reload(new_data);
     }
 });
-var gameplayCam = mp.cameras.new('gameplay');
 
 function pointingAt() {
     let distance = 10;
-    direction = gameplayCam.getDirection();
-    coords = gameplayCam.getCoord();
+    direction = mp.gameplayCam.getDirection();
+    coords = mp.gameplayCam.getCoord();
     const farAway = new mp.Vector3((direction.x * distance) + (coords.x), (direction.y * distance) + (coords.y), (direction.z * distance) + (coords.z));
     const result = mp.raycasting.testPointToPoint(coords, farAway, mp.players.local, -1);
     if (result === undefined) {

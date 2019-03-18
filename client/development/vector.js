@@ -70,14 +70,18 @@ mp.Vector3.prototype.ground = function() {
     nVector.z = mp.game.gameplay.getGroundZFor3dCoord(nVector.x, nVector.y, nVector.z, 0, false)
     return nVector;
 }
+mp.Vector3.prototype.sub = function(x, y, z) {
+    return new mp.Vector3(this.x - x, this.y - y, this.z - z);
+};
+mp.Vector3.prototype.add = function(x, y, z) {
+    return new mp.Vector3(this.x + x, this.y + -y, this.z + z);
+};
 mp.vector = function(vec) {
-    return new mp.Vector3(vec.x,vec.y,vec.z);
+    return new mp.Vector3(vec.x, vec.y, vec.z);
 }
-Array.prototype.shuffle = function()
-{
+Array.prototype.shuffle = function() {
     var i = this.length;
-    while (i)
-    {
+    while (i) {
         var j = Math.floor(Math.random() * i);
         var t = this[--i];
         this[i] = this[j];

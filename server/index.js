@@ -8,6 +8,7 @@ var players = [];
 mp.events.add("ServerAccount:Ready", function(player) {
     player.setVariable("loggedIn", false);
     players[player.id] = new PlayerClass(player);
+    player.class = players[player.id];
     player.call("Server:RequestLogin");
     player.position.x = 9000;
     player.position.y = 9000;
@@ -58,10 +59,10 @@ mp.events.add("Player:Crouch", (player) => {
     }
 });
 /* Pickup, Inventory */
-mp.events.add("Loot:Pickup", (player, lootpile_id, item_id, item_name, item_amount) => {
+mp.events.add("Loot:Pickup", (player, lootpile_id, item_index, item_name, item_amount) => {
     if (players[player.id]) {
-        console.log("Loot:Pickup", lootpile_id, item_id, item_name, item_amount);
-        ItemPickups.pickItem(players[player.id], lootpile_id, item_id, item_name, item_amount)
+        console.log("Loot:Pickup", lootpile_id, item_index, item_name, item_amount);
+        ItemPickups.pickItem(players[player.id], lootpile_id, item_index, item_name, item_amount)
     }
 });
 /* Pickup, Inventory */

@@ -2,6 +2,7 @@ console.log = function(...a) {
     mp.gui.chat.push("DEBUG:" + a.join(" "))
 };
 mp.gameplayCam = mp.cameras.new('gameplay');
+require("./vector.js")
 require("./scaleforms/index.js")
 require("./crouch.js")
 require("./items.js")

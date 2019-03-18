@@ -3,10 +3,8 @@ var User = MongoDB.getUserModel();
 var Inventory = MongoDB.getInventoryModel();
 var md5 = require("md5");
 var async = require("async");
-
 var Player = class {
-
-    constructor(player) {  
+    constructor(player) {
         this._setup(player);
     }
     _setup(player) {
@@ -95,8 +93,8 @@ var Player = class {
     death(killer, weapon, reason) {
         let self = this;
         setTimeout(function() {
-                    self.spawn();
-                }, 1000);
+            self.spawn();
+        }, 1000);
     }
     spawn() {
         var self = this;
@@ -125,8 +123,7 @@ var Player = class {
                     //if (bone != undefined) {
                     //    mul = Damage.getBoneMul(bone);
                     //}
-                    let damage = 0// Math.floor(Damage.getWeaponDamage(weapon) * (mul || 1));
-                    
+                    let damage = 0 // Math.floor(Damage.getWeaponDamage(weapon) * (mul || 1));
                     hitter.player.call("Combat:HitEntity")
                 } else {
                     if ((self.isDead() == 0)) {
@@ -154,27 +151,35 @@ var Player = class {
         let self = this;
         Inventory.find({
             owner_type: "player",
-            owner_id:self._userId
+            owner_id: self._userId
         }, async function(err, arr) {
             if (arr.length) {
                 let cInventory = arr;
                 self._inventory = [];
-                mp.events.call("Player:Inventory", self._player,self._inventory)
+                mp.events.call("Player:Inventory", self._player, self._inventory)
                 self.spawn();
             } else {
                 self.error("Account:Inventory", "Failed loading player inventory")
             }
         }).lean()
     }
-    hasItem(name,amount) {
-
+    hasItem(name, amount) {}
+    giveItem(name, amount) {
+        let self = this;
+        console.log("giveItem", name, amount);
+        let item = new Inventory({
+            owner_id: self._userId,
+            name: name,
+            amount: amount
+        });
+        item.save(function(err) {
+            if (err) return console.log(err);
+            // saved!
+            mp.events.call("Player:Inventory:AddItem", self._player, item.name,item.amount)
+            self._player.call("Inventory:AddItem", [item.name,item.amount])
+        });
     }
-    giveItem(name,amount) {
-
-    }
-    removeItem(name,amount) {
-        
-    }
+    removeItem(name, amount) {}
     /* Inventory */
     load(username) {
         var self = this;

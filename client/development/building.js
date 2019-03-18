@@ -11,22 +11,8 @@ mp.keys.bind(0x58, true, function() {
         dimension: 0
     });
 });
-function pointingAt() {
-    let distance = 10;
-    direction = mp.gameplayCam.getDirection();
-    coords = mp.gameplayCam.getCoord();
-    const farAway = new mp.Vector3((direction.x * distance) + (coords.x), (direction.y * distance) + (coords.y), (direction.z * distance) + (coords.z));
-    const result = mp.raycasting.testPointToPoint(coords, farAway, mp.players.local, -1);
-    if (result === undefined) {
-        return undefined;
-    }
-    return result;
-}
-
-
 
 mp.events.add("render", () => {
-    let rot = mp.players.local.getRotation(0);
     if (placeable_object) {
         let max_dist = 20;
         let direction = mp.gameplayCam.getDirection();
@@ -37,8 +23,9 @@ mp.events.add("render", () => {
         if (result !== undefined) {
             targetPos = result.position;
         }
+        let rot = placeable_object.getRotation(0);
         mp.game.controls.disableControlAction(0, 22, true);
-        let space_key = mp.game.controls.isDisabledControlJustPressed(0, 22);
+        let space_key = mp.game.controls.isDisabledControlPressed(0, 22);
         if (space_key) {
             mp.game.graphics.drawText("Ground", [targetPos.x, targetPos.y, targetPos.z - 0.25], {
                 font: 4,
@@ -47,6 +34,10 @@ mp.events.add("render", () => {
                 outline: true,
                 centre: true
             });
+
+            placeable_object.placeOnGroundProperly();
+            rot = placeable_object.getRotation(0);
+            targetPos = placeable_object.getCoords(false);
         }
         mp.game.graphics.drawText("Object", [targetPos.x, targetPos.y, targetPos.z], {
             font: 4,
@@ -55,6 +46,15 @@ mp.events.add("render", () => {
             outline: true,
             centre: true
         });
+        mp.game.controls.disableControlAction(0, 16, true);
+        mp.game.controls.disableControlAction(0, 17, true);
+        if (mp.game.controls.isDisabledControlPressed(0, 16)) {
+            console.log("Down");
+            placeable_object.setRotation(rot.x, rot.y, rot.z - 5, 0, false);
+        } else if (mp.game.controls.isDisabledControlPressed(0, 17)) {
+            console.log("Up");
+            placeable_object.setRotation(rot.x, rot.y, rot.z + 5, 0, true);
+        }
         placeable_object.setCoords(targetPos.x, targetPos.y, targetPos.z, false, false, false, false);
     }
 });

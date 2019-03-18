@@ -135,7 +135,7 @@ var Pickups = class {
                 self._pickups[id].items[doesExist] = null;
                 /*Add Item to Inventory*/
                 console.log("pick item up", id, item, amount);
-
+                playerInstance.giveItem(item,amount);
                 /*Add Item to Inventory*/
                 if (self.isEmpty(id) == true) {
                     self.unloadPickup(id);

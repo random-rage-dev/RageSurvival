@@ -33,6 +33,7 @@ let Inventory = {
     SetItem: function(item, x, y, flip = false) {
         let width = item.width;
         let height = item.height;
+
         if (flip) {
             width = item.height;
             height = item.width;
@@ -46,7 +47,7 @@ let Inventory = {
             }
 
             let html = '<div class="item item' + width + 'x' + height + '">'
-                + '<img src="../../source/img/' + item.name + '.png">'
+                + '<img src="../../source/img/' + item.name + '.png"' + (flip ? ' class="flipped"' : '') + '>'
                 + '</div>';
 
 
@@ -61,23 +62,29 @@ let Inventory = {
         }
     },
 
-    FillSlot: function(x, y, width, height) {
-        for (let i = x; i < x + width; i++)
-            for (let j = y; j < y + height; j++)
-                Inventory.selector.children().eq(Inventory.GetIndex(i, j)).addClass('used');
+    AddItem: function(item) {
+        let width = item.width;
+        let height = item.height;
+
+        //algorithmus zum finden von freiem platz
     },
 
-    ClearSlot: function(x, y, width, height) {
+    FillSlot: function(x, y, width, height, isDragged) {
         for (let i = x; i < x + width; i++)
             for (let j = y; j < y + height; j++)
-                Inventory.selector.children().eq(Inventory.GetIndex(i, j)).removeClass('used');
+                Inventory.selector.children().eq(Inventory.GetIndex(i, j)).addClass(isDragged ? 'used-drag' : 'used');
+    },
+
+    ClearSlot: function(x, y, width, height, isDragged) {
+        for (let i = x; i < x + width; i++)
+            for (let j = y; j < y + height; j++)
+                Inventory.selector.children().eq(Inventory.GetIndex(i, j)).removeClass(isDragged ? 'used-drag' : 'used');
     },
 
     IsFree: function(x, y, width, height) {
-        //Vertikale überprüfung hinzufügen
         for (let i = x; i < x + width; i++)
             for (let j = y; j < y + height; j++)
-                if (Inventory.selector.children().eq(Inventory.GetIndex(i, j)).hasClass('used'))
+                if (Inventory.selector.children().eq(Inventory.GetIndex(i, j)).hasClass('used') || Inventory.GetIndex(i, j) >= Inventory.slots)
                     return false;
         return (x + width <= Inventory.width);
     },
@@ -112,7 +119,7 @@ function ItemDropEvent(event, ui) {
         top: 0
     });
 
-    if(coords.x + width > Inventory.width || coords.x < 0 || coords.y < 0) {
+    if(coords.x + width > Inventory.width || coords.x < 0 || coords.y < 0 || !Inventory.IsFree(coords.x, coords.y, width, height)) {
         console.log(event.target);
         return;
     }
@@ -136,40 +143,63 @@ function ItemDragEvent(event, ui) {
 $(function() {
     Inventory.Generate(122);
     Inventory.SetItem(item_pdw, 6, 0);
-    Inventory.SetItem(item_parachute, 1, 2,false);
+    Inventory.SetItem(item_parachute, 1, 2, false);
     // Wird nicht angezeigt. IsFree ist false
-    Inventory.SetItem(item_hatchet, 3, 3, false);
+    Inventory.SetItem(item_hatchet, 5, 3, false);
 
+    let lastCoords = null;
+    let width, height;
     $(".item").draggable({
         start: function(event, ui) {
             ui.helper.data('dropped', false);
-            let width = $(event.target).data('width');
-            let height = $(event.target).data('height');
+            width = $(event.target).data('width');
+            height = $(event.target).data('height');
 
             $('.item').css('pointer-events', 'none');
             let lastSlot = -1;
-            let lastCoords = {
+            lastCoords = {
                 x: $(event.target).data('x'),
                 y: $(event.target).data('y')
             };
+
+            Inventory.ClearSlot(lastCoords.x, lastCoords.y, width, height);
+
             $('.slot').mousemove(function(e) {
                 let index = Inventory.selector.children().index($(e.target));
                 if(index === lastSlot)
                     return;
 
-                Inventory.ClearSlot(lastCoords.x, lastCoords.y, width, height);
+                Inventory.ClearSlot(lastCoords.x, lastCoords.y, width, height, true);
                 let coords = Inventory.GetCoords(index);
-                Inventory.FillSlot(coords.x, coords.y, width, height);
+                if(!Inventory.IsFree(coords.x, coords.y, width, height)) {
+                    return;
+                }
+
+                Inventory.FillSlot(
+                    coords.x,
+                    coords.y,
+                    width + coords.x > Inventory.width ? Inventory.width - coords.x : width,
+                    height,
+                    true
+                );
 
                 lastCoords = coords;
             });
         },
         stop: function(event, ui) {
+            // if dropped outside of inventory
             if(!ui.helper.data('dropped')) {
+                Inventory.ClearSlot(lastCoords.x, lastCoords.y, width, height, true);
                 $(this).css({top: 0, left: 0});
+                // drop item, etc...
             }
 
+            // fill new slot
+            Inventory.FillSlot($(this).data('x'), $(this).data('y'), $(this).data('width'), $(this).data('height'));
+
             $('.item').css('pointer-events', 'all');
+
+            // unbind the mousemove event
             $('.slot').unbind();
         }
     });
@@ -177,8 +207,18 @@ $(function() {
     $(".slot").droppable({
         accept: '.item',
         tolerance: 'pointer',
+        activeClass: 'droppable-highlight',
         drop: ItemDropEvent,
     });
+
+    $(".equip-slot").droppable({
+        accept: '.item',
+        tolerance: 'pointer',
+        activeClass: 'droppable-highlight',
+        drop: ItemDropEvent,
+    });
+
+
 
     $(".slot").click(function() {
         let index = Inventory.selector.children().index($(this));

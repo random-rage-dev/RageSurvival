@@ -171,6 +171,11 @@ body
     background-color: gray;
 }
 
+#inventory .slot.used-drag
+{
+    background-color: gray;
+}
+
 #inventory .slot .item img
 {
     max-width: inherit;
@@ -178,6 +183,13 @@ body
     position: absolute;
     z-index: 2;
     pointer-events: none;
+}
+
+#inventory .slot .item img.flipped
+{
+    max-width: fit-content;
+    max-height: fit-content;
+    transform: rotate(-90deg);
 }
 
 .item
@@ -219,4 +231,169 @@ body
     max-height: 80px;
     width: 160px;
     height: 80px;
+}
+
+
+
+/*
+ * QUICKCRAFT
+ */
+
+#quickcraft-panel
+{
+    width: 600px;
+    height: 400px;
+    position: absolute;
+    right: 20px;
+    bottom: 20px;
+    background-color: rgba(0, 0, 0, .7);
+}
+
+#quickcraft-panel .categories
+{
+    width: 150px;
+    height: inherit;
+    position: relative;
+    background-color: rgba(0, 0, 0, .6);
+}
+
+#quickcraft-panel .categories p
+{
+    height: 25px;
+    line-height: 25px;
+    padding-left: 5px;
+    font-weight: normal;
+    letter-spacing: 1px;
+}
+
+#quickcraft-panel .categories p:nth-child(odd)
+{
+    background-color: rgba(180, 180, 180, .2);
+}
+
+#quickcraft-panel .categories p:nth-child(even)
+{
+    background-color: rgba(180, 180, 180, .15);
+}
+
+#quickcraft-panel .categories p:hover
+{
+    background-color: rgba(130, 130, 130, .4);
+}
+
+#quickcraft-panel .categories p.selected
+{
+    background-color: rgba(130, 130, 130, .8);
+}
+
+#quickcraft-list
+{
+    width: 450px;
+    height: inherit;
+    position: absolute;
+    top: 0;
+    right: 0;
+    overflow: hidden scroll;
+}
+
+#quickcraft-list .entry
+{
+    height: 80px;
+    width: inherit;
+    background-color: rgba(0, 0, 0, .1);
+    margin-bottom: 2px;
+}
+
+#quickcraft-list .entry:nth-child(odd)
+{
+    background-color: rgba(0, 0, 0, .2);
+}
+
+#quickcraft-list .entry:hover
+{
+    background-color: rgba(0, 0, 0, .3);
+}
+
+#quickcraft-list .entry h1
+{
+    max-width: 250px;
+    margin: 0;
+    font-size: 20px;
+    font-weight: normal;
+    position: relative;
+    top: -80px;
+    left: 85px;
+}
+
+#quickcraft-list .entry .result
+{
+    width: 80px;
+    height: inherit;
+    background-color: rgba(150, 150, 150, .4);
+}
+
+#quickcraft-list .entry .result img
+{
+    width: 80%;
+    height: auto;
+    margin: 10%;
+}
+
+#quickcraft-list .entry .result p
+{
+    width: inherit;
+    position: relative;
+    bottom: 30px;
+    right: 60px;
+    text-align: right;
+    font-size: 25px;
+    -webkit-text-stroke: 2px rgba(0, 0, 0, .2);
+}
+
+#quickcraft-list .entry .requirements
+{
+    width: 250px;
+    height: 80px;
+    position: relative;
+    bottom: 100px;
+    left: 80px;
+}
+
+#quickcraft-list .entry .requirements .qc-item
+{
+    height: 40px;
+    width: auto;
+    display: inline-block;
+    position: relative;
+    top: 30px;
+    left: 5px;
+    background-color: rgba(150, 150, 150, .2);
+}
+
+#quickcraft-list .entry .requirements .qc-item img
+{
+    height: inherit;
+    width: auto;
+}
+
+#quickcraft-list .entry .requirements .qc-item p
+{
+    position: relative;
+    bottom: 15px;
+}
+
+#quickcraft-list .entry .btn_craft
+{
+    width: 80px;
+    height: 25px;
+    background-color: #0f9d58;
+    position: relative;
+    bottom: 155px;
+    left: 340px;
+}
+
+#quickcraft-list .entry .btn_craft p
+{
+    line-height: 25px;
+    text-align: center;
 }

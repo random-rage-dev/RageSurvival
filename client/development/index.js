@@ -5,6 +5,7 @@ mp.gameplayCam = mp.cameras.new('gameplay');
 require("./scaleforms/index.js")
 require("./crouch.js")
 require("./items.js")
+require("./crafting.js")
 require("./zombies.js")
 require("./gathering.js")
 require("./building.js")

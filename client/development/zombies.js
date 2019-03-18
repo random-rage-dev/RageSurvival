@@ -6,7 +6,7 @@ var Zombie = class {
     _setup(id, data, skin) {
         let self = this;
         self._id = id;
-        self._skin = skin;
+        self._skin = "u_m_y_zombie_01";
         self._pos = mp.vector({
             x: 0,
             y: 0,
@@ -81,10 +81,12 @@ var Zombie = class {
         this._currentMove = move;
     }
     setNextPos(pos) {
+        if(pos === undefined)
+            return;
         this._targetPos = mp.vector(pos);
     }
     setPos(pos) {
-        console.log("setPos");
+        //console.log("setPos");
         this._pos = mp.vector(pos);
         if (this._ped) {
             if (this._pos.dist(this._ped.getCoords(true)) > this._acceptedErrorPosition) {
@@ -97,7 +99,7 @@ var Zombie = class {
         }
     }
     setSyncer(syncer) {
-        console.log("setSyncer");
+        //console.log("setSyncer");
         this._syncer = syncer;
     }
     updatePackage(data) {
@@ -139,9 +141,9 @@ var Zombie = class {
                         self._nextPackage["setPos"] = this._ped.getCoords(true)
                     }
                 }
-                /* if (!tasks["setNextPos"]){
-                 	self._nextPackage["setNextPos"] = mp.vector({x:0,y:0,z:0})
-                 }*/
+
+                //self._nextPackage["setNextPos"] = mp.players.local.position;
+
                 if (tasks.length > 0) {
                     let task_block = Object.keys(self._nextPackage).map(function(key) {
                         return {
@@ -224,11 +226,11 @@ mp.events.add("render", () => {
     })
 });
 mp.events.add("Zombies:Sync", (id, zombieData, skin) => {
-    console.log("Zombies:Sync")
+    //console.log("Zombies:Sync")
     ZombieManager.updateZombie(id, zombieData, skin);
 });
 mp.events.add("Zombies:Remove", (id) => {
-    console.log("Zombies:Remove")
+    //console.log("Zombies:Remove")
     let zombie = ZombieManager.getZombieById(id);
     ZombieManager.removeZombie(zombie, false)
 });

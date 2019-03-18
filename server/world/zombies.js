@@ -11,7 +11,7 @@ var Zombie = class {
     }
     _setup(x, y, z) {
         let self = this;
-        self._id = "Zombie_" + Date.now();
+        self._id = "Zombie_" + Math.floor(Math.random() * Math.floor(1923));
         self._skin = "u_m_y_zombie_01";
         self._pos = mp.vector({
             x: x,
@@ -106,7 +106,7 @@ var Zombie = class {
             });
             self._updatePackage.push({
                 type: "setNextPos",
-                data: new_data.nextpos
+                data: self._syncer.player.position === undefined ? self._targetPos : self._syncer.player.position
             });
             self._updatePackage.push({
                 type: "setSyncer",
@@ -133,7 +133,7 @@ var Zombie = class {
                     dist: dist,
                     ping: ping
                 }
-                console.log("found nearest");
+                //console.log("found nearest");
             }
         });
         return option.player;
@@ -141,8 +141,8 @@ var Zombie = class {
     updatePackage(player, data) {
         let self = this;
         if (player.name == self._syncer.player.name) {
-            console.log("Update by Syncer")
-            console.log("Update Package")
+            //console.log("Update by Syncer")
+            //console.log("Update Package")
             data.forEach(function(task) {
                 if (task.type == "setTarget") {
                     self.setTarget(task.data);
@@ -179,7 +179,7 @@ var Zombie = class {
                     self._firstTimeSync[rPlayer] = true;
                     rPlayer.call("Zombies:Sync", [self._id, self._updatePackage, self._skin]);
                 } else {
-                    rPlayer.call("Zombies:Sync", [self._id, self._updatePackage]);
+                    rPlayer.call("Zombies:Sync", [self._id, self._updatePackage, self._skin]);
                 }
                 self._updatedPlayers[rPlayer] = true;
             }
@@ -251,7 +251,7 @@ ZombieManager.newZombie(1967.2689208984375, 3729.28271484375, 32.33523178100586)
 
 
 mp.events.add("Zombie:ReSync", function(player,id,data) {
-    console.log("Zombie:ReSync",JSON.stringify(id),JSON.stringify(data));
+    //console.log("Zombie:ReSync",JSON.stringify(id),JSON.stringify(data));
     let zIndex = ZombieManager.getZombieById(id);
     if (zIndex != -1) {
         let zombie = zIndex.zombie;

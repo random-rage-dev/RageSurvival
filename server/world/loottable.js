@@ -232,7 +232,6 @@ var Loottable = class {
     }
     getRandomItem(items) {
         let self = this;
-        let random_int = Math.floor(Math.random() * (100 - 0));
         let item = items[Math.floor(Math.random() * items.length)];
         return item;
     }

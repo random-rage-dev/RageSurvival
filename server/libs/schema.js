@@ -64,7 +64,7 @@ var buildings = mongoose.Schema({
     autoIndex: true
 })
 
-building_props.index({
+buildings.index({
     prop_id: 1,
     placed: 1,
     owner_id: 1

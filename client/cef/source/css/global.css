@@ -1,0 +1,57 @@
+:root
+{
+    --color-bg-trans:           rgba(38, 38, 38, .2);
+    --color-bg-trans-4:         rgba(38, 38, 38, .4);
+    --color-highlight:          #dce2ef;
+    --color-highlight-trans:    rgba(220, 226, 239, .6);
+
+    --color-inv-bg:             rgba(122, 122, 122, .6);
+    --color-slot-bg:            rgba(18, 18, 18, .7);
+
+    --equip-dot:                rgba(82, 82, 82, .5);
+
+    --color-header:             rgba(100, 100, 100, .7);
+
+    font-family: Lato;
+}
+
+@font-face {
+    font-family: Roboto;
+    src: url('../fonts/Roboto-Regular.ttf') format('truetype');
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: Roboto;
+    src: url('../fonts/Roboto-Bold.ttf') format('truetype');
+    font-weight: bold;
+}
+
+
+@font-face {
+    font-family: Lato;
+    src: url("../fonts/Lato-Regular.ttf") format('truetype');
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: Lato;
+    src: url("../fonts/Lato-Bold.ttf") format('truetype');
+    font-weight: bold;
+}
+
+.header
+{
+    width: 150px;
+    height: 30px;
+    background-color: var(--color-header);
+    box-shadow: 0 0 0 2px var(--color-highlight-trans);
+    z-index: 1;
+}
+
+.header p
+{
+    line-height: 30px;
+    margin-left: 5px;
+    color: var(--color-highlight);
+}

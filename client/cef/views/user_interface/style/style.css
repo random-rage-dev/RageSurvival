@@ -139,7 +139,7 @@ body
     font-size: 20px;
     text-align: center;
     letter-spacing: 5px;
-    color: rgba(255, 255, 255, .3);
+    color: var(--color-highlight-trans);
 }
 
 #equip-panel .equip-dot
@@ -168,8 +168,8 @@ body
 .header
 {
     position: relative;
-    top: -100px;
-    left: -200px;
+    top: -102px;
+    left: -198px;
 }
 
 #inventory
@@ -190,7 +190,7 @@ body
     height: 40px;
     position: relative;
     background-color: var(--color-slot-bg);
-    box-shadow: inset 0 0 0 1px var(--color-inv-bg);
+    box-shadow: inset 0 0 0 1px var(--color-highlight-trans);
 }
 
 #inventory .slot.used

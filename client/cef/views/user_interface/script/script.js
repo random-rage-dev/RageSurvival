@@ -66,7 +66,17 @@ let Inventory = {
         let width = item.width;
         let height = item.height;
 
-        //algorithmus zum finden von freiem platz
+        for(let i = 0; i < Inventory.slots; i++) {
+            let coords = Inventory.GetCoords(i);
+            if(Inventory.IsFree(coords.x, coords.y, width, height)) {
+                Inventory.SetItem(item, coords.x, coords.y);
+                return {
+                    x: coords.x,
+                    y: coords.y
+                };
+            }
+        }
+        return false;
     },
 
     FillSlot: function(x, y, width, height, isDragged) {
@@ -142,10 +152,10 @@ function ItemDragEvent(event, ui) {
 
 $(function() {
     Inventory.Generate(122);
-    Inventory.SetItem(item_pdw, 6, 0);
-    Inventory.SetItem(item_parachute, 1, 2, false);
+    Inventory.AddItem(item_pdw);
+    Inventory.AddItem(item_parachute);
     // Wird nicht angezeigt. IsFree ist false
-    Inventory.SetItem(item_hatchet, 5, 3, false);
+    Inventory.AddItem(item_hatchet);
 
     let lastCoords = null;
     let width, height;

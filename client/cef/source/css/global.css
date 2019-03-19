@@ -3,7 +3,7 @@
     --color-bg-trans:           rgba(38, 38, 38, .2);
     --color-bg-trans-4:         rgba(38, 38, 38, .4);
     --color-highlight:          #dce2ef;
-    --color-highlight-trans:    rgba(220, 226, 239, .8);
+    --color-highlight-trans:    rgba(220, 226, 239, .6);
 
     --color-inv-bg:             rgba(122, 122, 122, .6);
     --color-slot-bg:            rgba(18, 18, 18, .7);
@@ -45,7 +45,8 @@
     width: 150px;
     height: 30px;
     background-color: var(--color-header);
-    box-shadow: inset 0 0 0 2px var(--color-highlight-trans);
+    box-shadow: 0 0 0 2px var(--color-highlight-trans);
+    z-index: 1;
 }
 
 .header p

@@ -1,4 +1,3 @@
-require("./vector.js")
 var streamedPools = [];
 class LootPool {
     constructor(data) {
@@ -96,20 +95,17 @@ class LootPool {
 }
 mp.events.add("Loot:Load", (id, poolData) => {
     if (!streamedPools[id]) {
-        console.log("Creating LootPool", id);
         streamedPools[id] = new LootPool(poolData);
     }
 });
 mp.events.add("Loot:Unload", (id) => {
     if (streamedPools[id]) {
-        console.log("Unload LootPool", id);
         streamedPools[id].unload(id)
         delete streamedPools[id];
     }
 });
 mp.events.add("Loot:Reload", (id, new_data) => {
     if (streamedPools[id]) {
-        console.log("Reload LootPool", id);
         streamedPools[id].reload(new_data);
     }
 });
@@ -142,7 +138,6 @@ mp.events.add("render", () => {
             pool.getLootPool().forEach(function(item, index) {
                 if (item != null) {
                     let offset_pos = pos.findRot(0, 0.5, Angle_Item * index).ground();
-                    //mp.game.graphics.drawMarker(28, offset_pos.x, offset_pos.y, offset_pos.z, 0, 0, 0, 0, 0, 0, item.thickness, item.thickness, item.thickness, 255, 255, 255, 255, false, false, 2.0, false, "", "", false);
                     if ((pointAt) && (pointAt.position)) {
                         let dist = (offset_pos.dist(pointAt.position));
                         if ((dist <= ((mp.players.local.isRunning() == true) ? item.thickness * 2 : item.thickness)) && (cur_selected == false) && (dist < cur_dist)) {
@@ -152,9 +147,6 @@ mp.events.add("render", () => {
                         }
                     }
                 }
-                //mp.game.ui.instructionalButtons.InitButtons(offset_pos.x,offset_pos.y,offset_pos.z + 0.3);
-                //mp.game.ui.instructionalButtons.AddButton(item.name,"t_E");
-                //mp.game.ui.instructionalButtons.finalizeButtons(1,0,0,0,50);
             })
         }
     });
@@ -171,18 +163,15 @@ mp.events.add("render", () => {
         if (mp.game.controls.isDisabledControlJustPressed(0, 51)) { // 51 == "E"
             //Loot:Pickup
             if (pool_data) {
-                console.log("is Pile Ok");
                 let name = cur_selected.name;
                 let amount = cur_selected.amount;
                 if (amount > 0) {
                     mp.events.callRemote("Loot:Pickup", pool_data, cur_selected.index, cur_selected.name, cur_selected.amount);
-                    //TaskPlayAnim(pP, "mp_common", "givetake1_a", 3.5, -8, -1, 2, 0, 0, 0, 0, 0)
                     if (timer_anim) {
                         clearTimeout(timer_anim);
                         mp.players.local.stopAnimTask("mp_take_money_mg", "stand_cash_in_bag_loop", 1.0);
                     }
                     mp.players.local.taskPlayAnim("mp_take_money_mg", "stand_cash_in_bag_loop", 16, 8.0, -1, 49, 0, false, false, false);
-                    //mp.players..playAnimation("mp_take_money_mg", "stand_cash_in_bag_loop", 1.5, (49 | 120))
                     timer_anim = setTimeout(function() {
                         mp.players.local.stopAnimTask("mp_take_money_mg", "stand_cash_in_bag_loop", 1.0);
                     }, 250);

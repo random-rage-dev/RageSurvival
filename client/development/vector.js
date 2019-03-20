@@ -67,7 +67,25 @@ mp.Vector3.prototype.angle = function(to) {
 }
 mp.Vector3.prototype.ground = function() {
     let nVector = new mp.Vector3(this.x, this.y, this.z);
-    nVector.z = mp.game.gameplay.getGroundZFor3dCoord(nVector.x, nVector.y, nVector.z, 0, false)
+    let z = mp.game.gameplay.getGroundZFor3dCoord(nVector.x, nVector.y, nVector.z, 0, false)
+    let z1 = mp.game.gameplay.getGroundZFor3dCoord(nVector.x + 0.01, nVector.y + 0.01, nVector.z, 0, false)
+    let z2 = mp.game.gameplay.getGroundZFor3dCoord(nVector.x - 0.01, nVector.y - 0.01, nVector.z, 0, false)
+    nVector.z = z;
+    if ((z + 0.1 < z1) || (z + 0.1 < z2)) {
+        if (z1 < z2) {
+            nVector.z = z2;
+        } else {
+            nVector.z = z1;
+        }
+    }
+    return nVector;
+}
+mp.Vector3.prototype.ground2 = function(ignore) {
+    let nVector = new mp.Vector3(this.x, this.y, this.z);
+    let r = mp.raycasting.testPointToPoint(nVector.add(0,0,1), nVector.sub(0, 0, 100), ignore.handle, (1 | 16));
+    if ((r) && (r.position)) {
+        nVector = mp.vector(r.position);
+    }
     return nVector;
 }
 mp.Vector3.prototype.sub = function(x, y, z) {

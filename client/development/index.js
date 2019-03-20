@@ -10,7 +10,6 @@ require("./crafting.js")
 require("./zombies.js")
 require("./gathering.js")
 require("./building.js")
-require("./loot_spawns_placement.js") // remove once done
 var natives = require("./natives.js")
 var CEFBrowser = require("./browser.js");
 var Browser = new CEFBrowser("login/index.html");

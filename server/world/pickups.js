@@ -9,12 +9,52 @@ var PickupManager = new class {
         self._respawningPickups = [];
         self._respawnLoop = setInterval(function() {
             self._check();
+        }, 1000)
+    }
+    _check() {
+        let self = this;
+        let pickup_ = Pickups.getAllPickups();
+        Object.keys(pickup_).forEach(function(id) {
+            if (pickup_[id].tier != "PlayerDropped") {
+                let c = pickup_[id].created;
+                let x = pickup_[id].pos.x;
+                let y = pickup_[id].pos.y;
+                let z = pickup_[id].pos.z;
+                let tier = pickup_[id].tier;
+                let resapwn_time = LootTable.getRespawnTimeForTier(pickup_[id].tier);
+                let should_respawn = (c + resapwn_time) < Date.now();
+                if (should_respawn == true) {
+                	if (Pickups.unloadPickup(id,false) == true) {
+                		console.log("Reloading Item Spot #"+id,"reason:inactivity");
+                		Pickups.generatePickup(id, tier, x, y, z);
+                	}
+                }
+
+            }
+        })
+        self._respawningPickups.forEach(function(pickup, index) {
+            let resapwn_time = LootTable.getRespawnTimeForTier(pickup.tier);
+            let can_respawn = (pickup.added + resapwn_time) < Date.now();
+            if (can_respawn == true) {
+                console.log("Respawning Item Spot",pickup.id,"reason:empty");
+                Pickups.generatePickup(pickup.id, pickup.tier, pickup.x, pickup.y, pickup.z);
+                self._respawningPickups.splice(index, 1);
+            }
+        });
+    }
+    add(id, tier, x, y, z) {
+        let self = this;
+        self._respawningPickups.push({
+            id: id,
+            tier: tier,
+            x: x,
+            y: y,
+            z: z,
+            added: Date.now()
         })
     }
-    _check() {}
-    add(x, y, z) {}
 }
-var Pickups = class {
+var Pickups = new class {
     constructor() {
         this._setup();
     }
@@ -34,6 +74,9 @@ var Pickups = class {
             }
         });
     }
+    isUnique(id) {
+        return (this._pickups[id] == undefined) ? true : false;
+    }
     isEmpty(id) {
         let self = this;
         let arr = self._pickups[id].items.filter(function(item) {
@@ -47,7 +90,6 @@ var Pickups = class {
     pickupStreamIn(player, colshape) {
         let self = this;
         let pickup_id = colshape.getVariable("item_colshape_id");
-        console.log("pickup_id", pickup_id);
         if (self._pickups[pickup_id]) {
             player.call("Loot:Load", [pickup_id, self._pickups[pickup_id]])
         }
@@ -57,6 +99,86 @@ var Pickups = class {
         let pickup_id = colshape.getVariable("item_colshape_id");
         if (self._pickups[pickup_id]) {
             player.call("Loot:Unload", [pickup_id])
+        }
+    }
+    generatePickup(id, tier, x, y, z) {
+        let self = this;
+        console.log("respawn pickup");
+        let count = LootTable.getItemCountForSpawn(tier);
+        let items = LootTable.getItemsForSpawn(tier, count);
+        items = items.map(function(a, i) {
+            if (typeof a.amount === "function") {
+                a.amount = a.amount();
+            } else if (typeof a.amount !== "number") {
+                a.amount = 1;
+            }
+            return a;
+        })
+        let colshape = mp.colshapes.newSphere(x, y, z, self._streamRadius, 0);
+        let blip = mp.blips.new(1, new mp.Vector3(x, y, z), {
+            name: tier,
+            color: 3,
+            shortRange: true,
+            scale: 0.2
+        });
+        colshape.setVariable("item_colshape", true);
+        colshape.setVariable("item_colshape_id", id);
+        self._pickups[id] = {
+            id: id,
+            tier: tier,
+            pos: {
+                x: x,
+                y: y,
+                z: z
+            },
+            items: items,
+            colshape: colshape,
+            world: true,
+            blip: blip,
+            created: Date.now()
+        }
+    }
+    dropItem(item, amount, x, y, z) {
+        let self = this;
+        item = item.replace("_", " ");
+        let item_data = LootTable.getItemData(item);
+        console.log(item_data);
+        if (item_data != undefined) {
+            let id = (item + "." + amount + "." + x + "." + y + "." + z).substr(0, 4) + (Date.now() + Math.random()).toString().replace('.', '').substr(-6);
+            if (self.isUnique(id) == true) {
+                let temp_item = [{
+                    type: item_data.type,
+                    model: item_data.model,
+                    thickness: item_data.thickness,
+                    amount: amount,
+                    offset: item_data.offset,
+                    name: item
+                }]
+                console.log("item_data", item_data);
+                let colshape = mp.colshapes.newSphere(x, y, z, self._streamRadius, 0);
+                let blip = mp.blips.new(1, new mp.Vector3(x, y, z), {
+                    name: item,
+                    color: 4,
+                    shortRange: true,
+                    scale: 0.3
+                });
+                colshape.setVariable("item_colshape", true);
+                colshape.setVariable("item_colshape_id", id);
+                self._pickups[id] = {
+                    id: id,
+                    tier: "PlayerDropped",
+                    pos: {
+                        x: x,
+                        y: y,
+                        z: z
+                    },
+                    items: temp_item,
+                    colshape: colshape,
+                    world: false,
+                    blip: blip,
+                    created: Date.now()
+                }
+            }
         }
     }
     generatePickups() {
@@ -85,6 +207,7 @@ var Pickups = class {
             colshape.setVariable("item_colshape_id", spawn.id);
             self._pickups[spawn.id] = {
                 id: spawn.id,
+                tier: spawn.type,
                 pos: {
                     x: spawn.x,
                     y: spawn.y,
@@ -93,7 +216,8 @@ var Pickups = class {
                 items: items,
                 colshape: colshape,
                 world: true,
-                blip: blip
+                blip: blip,
+                created: Date.now()
             }
             console.log(`generatePickupsSpawns [${self._pickups.length}/${total_spawns}]`)
         })
@@ -110,8 +234,9 @@ var Pickups = class {
             });
         }
     }
-    unloadPickup(id) {
+    unloadPickup(id, reload = true) {
         let self = this;
+        console.log("unloadPickup");
         let pickup = self._pickups[id];
         let pos = pickup.pos;
         mp.players.forEachInRange(new mp.Vector3(pos.x, pos.y, pos.z), self._streamRadius, function(player) {
@@ -119,11 +244,13 @@ var Pickups = class {
                 player.call("Loot:Unload", [id])
             }
         });
-        if (pickup.world == true) {
-            PickupManager.add(pos.x, pos.y, pos.z)
+        if ((pickup.world == true) && (reload == true)) {
+            console.log("RESPAWN");
+            PickupManager.add(pickup.id, pickup.tier, pos.x, pos.y, pos.z)
         }
         pickup.colshape.destroy();
         delete self._pickups[id];
+        return self._pickups[id] == undefined;
     }
     pickItem(playerInstance, id, index, item, amount) {
         let self = this;
@@ -135,7 +262,7 @@ var Pickups = class {
                 self._pickups[id].items[doesExist] = null;
                 /*Add Item to Inventory*/
                 console.log("pick item up", id, item, amount);
-                playerInstance.giveItem(item,amount);
+                playerInstance.giveItem(item, amount);
                 /*Add Item to Inventory*/
                 if (self.isEmpty(id) == true) {
                     self.unloadPickup(id);
@@ -146,4 +273,10 @@ var Pickups = class {
         }
     }
 }
-module.exports = new Pickups();
+mp.events.addCommand("drop", (player, fulltext, name, amount) => {
+    console.log(name, amount);
+    //player.call("Building:Start", [model])
+    let pos = mp.players.local.position;
+    Pickups.dropItem(name, amount, pos.x, pos.y, pos.z)
+});
+module.exports = Pickups;

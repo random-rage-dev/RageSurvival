@@ -87,11 +87,11 @@ var Building = new class {
         if (self._cObj) {
             let rot = self._cObj.getRotation(0);
             let pos = self._cObj.getCoords(false);
-            let model self._cObj.getModel();
+            let model = self._cObj.getModel();
             self._cObj.destroy();
             self._cObj = null;
             let obj_data = {
-                model: model
+                model: model,
                 pos: {
                     x: pos.x,
                     y: pos.y,

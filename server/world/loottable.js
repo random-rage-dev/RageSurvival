@@ -183,17 +183,32 @@ loot_tiers["Land"] = {
     "Craftbar": 0,
     "Land": 0
 };
-
-function uniqueNumber() {
-    var date = Date.now();
-    if (date <= uniqueNumber.previous) {
-        date = ++uniqueNumber.previous;
-    } else {
-        uniqueNumber.previous = date;
-    }
-    return date;
-}
-uniqueNumber.previous = 0;
+var loot_respawn = [];
+/*
+ *  Tiers : Industrial
+            Residential
+            Food
+            Other
+            Military
+            Hospital
+            Police
+            Beach
+            Farm
+            Forest
+            Craftbar
+            Land
+ */
+loot_respawn["Residential"] = 30 * 60 * 1000;
+loot_respawn["Industrial"] = 60 * 60 * 1000;
+loot_respawn["Food"] = 20 * 60 * 1000;
+loot_respawn["Other"] = 40 * 60 * 1000;
+loot_respawn["Military"] = 120 * 60 * 1000;
+loot_respawn["Police"] = 90 * 60 * 1000;
+loot_respawn["Beach"] = 15 * 60 * 1000;
+loot_respawn["Farm"] = 45 * 60 * 1000;
+loot_respawn["Forest"] = 45 * 60 * 1000;
+loot_respawn["Craftbar"] = 45 * 60 * 1000;
+loot_respawn["Land"] = 45 * 60 * 1000;
 var Loottable = class {
     constructor() {
         this._setup();
@@ -201,8 +216,16 @@ var Loottable = class {
     _setup() {
         this._idPool = [];
     }
-    getID() {
-        return uniqueNumber();
+    getRespawnTimeForTier(tier) {
+        if (loot_respawn[tier]) {
+            return loot_respawn[tier];
+        } else {
+            return 1000 * 15;
+        }
+    }
+    getItemData(name) {
+        console.log("getItemData",name);
+        return Items[name];
     }
     getItemCountForSpawn(tier) {
         let self = this;
@@ -230,9 +253,13 @@ var Loottable = class {
         }, 0)
         return type;
     }
-    getRandomItem(items) {
+    getRandomItem(item_data) {
         let self = this;
-        let item = items[Math.floor(Math.random() * items.length)];
+        let item_name = item_data[Math.floor(Math.random() * item_data.length)];
+        let item = Items[item_name];
+        if (item != undefined) {
+            item.name = item_name;
+        }
         return item;
     }
     getItemsForSpawn(type, count) {
@@ -240,7 +267,8 @@ var Loottable = class {
         let items_for_spawn = [];
         for (var i = 0; i < count; i++) {
             let r_type = self.getRarityThreshold(type);
-            let usable_items = Items.filter(function(item) {
+            let usable_items = Object.keys(Items).filter(function(name) {
+                let item = Items[name];
                 return item.type == r_type;
             }).shuffle();
             let random_item = self.getRandomItem(usable_items);

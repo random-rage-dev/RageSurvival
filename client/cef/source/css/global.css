@@ -55,3 +55,11 @@
     margin-left: 5px;
     color: var(--color-highlight);
 }
+
+/*
+ * UTILS
+ */
+.none
+{
+    display: none;
+}

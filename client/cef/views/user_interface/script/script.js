@@ -159,6 +159,8 @@ $(function() {
 
     let lastCoords = null;
     let width, height;
+
+    let first = true;
     $(".item").draggable({
         start: function(event, ui) {
             ui.helper.data('dropped', false);
@@ -174,7 +176,17 @@ $(function() {
 
             Inventory.ClearSlot(lastCoords.x, lastCoords.y, width, height);
 
+            let rect = event.target.getBoundingClientRect();
+
             $('.slot').mousemove(function(e) {
+                if(first) {
+                    $(event.target).find("img").css({
+                        top: e.target.getBoundingClientRect().top - rect.top,
+                        left: e.target.getBoundingClientRect().left - rect.left
+                    });
+                    first = false;
+                }
+
                 let index = Inventory.selector.children().index($(e.target));
                 if(index === lastSlot)
                     return;
@@ -197,6 +209,12 @@ $(function() {
             });
         },
         stop: function(event, ui) {
+            first = true;
+            $(event.target).find("img").css({
+                top: 0,
+                left: 0
+            });
+
             // if dropped outside of inventory
             if(!ui.helper.data('dropped')) {
                 Inventory.ClearSlot(lastCoords.x, lastCoords.y, width, height, true);
@@ -238,3 +256,7 @@ $(function() {
         console.log(Inventory.GetIndex(coords.x, coords.y));
     });
 });
+
+function ui_toggle(show) {
+    show ? $('#user-interface').show() : $('#user-interface').hide();
+}

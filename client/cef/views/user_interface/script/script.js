@@ -110,9 +110,17 @@ let Inventory = {
             x: colPos,
             y: rowPos
         };
+    },
+
+    GetOffset: function(originX, originY, x, y) {
+        return {
+            x: x - originX,
+            y: y - originY
+        };
     }
 };
 
+let offset = { x: 0, y: 0 };
 function ItemDropEvent(event, ui) {
     ui.helper.data('dropped', true);
 
@@ -120,6 +128,8 @@ function ItemDropEvent(event, ui) {
 
     let index = Inventory.selector.children().index(target);
     let coords = Inventory.GetCoords(index);
+    index = Inventory.GetIndex(coords.x - offset.x, coords.y - offset.y);
+    coords = Inventory.GetCoords(index);
 
     let width = ui.draggable.data('width');
     let height = ui.draggable.data('height');
@@ -129,14 +139,14 @@ function ItemDropEvent(event, ui) {
         top: 0
     });
 
-    if(coords.x + width > Inventory.width || coords.x < 0 || coords.y < 0 || !Inventory.IsFree(coords.x, coords.y, width, height)) {
+    if(coords.x + width > Inventory.width || coords.x < 0 || coords.y < 0 || !Inventory.IsFree(coords.x - offset.x, coords.y - offset.y, width, height)) {
         console.log(event.target);
         return;
     }
 
     console.log(coords.x);
 
-    ui.draggable.detach().appendTo(target);
+    ui.draggable.detach().appendTo("#inventory > div:nth-child(" + (index+1) + ")");
 
     Inventory.ClearSlot(ui.draggable.data('x'), ui.draggable.data('y'), width, height);
 
@@ -161,49 +171,52 @@ $(function() {
     let width, height;
 
     let first = true;
+
     $(".item").draggable({
         start: function(event, ui) {
             ui.helper.data('dropped', false);
             width = $(event.target).data('width');
             height = $(event.target).data('height');
 
-            $('.item').css('pointer-events', 'none');
+            $(event.target).css({
+                pointerEvents: 'none'
+            });
+
             let lastSlot = -1;
             lastCoords = {
                 x: $(event.target).data('x'),
                 y: $(event.target).data('y')
             };
 
-            Inventory.ClearSlot(lastCoords.x, lastCoords.y, width, height);
+            Inventory.selector.children().index($(event.target));
 
-            let rect = event.target.getBoundingClientRect();
+            Inventory.ClearSlot(lastCoords.x - offset.x, lastCoords.y - offset.y, width, height);
 
             $('.slot').mousemove(function(e) {
+                let index = Inventory.selector.children().index($(e.target));
                 if(first) {
-                    $(event.target).find("img").css({
-                        top: e.target.getBoundingClientRect().top - rect.top,
-                        left: e.target.getBoundingClientRect().left - rect.left
-                    });
+                    let offsetCoords = Inventory.GetCoords(index);
+                    offset = Inventory.GetOffset(lastCoords.x, lastCoords.y, offsetCoords.x, offsetCoords.y);
                     first = false;
                 }
-
-                let index = Inventory.selector.children().index($(e.target));
                 if(index === lastSlot)
                     return;
 
-                Inventory.ClearSlot(lastCoords.x, lastCoords.y, width, height, true);
+                Inventory.ClearSlot(lastCoords.x - offset.x, lastCoords.y - offset.y, width, height, true);
                 let coords = Inventory.GetCoords(index);
-                if(!Inventory.IsFree(coords.x, coords.y, width, height)) {
+                if(!Inventory.IsFree(coords.x - offset.x, coords.y - offset.y, width, height)) {
                     return;
                 }
 
+
                 Inventory.FillSlot(
-                    coords.x,
-                    coords.y,
+                    coords.x - offset.x,
+                    coords.y - offset.y,
                     width + coords.x > Inventory.width ? Inventory.width - coords.x : width,
                     height,
                     true
                 );
+
 
                 lastCoords = coords;
             });
@@ -217,7 +230,7 @@ $(function() {
 
             // if dropped outside of inventory
             if(!ui.helper.data('dropped')) {
-                Inventory.ClearSlot(lastCoords.x, lastCoords.y, width, height, true);
+                Inventory.ClearSlot(lastCoords.x - offset.x, lastCoords.y - offset.y, width, height, true);
                 $(this).css({top: 0, left: 0});
                 // drop item, etc...
             }
@@ -229,6 +242,7 @@ $(function() {
 
             // unbind the mousemove event
             $('.slot').unbind();
+            offset = { x: 0, y: 0 };
         }
     });
 

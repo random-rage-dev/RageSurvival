@@ -23,5 +23,10 @@
     "node-watch": "^0.6.0",
     "uglifyify": "^5.0.1",
     "watchify": "^3.11.1"
+  },
+  "devDependencies": {
+    "@types/jquery": "^3.3.29",
+    "@types/jqueryui": "^1.12.7",
+    "@types/ragemp-s": "github:CocaColaBear/types-ragemp-s#master"
   }
 }

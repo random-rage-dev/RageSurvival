@@ -289,6 +289,78 @@ body
 
 
 /*
+ * STASH
+ */
+#stash-panel
+{
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+}
+
+#stash
+{
+    width: calc(var(--slot-size) * var(--slots-per-row));
+    height: auto;
+    position: relative;
+    left: -50%;
+    bottom: 146px;
+    display: grid;
+    grid-template-columns: var(--slot-size) var(--slot-size) var(--slot-size) var(--slot-size) var(--slot-size) var(--slot-size) var(--slot-size) var(--slot-size) var(--slot-size) var(--slot-size);
+    grid-template-rows: var(--slot-size) auto;
+}
+
+#stash::before
+{
+    content: 'INVENTORY';
+    width: 142px;
+    height: 35px;
+    position: absolute;
+    top: -35px;
+    background-color: rgba(255, 255, 255, .4);
+    line-height: 35px;
+    padding-left: 8px;
+}
+
+#stash .slot
+{
+    width: var(--slot-size);
+    height: var(--slot-size);
+    position: relative;
+    background-color: rgba(200, 200, 200, .2);
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .2);
+}
+
+#stash .slot.used
+{
+    background-color: rgba(100, 100, 100, .4);
+}
+
+#stash .slot.used-drag
+{
+    background-color: rgba(100, 100, 100, .4);
+}
+
+#stash .slot .item img
+{
+    max-width: inherit;
+    max-height: inherit;
+    object-fit: contain;
+    position: absolute;
+    z-index: 2;
+    pointer-events: none;
+}
+
+#stash .slot .item img.flipped
+{
+    max-width: fit-content;
+    max-height: fit-content;
+    transform: rotate(-90deg);
+}
+
+
+
+/*
  * QUICKCRAFT
  */
 

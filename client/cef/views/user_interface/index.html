@@ -14,52 +14,67 @@
 <div id="user-interface" style="display: block;">
     <div id="equip-panel">
         <div id="equip">
-            <div class="equip-slot">
+            <div class="equip-slot" data-slot="HEAD">
                 <p>HEAD</p>
             </div>
-            <div class="equip-slot">
+            <div class="equip-slot" data-slot="BODY">
                 <p>BODY</p>
             </div>
-            <div class="equip-slot">
+            <div class="equip-slot" data-slot="LEGS">
                 <p>LEGS</p>
             </div>
         </div>
     </div>
     <div id="resistance-panel">
         <div id="resistances">
-            <div class="resistance">
-                <i class="fa fa-radiation"></i>
-                <p>15</p>
+            <div class="resistance" data-resistance="0">
+                <i class="fa fa-fire-alt"></i>
+                <p>45°c</p>
             </div>
-            <div class="resistance">
-                <i class="fa fa-radiation"></i>
+            <div class="resistance" data-resistance="1">
+                <i class="fa fa-snowflake"></i>
+                <p>-5°c</p>
             </div>
-            <div class="resistance">
-                <i class="fa fa-radiation"></i>
+            <div class="resistance" data-resistance="2">
+                <i class="fa fa-fist-raised"></i>
+                <p>0</p><!-- Schlagschaden -->
             </div>
-            <div class="resistance">
+            <div class="resistance" data-resistance="3">
+                <i class="fa fa-sun"></i>
+                <p>0</p><!-- Schnittschaden -->
+            </div>
+            <div class="resistance" data-resistance="4">
+                <i class="fa fa-crosshairs"></i>
+                <p>0</p><!-- Schussschaden -->
+            </div>
+            <div class="resistance" data-resistance="5">
+                <i class="fa fa-bolt"></i>
+                <p>15</p><!-- milliAmpere -->
+            </div>
+            <div class="resistance" data-resistance="6">
                 <i class="fa fa-radiation"></i>
+                <p>1</p><!-- milliSievert -->
             </div>
         </div>
     </div>
     <div id="quickbar-panel">
         <div id="quickbar">
-            <div class="quickslot">
+            <div class="quickslot" data-qs="1">
                 <p>1</p>
             </div>
-            <div class="quickslot">
+            <div class="quickslot" data-qs="2">
                 <p>2</p>
             </div>
-            <div class="quickslot">
+            <div class="quickslot" data-qs="3">
                 <p>3</p>
             </div>
-            <div class="quickslot">
+            <div class="quickslot" data-qs="4">
                 <p>4</p>
             </div>
-            <div class="quickslot">
+            <div class="quickslot" data-qs="5">
                 <p>5</p>
             </div>
-            <div class="quickslot">
+            <div class="quickslot" data-qs="6">
                 <p>6</p>
             </div>
         </div>
@@ -104,6 +119,8 @@
         </div>
     </div>
 </div>
-<script src="script/script.js"></script>
+<script>var exports = {};</script>
+<script src="../../source/ts/Inventory.js"></script>
+<script type="" src="script/script.js"></script>
 </body>
 </html>

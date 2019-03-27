@@ -2,6 +2,16 @@
 {
     font-weight: bold;
     color: white;
+
+    --equipslot-size:   112px;
+    --equipslot-gap:    6px;
+
+    --quickslot-size:   96px;
+    --quickslot-gap:    6px;
+    --quickslots:       6;
+
+    --slot-size:        50px;
+    --slots-per-row:    10;
 }
 
 p
@@ -13,6 +23,7 @@ html
 {
     width: 100%;
     height: 100%;
+    overflow: hidden;
 }
 
 body
@@ -26,7 +37,7 @@ body
 .bg-image
 {
     margin: 0;
-    background-image: url("../../../../../../../../background.jpg");
+    background-image: url("background.jpg");
     z-index: -1;
     -webkit-filter: blur(3px);
 
@@ -41,118 +52,128 @@ body
     width: inherit;
     height: inherit;
     z-index: 1;
-    background-color: var(--color-bg-trans-4);
+    background-color: rgba(0, 0, 0, .6);
     position: absolute;
     top: 0;
 }
 
 /*
- * TABS
- */
-#tabs
-{
-    width: 100%;
-    height: 50px;
-    line-height: 50px;
-    position: absolute;
-    left: 0;
-    top: 0;
-    background-color: rgba(0, 0, 0, .3);
-}
-
-#tabs .tab:first-of-type
-{
-    margin-left: 10px;
-}
-
-#tabs .tab
-{
-    height: 60%;
-    width: 150px;
-    line-height: 30px;
-    background-color: var(--color-bg-trans-4);
-    border: 2px solid var(--color-highlight);
-    display: inline-block;
-    transform: skewX(-20deg);
-    transition: .15s;
-}
-
-#tabs .tab.active
-{
-    border: 2px solid var(--color-highlight);
-    box-shadow: inset 0 0 5px 6px var(--color-highlight-trans);
-    background-color: var(--color-highlight-trans)
-}
-
-#tabs .tab:hover
-{
-    border: 2px solid var(--color-highlight);
-    box-shadow: inset 0 0 20px 5px var(--color-highlight-trans);
-    cursor: pointer;
-}
-
-#tabs .tab p
-{
-    margin: 0 0 0 10px;
-    text-shadow: -2px 2px rgba(0, 0, 0, .1);
-    letter-spacing: 3px;
-    transform: skewX(20deg);
-    cursor: inherit;
-}
-
-
-/*
- * EQUIPMENT PANEL
+ * EQUIP PANEL
  */
 #equip-panel
 {
+    width: var(--equipslot-size);
     height: auto;
     position: absolute;
-    bottom: 10px;
-    left: 10px;
+    left: 15px;
+    bottom: 50%;
 }
 
-#equip-panel .equip-entry
+#equip-panel #equip
 {
-    width: inherit;
-    height: inherit;
-    display: inline;
-    position: relative;
-}
-
-#equip-panel .equip-slot
-{
-    width: 300px;
-    height: 100px;
-    position: relative;
-    margin-bottom: 15px;
-    background-color: var(--color-slot-bg);
-    clip-path: polygon(68% 0, 93% 1%, 93% 59%, 100% 81%, 100% 100%, 78% 100%, 0 100%, 0 0);
-}
-
-#equip-panel .equip-slot p
-{
-    width: inherit;
-    height: inherit;
-    line-height: 100px;
-    font-size: 20px;
-    text-align: center;
-    letter-spacing: 5px;
-    color: var(--color-highlight-trans);
-}
-
-#equip-panel .equip-dot
-{
-    width: 60px;
-    height: 100px;
-    background-color: var(--equip-dot);
-    clip-path: polygon(0% 5%, 100% 5%, 100% 95%, 40% 95%, 0 70%, 0 0);
     position: absolute;
-    left: 282px;
-    top: -12px;
+    bottom: -50%;
+}
+
+#equip-panel #equip .equip-slot
+{
+    width: var(--equipslot-size);
+    height: var(--equipslot-size);
+    margin-bottom: var(--equipslot-gap);
+    background-color: rgba(255, 255, 255, .2);
+}
+
+#equip-panel #equip .equip-slot p
+{
+    line-height: var(--equipslot-size);
+    text-align: center;
+    color: rgba(255, 255, 255, .2);
+}
+
+/*
+ * RESISTANCES
+ */
+#resistance-panel
+{
+    width: 200px;
+    height: auto;
+    position: absolute;
+    left: 15px;
+    top: 50%;
+}
+
+#resistance-panel #resistances
+{
+    position: absolute;
+    top: -50%;
+}
+
+#resistance-panel #resistances .resistance
+{
+    width: 112px;
+    height: 30px;
+    background: linear-gradient(to right, rgba(120,120,120,0.6) 0%, rgba(0,0,0,0.2) 100%);
+    margin-bottom: 5px;
+    line-height: 30px;
+    color: rgba(255, 255, 255, .6);
+}
+
+#resistance-panel #resistances .resistance i
+{
+    margin-left: 5px;
+    font-size: 20px;
+}
+
+#resistance-panel #resistances .resistance p
+{
+    display: inline-block;
+    float: right;
+    margin-right: 5px;
 }
 
 
+/*
+ * QUICKBAR
+ */
+#quickbar-panel
+{
+    width: calc(var(--quickslots) * (var(--quickslot-size) + var(--quickslot-gap)));
+    height: var(--quickslot-size);
+    position: absolute;
+    left: 50%;
+    bottom: var(--quickslot-gap);
+}
+
+#quickbar-panel #quickbar
+{
+    width: calc(var(--quickslots) * (var(--quickslot-size) + var(--quickslot-gap)));
+    height: var(--quickslot-size);
+    position: inherit;
+    left: -50%;
+    display: inline;
+    font-size: 0;
+}
+
+#quickbar-panel #quickbar .quickslot
+{
+    width: var(--quickslot-size);
+    height: var(--quickslot-size);
+    margin-right: var(--quickslot-gap);
+    background-color: rgba(255, 255, 255, .2);
+    display: inline-block;
+    overflow: hidden;
+}
+
+#quickbar-panel #quickbar .quickslot p
+{
+    margin: 0;
+    line-height: var(--quickslot-size);
+    text-align: center;
+    font-family: Roboto;
+    font-weight: normal;
+    font-size: 30px;
+    color: rgba(255, 255, 255, .2);
+}
 
 /*
  * INVENTORY
@@ -164,48 +185,54 @@ body
     bottom: 0;
 }
 
-.header
-{
-    position: relative;
-    top: -102px;
-    left: -198px;
-}
-
 #inventory
 {
-    width: 400px;
+    width: calc(var(--slot-size) * var(--slots-per-row));
     height: auto;
     position: relative;
     left: -50%;
-    bottom: 100px;
+    bottom: 146px;
     display: grid;
-    grid-template-columns: 40px 40px 40px 40px 40px 40px 40px 40px 40px 40px;
-    grid-template-rows: 40px auto;
+    grid-template-columns: var(--slot-size) var(--slot-size) var(--slot-size) var(--slot-size) var(--slot-size) var(--slot-size) var(--slot-size) var(--slot-size) var(--slot-size) var(--slot-size);
+    grid-template-rows: var(--slot-size) auto;
+}
+
+#inventory::before
+{
+    content: 'INVENTORY';
+    width: 142px;
+    height: 35px;
+    position: absolute;
+    top: -35px;
+    background-color: rgba(255, 255, 255, .4);
+    line-height: 35px;
+    padding-left: 8px;
 }
 
 #inventory .slot
 {
-    width: 40px;
-    height: 40px;
+    width: var(--slot-size);
+    height: var(--slot-size);
     position: relative;
-    background-color: var(--color-slot-bg);
-    box-shadow: inset 0 0 0 1px var(--color-highlight-trans);
+    background-color: rgba(200, 200, 200, .2);
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .2);
 }
 
 #inventory .slot.used
 {
-    background-color: var(--color-inv-bg);
+    background-color: rgba(100, 100, 100, .4);
 }
 
 #inventory .slot.used-drag
 {
-    background-color: var(--color-inv-bg);
+    background-color: rgba(100, 100, 100, .4);
 }
 
 #inventory .slot .item img
 {
     max-width: inherit;
     max-height: inherit;
+    object-fit: contain;
     position: absolute;
     z-index: 2;
     pointer-events: none;
@@ -228,35 +255,35 @@ body
 
 .item1x1
 {
-    max-width: 40px;
-    max-height: 40px;
-    width: 40px;
-    height: 40px;
+    max-width: var(--slot-size);
+    max-height: var(--slot-size);
+    width: var(--slot-size);
+    height: var(--slot-size);
 }
 
 .item2x3
 {
-    max-width: 80px;
-    max-height: 120px;
-    width: 80px;
-    height: 120px;
+    max-width: calc(2 * var(--slot-size));
+    max-height: calc(3 * var(--slot-size));
+    width: calc(2 * var(--slot-size));
+    height: calc(3 * var(--slot-size));
 }
 
 .item2x4
 {
-    max-width: 80px;
-    max-height: 160px;
-    width: 80px;
-    height: 160px;
+    max-width: calc(2 * var(--slot-size));
+    max-height: calc(4 * var(--slot-size));
+    width: calc(2 * var(--slot-size));
+    height: calc(4 * var(--slot-size));
 
 }
 
 .item4x2
 {
-    max-width: 160px;
-    max-height: 80px;
-    width: 160px;
-    height: 80px;
+    max-width: calc(4 * var(--slot-size));
+    max-height: calc(2 * var(--slot-size));
+    width: calc(4 * var(--slot-size));
+    height: calc(2 * var(--slot-size));
 }
 
 
@@ -272,7 +299,7 @@ body
     position: absolute;
     right: 20px;
     bottom: 20px;
-    background-color: var(--color-bg-trans-4);
+    background-color: rgba(255, 255, 255, .2);
 }
 
 #quickcraft-panel .categories
@@ -280,7 +307,7 @@ body
     width: 150px;
     height: inherit;
     position: relative;
-    background-color: var(--color-bg-trans-4);
+    background-color: rgba(0, 0, 0, .2);
 }
 
 #quickcraft-panel .categories p
@@ -294,7 +321,7 @@ body
 
 #quickcraft-panel .categories p:nth-child(odd)
 {
-    background-color: rgba(180, 180, 180, .3);
+    background-color: rgba(180, 180, 180, .2);
 }
 
 #quickcraft-panel .categories p:nth-child(even)
@@ -309,7 +336,7 @@ body
 
 #quickcraft-panel .categories p.selected
 {
-    background-color: rgba(60, 60, 60, .6);
+    background-color: rgba(200, 200, 200, .6);
 }
 
 #quickcraft-list
@@ -319,7 +346,7 @@ body
     position: absolute;
     top: 0;
     right: 0;
-    overflow: hidden scroll;
+    overflow: hidden auto;
 }
 
 #quickcraft-list .entry
@@ -355,7 +382,7 @@ body
 {
     width: 80px;
     height: inherit;
-    background-color: rgba(150, 150, 150, .4);
+    background-color: rgba(0, 0, 0, .1);
 }
 
 #quickcraft-list .entry .result img
@@ -422,4 +449,10 @@ body
 {
     line-height: 25px;
     text-align: center;
+}
+
+.droppable-highlight
+{
+    box-shadow: inset 0 0 15px 2px rgba(0, 210, 0, .6);
+    transition: .2s;
 }

@@ -47,7 +47,7 @@ let Inventory = {
             }
 
             let html = '<div class="item item' + width + 'x' + height + '">'
-                + '<img src="../../source/img/' + item.name + '.png"' + (flip ? ' class="flipped"' : '') + '>'
+                + '<img class="item' + width + 'x' + height + '" src="../../source/img/' + item.name + '.png"' + (flip ? ' class="flipped"' : '') + '>'
                 + '</div>';
 
 
@@ -156,8 +156,18 @@ function ItemDropEvent(event, ui) {
     Inventory.FillSlot(coords.x, coords.y, width, height);
 }
 
-function ItemDragEvent(event, ui) {
+function ItemEquipEvent(event, ui) {
+    ui.draggable.detach().appendTo($(event.target));
+    $(ui.draggable).css({
+        marginLeft: "50%",
+        marginTop: "20%"
+    });
+    $(ui.draggable).find('img').css({
+        marginLeft: "-50%",
+        marginTop: "-50%"
+    });
 
+    $(event.target).find('p').hide();
 }
 
 $(function() {
@@ -257,7 +267,14 @@ $(function() {
         accept: '.item',
         tolerance: 'pointer',
         activeClass: 'droppable-highlight',
-        drop: ItemDropEvent,
+        drop: ItemEquipEvent,
+    });
+
+    $('.quickslot').droppable({
+        accept: '.item',
+        tolerance: 'pointer',
+        activeClass: 'droppable-highlight',
+        drop: null
     });
 
 

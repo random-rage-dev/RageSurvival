@@ -1,0 +1,87 @@
+:root {}
+body {
+    background-image: url("../20190124-17-40-7.jpg");
+}
+.charselect {
+    position: relative;
+    width: 20vw;
+    height: 60vh;
+    max-width: 300px;
+    margin-left: 60vw;
+    margin-top: 20vh;
+
+}
+.charselect>.headline {
+    font-family: Lato;
+    background: var(--color-headline);
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 5px;
+    padding-bottom: 6px;
+    font-weight: 600;
+    position: relative;
+    text-align: center;
+    line-height: 20px;
+    color: #FFF;
+}
+.charselect>.char_list {
+    padding-top: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    height: 100%;
+    background: var(--color-background);
+}
+.charselect>.char_list>.char {
+    height: 70px;
+    width: 95%;
+    margin-left:2.5%;
+    position: relative;
+    color: #FFF;
+    background: rgba(86, 86, 86, 0.8);
+    margin-bottom: 8px;
+    border-radius:2px;
+    cursor:pointer;
+}
+
+.charselect>.char_list>.char>.name {
+    font-family: Roboto;
+    padding-top: 2px;
+    padding-bottom: 3px;
+    padding-left:12px;
+    line-height: 30px;
+}
+.charselect>.char_list>.char>.status {
+    font-family: Roboto;
+    padding-top: 2px;
+    padding-bottom: 3px;
+    line-height: 30px;
+    padding-left:12px;
+}
+.charselect>.char_list>.char>.select {
+    font-family: Roboto;
+    position: absolute;
+    right:20px;
+    top:10px;
+    width:45px;
+    letter-spacing: .1em;
+    text-align: center;
+    background: var(--color-headline);
+    line-height: 20px;
+    font-size:12px;
+
+    transition: all 0.1s linear;
+}
+
+.charselect>.char_list>.char>.select:hover {
+    background: var(--color-button-hover);
+    transition: all 0.1s linear;
+}
+.charselect>.char_list>.char>.new {
+    line-height: 70px;
+    text-align: center;
+    width: 100%;
+    font-size: 4em;
+    opacity: 0.6;
+    position: absolute;
+    top:-2px;
+}

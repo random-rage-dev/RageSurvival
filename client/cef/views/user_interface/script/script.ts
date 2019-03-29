@@ -182,7 +182,7 @@ enum Resistances {
     PUNCTURE,
     ELECTRICITY,
     RADIATION
-};
+}
 
 class Resistance {
     static set(resistance: Resistances, value: number) {
@@ -195,5 +195,16 @@ class Resistance {
 }
 
 function ui_toggle(show) {
-    show ? $('#user-interface').show() : $('#user-interface').hide();
+    let selector = $('#user-interface');
+    show ? selector.show() : selector.hide();
 }
+
+
+// EXAMPLES
+Resistance.set(Resistances.HEAT, 0);
+Resistance.set(Resistances.COLD, 0);
+Resistance.set(Resistances.IMPACT, 0);
+Resistance.set(Resistances.SLASH, 0);
+Resistance.set(Resistances.PUNCTURE, 0);
+Resistance.set(Resistances.ELECTRICITY, 0);
+Resistance.set(Resistances.RADIATION, 0);

@@ -138,7 +138,6 @@ var Resistances;
     Resistances[Resistances["ELECTRICITY"] = 5] = "ELECTRICITY";
     Resistances[Resistances["RADIATION"] = 6] = "RADIATION";
 })(Resistances || (Resistances = {}));
-;
 var Resistance = /** @class */ (function () {
     function Resistance() {
     }
@@ -151,5 +150,14 @@ var Resistance = /** @class */ (function () {
     return Resistance;
 }());
 function ui_toggle(show) {
-    show ? $('#user-interface').show() : $('#user-interface').hide();
+    var selector = $('#user-interface');
+    show ? selector.show() : selector.hide();
 }
+// EXAMPLES
+Resistance.set(Resistances.HEAT, 0);
+Resistance.set(Resistances.COLD, 0);
+Resistance.set(Resistances.IMPACT, 0);
+Resistance.set(Resistances.SLASH, 0);
+Resistance.set(Resistances.PUNCTURE, 0);
+Resistance.set(Resistances.ELECTRICITY, 0);
+Resistance.set(Resistances.RADIATION, 0);

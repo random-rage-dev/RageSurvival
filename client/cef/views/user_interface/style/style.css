@@ -131,6 +131,10 @@ body
     margin-right: 5px;
 }
 
+[data-resistance="0"] p::after, [data-resistance="1"] p::after
+{
+    content: " °c";
+}
 
 /*
  * QUICKBAR

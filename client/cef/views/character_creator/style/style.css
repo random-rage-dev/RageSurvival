@@ -2,7 +2,7 @@
 body {
     background-image: url("../20190208-17-54-25.jpg");
 }
-.charselect {
+.charcreation {
     position: relative;
     width: 20vw;
     height: 50vh;
@@ -11,9 +11,8 @@ body {
     margin-top: 20vh;
 
 }
-.charselect>.headline {
+.charcreation>.headline {
     font-family: Lato;
-    background: var(--color-headline);
     padding-top: 5px;
     padding-bottom: 6px;
     margin-bottom:5px;
@@ -24,15 +23,13 @@ body {
     padding-left:20px;
     line-height: 20px;
     color:var(--font-color-dark);
-    background:rgba(200,200,200,0.9);
+    background:var(--color-headline);
     border-radius: 0px;
     opacity:0.9;
     text-transform: uppercase;
 }
 
-
-
-.charselect>.char_list {
+.charcreation>.properties {
     padding-top: 10px;
     padding-left: 10px;
     padding-right: 10px;
@@ -40,64 +37,68 @@ body {
     background: var(--color-bg-trans-8);
     overflow:overlay;
 }
-.charselect>.char_list>.char {
-    height: 70px;
-    width: 95%;
-    margin-left:2.5%;
+.charcreation>.properties>.group {
+    line-height: 35px;
+    padding-left:15px;
+    margin-top:5px;
+    background:var(--color-headline-trans-2);
+    color:#FFF;
+    border-bottom:1px solid #FFF;
+    cursor: pointer;
+    transition: all 100ms linear;
+}
+
+.charcreation>.properties>.group:hover {
+    background:var(--color-headline-trans-4);
+    transition: all 100ms linear;
+
+}
+.charcreation>.properties>.group_content {
+    color:#FFF;
+    transition: all 100ms linear;
+    overflow: hidden;
     position: relative;
-    color: #FFF;
-    margin-bottom: 8px;
-    border-radius:2px;
-    cursor:pointer;
-    outline:1px solid var(--color-outline-normal);
-    transition: all 0.1s linear;
-    z-index:0;
-    overflow:hidden;
+    height:0;
 }
-.charselect>.char_list>.char:hover {
-    background-color: var(--color-background-selected-light);
-    transition: all 0.1s linear;
+.charcreation>.properties>.group_content .group_div{
+    height:70px;
+    background:var(--color-headline-trans-2);
 }
-.charselect>.char_list>.char.selected>.check {
-	position: absolute;
-	height:100%;
-	top:-40px;
-	right:15%;
-	vertical-align: middle;
-	line-height:70px;
-	font-size:160px;
-	color:rgba(255,255,255,0.2);
+.charcreation>.properties>.group_content .value{
+    width:90%;
+    margin-left:5%;
+    padding-top:5px;
+    display:block;
 }
-
-.charselect>.char_list>.char>.name {
-    font-family: Roboto;
-    padding-top: 2px;
-    padding-bottom: 3px;
-    padding-left:12px;
-    line-height: 30px;
-    z-index:1;
-}
-.charselect>.char_list>.char>.status {
-    font-family: Roboto;
-    padding-top: 2px;
-    padding-bottom: 3px;
-    line-height: 30px;
-    padding-left:12px;
-    z-index:1;
-}
-
-.charselect>.char_list>.char>.new {
-    line-height: 70px;
-    text-align: center;
-    width: 100%;
-    font-size: 2em;
-    opacity: 0.6;
+.charcreation>.properties>.group_content .value > span{
+    text-align: right;
     position: absolute;
-    top:-2px;
-    z-index:1;
+    right: 25%;
 }
 
-.charselect>.button:after {
+.charcreation>.properties>.group_content .slider {
+    display: block;
+    float: none;
+    position: absolute;
+    margin-top:0px;
+    width:80%;
+    left:10%;
+}
+.charcreation>.properties>.group_content .slider input{
+   margin-top:20px;
+}
+.flat-slider.ui-slider{
+   background: rgba(0,0,0,0);
+}
+.flat-slider.ui-slider .ui-slider-pip .ui-slider-line {
+    background: var(--color-headline);
+}
+.flat-slider .ui-slider-handle, .flat-slider .ui-slider-range, .flat-slider .ui-slider-pip[class*="ui-slider-pip-selected"] .ui-slider-line, .flat-slider .ui-slider-pip.ui-slider-pip-inrange .ui-slider-line {
+    background: red;
+
+}
+
+.charcreation>.button:after {
     content:" ";
     position: absolute;
     top:0;
@@ -109,7 +110,7 @@ body {
     opacity:0.4;
 
 }
-.charselect>.button {
+.charcreation>.button {
     position: relative;
     line-height:70px;
     color:#FFF;
@@ -131,7 +132,7 @@ body {
                  -1px -1px 3px rgba(0,0,0,0.1);
 }
 
-.charselect>.button:hover {
+.charcreation>.button:hover {
     background: rgba(220,220,220,1);
     text-shadow:  1px  1px 5px rgba(0,0,0,0.2),
                   1px -1px 5px rgba(0,0,0,0.2),
@@ -139,4 +140,5 @@ body {
                  -1px -1px 5px rgba(0,0,0,0.2);
     transition: all 100ms linear;
 }
+
 

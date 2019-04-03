@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+	    <meta charset="UTF-8">
+	    <link rel="stylesheet" href="../../source/css/font-awesome.css">
+	    <link rel="stylesheet" href="../../source/css/global.css">
+
+	    <script src="../../source/js/jquery-3.3.1.min.js"></script>
+	    <script src="../../source/js/jquery-ui.min.js"></script>
+
+
+	    <link rel="stylesheet" href="../../source/css/jquery-ui-slider-pips.css">
+	    <link rel="stylesheet" href="../../source/css/jquery-ui-slider-flat-theme.css">
+	    <link rel="stylesheet" href="../../source/css/jquery-ui-slider-flat-circle-theme.css">
+	    <link rel="stylesheet" href="../../source/css/slider-range-default.css">
+	    <script src="../../source/js/jquery-ui-slider-pips.js"></script>
+	    <link rel="stylesheet" href="style/style.css">
+	</head>
+	<body>
+		<div id="character_select" class="charcreation">
+			<div class="headline">Character Selection</div>
+		    <div class="properties">
+		    	<div class="group" for="parents">
+		    		<span class="group_name text-shadow">Parents</span>
+		    	</div>
+		    	<div class="group_content" id="parents" style="display:none">
+		    		<div class="group_div">
+			    		<div class="value">Father: <span>5%</span></div>
+			    		<div class="slider">
+			    			<div class="flat-slider" id="father_slider"></div>
+						</div>
+					</div>
+		    		<div class="group_div">
+			    		<div class="value">Mother: <span>5%</span></div>
+			    		<div class="slider">
+			    			<div class="flat-slider" id="mother_slider"></div>
+						</div>
+					</div>
+		    		<div class="group_div">
+			    		<div class="value">Resemblence<span>5%</span></div>
+			    		<div class="slider">
+			    			<input type="range" min="1" max="100" value="50" step="5" class="slider" id="resemblence_slider">
+						</div>
+					</div>
+		    	</div>
+		    	<div class="group" for="parents1">
+		    		<span class="group_name text-shadow">Parents</span>
+		    	</div>
+		    	<div class="group_content" id="parents1" style="display:none">
+		    		<div class="group_div">
+			    		<div class="value">Father: Forces</div>
+			    		<div class="slider">
+			    			<div class="flat-slider" id="fath2er_slider"></div>
+						</div>
+					</div>
+		    		<div class="group_div">
+			    		<div class="value">Mother: Zaxon</div>
+			    		<div class="slider">
+			    			<div class="flat-slider" id="mot3her_slider"></div>
+						</div>
+					</div>
+		    	</div>
+		    </div>
+		    <div class="button no-select">
+		    	Spawn
+		    </div>
+		</div>
+	<script src="script/script.js"></script>
+	</body>
+</html>

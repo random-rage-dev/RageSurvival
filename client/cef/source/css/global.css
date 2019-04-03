@@ -22,7 +22,11 @@
     --color-outline-normal:            rgba(200, 209, 214,0.4);
     --color-background-selected-dark:       rgba(42, 43, 47,0.6);
     --color-background-selected-light:       rgba(93, 93, 95,0.6);
+    --color-headline: rgba(200,200,200,0.9);
+    --color-headline-trans-2: rgba(200,200,200,0.2);
+    --color-headline-trans-4: rgba(200,200,200,0.4);
 
+    --accent-trans-8:   rgba(33, 173, 255,0.9);
 
     font-family: Lato;
 }
@@ -77,6 +81,21 @@
     display: none;
 }
 
+.no-select{
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently */
+}
+.text-shadow{
+    
+    text-shadow:  1px  1px 3px rgba(0,0,0,0.1),
+                  1px -1px 3px rgba(0,0,0,0.1),
+                 -1px  1px 3px rgba(0,0,0,0.1),
+                 -1px -1px 3px rgba(0,0,0,0.1);
+}
 
 /*
 * Scrollbar

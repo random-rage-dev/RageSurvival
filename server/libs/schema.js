@@ -19,6 +19,10 @@ var user = mongoose.Schema({
     playtime: {
         type: Number,
         default: 0
+    },
+    character: {
+        type:Array,
+        default:[]
     }
 }, {
     autoIndex: true

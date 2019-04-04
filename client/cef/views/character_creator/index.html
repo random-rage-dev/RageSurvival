@@ -8,58 +8,180 @@
 	    <script src="../../source/js/jquery-3.3.1.min.js"></script>
 	    <script src="../../source/js/jquery-ui.min.js"></script>
 
-
-	    <link rel="stylesheet" href="../../source/css/jquery-ui-slider-pips.css">
-	    <link rel="stylesheet" href="../../source/css/jquery-ui-slider-flat-theme.css">
-	    <link rel="stylesheet" href="../../source/css/jquery-ui-slider-flat-circle-theme.css">
-	    <link rel="stylesheet" href="../../source/css/slider-range-default.css">
-	    <script src="../../source/js/jquery-ui-slider-pips.js"></script>
 	    <link rel="stylesheet" href="style/style.css">
 	</head>
 	<body>
 		<div id="character_select" class="charcreation">
 			<div class="headline">Character Selection</div>
 		    <div class="properties">
-		    	<div class="group" for="parents">
-		    		<span class="group_name text-shadow">Parents</span>
+		    	<div class="group" for="genetics">
+		    		<span class="group_name text-shadow">Genetics</span>
 		    	</div>
-		    	<div class="group_content" id="parents" style="display:none">
+		    	<div class="group_content" id="genetics" style="display:none">
 		    		<div class="group_div">
-			    		<div class="value">Father: <span>5%</span></div>
+			    		<div class="headline">Father</div>
+			    		<div class="int_select">
+			    			<div class="arrow_left"><i class="fas fa-chevron-left"></i></div>
+			    			<div class="value">25/50</div>
+			    			<div class="arrow_right"><i class="fas fa-chevron-right"></i></div>
+			    		</div>
+					</div>
+		    		<div class="group_div">
+			    		<div class="headline">Mother</div>
+			    		<div class="int_select">
+			    			<div class="arrow_left"><i class="fas fa-chevron-left"></i></div>
+			    			<div class="value">25/50</div>
+			    			<div class="arrow_right"><i class="fas fa-chevron-right"></i></div>
+			    		</div>
+					</div>
+		    		<div class="group_div">
+			    		<div class="headline">Skin-Tone</div>
 			    		<div class="slider">
-			    			<div class="flat-slider" id="father_slider"></div>
+			    		<div class="notice left">Mother</div>
+			    		<div class="notice right">Father</div>
+			    			<input type="range" min="0" max="100" value="50" step="1" id="resemblence_slider">
+						</div>
+					</div>
+				</div>
+				<div class="group" for="facial">
+		    		<span class="group_name text-shadow">Facial</span>
+		    	</div>
+		    	<div class="group_content" id="facial" style="display:none">
+		    		<div class="group_div">
+			    		<div class="headline">Nose_Width</div>
+			    		<div class="slider">
+			    			<input type="range" min="0" max="100" value="50" step="1" id="Nose_Width">
 						</div>
 					</div>
 		    		<div class="group_div">
-			    		<div class="value">Mother: <span>5%</span></div>
+			    		<div class="headline">Nose_Bottom_Height</div>
 			    		<div class="slider">
-			    			<div class="flat-slider" id="mother_slider"></div>
+			    			<input type="range" min="0" max="100" value="50" step="1" id="Nose_Bottom_Height">
 						</div>
 					</div>
 		    		<div class="group_div">
-			    		<div class="value">Resemblence<span>5%</span></div>
+			    		<div class="headline">Nose_Tip_Length</div>
 			    		<div class="slider">
-			    			<input type="range" min="1" max="100" value="50" step="5" class="slider" id="resemblence_slider">
+			    			<input type="range" min="0" max="100" value="50" step="1" id="Nose_Tip_Length">
+						</div>
+					</div>
+		    		<div class="group_div">
+			    		<div class="headline">Nose_Bridge_Depth</div>
+			    		<div class="slider">
+			    			<input type="range" min="0" max="100" value="50" step="1" id="Nose_Bridge_Depth">
+						</div>
+					</div>
+		    		<div class="group_div">
+			    		<div class="headline">Nose_Tip_Height</div>
+			    		<div class="slider">
+			    			<input type="range" min="0" max="100" value="50" step="1" id="Nose_Tip_Height">
+						</div>
+					</div>
+		    		<div class="group_div">
+			    		<div class="headline">Nose_Broken</div>
+			    		<div class="slider">
+			    			<input type="range" min="0" max="100" value="50" step="1" id="Nose_Broken">
+						</div>
+					</div>
+		    		<div class="group_div">
+			    		<div class="headline">Brow_Height</div>
+			    		<div class="slider">
+			    			<input type="range" min="0" max="100" value="50" step="1" id="Brow_Height">
+						</div>
+					</div>
+		    		<div class="group_div">
+			    		<div class="headline">Brow_Depth</div>
+			    		<div class="slider">
+			    			<input type="range" min="0" max="100" value="50" step="1" id="Brow_Depth">
+						</div>
+					</div>
+		    		<div class="group_div">
+			    		<div class="headline">Cheekbone_Height</div>
+			    		<div class="slider">
+			    			<input type="range" min="0" max="100" value="50" step="1" id="Cheekbone_Height">
+						</div>
+					</div>
+		    		<div class="group_div">
+			    		<div class="headline">Cheekbone_Width</div>
+			    		<div class="slider">
+			    			<input type="range" min="0" max="100" value="50" step="1" id="Cheekbone_Width">
+						</div>
+					</div>
+		    		<div class="group_div">
+			    		<div class="headline">Cheek_Depth</div>
+			    		<div class="slider">
+			    			<input type="range" min="0" max="100" value="50" step="1" id="Cheek_Depth">
+						</div>
+					</div>
+		    		<div class="group_div">
+			    		<div class="headline">Eye_Size</div>
+			    		<div class="slider">
+			    			<input type="range" min="0" max="100" value="50" step="1" id="Eye_Size">
+						</div>
+					</div>
+		    		<div class="group_div">
+			    		<div class="headline">Lip_Thickness</div>
+			    		<div class="slider">
+			    			<input type="range" min="0" max="100" value="50" step="1" id="Lip_Thickness">
+						</div>
+					</div>
+		    		<div class="group_div">
+			    		<div class="headline">Jaw_Width</div>
+			    		<div class="slider">
+			    			<input type="range" min="0" max="100" value="50" step="1" id="Jaw_Width">
+						</div>
+					</div>
+		    		<div class="group_div">
+			    		<div class="headline">Jaw_Shape</div>
+			    		<div class="slider">
+			    			<input type="range" min="0" max="100" value="50" step="1" id="Jaw_Shape">
+						</div>
+					</div>
+		    		<div class="group_div">
+			    		<div class="headline">Chin_Height</div>
+			    		<div class="slider">
+			    			<input type="range" min="0" max="100" value="50" step="1" id="Chin_Height">
+						</div>
+					</div>
+		    		<div class="group_div">
+			    		<div class="headline">Chin_Depth</div>
+			    		<div class="slider">
+			    			<input type="range" min="0" max="100" value="50" step="1" id="Chin_Depth">
+						</div>
+					</div>
+		    		<div class="group_div">
+			    		<div class="headline">Chin_Width</div>
+			    		<div class="slider">
+			    			<input type="range" min="0" max="100" value="50" step="1" id="Chin_Width">
+						</div>
+					</div>
+		    		<div class="group_div">
+			    		<div class="headline">Chin_Indent</div>
+			    		<div class="slider">
+			    			<input type="range" min="0" max="100" value="50" step="1" id="Chin_Indent">
+						</div>
+					</div>
+		    		<div class="group_div">
+			    		<div class="headline">Neck_Width</div>
+			    		<div class="slider">
+			    			<input type="range" min="0" max="100" value="50" step="1" id="Neck_Width">
 						</div>
 					</div>
 		    	</div>
-		    	<div class="group" for="parents1">
-		    		<span class="group_name text-shadow">Parents</span>
+		    	<div class="group" for="appearance">
+		    		<span class="group_name text-shadow">Appearance</span>
 		    	</div>
-		    	<div class="group_content" id="parents1" style="display:none">
+		    	<div class="group_content" id="appearance" style="display:none">
 		    		<div class="group_div">
-			    		<div class="value">Father: Forces</div>
-			    		<div class="slider">
-			    			<div class="flat-slider" id="fath2er_slider"></div>
+			    		<div class="headline">Blemishes</div>
+			    		<div class="val_select">
+			    			<div class="arrow_left"><i class="fas fa-chevron-left"></i></div>
+			    			<div class="value">None</div>
+			    			<div class="arrow_right"><i class="fas fa-chevron-right"></i></div>
 						</div>
 					</div>
-		    		<div class="group_div">
-			    		<div class="value">Mother: Zaxon</div>
-			    		<div class="slider">
-			    			<div class="flat-slider" id="mot3her_slider"></div>
-						</div>
-					</div>
-		    	</div>
+				</div>
+		    	
 		    </div>
 		    <div class="button no-select">
 		    	Spawn

@@ -7,6 +7,7 @@ class CEFBrowser {
         let self = this;
         self.browser = mp.browsers.new(absolute_path + url);
         self.cursorState = false;
+        console.log("new instance");
 
     }
     call() {
@@ -39,7 +40,6 @@ class CEFBrowser {
         callArgs += ");";
         full += callArgs;
         this.browser.execute(full);
-        //mp.gui.chat.push(full);
     }
     active(toggle) {
         this.browser.active = toggle;
@@ -51,9 +51,16 @@ class CEFBrowser {
         this.cursorState = state;
         mp.gui.cursor.visible = state;
     }
+    clear() {
+        this.load("empty.html")
+    }
     load(path) {
         let self = this;
         self.browser.url = absolute_path + path;
     }
 }
-module.exports = CEFBrowser;
+module.exports = {
+    interface:new CEFBrowser("empty.html"),
+    notification:new CEFBrowser("empty.html"),
+    class:CEFBrowser
+};

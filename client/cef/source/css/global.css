@@ -26,7 +26,9 @@
     --color-headline-trans-2: rgba(200,200,200,0.2);
     --color-headline-trans-4: rgba(200,200,200,0.4);
 
-    --accent-trans-8:   rgba(33, 173, 255,0.9);
+    --accent-trans:   rgba(0, 154, 189,1);
+    --accent-trans-8:   rgba(0, 154, 189,0.8);
+    --accent-trans-6:   rgba(0, 154, 189,0.6);
 
     font-family: Lato;
 }

@@ -47,7 +47,10 @@ $(".group").on("click", function() {
     console.log(f);
     console.log($("#" + f));
     $("#" + f).show();
-    console.log($("#" + f).children().length * 70)
+
+    let height = $($("#"+f).find(".group_div")[0]).height();
+
+    console.log($("#" + f).children().length * height)
     if ($("#" + f).height() != 0) {
         //$("#" + f).hide();
         $("#" + f).animate({
@@ -60,9 +63,9 @@ $(".group").on("click", function() {
             }
         })
     } else {
-        console.log($("#" + f).children().length * 70)
+        console.log($("#" + f).children().length * height)
         $("#" + f).animate({
-            height: $("#" + f).children().length * 70
+            height: $("#" + f).children().length * height
         }, {
             duration: 100,
             specialEasing: {

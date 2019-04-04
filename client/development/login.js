@@ -1,10 +1,11 @@
 //1868.765869140625, 3710.90283203125, 113.74462127685547
 
 var natives = require("./natives.js")
-var CEFBrowser = require("./browser.js");
-var Browser = new CEFBrowser("login/index.html");
+var CEFInterface = require("./browser.js").interface;
+var CEFNotification = require("./browser.js").notification;
+CEFInterface.load("login/index.html");
 mp.events.add("Notifications:New", (notification_data) => {
-    Browser.call("notify", notification_data)
+    CEFNotification.call("notify", notification_data)
 })
 
 function clearBlips() {
@@ -33,18 +34,18 @@ mp.events.add("Server:RequestLogin", () => {
     mp.game.ui.displayHud(false);
     mp.game.ui.displayRadar(false);
     mp.game.graphics.transitionToBlurred(1);
-    Browser.cursor(true);
+    CEFInterface.cursor(true);
     setTimeout(function() {
-        Browser.call("cef_loadlogin", mp.players.local.name)
+        CEFInterface.call("cef_loadlogin", mp.players.local.name)
     }, 100);
 });
 mp.events.add("Account:Alert", function(...args) {
-    Browser.call("alert_login", args[0])
+    CEFInterface.call("alert_login", args[0])
 });
 mp.events.add("Account:HideLogin", () => {
     mp.game.graphics.transitionFromBlurred(500);
-    Browser.cursor(false);
-    Browser.call("cef_hidelogin")
+    CEFInterface.cursor(false);
+    CEFInterface.call("cef_hidelogin")
 });
 mp.events.add("Account:LoginDone", () => {
     mp.game.player.setTargetingMode(1);

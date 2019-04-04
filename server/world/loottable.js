@@ -202,6 +202,7 @@ loot_respawn["Residential"] = 30 * 60 * 1000;
 loot_respawn["Industrial"] = 60 * 60 * 1000;
 loot_respawn["Food"] = 20 * 60 * 1000;
 loot_respawn["Other"] = 40 * 60 * 1000;
+loot_respawn["Hospital"] = 40 * 60 * 1000;
 loot_respawn["Military"] = 120 * 60 * 1000;
 loot_respawn["Police"] = 90 * 60 * 1000;
 loot_respawn["Beach"] = 15 * 60 * 1000;

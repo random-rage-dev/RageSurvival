@@ -1,0 +1,88 @@
+//1868.765869140625, 3710.90283203125, 113.74462127685547
+
+var natives = require("./natives.js")
+var CEFBrowser = require("./browser.js");
+var Browser = new CEFBrowser("login/index.html");
+mp.events.add("Notifications:New", (notification_data) => {
+    Browser.call("notify", notification_data)
+})
+
+function clearBlips() {
+    natives.SET_THIS_SCRIPT_CAN_REMOVE_BLIPS_CREATED_BY_ANY_SCRIPT(true);
+    let last_blip = natives.GET_FIRST_BLIP_INFO_ID(5);
+    while (natives.DOES_BLIP_EXIST(last_blip)) {
+        mp.game.ui.removeBlip(last_blip);
+        last_blip = natives.GET_NEXT_BLIP_INFO_ID(5);
+    }
+    mp.game.wait(50);
+}
+
+// Account Stuff
+mp.events.callRemote("ServerAccount:Ready");
+mp.game.graphics.transitionToBlurred(1);
+var LastCam;
+mp.events.add("Server:RequestLogin", () => {
+    clearBlips();
+    mp.players.local.position = new mp.Vector3(2927.993408203125, 5618.33544921875, 244.45285034179688);
+    mp.players.local.setAlpha(0);
+
+    LastCam = mp.cameras.new('default', new mp.Vector3(2927.993408203125, 5618.33544921875, 244.45285034179688), new mp.Vector3(), 70);
+    LastCam.pointAtCoord(2906.989501953125, 5563.49267578125, 245.226806640625);
+    LastCam.setActive(true);
+    mp.game.cam.renderScriptCams(true, false, 0, true, false);
+    mp.game.ui.displayHud(false);
+    mp.game.ui.displayRadar(false);
+    mp.game.graphics.transitionToBlurred(1);
+    Browser.cursor(true);
+    setTimeout(function() {
+        Browser.call("cef_loadlogin", mp.players.local.name)
+    }, 100);
+});
+mp.events.add("Account:Alert", function(...args) {
+    Browser.call("alert_login", args[0])
+});
+mp.events.add("Account:HideLogin", () => {
+    mp.game.graphics.transitionFromBlurred(500);
+    Browser.cursor(false);
+    Browser.call("cef_hidelogin")
+});
+mp.events.add("Account:LoginDone", () => {
+    mp.game.player.setTargetingMode(1);
+    mp.game.player.setLockon(false);
+    mp.game.player.setLockonRangeOverride(0.0);
+    mp.players.local.setOnlyDamagedByPlayer(false);
+    mp.players.local.setProofs(true, false, false, false, false, false, false, false);
+    mp.game.player.setHealthRechargeMultiplier(0.0);
+    mp.game.ui.displayRadar(true);
+    mp.game.ui.displayHud(true);
+    mp.game.ui.setMinimapVisible(false)
+})
+mp.events.add("Cam:Hide", () => {
+    mp.game.graphics.transitionFromBlurred(100);
+    LastCam.setActive(false);
+    mp.game.cam.renderScriptCams(false, false, 0, true, false);
+    mp.game.ui.displayRadar(true);
+    mp.game.ui.displayHud(true);
+    mp.game.ui.setMinimapVisible(false)
+    mp.game.player.setTargetingMode(1);
+    mp.game.player.setLockon(false);
+    mp.game.player.setLockonRangeOverride(0.0);
+    mp.players.local.setOnlyDamagedByPlayer(false);
+    mp.players.local.setProofs(true, false, false, false, false, false, false, false);
+    mp.game.player.setHealthRechargeMultiplier(0.0);
+})
+mp.events.add("entityStreamIn", (entity) => {
+    if (entity.type !== "player") return;
+    mp.game.player.setTargetingMode(1);
+    mp.game.player.setLockon(false);
+    mp.game.player.setLockonRangeOverride(0.0);
+    mp.players.local.setOnlyDamagedByPlayer(false);
+    mp.players.local.setProofs(true, false, false, false, false, false, false, false);
+    mp.game.player.setLockonRangeOverride(0.0);
+});
+mp.events.add("Account:Login", (username, password) => {
+    mp.events.callRemote("ServerAccount:Login", username, password);
+});
+mp.events.add("Account:Register", (username, hash_password, salt) => {
+    mp.events.callRemote("ServerAccount:Register", username, hash_password, salt);
+});

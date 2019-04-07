@@ -8,6 +8,10 @@ var user = mongoose.Schema({
         type: String,
         unique: true
     },
+    position:{
+    	type:Object,
+    	default:{x:0,y:0,z:0}
+    },
     hwid: String,
     social_club: String,
     password: String,

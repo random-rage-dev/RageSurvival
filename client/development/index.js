@@ -16,15 +16,11 @@ require("./login.js")
 require("./combat.js")
 require("./character_creator.js")
 var natives = require("./natives.js")
-
 var CEFInterface = require("./browser.js").interface;
 var CEFNotification = require("./browser.js").notification;
 mp.events.add("Notifications:New", (notification_data) => {
     CEFNotification.call("notify", notification_data)
 })
-
-
-
 /*CEFNotification.call("notify", {
                     title: "Buyable",
                     titleSize: "16px",
@@ -37,9 +33,14 @@ mp.events.add("Notifications:New", (notification_data) => {
 /*mp.events.add("Player:UpdateEXP", (currentRankLimit, nextRankLimit, lastRankEXP, currentXP, currentLvl) => {
     exp.showEXPBar(currentRankLimit, nextRankLimit, lastRankEXP, currentXP, currentLvl)
 });*/
-
-
-
+mp.events.add("Player:WanderDuration", (ms) => {
+    console.log("GO WANDER");
+    let p = mp.players.local.position;
+    mp.players.local.taskWanderStandard(10, 10);
+    setTimeout(function() {
+        mp.players.local.clearTasksImmediately();
+    }, ms)
+});
 mp.events.add('Player:Collision', (enable) => {
     if (enable == true) {
         mp.vehicles.forEach(vehicle => {

@@ -136,8 +136,6 @@ mp.events.add("Character:Update", (data) => {
             values["mother"][data.motherIndex], values["father"][data.fatherIndex], 0,
             // mixes
             data.resemblance * 0.01, data.tone * 0.01, 0.0, false);
-        console.log("data.resemblance", data.resemblance * 0.01);
-        console.log("data.tone", data.tone * 0.01);
     }
 });
 mp.events.add("Character:Save", (data) => {
@@ -145,10 +143,13 @@ mp.events.add("Character:Save", (data) => {
     CEFInterface.clear();
     CEFInterface.cursor(false);
     CEFInterface.active(false);
-    mp.events.callRemote("Character:Save", data);
     clearTasksRender = false;
     mp.defaultCam.setActive(false);
     mp.localPlayer.freezePosition(false);
+    mp.game.cam.doScreenFadeOut(500);
+    setTimeout(function() {
+        mp.events.callRemote("Character:Save", data);
+    }, 1000)
 });
 var clearTasksRender = false;
 mp.events.add("render", function() {

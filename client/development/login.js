@@ -1,5 +1,4 @@
 //1868.765869140625, 3710.90283203125, 113.74462127685547
-
 var natives = require("./natives.js")
 var CEFInterface = require("./browser.js").interface;
 var CEFNotification = require("./browser.js").notification;
@@ -14,7 +13,6 @@ function clearBlips() {
     }
     mp.game.wait(50);
 }
-
 // Account Stuff
 mp.events.callRemote("ServerAccount:Ready");
 mp.game.graphics.transitionToBlurred(1);
@@ -23,7 +21,6 @@ mp.events.add("Server:RequestLogin", () => {
     clearBlips();
     mp.players.local.position = new mp.Vector3(2927.993408203125, 5618.33544921875, 244.45285034179688);
     mp.players.local.setAlpha(0);
-
     mp.defaultCam = mp.cameras.new('default', new mp.Vector3(2927.993408203125, 5618.33544921875, 244.45285034179688), new mp.Vector3(), 70);
     mp.defaultCam.pointAtCoord(2906.989501953125, 5563.49267578125, 245.226806640625);
     mp.defaultCam.setActive(true);
@@ -68,7 +65,9 @@ mp.events.add("Cam:Hide", () => {
     mp.game.player.setHealthRechargeMultiplier(0.0);
     mp.players.local.freezePosition(false);
     mp.game.cam.renderScriptCams(false, false, 0, true, false);
+    mp.game.cam.doScreenFadeIn(1000);
 })
+
 mp.events.add("entityStreamIn", (entity) => {
     if (entity.type !== "player") return;
     mp.game.player.setTargetingMode(1);
@@ -84,7 +83,3 @@ mp.events.add("Account:Login", (username, password) => {
 mp.events.add("Account:Register", (username, hash_password, salt) => {
     mp.events.callRemote("ServerAccount:Register", username, hash_password, salt);
 });
-
-
-
-

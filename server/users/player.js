@@ -1,4 +1,5 @@
 var MongoDB = require("../libs/mongodb.js")
+var PlayerSpawns = require("../world/playerspawns.js")
 var User = MongoDB.getUserModel();
 var Inventory = MongoDB.getInventoryModel();
 var md5 = require("md5");
@@ -39,6 +40,7 @@ var Player = class {
         self._armor = 100;
         self._storage = {};
         self._characterData = [];
+        self._position = {x:0,y:0,z:0}
     }
     log(...args) {
         console.log("Account:Log", args)
@@ -63,12 +65,18 @@ var Player = class {
     }
     save() {
         let self = this;
+        let position = self._player.position;
         return new Promise(function(fulfill, reject) {
             if ((self._loggedIn == true) && (self._player)) {
                 User.updateOne({
                     user_id: self._userId
                 }, {
-                    warns: self._warns // Change stuff later
+                    warns: self._warns, // Change stuff later
+                    position: {
+                        x: position.x,
+                        y: position.y,
+                        z: position.z
+                    }
                 }, function(err, numberAffected, rawResponse) {
                     if (!err) {
                         self.log("Succesfully saved data", self._username)
@@ -109,13 +117,15 @@ var Player = class {
     }
     death(killer, weapon, reason) {
         let self = this;
+
+        self._position = mp.vector(PlayerSpawns[Math.floor(Math.random() * PlayerSpawns.length)]);
         setTimeout(function() {
-            self.spawn();
+            self.spawn(1);
         }, 1000);
     }
-    spawn() {
+    spawn(fresh = 0) {
         var self = this;
-        self._player.spawn(new mp.Vector3(1964.2689208984375, 3739.28271484375, 32.33523178100586));
+        self._player.spawn(mp.vector(self._position));
         self.loadChar(self._characterData);
         self._player.heading = 90;
         self._health = 100;
@@ -129,6 +139,9 @@ var Player = class {
         self._player.alpha = 255;
         self._player.call("Cam:Hide")
         self._player.call("Player:Spawn");
+        if (fresh == 1) {
+            self._player.call("Player:WanderDuration",[1000]);
+        }
         self._spawnedTimestamp = Date.now();
     }
     hit(hitter, weapon, bone) {
@@ -219,7 +232,7 @@ var Player = class {
                         close: false
                     }])
                     self._characterData = JSON.parse(data);
-                    self.spawn();
+                    self.load(self._username,1);
                 }
                 return fulfill("Succesfully saved data", self._username);
             } else {
@@ -230,26 +243,26 @@ var Player = class {
     }
     loadChar(data) {
         let self = this;
-            if (data.gender == "Male") {
-                self._player.model = mp.joaat('mp_m_freemode_01');
-                self._player.setClothes(3, 15, 0, 2);
-                self._player.setClothes(4, 21, 0, 2);
-                self._player.setClothes(6, 34, 0, 2);
-                self._player.setClothes(8, 15, 0, 2);
-                self._player.setClothes(11, 15, 0, 2);
-            } else {
-                self._player.model = mp.joaat('mp_f_freemode_01');
-                self._player.setClothes(3, 15, 0, 2);
-                self._player.setClothes(4, 10, 0, 2);
-                self._player.setClothes(6, 35, 0, 2);
-                self._player.setClothes(8, 15, 0, 2);
-                self._player.setClothes(11, 15, 0, 2);
-            }
+        if (data.gender == "Male") {
+            self._player.model = mp.joaat('mp_m_freemode_01');
+            self._player.setClothes(3, 15, 0, 2);
+            self._player.setClothes(4, 21, 0, 2);
+            self._player.setClothes(6, 34, 0, 2);
+            self._player.setClothes(8, 15, 0, 2);
+            self._player.setClothes(11, 15, 0, 2);
+        } else {
+            self._player.model = mp.joaat('mp_f_freemode_01');
+            self._player.setClothes(3, 15, 0, 2);
+            self._player.setClothes(4, 10, 0, 2);
+            self._player.setClothes(6, 35, 0, 2);
+            self._player.setClothes(8, 15, 0, 2);
+            self._player.setClothes(11, 15, 0, 2);
+        }
         /*appearanceIndex*/
         if (data.makeup) {
             let index = appearanceIndex["makeup"];
             let overlayID = (data.makeup == 0) ? 255 : data.makeup - 1;
-            self._player.setHeadOverlay(index, [overlayID, /*Opacity*/ parseInt(data.makeup_opacity) * 0.01, 0/*ColorOverlay*/ , 0]);
+            self._player.setHeadOverlay(index, [overlayID, /*Opacity*/ parseInt(data.makeup_opacity) * 0.01, 0 /*ColorOverlay*/ , 0]);
         }
         if (data.ageing) {
             let index = appearanceIndex["ageing"];
@@ -327,7 +340,7 @@ var Player = class {
             console.log("data.tone", data.tone * 0.01);
         }
     }
-    load(username) {
+    load(username,fresh = 0) {
         var self = this;
         self._username = username;
         self._player.call("Account:HideLogin")
@@ -341,18 +354,18 @@ var Player = class {
                 self._playtime = cUser.playtime;
                 self._warns = cUser.warns;
                 self._userId = cUser.user_id;
+                self._position = cUser.position;
                 if (cUser.character.length > 0) {
                     self._characterData = cUser.character[0];
                     self._player.setVariable("user_id", self._userId)
                     self._player.setVariable("loggedIn", true);
                     self._player.setVariable("spawned", false)
                     self._player.call("Account:LoginDone")
-                    //self._player.call("Cam:Hide")
                     self.log("loaded player data for", self._player.name)
                     console.log(self._player)
                     mp.events.call("Player:Loaded", self._player)
                     self.loadInventory();
-                    self.spawn();
+                    self.spawn(fresh);
                 } else {
                     self._player.call("Character:Start")
                 }
@@ -373,6 +386,7 @@ var Player = class {
                 let hwid = self._player.serial
                 let social_club = self._player.socialClub;
                 let hash = password_hash;
+                let position = PlayerSpawns[Math.floor(Math.random() * PlayerSpawns.length)]
                 let UserCount = await User.find({});
                 User.create({
                     user_id: UserCount.length,
@@ -381,6 +395,7 @@ var Player = class {
                     social_clib: social_club,
                     password: password_hash,
                     salt: salt,
+                    position:{x:position.x,y:position.y,z:position.z}
                 }, function(err, rV) {
                     if (err) {
                         self._player.call("Account:Alert", ["Username already exsits"])

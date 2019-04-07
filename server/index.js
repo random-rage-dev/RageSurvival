@@ -46,6 +46,11 @@ mp.events.add("ServerAccount:Register", function(player, username, hash_password
 mp.events.add("Player:Loaded", function(player) {
     console.log("Player Loaded " + player.name)
 });
+mp.events.add("Character:Save", function(player,data) {
+    if (players[player.id]) {
+        players[player.id].saveChar(data)
+    }
+});
 mp.events.add('playerChat', (player, message) => {
     if (players[player.id]) {
         let color = player.getVariable("team_rgb_color");

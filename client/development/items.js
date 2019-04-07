@@ -1,3 +1,5 @@
+var CEFNotification = require("./browser.js").notification;
+
 var streamedPools = [];
 class LootPool {
     constructor(data) {
@@ -167,6 +169,16 @@ mp.events.add("render", () => {
                 let amount = cur_selected.amount;
                 if (amount > 0) {
                     mp.events.callRemote("Loot:Pickup", pool_data, cur_selected.index, cur_selected.name, cur_selected.amount);
+                    CEFNotification.call("notify", {
+                        title: "Notification",
+                        titleSize: "16px",
+                        message: `${cur_selected.name} just got picked up`,
+                        messageColor: 'rgba(50,50,50,.8)',
+                        position: "bottomCenter",
+                        backgroundColor: 'rgba(206, 206, 206, 0.9)',
+                        close: false
+                    })
+
                     if (timer_anim) {
                         clearTimeout(timer_anim);
                         mp.players.local.stopAnimTask("mp_take_money_mg", "stand_cash_in_bag_loop", 1.0);

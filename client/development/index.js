@@ -2,6 +2,8 @@ console.log = function(...a) {
     mp.gui.chat.push("DEBUG:" + a.join(" "))
 };
 mp.gameplayCam = mp.cameras.new('gameplay');
+mp.defaultCam = mp.cameras.new('default');
+mp.localPlayer = mp.players.local;
 require("./vector.js")
 require("./scaleforms/index.js")
 require("./crouch.js")
@@ -11,11 +13,27 @@ require("./zombies.js")
 require("./gathering.js")
 require("./building.js")
 require("./login.js")
+require("./combat.js")
+require("./character_creator.js")
 var natives = require("./natives.js")
 
 var CEFInterface = require("./browser.js").interface;
 var CEFNotification = require("./browser.js").notification;
+mp.events.add("Notifications:New", (notification_data) => {
+    CEFNotification.call("notify", notification_data)
+})
 
+
+
+/*CEFNotification.call("notify", {
+                    title: "Buyable",
+                    titleSize: "16px",
+                    message: `${name} just got unlocked`,
+                    messageColor: 'rgba(0,50,0,.8)',
+                    position: "topCenter",
+                    backgroundColor: 'rgba(86, 206, 86, 0.9)',
+                    close: false
+                })*/
 /*mp.events.add("Player:UpdateEXP", (currentRankLimit, nextRankLimit, lastRankEXP, currentXP, currentLvl) => {
     exp.showEXPBar(currentRankLimit, nextRankLimit, lastRankEXP, currentXP, currentLvl)
 });*/

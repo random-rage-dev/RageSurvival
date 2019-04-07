@@ -17,174 +17,404 @@
 		    	<div class="group" for="genetics">
 		    		<span class="group_name text-shadow">Genetics</span>
 		    	</div>
-		    	<div class="group_content" id="genetics" style="display:none">
+		    	<div class="group_content" id="genetics" >
 		    		<div class="group_div">
+			    		<div class="headline">Gender</div>
+			    		<div class="int_select">
+			    			<div onclick="CharacterCreator.prev('gender')" class="arrow_left"><i class="fas fa-chevron-left"></i></div>
+			    			<div id="gender" class="value">Male</div>
+			    			<div onclick="CharacterCreator.next('gender')" class="arrow_right"><i class="fas fa-chevron-right"></i></div>
+			    		</div>
+					</div><div class="group_div">
 			    		<div class="headline">Father</div>
 			    		<div class="int_select">
-			    			<div class="arrow_left"><i class="fas fa-chevron-left"></i></div>
-			    			<div class="value">25/50</div>
-			    			<div class="arrow_right"><i class="fas fa-chevron-right"></i></div>
+			    			<div onclick="CharacterCreator.prev('fatherIndex')" class="arrow_left"><i class="fas fa-chevron-left"></i></div>
+			    			<div id="fatherIndex" class="value">Benjamin</div>
+			    			<div onclick="CharacterCreator.next('fatherIndex')" class="arrow_right"><i class="fas fa-chevron-right"></i></div>
 			    		</div>
 					</div>
 		    		<div class="group_div">
 			    		<div class="headline">Mother</div>
 			    		<div class="int_select">
-			    			<div class="arrow_left"><i class="fas fa-chevron-left"></i></div>
-			    			<div class="value">25/50</div>
-			    			<div class="arrow_right"><i class="fas fa-chevron-right"></i></div>
+			    			<div onclick="CharacterCreator.prev('motherIndex')" class="arrow_left"><i class="fas fa-chevron-left"></i></div>
+			    			<div id="motherIndex" class="value">Hannah</div>
+			    			<div onclick="CharacterCreator.next('motherIndex')" class="arrow_right"><i class="fas fa-chevron-right"></i></div>
 			    		</div>
 					</div>
 		    		<div class="group_div">
-			    		<div class="headline">Skin-Tone</div>
+			    		<div class="headline">Resemblance</div>
 			    		<div class="slider">
-			    		<div class="notice left">Mother</div>
-			    		<div class="notice right">Father</div>
-			    			<input type="range" min="0" max="100" value="50" step="1" id="resemblence_slider">
+				    		<div class="notice left">Mother</div>
+				    		<div class="notice right">Father</div>
+			    			<input oninput="CharacterCreator.slide('resemblance',this.value)" onchange="CharacterCreator.slide('resemblance',this.value)" type="range" min="0" max="100" value="100" step="1" ></input>
 						</div>
 					</div>
+		    		
 				</div>
 				<div class="group" for="facial">
-		    		<span class="group_name text-shadow">Facial</span>
+		    		<span class="group_name text-shadow">Facial Features</span>
 		    	</div>
 		    	<div class="group_content" id="facial" style="display:none">
+		    		<div class="group_div med">
+			    		<div class="headline">Eye Color</div>
+			    		<div class="val_select" id="eyeColor">
+			    			<div onclick="CharacterCreator.prev('eyeColor')" class="arrow_left"><i class="fas fa-chevron-left"></i></div>
+			    			<div id="eyeColorValue" class="value">None</div>
+			    			<div onclick="CharacterCreator.next('eyeColor')" class="arrow_right"><i class="fas fa-chevron-right"></i></div>
+						</div>
+					</div>
+
 		    		<div class="group_div">
-			    		<div class="headline">Nose_Width</div>
+			    		<div class="headline">Nose Width</div>
 			    		<div class="slider">
-			    			<input type="range" min="0" max="100" value="50" step="1" id="Nose_Width">
+			    			<input oninput="CharacterCreator.slide('FacialFeature_0',this.value)" onchange="CharacterCreator.slide('FacialFeature_0',this.value)" type="range" min="0" max="100" value="50" step="1" id="Nose_Width"></input>
 						</div>
 					</div>
 		    		<div class="group_div">
-			    		<div class="headline">Nose_Bottom_Height</div>
+			    		<div class="headline">Nose Bottom Height</div>
 			    		<div class="slider">
-			    			<input type="range" min="0" max="100" value="50" step="1" id="Nose_Bottom_Height">
+			    			<input oninput="CharacterCreator.slide('FacialFeature_1',this.value)" onchange="CharacterCreator.slide('FacialFeature_1',this.value)" type="range" min="0" max="100" value="50" step="1" id="Nose_Bottom_Height"></input>
 						</div>
 					</div>
 		    		<div class="group_div">
-			    		<div class="headline">Nose_Tip_Length</div>
+			    		<div class="headline">Nose Tip Length</div>
 			    		<div class="slider">
-			    			<input type="range" min="0" max="100" value="50" step="1" id="Nose_Tip_Length">
+			    			<input oninput="CharacterCreator.slide('FacialFeature_2',this.value)" onchange="CharacterCreator.slide('FacialFeature_2',this.value)" type="range" min="0" max="100" value="50" step="1" id="Nose_Tip_Length"></input>
 						</div>
 					</div>
 		    		<div class="group_div">
-			    		<div class="headline">Nose_Bridge_Depth</div>
+			    		<div class="headline">Nose Bridge Depth</div>
 			    		<div class="slider">
-			    			<input type="range" min="0" max="100" value="50" step="1" id="Nose_Bridge_Depth">
+			    			<input oninput="CharacterCreator.slide('FacialFeature_3',this.value)" onchange="CharacterCreator.slide('FacialFeature_3',this.value)" type="range" min="0" max="100" value="50" step="1" id="Nose_Bridge_Depth"></input>
 						</div>
 					</div>
 		    		<div class="group_div">
-			    		<div class="headline">Nose_Tip_Height</div>
+			    		<div class="headline">Nose Tip Height</div>
 			    		<div class="slider">
-			    			<input type="range" min="0" max="100" value="50" step="1" id="Nose_Tip_Height">
+			    			<input oninput="CharacterCreator.slide('FacialFeature_4',this.value)" onchange="CharacterCreator.slide('FacialFeature_4',this.value)" type="range" min="0" max="100" value="50" step="1" id="Nose_Tip_Height"></input>
 						</div>
 					</div>
 		    		<div class="group_div">
-			    		<div class="headline">Nose_Broken</div>
+			    		<div class="headline">Nose Broken</div>
 			    		<div class="slider">
-			    			<input type="range" min="0" max="100" value="50" step="1" id="Nose_Broken">
+			    			<input oninput="CharacterCreator.slide('FacialFeature_5',this.value)" onchange="CharacterCreator.slide('FacialFeature_5',this.value)" type="range" min="0" max="100" value="50" step="1" id="Nose_Broken"></input>
 						</div>
 					</div>
 		    		<div class="group_div">
-			    		<div class="headline">Brow_Height</div>
+			    		<div class="headline">Brow Height</div>
 			    		<div class="slider">
-			    			<input type="range" min="0" max="100" value="50" step="1" id="Brow_Height">
+			    			<input oninput="CharacterCreator.slide('FacialFeature_6',this.value)" onchange="CharacterCreator.slide('FacialFeature_6',this.value)" type="range" min="0" max="100" value="50" step="1" id="Brow_Height"></input>
 						</div>
 					</div>
 		    		<div class="group_div">
-			    		<div class="headline">Brow_Depth</div>
+			    		<div class="headline">Brow Depth</div>
 			    		<div class="slider">
-			    			<input type="range" min="0" max="100" value="50" step="1" id="Brow_Depth">
+			    			<input oninput="CharacterCreator.slide('FacialFeature_7',this.value)" onchange="CharacterCreator.slide('FacialFeature_7',this.value)" type="range" min="0" max="100" value="50" step="1" id="Brow_Depth"></input>
 						</div>
 					</div>
 		    		<div class="group_div">
-			    		<div class="headline">Cheekbone_Height</div>
+			    		<div class="headline">Cheekbone Height</div>
 			    		<div class="slider">
-			    			<input type="range" min="0" max="100" value="50" step="1" id="Cheekbone_Height">
+			    			<input oninput="CharacterCreator.slide('FacialFeature_8',this.value)" onchange="CharacterCreator.slide('FacialFeature_8',this.value)" type="range" min="0" max="100" value="50" step="1" id="Cheekbone_Height"></input>
 						</div>
 					</div>
 		    		<div class="group_div">
-			    		<div class="headline">Cheekbone_Width</div>
+			    		<div class="headline">Cheekbone Width</div>
 			    		<div class="slider">
-			    			<input type="range" min="0" max="100" value="50" step="1" id="Cheekbone_Width">
+			    			<input oninput="CharacterCreator.slide('FacialFeature_9',this.value)" onchange="CharacterCreator.slide('FacialFeature_9',this.value)" type="range" min="0" max="100" value="50" step="1" id="Cheekbone_Width"></input>
 						</div>
 					</div>
 		    		<div class="group_div">
-			    		<div class="headline">Cheek_Depth</div>
+			    		<div class="headline">Cheek Depth</div>
 			    		<div class="slider">
-			    			<input type="range" min="0" max="100" value="50" step="1" id="Cheek_Depth">
+			    			<input oninput="CharacterCreator.slide('FacialFeature_10',this.value)" onchange="CharacterCreator.slide('FacialFeature_10',this.value)" type="range" min="0" max="100" value="50" step="1" id="Cheek_Depth"></input>
 						</div>
 					</div>
 		    		<div class="group_div">
-			    		<div class="headline">Eye_Size</div>
+			    		<div class="headline">Eye Size</div>
 			    		<div class="slider">
-			    			<input type="range" min="0" max="100" value="50" step="1" id="Eye_Size">
+			    			<input oninput="CharacterCreator.slide('FacialFeature_11',this.value)" onchange="CharacterCreator.slide('FacialFeature_11',this.value)" type="range" min="0" max="100" value="50" step="1" id="Eye_Size"></input>
 						</div>
 					</div>
 		    		<div class="group_div">
-			    		<div class="headline">Lip_Thickness</div>
+			    		<div class="headline">Lip Thickness</div>
 			    		<div class="slider">
-			    			<input type="range" min="0" max="100" value="50" step="1" id="Lip_Thickness">
+			    			<input oninput="CharacterCreator.slide('FacialFeature_12',this.value)" onchange="CharacterCreator.slide('FacialFeature_12',this.value)" type="range" min="0" max="100" value="50" step="1" id="Lip_Thickness"></input>
 						</div>
 					</div>
 		    		<div class="group_div">
-			    		<div class="headline">Jaw_Width</div>
+			    		<div class="headline">Jaw Width</div>
 			    		<div class="slider">
-			    			<input type="range" min="0" max="100" value="50" step="1" id="Jaw_Width">
+			    			<input oninput="CharacterCreator.slide('FacialFeature_13',this.value)" onchange="CharacterCreator.slide('FacialFeature_13',this.value)" type="range" min="0" max="100" value="50" step="1" id="Jaw_Width"></input>
 						</div>
 					</div>
 		    		<div class="group_div">
-			    		<div class="headline">Jaw_Shape</div>
+			    		<div class="headline">Jaw Shape</div>
 			    		<div class="slider">
-			    			<input type="range" min="0" max="100" value="50" step="1" id="Jaw_Shape">
+			    			<input oninput="CharacterCreator.slide('FacialFeature_14',this.value)" onchange="CharacterCreator.slide('FacialFeature_14',this.value)" type="range" min="0" max="100" value="50" step="1" id="Jaw_Shape"></input>
 						</div>
 					</div>
 		    		<div class="group_div">
-			    		<div class="headline">Chin_Height</div>
+			    		<div class="headline">Chin Height</div>
 			    		<div class="slider">
-			    			<input type="range" min="0" max="100" value="50" step="1" id="Chin_Height">
+			    			<input oninput="CharacterCreator.slide('FacialFeature_15',this.value)" onchange="CharacterCreator.slide('FacialFeature_15',this.value)" type="range" min="0" max="100" value="50" step="1" id="Chin_Height"></input>
 						</div>
 					</div>
 		    		<div class="group_div">
-			    		<div class="headline">Chin_Depth</div>
+			    		<div class="headline">Chin Depth</div>
 			    		<div class="slider">
-			    			<input type="range" min="0" max="100" value="50" step="1" id="Chin_Depth">
+			    			<input oninput="CharacterCreator.slide('FacialFeature_16',this.value)" onchange="CharacterCreator.slide('FacialFeature_16',this.value)" type="range" min="0" max="100" value="50" step="1" id="Chin_Depth"></input>
 						</div>
 					</div>
 		    		<div class="group_div">
-			    		<div class="headline">Chin_Width</div>
+			    		<div class="headline">Chin Width</div>
 			    		<div class="slider">
-			    			<input type="range" min="0" max="100" value="50" step="1" id="Chin_Width">
+			    			<input oninput="CharacterCreator.slide('FacialFeature_17',this.value)" onchange="CharacterCreator.slide('FacialFeature_17',this.value)" type="range" min="0" max="100" value="50" step="1" id="Chin_Width"></input>
 						</div>
 					</div>
 		    		<div class="group_div">
-			    		<div class="headline">Chin_Indent</div>
+			    		<div class="headline">Chin Indent</div>
 			    		<div class="slider">
-			    			<input type="range" min="0" max="100" value="50" step="1" id="Chin_Indent">
+			    			<input oninput="CharacterCreator.slide('FacialFeature_18',this.value)" onchange="CharacterCreator.slide('FacialFeature_18',this.value)" type="range" min="0" max="100" value="50" step="1" id="Chin_Indent"></input>
 						</div>
 					</div>
 		    		<div class="group_div">
-			    		<div class="headline">Neck_Width</div>
+			    		<div class="headline">Neck Width</div>
 			    		<div class="slider">
-			    			<input type="range" min="0" max="100" value="50" step="1" id="Neck_Width">
+			    			<input oninput="CharacterCreator.slide('FacialFeature_19',this.value)" onchange="CharacterCreator.slide('FacialFeature_19',this.value)" type="range" min="0" max="100" value="50" step="1" id="Neck_Width"></input>
 						</div>
 					</div>
 		    	</div>
-		    	<div class="group" for="appearance">
-		    		<span class="group_name text-shadow">Appearance</span>
+		    	<div class="group" for="skin_appearance">
+		    		<span class="group_name text-shadow">Skin Appearance</span>
 		    	</div>
-		    	<div class="group_content" id="appearance" style="display:none">
+		    	<div class="group_content" id="skin_appearance" style="display:none">
 		    		<div class="group_div">
+			    		<div class="headline">Skin Tone</div>
+			    		<div class="slider">
+				    		<div class="notice left">Mother</div>
+				    		<div class="notice right">Father</div>
+			    			<input oninput="CharacterCreator.slide('tone',this.value)" onchange="CharacterCreator.slide('tone',this.value)" type="range" min="0" max="100" value="100" step="1" ></input>
+						</div>
+					</div>
+
+		    		<div class="group_div big">
+			    		<div class="headline">Ageing</div>
+			    		<div class="val_select" id="ageing">
+			    			<div onclick="CharacterCreator.prev('ageing')" class="arrow_left"><i class="fas fa-chevron-left"></i></div>
+			    			<div id="ageingValue" class="value">None</div>
+			    			<div onclick="CharacterCreator.next('ageing')" class="arrow_right"><i class="fas fa-chevron-right"></i></div>
+						</div>
+						<div class="slider">
+				    		<div class="top_notice">Transparency</div>
+				    		<div class="notice left">0%</div>
+				    		<div class="notice right">100%</div>
+			    			<input oninput="CharacterCreator.slide('ageing_opacity',this.value)" onchange="CharacterCreator.slide('ageing_opacity',this.value)" type="range" min="0" max="100" value="100" step="1" ></input>
+						</div>
+					</div>
+					<div class="group_div big">
 			    		<div class="headline">Blemishes</div>
-			    		<div class="val_select">
-			    			<div class="arrow_left"><i class="fas fa-chevron-left"></i></div>
-			    			<div class="value">None</div>
-			    			<div class="arrow_right"><i class="fas fa-chevron-right"></i></div>
+			    		<div class="val_select" id="blemishes">
+			    			<div onclick="CharacterCreator.prev('blemishes')" class="arrow_left"><i class="fas fa-chevron-left"></i></div>
+			    			<div id="blemishesValue" class="value">None</div>
+			    			<div onclick="CharacterCreator.next('blemishes')" class="arrow_right"><i class="fas fa-chevron-right"></i></div>
+						</div>
+						<div class="slider">
+				    		<div class="top_notice">Transparency</div>
+				    		<div class="notice left">0%</div>
+				    		<div class="notice right">100%</div>
+			    			<input oninput="CharacterCreator.slide('blemisch_opacity',this.value)" onchange="CharacterCreator.slide('blemisch_opacity',this.value)" type="range" min="0" max="100" value="100" step="1" ></input>
 						</div>
 					</div>
-				</div>
-		    	
+					<div class="group_div big">
+			    		<div class="headline">Sun Damage</div>
+			    		<div class="val_select" id="sundamage">
+			    			<div onclick="CharacterCreator.prev('sundamage')" class="arrow_left"><i class="fas fa-chevron-left"></i></div>
+			    			<div id="sundamageValue" class="value">None</div>
+			    			<div onclick="CharacterCreator.next('sundamage')" class="arrow_right"><i class="fas fa-chevron-right"></i></div>
+						</div>
+						<div class="slider">
+				    		<div class="top_notice">Transparency</div>
+				    		<div class="notice left">0%</div>
+				    		<div class="notice right">100%</div>
+			    			<input oninput="CharacterCreator.slide('sundamage_opacity',this.value)" onchange="CharacterCreator.slide('sundamage_opacity',this.value)" type="range" min="0" max="100" value="100" step="1" ></input>
+						</div>
+					</div>
+					<div class="group_div big">
+			    		<div class="headline">Moles & Freckles</div>
+			    		<div class="val_select" id="freckles">
+			    			<div onclick="CharacterCreator.prev('freckles')" class="arrow_left"><i class="fas fa-chevron-left"></i></div>
+			    			<div id="frecklesValue" class="value">None</div>
+			    			<div onclick="CharacterCreator.next('freckles')" class="arrow_right"><i class="fas fa-chevron-right"></i></div>
+						</div>
+						<div class="slider">
+				    		<div class="top_notice">Transparency</div>
+				    		<div class="notice left">0%</div>
+				    		<div class="notice right">100%</div>
+			    			<input oninput="CharacterCreator.slide('molesfreckles_opacity',this.value)" onchange="CharacterCreator.slide('molesfreckles_opacity',this.value)" type="range" min="0" max="100" value="100" step="1" ></input>
+						</div>
+					</div>
+		    	</div>
+		    	<div class="group" for="makeup">
+		    		<span class="group_name text-shadow">Makeup</span>
+		    	</div>
+		    	<div class="group_content" id="makeup" style="display:none">
+		    		<div class="group_div big">
+			    		<div class="headline">Complexion</div>
+			    		<div class="val_select" id="complexion">
+			    			<div onclick="CharacterCreator.prev('complexion')" class="arrow_left"><i class="fas fa-chevron-left"></i></div>
+			    			<div id="complexionValue" class="value">None</div>
+			    			<div onclick="CharacterCreator.next('complexion')" class="arrow_right"><i class="fas fa-chevron-right"></i></div>
+						</div>
+						<div class="slider">
+				    		<div class="top_notice">Transparency</div>
+				    		<div class="notice left">0%</div>
+				    		<div class="notice right">100%</div>
+			    			<input oninput="CharacterCreator.slide('complexion_opacity',this.value)" onchange="CharacterCreator.slide('complexion_opacity',this.value)" type="range" min="0" max="100" value="100" step="1" ></input>
+						</div>
+					</div>
+					<div class="group_div big">
+			    		<div class="headline">Makeup</div>
+			    		<div class="val_select" id="makeup">
+			    			<div onclick="CharacterCreator.prev('makeup')" class="arrow_left"><i class="fas fa-chevron-left"></i></div>
+			    			<div id="makeupValue" class="value">None</div>
+			    			<div onclick="CharacterCreator.next('makeup')" class="arrow_right"><i class="fas fa-chevron-right"></i></div>
+						</div>
+						<div class="slider">
+				    		<div class="top_notice">Transparency</div>
+				    		<div class="notice left">0%</div>
+				    		<div class="notice right">100%</div>
+			    			<input oninput="CharacterCreator.slide('makeup_opacity',this.value)" onchange="CharacterCreator.slide('makeup_opacity',this.value)" type="range" min="0" max="100" value="100" step="1" ></input>
+						</div>
+					</div>
+					<div class="group_div huge">
+			    		<div class="headline">Blush</div>
+			    		<div class="val_select" id="blush">
+			    			<div onclick="CharacterCreator.prev('blush')" class="arrow_left"><i class="fas fa-chevron-left"></i></div>
+			    			<div id="blushValue" class="value">None</div>
+			    			<div onclick="CharacterCreator.next('blush')" class="arrow_right"><i class="fas fa-chevron-right"></i></div>
+						</div>
+						<div class="val_select small" id="blush_color">
+							<div class="info">Blush Color</div>
+			    			<div onclick="CharacterCreator.prev('blush_color','blush')" class="arrow_left"><i class="fas fa-chevron-left"></i></div>
+			    			<div id="blush_colorValue" class="value">1</div>
+			    			<div onclick="CharacterCreator.next('blush_color','blush')" class="arrow_right"><i class="fas fa-chevron-right"></i></div>
+						</div>
+						<div class="slider">
+				    		<div class="top_notice">Transparency</div>
+				    		<div class="notice left">0%</div>
+				    		<div class="notice right">100%</div>
+			    			<input oninput="CharacterCreator.slide('blush_opacity',this.value)" onchange="CharacterCreator.slide('blush_opacity',this.value)" type="range" min="0" max="100" value="100" step="1" ></input>
+						</div>
+					</div>
+					<div class="group_div huge">
+			    		<div class="headline">Lipstick</div>
+			    		<div class="val_select" id="lipstick">
+			    			<div onclick="CharacterCreator.prev('lipstick')" class="arrow_left"><i class="fas fa-chevron-left"></i></div>
+			    			<div id="lipstickValue" class="value">None</div>
+			    			<div onclick="CharacterCreator.next('lipstick')" class="arrow_right"><i class="fas fa-chevron-right"></i></div>
+						</div>
+						<div class="slider">
+				    		<div class="top_notice">Transparency</div>
+				    		<div class="notice left">0%</div>
+				    		<div class="notice right">100%</div>
+			    			<input oninput="CharacterCreator.slide('lipstick_opacity',this.value)" onchange="CharacterCreator.slide('lipstick_opacity',this.value)" type="range" min="0" max="100" value="100" step="1" ></input>
+						</div>
+					</div>
+		    	</div>
+
+
+		    	<div class="group" for="hair">
+		    		<span class="group_name text-shadow">Hair</span>
+		    	</div>
+		    	<div class="group_content" id="hair" style="display:none">
+		    		<div class="group_div huge">
+			    		<div class="headline">Hair</div>
+			    		<div class="val_select" id="hair">
+			    			<div onclick="CharacterCreator.prev('hair')" class="arrow_left"><i class="fas fa-chevron-left"></i></div>
+			    			<div id="hairValue" class="value">Close Shave</div>
+			    			<div onclick="CharacterCreator.next('hair')" class="arrow_right"><i class="fas fa-chevron-right"></i></div>
+						</div>
+						<div class="val_select small" id="hair_color">
+							<div class="info">Hair Color</div>
+			    			<div onclick="CharacterCreator.prev('hair_color','hair')" class="arrow_left"><i class="fas fa-chevron-left"></i></div>
+			    			<div id="hair_colorValue" class="value">0</div>
+			    			<div onclick="CharacterCreator.next('hair_color','hair')" class="arrow_right"><i class="fas fa-chevron-right"></i></div>
+						</div>
+						<div class="val_select small" id="hair_highlight_color">
+							<div class="info">Hair Highlight Color</div>
+			    			<div onclick="CharacterCreator.prev('hair_highlight_color','hair')" class="arrow_left"><i class="fas fa-chevron-left"></i></div>
+			    			<div id="hair_highlight_colorValue" class="value">0</div>
+			    			<div onclick="CharacterCreator.next('hair_highlight_color','hair')" class="arrow_right"><i class="fas fa-chevron-right"></i></div>
+						</div>
+					</div>
+
+					<div class="group_div huge">
+			    		<div class="headline">Facial Hair</div>
+			    		<div class="val_select" id="facial_hair">
+			    			<div onclick="CharacterCreator.prev('facial_hair')" class="arrow_left"><i class="fas fa-chevron-left"></i></div>
+			    			<div id="facial_hairValue" class="value">None</div>
+			    			<div onclick="CharacterCreator.next('facial_hair')" class="arrow_right"><i class="fas fa-chevron-right"></i></div>
+						</div>
+						<div class="val_select small" id="facial_hair_color">
+							<div class="info">Facial Hair Color</div>
+			    			<div onclick="CharacterCreator.prev('facial_hair_color','hair')" class="arrow_left"><i class="fas fa-chevron-left"></i></div>
+			    			<div id="facial_hair_colorValue" class="value">0</div>
+			    			<div onclick="CharacterCreator.next('facial_hair_color','hair')" class="arrow_right"><i class="fas fa-chevron-right"></i></div>
+						</div>
+						<div class="slider">
+				    		<div class="top_notice">Transparency</div>
+				    		<div class="notice left">0%</div>
+				    		<div class="notice right">100%</div>
+			    			<input oninput="CharacterCreator.slide('facial_hair_opacity',this.value)" onchange="CharacterCreator.slide('facial_hair_opacity',this.value)" type="range" min="0" max="100" value="100" step="1" ></input>
+						</div>
+					</div>
+					<div class="group_div huge">
+			    		<div class="headline">Eyebrows</div>
+			    		<div class="val_select" id="eyebrows">
+			    			<div onclick="CharacterCreator.prev('eyebrows')" class="arrow_left"><i class="fas fa-chevron-left"></i></div>
+			    			<div id="eyebrowsValue" class="value">None</div>
+			    			<div onclick="CharacterCreator.next('eyebrows')" class="arrow_right"><i class="fas fa-chevron-right"></i></div>
+						</div>
+						<div class="val_select small" id="eyebrows_color">
+							<div class="info">Eyebrows Color</div>
+			    			<div onclick="CharacterCreator.prev('eyebrows_color','hair')" class="arrow_left"><i class="fas fa-chevron-left"></i></div>
+			    			<div id="eyebrows_colorValue" class="value">0</div>
+			    			<div onclick="CharacterCreator.next('eyebrows_color','hair')" class="arrow_right"><i class="fas fa-chevron-right"></i></div>
+						</div>
+						<div class="slider">
+				    		<div class="top_notice">Transparency</div>
+				    		<div class="notice left">0%</div>
+				    		<div class="notice right">100%</div>
+			    			<input oninput="CharacterCreator.slide('eyebrows_opacity',this.value)" onchange="CharacterCreator.slide('eyebrows_opacity',this.value)" type="range" min="0" max="100" value="100" step="1" ></input>
+						</div>
+					</div>
+					<div class="group_div huge">
+			    		<div class="headline">Chest Hair</div>
+			    		<div class="val_select" id="chesthair">
+			    			<div onclick="CharacterCreator.prev('chesthair')" class="arrow_left"><i class="fas fa-chevron-left"></i></div>
+			    			<div id="chesthairValue" class="value">None</div>
+			    			<div onclick="CharacterCreator.next('chesthair')" class="arrow_right"><i class="fas fa-chevron-right"></i></div>
+						</div>
+						
+						<div class="val_select small" id="chesthair_color">
+							<div class="info">Chest Hair Color</div>
+			    			<div onclick="CharacterCreator.prev('chesthair_color','hair')" class="arrow_left"><i class="fas fa-chevron-left"></i></div>
+			    			<div id="chesthair_colorValue" class="value">0</div>
+			    			<div onclick="CharacterCreator.next('chesthair_color','hair')" class="arrow_right"><i class="fas fa-chevron-right"></i></div>
+						</div>
+						
+						<div class="slider">
+				    		<div class="top_notice">Transparency</div>
+				    		<div class="notice left">0%</div>
+				    		<div class="notice right">100%</div>
+			    			<input oninput="CharacterCreator.slide('chesthair_opacity',this.value)" onchange="CharacterCreator.slide('chesthair_opacity',this.value)" type="range" min="0" max="100" value="100" step="1" ></input>
+						</div>
+					</div>
+				</div>	    	
 		    </div>
-		    <div class="button no-select">
-		    	Spawn
+		    <div class="button no-select" id="create_button">
+		    	Create
 		    </div>
 		</div>
 	<script src="script/script.js"></script>

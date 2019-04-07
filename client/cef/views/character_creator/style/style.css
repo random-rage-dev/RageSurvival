@@ -1,7 +1,7 @@
 :root {}
-body {
+/*body {
     background-image: url("../20190208-17-54-25.jpg");
-}
+}*/
 .charcreation {
     position: relative;
     width: 20vw;
@@ -60,7 +60,27 @@ body {
     background: var(--color-headline-trans-2);
 }
 .charcreation>.properties>.group_content .group_div {
+    height: 65px;
+}
+.charcreation>.properties>.group_content .group_div.big {
+    height: 120px;
+}
+.charcreation>.properties>.group_content .group_div.huge {
+    height: 150px;
+}
+.charcreation>.properties>.group_content .group_div.med {
     height: 80px;
+}
+
+.charcreation>.properties>.group_content .group_div:last-child {
+    height: 80px;
+}
+.charcreation>.properties>.group_content .group_div.big:last-child {
+    height: 130px;
+}
+
+.charcreation>.properties>.group_content .group_div.huge:last-child {
+    height: 160px;
 }
 
 .charcreation>.properties>.group_content .value {
@@ -89,15 +109,20 @@ body {
 }
 .charcreation>.properties>.group_content .int_select>.arrow_left {
     position: absolute;
-    left: 5%;
+    left: 0%;
     cursor: pointer;
+    width: 15%;
+    text-align: center;
     font-size: 20px;
 }
 .charcreation>.properties>.group_content .int_select>.arrow_right {
     position: absolute;
-    right: 5%;
+    right: 0%;
     cursor: pointer;
+    width: 15%;
+    text-align: center;
     font-size: 20px;
+
 }
 .charcreation>.properties>.group_content .int_select>.value {
     width: 60%;
@@ -114,21 +139,55 @@ body {
 .charcreation>.properties>.group_content .val_select {
     width: 90%;
     margin-top: 10px;
-    margin-bottom: 10px;
+    margin-bottom: -5px;
     margin-left: 5%;
     line-height: 30px;
+    display: block;
+    position: relative;
+    height: 30px;
+}
+.charcreation>.properties>.group_content .val_select>.info {
+    width: 90%;
+    margin-left: 5%;
+    line-height: 10px;
+    display: block;
+    position: absolute;
+    height: 10px;
+    font-size:10px;
+    text-align: center;
+    top:-12px;
+}
+.charcreation>.properties>.group_content .val_select.small {
+    width: 90%;
+    margin-top: 20px;
+    margin-bottom: 5px;
+    margin-left: 5%;
+    line-height: 15px;
+    display: block;
+    position: relative;
+    height: 15px;
 }
 .charcreation>.properties>.group_content .val_select>.arrow_left {
     position: absolute;
-    left: 5%;
+    left: 0%;
     cursor: pointer;
+    width: 15%;
+    text-align: center;
     font-size: 20px;
 }
 .charcreation>.properties>.group_content .val_select>.arrow_right {
     position: absolute;
-    right: 5%;
+    right: 0%;
     cursor: pointer;
+    width: 15%;
+    text-align: center;
     font-size: 20px;
+}
+.charcreation>.properties>.group_content .val_select.small>.arrow_left {
+    font-size: 15px;
+}
+.charcreation>.properties>.group_content .val_select.small>.arrow_right {
+    font-size: 15px;
 }
 .charcreation>.properties>.group_content .val_select>.value {
     width: 60%;
@@ -142,15 +201,34 @@ body {
     margin-left: 20%;
 }
 
+.charcreation>.properties>.group_content .val_select.small>.value {
+    width: 60%;
+    line-height: 15px;
+    padding: 0;
+    float: left;
+    text-align: center;
+    background: var(--accent-trans-6);
+    font-size: 10px;
+    font-family: Lato;
+    margin-left: 20%;
+}
+
 
 
 .charcreation>.properties>.group_content .slider {
     display: block;
     float: none;
     position: absolute;
-    margin-top: 0px;
+    margin-top: 5px;
     width: 80%;
     left: 10%;
+}
+.charcreation>.properties>.group_content .slider>.top_notice {
+    position: absolute;
+    font-size: 14px;
+    top: -4px;
+    width: 100%;
+    text-align: center;
 }
 .charcreation>.properties>.group_content .slider>.notice {
     position: absolute;
@@ -173,18 +251,17 @@ input[type="range"] {
     -webkit-appearance: none;
     background-color: #bdc3c7;
     width: 100%;
-    height: 5px;
-    border-radius: 5px;
+    height: 10px;
+    border-radius: 1px;
     margin: 0 auto;
     outline: 0;
 }
 input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
     background: var(--accent-trans-8);
-    width: 15px;
-    height: 20px;
+    width: 10px;
+    height: 18px;
     border-radius: 1%;
-    border: 1px solid white;
     cursor: pointer;
     transition: .3s ease-in-out;
 }

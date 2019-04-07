@@ -3,6 +3,22 @@ var User = MongoDB.getUserModel();
 var Inventory = MongoDB.getInventoryModel();
 var md5 = require("md5");
 var async = require("async");
+var values = [];
+values["father"] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 42, 43, 44];
+values["mother"] = [21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 45];
+const appearanceIndex = {
+    "blemishes": 0,
+    "facial_hair": 1,
+    "eyebrows": 2,
+    "ageing": 3,
+    "makeup": 4,
+    "blush": 5,
+    "complexion": 6,
+    "sundamage": 7,
+    "lipstick": 8,
+    "freckles": 9,
+    "chesthair": 10
+}
 var Player = class {
     constructor(player) {
         this._setup(player);
@@ -22,6 +38,7 @@ var Player = class {
         self._health = 100;
         self._armor = 100;
         self._storage = {};
+        self._characterData = [];
     }
     log(...args) {
         console.log("Account:Log", args)
@@ -99,7 +116,7 @@ var Player = class {
     spawn() {
         var self = this;
         self._player.spawn(new mp.Vector3(1964.2689208984375, 3739.28271484375, 32.33523178100586));
-        self._player.model = mp.joaat(self._skin);
+        self.loadChar(self._characterData);
         self._player.heading = 90;
         self._health = 100;
         self._armor = 25;
@@ -175,12 +192,141 @@ var Player = class {
         item.save(function(err) {
             if (err) return console.log(err);
             // saved!
-            mp.events.call("Player:Inventory:AddItem", self._player, item.name,item.amount)
-            self._player.call("Inventory:AddItem", [item.name,item.amount])
+            mp.events.call("Player:Inventory:AddItem", self._player, item.name, item.amount)
+            self._player.call("Inventory:AddItem", [item.name, item.amount])
         });
     }
     removeItem(name, amount) {}
     /* Inventory */
+    /*Character*/
+    saveChar(data) {
+        let self = this;
+        console.log("DATA", data);
+        User.updateOne({
+            user_id: self._userId
+        }, {
+            character: JSON.parse(data)
+        }, function(err, numberAffected, rawResponse) {
+            if (!err) {
+                self.log("Succesfully created Character", self._username)
+                if (self._player) {
+                    self._player.call("Notifications:New", [{
+                        title: "Save",
+                        titleSize: "16px",
+                        message: "Saved Character",
+                        messageColor: 'rgba(0,0,0,.8)',
+                        position: "bottomCenter",
+                        close: false
+                    }])
+                    self._characterData = JSON.parse(data);
+                    self.spawn();
+                }
+                return fulfill("Succesfully saved data", self._username);
+            } else {
+                self.error("Account:Save Fail", err)
+                return reject("Failed saving player data");
+            }
+        });
+    }
+    loadChar(data) {
+        let self = this;
+            if (data.gender == "Male") {
+                self._player.model = mp.joaat('mp_m_freemode_01');
+                self._player.setClothes(3, 15, 0, 2);
+                self._player.setClothes(4, 21, 0, 2);
+                self._player.setClothes(6, 34, 0, 2);
+                self._player.setClothes(8, 15, 0, 2);
+                self._player.setClothes(11, 15, 0, 2);
+            } else {
+                self._player.model = mp.joaat('mp_f_freemode_01');
+                self._player.setClothes(3, 15, 0, 2);
+                self._player.setClothes(4, 10, 0, 2);
+                self._player.setClothes(6, 35, 0, 2);
+                self._player.setClothes(8, 15, 0, 2);
+                self._player.setClothes(11, 15, 0, 2);
+            }
+        /*appearanceIndex*/
+        if (data.makeup) {
+            let index = appearanceIndex["makeup"];
+            let overlayID = (data.makeup == 0) ? 255 : data.makeup - 1;
+            self._player.setHeadOverlay(index, [overlayID, /*Opacity*/ parseInt(data.makeup_opacity) * 0.01, 0/*ColorOverlay*/ , 0]);
+        }
+        if (data.ageing) {
+            let index = appearanceIndex["ageing"];
+            let overlayID = (data.ageing == 0) ? 255 : data.ageing - 1;
+            self._player.setHeadOverlay(index, [overlayID, /*Opacity*/ parseInt(data.ageing_opacity) * 0.01, 0 /*ColorOverlay*/ , 0]);
+        }
+        if (data.blemishes) {
+            let index = appearanceIndex["blemishes"];
+            let overlayID = (data.blemishes == 0) ? 255 : data.blemishes - 1;
+            self._player.setHeadOverlay(index, [overlayID, /*Opacity*/ parseInt(data.blemishes_opacity) * 0.01, 0 /*ColorOverlay*/ , 0]);
+        }
+        if (data.facial_hair) {
+            let index = appearanceIndex["facial_hair"];
+            let overlayID = (data.facial_hair == 0) ? 255 : data.facial_hair - 1;
+            self._player.setHeadOverlay(index, [overlayID, /*Opacity*/ parseInt(data.facial_hair_opacity) * 0.01, data.facial_hair_color /*ColorOverlay*/ , 0]);
+        }
+        if (data.eyebrows) {
+            let index = appearanceIndex["eyebrows"];
+            let overlayID = (data.eyebrows == 0) ? 255 : data.eyebrows - 1;
+            self._player.setHeadOverlay(index, [overlayID, /*Opacity*/ parseInt(data.eyebrows_opacity) * 0.01, data.eyebrows_color /*ColorOverlay*/ , 0]);
+        }
+        if (data.blush) {
+            let index = appearanceIndex["blush"];
+            let overlayID = (data.blush == 0) ? 255 : data.blush - 1;
+            self._player.setHeadOverlay(index, [overlayID, /*Opacity*/ parseInt(data.blush_opacity) * 0.01, data.blush_color /*ColorOverlay*/ , 0]);
+        }
+        if (data.complexion) {
+            let index = appearanceIndex["complexion"];
+            let overlayID = (data.complexion == 0) ? 255 : data.complexion - 1;
+            self._player.setHeadOverlay(index, [overlayID, /*Opacity*/ parseInt(data.complexion_opacity) * 0.01, 0 /*ColorOverlay*/ , 0]);
+        }
+        if (data.lipstick) {
+            let index = appearanceIndex["lipstick"];
+            let overlayID = (data.lipstick == 0) ? 255 : data.lipstick - 1;
+            self._player.setHeadOverlay(index, [overlayID, /*Opacity*/ parseInt(data.lipstick_opacity) * 0.01, 0 /*ColorOverlay*/ , 0]);
+        }
+        if (data.freckles) {
+            let index = appearanceIndex["freckles"];
+            let overlayID = (data.freckles == 0) ? 255 : data.freckles - 1;
+            self._player.setHeadOverlay(index, [overlayID, /*Opacity*/ parseInt(data.freckles_opacity) * 0.01, 0 /*ColorOverlay*/ , 0]);
+        }
+        if (data.chesthair) {
+            let index = appearanceIndex["chesthair"];
+            let overlayID = (data.chesthair == 0) ? 255 : data.chesthair - 1;
+            self._player.setHeadOverlay(index, [overlayID, /*Opacity*/ parseInt(data.chesthair_opacity) * 0.01, data.chesthair_color /*ColorOverlay*/ , 0]);
+        }
+        if (data.sundamage) {
+            let index = appearanceIndex["sundamage"];
+            let overlayID = (data.sundamage == 0) ? 255 : data.sundamage - 1;
+            self._player.setHeadOverlay(index, [overlayID, /*Opacity*/ parseInt(data.sundamage_opacity) * 0.01, 0 /*ColorOverlay*/ , 0]);
+        }
+        data.facial.forEach(function(feature, i) {
+            self._player.setFaceFeature(parseInt(feature.index), parseFloat(feature.val) * 0.01);
+        })
+        if (data.hair != undefined) {
+            self._player.setClothes(2, data.hair, 0, 2);
+            self._player.setHairColor(data.hair_color, data.hair_highlight_color);
+            // self._player.setEyeColor(data.eyeColor);
+            self._player.eyeColor = parseInt(data.eyeColor);
+            /*self._player.setHeadOverlayColor(1, 1, data.facial_hair_color, 0);
+            self._player.setHeadOverlayColor(2, 1, data.eyebrows_color, 0);
+            self._player.setHeadOverlayColor(5, 2, data.blush_color, 0);
+            self._player.setHeadOverlayColor(8, 2, data.lipstick, 0);
+            self._player.setHeadOverlayColor(10, 1, data.chesthair_color, 0);*/
+        }
+        if ((data.fatherIndex != undefined) && (data.motherIndex != undefined) && (data.tone != undefined) && (data.resemblance != undefined)) {
+            self._player.setHeadBlend(
+                // shape
+                values["mother"][data.motherIndex], values["father"][data.fatherIndex], 0,
+                // skin
+                values["mother"][data.motherIndex], values["father"][data.fatherIndex], 0,
+                // mixes
+                data.resemblance * 0.01, data.tone * 0.01, 0.0);
+            console.log("data.resemblance", data.resemblance * 0.01);
+            console.log("data.tone", data.tone * 0.01);
+        }
+    }
     load(username) {
         var self = this;
         self._username = username;
@@ -191,20 +337,25 @@ var Player = class {
         }, async function(err, arr) {
             if (arr.length) {
                 let cUser = arr[0];
+                console.log("cUser", cUser);
                 self._playtime = cUser.playtime;
                 self._warns = cUser.warns;
                 self._userId = cUser.user_id;
-                //self.spawn();
-                self._player.setVariable("user_id", self._userId)
-                self._player.setVariable("loggedIn", true);
-                self._player.setVariable("spawned", false)
-                self._player.call("Account:LoginDone")
-                //self._player.call("Cam:Hide")
-                self.log("loaded player data for", self._player.name)
-                console.log(self._player)
-                mp.events.call("Player:Loaded", self._player)
-                self.loadInventory();
-                self.spawn();
+                if (cUser.character.length > 0) {
+                    self._characterData = cUser.character[0];
+                    self._player.setVariable("user_id", self._userId)
+                    self._player.setVariable("loggedIn", true);
+                    self._player.setVariable("spawned", false)
+                    self._player.call("Account:LoginDone")
+                    //self._player.call("Cam:Hide")
+                    self.log("loaded player data for", self._player.name)
+                    console.log(self._player)
+                    mp.events.call("Player:Loaded", self._player)
+                    self.loadInventory();
+                    self.spawn();
+                } else {
+                    self._player.call("Character:Start")
+                }
             } else {
                 self.error("Account:Load", "Failed loading player data")
             }

@@ -22,6 +22,10 @@ function ItemDropEvent(event, ui) {
     }
     console.log(coords.x);
     ui.draggable.detach().appendTo("#inventory > div:nth-child(" + (index + 1) + ")");
+    $(ui.draggable).find('img').css({
+        left: 0,
+        top: 0
+    });
     inventory.clearSlot(ui.draggable.data('x'), ui.draggable.data('y'), width, height);
     ui.draggable.data('x', coords.x);
     ui.draggable.data('y', coords.y);
@@ -29,14 +33,37 @@ function ItemDropEvent(event, ui) {
 }
 function ItemEquipEvent(event, ui) {
     ui.draggable.detach().appendTo($(event.target));
-    $(ui.draggable).css({
-        marginLeft: "50%",
-        marginTop: "20%"
-    });
-    $(ui.draggable).find('img').css({
-        marginLeft: "-50%",
-        marginTop: "-50%"
-    });
+    inventory.clearSlot($(ui.draggable).data('x'), $(ui.draggable).data('y'), $(ui.draggable).data('width'), $(ui.draggable).data('height'));
+    var styleImg = {};
+    switch ($(ui.draggable).data('name')) {
+        case 'combatpdw':
+            styleImg = {
+                width: '120%',
+                height: 'auto',
+                top: 40,
+                left: -5,
+                'transform': 'rotate(-45deg)'
+            };
+            break;
+        case 'parachute':
+            styleImg = {
+                width: 'auto',
+                height: '95%',
+                top: 5,
+                left: 15
+            };
+            break;
+        case 'hatchet':
+            styleImg = {
+                width: 'auto',
+                height: '100%',
+                top: 0,
+                left: 40,
+                'transform': 'rotate(45deg)'
+            };
+            break;
+    }
+    $(ui.draggable).find('img').css(styleImg);
     $(event.target).find('p').hide();
 }
 $(function () {
@@ -75,24 +102,21 @@ $(function () {
                 if (!inventory.isFree(coords.x - offset.x, coords.y - offset.y, width, height)) {
                     return;
                 }
-                inventory.fillSlot(coords.x - offset.x, coords.y - offset.y, width + coords.x > inventory.slotsPerRow ? inventory.slotsPerRow - coords.x : width, height, true);
+                inventory.fillSlot(coords.x - offset.x, coords.y - offset.y, width, height, true);
                 lastCoords = coords;
             });
         },
         stop: function (event, ui) {
             first = true;
-            $(event.target).find("img").css({
-                top: 0,
-                left: 0
-            });
             // if dropped outside of inventory
             if (!ui.helper.data('dropped')) {
                 inventory.clearSlot(lastCoords.x - offset.x, lastCoords.y - offset.y, width, height, true);
                 $(this).css({ top: 0, left: 0 });
                 // drop item, etc...
             }
-            // fill new slot
-            inventory.fillSlot($(this).data('x'), $(this).data('y'), $(this).data('width'), $(this).data('height'));
+            console.log($(event.target).parent().hasClass('slot'));
+            if ($(event.target).parent().hasClass('slot'))
+                $(this).find('img').css({ 'transform': 'rotate(0)' });
             $('.item').css('pointer-events', 'all');
             // unbind the mousemove event
             $('.slot').unbind();
@@ -115,7 +139,7 @@ $(function () {
         accept: '.item',
         tolerance: 'pointer',
         activeClass: 'droppable-highlight',
-        drop: null
+        drop: ItemEquipEvent
     });
     $(".slot").click(function () {
         var index = inventory.element.children().index($(this));
@@ -161,3 +185,6 @@ Resistance.set(Resistances.SLASH, 0);
 Resistance.set(Resistances.PUNCTURE, 0);
 Resistance.set(Resistances.ELECTRICITY, 0);
 Resistance.set(Resistances.RADIATION, 0);
+function addItem(item) {
+    inventory.addItem(item);
+}

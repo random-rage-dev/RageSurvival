@@ -31,6 +31,39 @@ var user = mongoose.Schema({
 }, {
     autoIndex: true
 });
+
+var vehicles = mongoose.Schema({
+    veh_id: {
+        type: String,
+        unique: true
+    },
+    model: {
+        type: String
+    },
+    position:{
+    	type:Object,
+    	default:{x:0,y:0,z:0}
+    },
+    rotation:{
+    	type:Object,
+    	default:{x:0,y:0,z:0}
+    },
+    storage_id:{
+    	type:String,
+    	unique:true
+    },
+    key:{
+    	type:String,
+    	unqiue:true
+    },
+    components:{
+    	type:Object,
+    	default:{}
+    }
+}, {
+    autoIndex: true
+});
+
 var inventory = mongoose.Schema({
     owner_type: {
         type: String,
@@ -38,7 +71,11 @@ var inventory = mongoose.Schema({
     },
     owner_id: Number,
     name: String,
-    amount: Number
+    amount: Number,
+    data:{
+    	type:Object,
+    	default:{}
+    }
 }, {
     autoIndex: true
 });
@@ -81,6 +118,10 @@ user.index({
     user_id: 1,
     name: 1
 });
+vehicles.index({
+    veh_id: 1,
+    model: 1
+});
 inventory.index({
     owner_type: 1,
     owner_id: 1
@@ -88,5 +129,6 @@ inventory.index({
 module.exports = {
     user: user,
     inventory: inventory,
-    buildings: buildings
+    buildings: buildings,
+    vehicles:vehicles
 };

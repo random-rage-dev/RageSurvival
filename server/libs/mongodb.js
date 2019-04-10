@@ -21,6 +21,7 @@ class mongodb {
         self._dbUserModel = mongoose.model('User', schema.user);
         self._dbInventoryModel = mongoose.model('Inventory', schema.inventory);
         self._dbBuildingModel = mongoose.model('Buildings', schema.buildings);
+        self._dbVehicleModel = mongoose.model('Vehicles', schema.vehicles);
 
         self._db.once('open', function() {
             self._conncted = true;
@@ -36,6 +37,9 @@ class mongodb {
     }
     getBuildingModel() {
         return this._dbBuildingModel;
+    }
+    getVehicleModel() {
+        return this._dbVehicleModel;
     }
 }
 module.exports = new mongodb();

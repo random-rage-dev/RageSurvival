@@ -61,6 +61,8 @@ class CEFBrowser {
 }
 module.exports = {
     interface:new CEFBrowser("empty.html"),
+    inventory:new CEFBrowser("empty.html"),
+    hud:new CEFBrowser("empty.html"),
     notification:new CEFBrowser("notifications/index.html"),
     class:CEFBrowser
 };

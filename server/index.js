@@ -4,6 +4,7 @@ var PlayerClass = require("./users/player.js")
 var ItemPickups = require("./world/pickups.js")
 var Zombies = require("./world/zombies.js")
 var Building = require("./world/building.js")
+var Vehicles = require("./world/vehicles.js")
 require("./world/crafting.js")
 require("./dev/loot_placement.js")
 var players = [];

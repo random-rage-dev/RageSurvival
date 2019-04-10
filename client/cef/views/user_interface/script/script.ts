@@ -33,6 +33,11 @@ function ItemDropEvent(event, ui) {
 
     ui.draggable.detach().appendTo("#inventory > div:nth-child(" + (index+1) + ")");
 
+    $(ui.draggable).find('img').css({
+        left: 0,
+        top: 0
+    });
+
     inventory.clearSlot(ui.draggable.data('x'), ui.draggable.data('y'), width, height);
 
     ui.draggable.data('x', coords.x);
@@ -43,15 +48,40 @@ function ItemDropEvent(event, ui) {
 
 function ItemEquipEvent(event, ui) {
     ui.draggable.detach().appendTo($(event.target));
-    $(ui.draggable).css({
-        marginLeft: "50%",
-        marginTop: "20%"
-    });
-    $(ui.draggable).find('img').css({
-        marginLeft: "-50%",
-        marginTop: "-50%"
-    });
 
+    inventory.clearSlot($(ui.draggable).data('x'), $(ui.draggable).data('y'), $(ui.draggable).data('width'), $(ui.draggable).data('height'));
+
+    let styleImg = {};
+    switch($(ui.draggable).data('name')) {
+        case 'combatpdw':
+            styleImg = {
+                width: '120%',
+                height: 'auto',
+                top: 40,
+                left: -5,
+                'transform': 'rotate(-45deg)'
+            };
+            break;
+        case 'parachute':
+            styleImg = {
+                width: 'auto',
+                height: '95%',
+                top: 5,
+                left: 15
+            };
+            break;
+        case 'hatchet':
+            styleImg = {
+                width: 'auto',
+                height: '100%',
+                top: 0,
+                left: 40,
+                'transform': 'rotate(45deg)'
+            };
+            break;
+    }
+
+    $(ui.draggable).find('img').css(styleImg);
     $(event.target).find('p').hide();
 }
 
@@ -104,7 +134,7 @@ $(function() {
                 inventory.fillSlot(
                     coords.x - offset.x,
                     coords.y - offset.y,
-                    width + coords.x > inventory.slotsPerRow ? inventory.slotsPerRow - coords.x : width,
+                    width,
                     height,
                     true
                 );
@@ -115,10 +145,6 @@ $(function() {
         },
         stop: function(event, ui) {
             first = true;
-            $(event.target).find("img").css({
-                top: 0,
-                left: 0
-            });
 
             // if dropped outside of inventory
             if(!ui.helper.data('dropped')) {
@@ -127,8 +153,9 @@ $(function() {
                 // drop item, etc...
             }
 
-            // fill new slot
-            inventory.fillSlot($(this).data('x'), $(this).data('y'), $(this).data('width'), $(this).data('height'));
+            console.log($(event.target).parent().hasClass('slot'));
+            if($(event.target).parent().hasClass('slot'))
+                $(this).find('img').css({'transform': 'rotate(0)'});
 
             $('.item').css('pointer-events', 'all');
 
@@ -156,7 +183,7 @@ $(function() {
         accept: '.item',
         tolerance: 'pointer',
         activeClass: 'droppable-highlight',
-        drop: null
+        drop: ItemEquipEvent
     });
 
 
@@ -208,3 +235,9 @@ Resistance.set(Resistances.SLASH, 0);
 Resistance.set(Resistances.PUNCTURE, 0);
 Resistance.set(Resistances.ELECTRICITY, 0);
 Resistance.set(Resistances.RADIATION, 0);
+
+function addItem(item) {
+    inventory.addItem(item);
+}
+
+

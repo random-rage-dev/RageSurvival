@@ -49,10 +49,13 @@ class Inventory {
                 + '</div>';
 
             let element = this.element.children().eq(this.getIndex(x, y)).append($(html)
+                .data('name', item.name)
                 .data('width', width)
                 .data('height', height)
                 .data('x', x)
                 .data('y', y));
+
+            console.log(item.name);
 
             return element ? element : false;
         }

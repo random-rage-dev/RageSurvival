@@ -36,10 +36,12 @@ var Inventory = /** @class */ (function () {
                 + '<img class="item' + width + 'x' + height + '" src="../../source/img/' + item.name + '.png"' + (flip ? ' class="flipped"' : '') + '>'
                 + '</div>';
             var element = this.element.children().eq(this.getIndex(x, y)).append($(html)
+                .data('name', item.name)
                 .data('width', width)
                 .data('height', height)
                 .data('x', x)
                 .data('y', y));
+            console.log(item.name);
             return element ? element : false;
         }
         return false;

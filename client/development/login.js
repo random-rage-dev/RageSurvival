@@ -51,6 +51,7 @@ mp.events.add("Account:LoginDone", () => {
     mp.game.ui.displayRadar(true);
     mp.game.ui.displayHud(true);
     mp.game.ui.setMinimapVisible(false)
+    CEFInterface.load("user_interface/index.html");
 })
 mp.events.add("Cam:Hide", () => {
     mp.game.graphics.transitionFromBlurred(100);

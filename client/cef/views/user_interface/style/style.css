@@ -83,6 +83,17 @@ body
     background-color: rgba(255, 255, 255, .2);
 }
 
+#equip-panel #equip .equip-slot .item
+{
+    width: 100%;
+    height: 100%;
+}
+
+#equip-panel #equip .equip-slot .item img
+{
+    position: relative;
+}
+
 #equip-panel #equip .equip-slot p
 {
     line-height: var(--equipslot-size);
@@ -249,7 +260,7 @@ body
     transform: rotate(-90deg);
 }
 
-.item
+#inventory .slot .item
 {
     width: auto;
     height: auto;
@@ -257,7 +268,7 @@ body
     z-index: 1;
 }
 
-.item1x1
+#inventory .slot .item.item1x1, #inventory .slot .item img.item1x1
 {
     max-width: var(--slot-size);
     max-height: var(--slot-size);
@@ -265,7 +276,7 @@ body
     height: var(--slot-size);
 }
 
-.item2x3
+#inventory .slot .item.item2x3, #inventory .slot .item img.item2x3
 {
     max-width: calc(2 * var(--slot-size));
     max-height: calc(3 * var(--slot-size));
@@ -273,7 +284,7 @@ body
     height: calc(3 * var(--slot-size));
 }
 
-.item2x4
+#inventory .slot .item.item2x4, #inventory .slot .item img.item2x4
 {
     max-width: calc(2 * var(--slot-size));
     max-height: calc(4 * var(--slot-size));
@@ -282,7 +293,7 @@ body
 
 }
 
-.item4x2
+#inventory .slot .item.item4x2, #inventory .slot .item img.item4x2
 {
     max-width: calc(4 * var(--slot-size));
     max-height: calc(2 * var(--slot-size));

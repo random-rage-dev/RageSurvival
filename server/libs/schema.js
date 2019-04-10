@@ -34,7 +34,7 @@ var user = mongoose.Schema({
 var inventory = mongoose.Schema({
     owner_type: {
         type: String,
-        default: "Player"
+        default: "player"
     },
     owner_id: Number,
     name: String,

@@ -183,6 +183,7 @@ var Player = class {
             owner_type: "player",
             owner_id: self._userId
         }, async function(err, arr) {
+            if (err) return console.log(err);
             if (arr.length) {
                 let cInventory = arr;
                 self._inventory = [];

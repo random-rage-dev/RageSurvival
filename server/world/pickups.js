@@ -24,19 +24,18 @@ var PickupManager = new class {
                 let resapwn_time = LootTable.getRespawnTimeForTier(pickup_[id].tier);
                 let should_respawn = (c + resapwn_time) < Date.now();
                 if (should_respawn == true) {
-                	if (Pickups.unloadPickup(id,false) == true) {
-                		console.log("Reloading Item Spot #"+id,"reason:inactivity");
-                		Pickups.generatePickup(id, tier, x, y, z);
-                	}
+                    if (Pickups.unloadPickup(id, false) == true) {
+                        console.log("Reloading Item Spot #" + id, "reason:inactivity");
+                        Pickups.generatePickup(id, tier, x, y, z);
+                    }
                 }
-
             }
         })
         self._respawningPickups.forEach(function(pickup, index) {
             let resapwn_time = LootTable.getRespawnTimeForTier(pickup.tier);
             let can_respawn = (pickup.added + resapwn_time) < Date.now();
             if (can_respawn == true) {
-                console.log("Respawning Item Spot",pickup.id,"reason:empty");
+                console.log("Respawning Item Spot", pickup.id, "reason:empty");
                 Pickups.generatePickup(pickup.id, pickup.tier, pickup.x, pickup.y, pickup.z);
                 self._respawningPickups.splice(index, 1);
             }
@@ -138,7 +137,7 @@ var Pickups = new class {
             created: Date.now()
         }
     }
-    dropItem(item, amount, x, y, z) {
+    dropItem(item, amount, x, y, z, data = {}) {
         let self = this;
         item = item.replace("_", " ");
         let item_data = LootTable.getItemData(item);
@@ -152,7 +151,8 @@ var Pickups = new class {
                     thickness: item_data.thickness,
                     amount: amount,
                     offset: item_data.offset,
-                    name: item
+                    name: item,
+                    data: data
                 }]
                 console.log("item_data", item_data);
                 let colshape = mp.colshapes.newSphere(x, y, z, self._streamRadius, 0);
@@ -184,7 +184,6 @@ var Pickups = new class {
     generatePickups() {
         let self = this;
         let total_spawns = loot_spawns.length;
-        console.log(`generatePickupsSpawns [0/${total_spawns}]`)
         loot_spawns.forEach(function(spawn) {
             let count = LootTable.getItemCountForSpawn(spawn.type);
             let items = LootTable.getItemsForSpawn(spawn.type, count);
@@ -219,8 +218,8 @@ var Pickups = new class {
                 blip: blip,
                 created: Date.now()
             }
-            console.log(`generatePickupsSpawns [${self._pickups.length}/${total_spawns}]`)
         })
+        console.log(`generatePickupsSpawns [${self._pickups.length}/${total_spawns}]`)
     }
     updatePickup(id) {
         let self = this;
@@ -259,10 +258,11 @@ var Pickups = new class {
                 return ((e != null) && (e.name == item) && (e.amount == amount) && (i == index));
             })
             if (doesExist > -1) {
+                let item_data = self._pickups[id].items[doesExist];
                 self._pickups[id].items[doesExist] = null;
                 /*Add Item to Inventory*/
-                console.log("pick item up", id, item, amount);
-                playerInstance.giveItem(item, amount);
+                console.log("pick item up", id, item_data.name, item_data.amount);
+                playerInstance.giveItem(item_data);
                 /*Add Item to Inventory*/
                 if (self.isEmpty(id) == true) {
                     self.unloadPickup(id);

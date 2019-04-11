@@ -184,9 +184,16 @@ var Player = class {
             owner_id: self._userId
         }, async function(err, arr) {
             if (err) return console.log(err);
-            if (arr.length) {
+            if (arr != undefined ) {
                 let cInventory = arr;
-                self._inventory = [];
+                self._inventory = cInventory.map(function(item,i) {
+                    return {
+                        name:item.name,
+                        amount:item.amount,
+                        data:item.data
+                    }
+                });
+                console.log(self._inventory);
                 mp.events.call("Player:Inventory", self._player, self._inventory)
                 self.spawn();
             } else {
@@ -195,18 +202,19 @@ var Player = class {
         }).lean()
     }
     hasItem(name, amount) {}
-    giveItem(name, amount) {
+    giveItem(item) {
         let self = this;
-        console.log("giveItem", name, amount);
-        let item = new Inventory({
+        console.log("giveItem", item);
+        let dbItem = new Inventory({
             owner_id: self._userId,
-            name: name,
-            amount: amount
+            name: item.name,
+            amount: item.amount,
+            data:item.data
         });
-        item.save(function(err) {
+        dbItem.save(function(err) {
             if (err) return console.log(err);
             // saved!
-            mp.events.call("Player:Inventory:AddItem", self._player, item.name, item.amount)
+            mp.events.call("Player:Inventory:AddItem", self._player, item)
             self._player.call("Inventory:AddItem", [item.name, item.amount])
         });
     }
@@ -337,8 +345,6 @@ var Player = class {
                 values["mother"][data.motherIndex], values["father"][data.fatherIndex], 0,
                 // mixes
                 data.resemblance * 0.01, data.tone * 0.01, 0.0);
-            console.log("data.resemblance", data.resemblance * 0.01);
-            console.log("data.tone", data.tone * 0.01);
         }
     }
     load(username,fresh = 0) {

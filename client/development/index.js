@@ -15,6 +15,7 @@ require("./building.js")
 require("./login.js")
 require("./combat.js")
 require("./character_creator.js")
+require("./vehicles.js")
 var natives = require("./natives.js")
 var CEFInterface = require("./browser.js").interface;
 var CEFNotification = require("./browser.js").notification;

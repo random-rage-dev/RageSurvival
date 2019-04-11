@@ -225,7 +225,7 @@ var Loottable = class {
         }
     }
     getItemData(name) {
-        console.log("getItemData",name);
+        console.log("getItemData", name);
         return Items[name];
     }
     getItemCountForSpawn(tier) {
@@ -248,6 +248,7 @@ var Loottable = class {
                     return v;
                 } else {
                     return k;
+                    1
                 }
             }
             return k;
@@ -260,6 +261,9 @@ var Loottable = class {
         let item = Items[item_name];
         if (item != undefined) {
             item.name = item_name;
+            item.data = {
+                value: Math.random() * 100
+            }
         }
         return item;
     }

@@ -1,6 +1,9 @@
 console.log = function(...a) {
     mp.gui.chat.push("DEBUG:" + a.join(" "))
 };
+mp.isValid = function(val) {
+    return val != null && val != undefined && val != "";
+}
 mp.gameplayCam = mp.cameras.new('gameplay');
 mp.defaultCam = mp.cameras.new('default');
 mp.localPlayer = mp.players.local;

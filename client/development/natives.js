@@ -1,4 +1,6 @@
 var natives = {};
+
+mp.game.vehicle.getVehicleSeats = (veh) => mp.game.invoke("0xA7C4F2C6E744A550", veh.handle);
 mp.game.graphics.clearDrawOrigin = () => mp.game.invoke('0xFF0B610F6BE0D7AF'); // 26.07.2018 // GTA 1.44 
 natives.START_PLAYER_TELEPORT = (player, x, y, z, heading, p5, p6, p7) => mp.game.invoke("0xAD15F075A4DA0FDE", player, x, y, z, heading, p5, p6, p7);
 natives.CHANGE_PLAYER_PED = (ped, p1, p2) => mp.game.invoke("0x048189FAC643DEEE", ped, p1, p2);

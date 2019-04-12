@@ -1,7 +1,7 @@
 
 var natives = require("./natives.js")
-var CEFInterface = require("./browser.js").interface;
+var CEFInventory = require("./browser.js").inventory;
 
 mp.events.add("Inventory:AddItem", (item) => {
-    CEFInterface.call("addItem", item);
+    CEFInventory.call("addItem", item);
 });

@@ -56,6 +56,14 @@ var vehicles = mongoose.Schema({
     	type:String,
     	unqiue:true
     },
+    health:{
+        type:Number,
+        default:1000
+    },
+    running:{
+        type:Boolean,
+        default:false
+    },
     components:{
     	type:Object,
     	default:{}

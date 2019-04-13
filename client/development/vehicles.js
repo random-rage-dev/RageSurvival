@@ -150,6 +150,7 @@ mp.events.add("render", () => {
 });
 mp.keys.bind(0x58, true, function() {
     mp.events.callRemote("Vehicles:ToggleEngine");
+    mp.events.callRemote("Vehicles:RequestInventory");
 });
 var seats = {
     0: "seat_pside_f", // passanger side front

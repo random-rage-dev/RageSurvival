@@ -1,5 +1,6 @@
 var MongoDB = require("../libs/mongodb.js")
 var Vehicles = MongoDB.getVehicleModel();
+var Inventory = MongoDB.getInventoryModel();
 var Vehicle = class {
     constructor(data) {
         let self = this;
@@ -12,6 +13,7 @@ var Vehicle = class {
         this._health = data.health;
         this._running = data.running;
         this._key = data.key;
+        this._inventory = [];
         this.components = data.components;
         this._veh = null;
         this._timer = setInterval(function() {
@@ -19,6 +21,20 @@ var Vehicle = class {
         }, 5 * 60 * 1000); // Save Interval 5 Min
         this.create();
         console.log("new Vehicle instance")
+    }
+    getInventory() {
+        Inventory.find({
+            owner_type: "vehicle",
+            owner_id: this._storage_id
+        }, async function(err, arr) {
+            if (err) return console.log("error", err);
+            if ((arr) && (arr.length)) {
+                console.log("Inventory",arr);
+            }
+        });
+    }
+    putIntoInventory(item) {
+        console.log("TODO putIntoInventory()")
     }
     log(...args) {
         console.log("Vehicle:Log", args)
@@ -90,6 +106,24 @@ var Vehicle = class {
 mp.events.add("Vehicles:createVehicle", function(vehicle) {
     console.log("vehicle", vehicle);
 });
+mp.events.add("Vehicles:RequestInventory", function(player) {
+    if (player.vehicle) {
+        let id = player.vehicle.getVariable("id");
+        if (VehicleManager.getVehicle(id) != false) {
+            let veh = VehicleManager.getVehicle(id);
+            let inv =  veh.getInventory();
+        }
+    }
+});
+mp.events.add("Vehicles:PutIntoVehicle", function(player,item) {
+    if (player.vehicle) {
+        let id = player.vehicle.getVariable("id");
+        if (VehicleManager.getVehicle(id) != false) {
+            let veh = VehicleManager.getVehicle(id);
+            veh.putIntoInventory(item);
+        }
+    }
+});
 mp.events.add("Vehicles:UpdateFuel", function(player, dist) {
     if (player.vehicle) {
         let id = player.vehicle.getVariable("id");
@@ -105,9 +139,7 @@ mp.events.add("Vehicles:ToggleEngine", function(player) {
     if (player.vehicle) {
         let id = player.vehicle.getVariable("id");
         console.log("ID", id);
-        console.log("ID", VehicleManager.getVehicle(id));
         if (VehicleManager.getVehicle(id) != false) {
-            console.log("isVeh");
             let veh = VehicleManager.getVehicle(id);
             if (veh.hasKey(player) == true) {
                 console.log("hasKey");

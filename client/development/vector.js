@@ -22,12 +22,19 @@ mp.Vector3.prototype.rotPoint = function(pos) {
     nVector.z = this.z / n;
     return this;
 }*/
+mp.Vector3.prototype.lerp = function(vector2,deltaTime) {
+    let nVector = new mp.Vector3(this.x, this.y, this.z);
+    nVector.x = this.x + (vector2.x - this.x) * deltaTime
+    nVector.y = this.y + (vector2.y - this.y) * deltaTime
+    nVector.z = this.z + (vector2.z - this.z) * deltaTime
+    return nVector;
+}
 mp.Vector3.prototype.multiply = function(n) {
     let nVector = new mp.Vector3(this.x, this.y, this.z);
     nVector.x = this.x * n;
     nVector.y = this.y * n;
     nVector.z = this.z * n;
-    return this;
+    return nVector;
 }
 mp.Vector3.prototype.dist = function(to) {
     let a = this.x - to.x;

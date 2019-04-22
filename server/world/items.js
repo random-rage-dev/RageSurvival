@@ -95,6 +95,18 @@ var items = {
             pos: new mp.Vector3(0, 0, 0),
             rot: new mp.Vector3(0, 0, 0)
         }
+    },
+    "Gas Can": {
+        type: "Industrial",
+        model: "prop_cs_package_01",
+        thickness: 0.35,
+        amount: function() {
+            return 1
+        },
+        offset: {
+            pos: new mp.Vector3(0, 0, 0),
+            rot: new mp.Vector3(0, 0, 0)
+        }
     }
 };
 module.exports = items;

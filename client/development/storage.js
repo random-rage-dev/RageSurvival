@@ -22,9 +22,8 @@ mp.events.add("Inventory:Ready", (data) => {
 		}
 	})
 });
-let toggleInvState = false;
-mp.keys.bind(0x49, false, function() {
-	console.log("press bind key");
+function toggleInventory() {
+	mp.canCrouch = !mp.canCrouch;
 	if (toggleInvState == false) {
 		CEFInventory.call("setPos", "inventory", Inventory_Order.top, Inventory_Order.left);
 		CEFInventory.call("show");
@@ -37,6 +36,7 @@ mp.keys.bind(0x49, false, function() {
 			width: 4,
 			height: 2,
 			item: {
+				amount:1,
 				name: "CompactRifle",
 				image: "../../source/img/weapon_compactrifle.png"
 			}
@@ -46,6 +46,7 @@ mp.keys.bind(0x49, false, function() {
 			width: 4,
 			height: 2,
 			item: {
+				amount:1,
 				name: "CompactRifle",
 				image: "../../source/img/weapon_compactrifle.png"
 			}
@@ -77,6 +78,12 @@ mp.keys.bind(0x49, false, function() {
 			toggleInvState = false;
 		});
 	}
+}
+let toggleInvState = false;
+mp.keys.bind(0x49, false, function() {
+	console.log("press bind key");
+	toggleInventory() ;
+	
 });
 mp.events.add("Inventory:Update", (inventory) => {
 	console.log("Inventory:Update");
@@ -89,7 +96,9 @@ mp.events.add("Inventory:Update", (inventory) => {
 			id: citem.id,
 			name: details.name,
 			image: details.image,
-			scale: tempSettings.scale || {}
+			scale: tempSettings.scale || {},
+			amount:citem.amount,
+			max_stack:details.max_stack
 		}
 		let width = citem.width;
 		let height = citem.height;
@@ -110,7 +119,8 @@ mp.events.add("Inventory:AddItem", (citem) => {
 		id: citem.id,
 		name: details.name,
 		image: details.image,
-		scale: tempSettings.scale || {}
+		scale: tempSettings.scale || {},
+		amount:citem.amount
 	}
 	let width = citem.width;
 	let height = citem.height;
@@ -166,56 +176,72 @@ var StorageSystem = new class {
 			"Pump Shotgun": {
 				width: 4,
 				height: 2,
+				max_stack:1,
 				name: 'Pump Shotgun',
 				image: '../../source/img/weapon_pumpshotgun.png'
 			},
 			"Hatchet": {
 				width: 2,
 				height: 4,
+				max_stack:1,
 				name: 'Hatchet',
 				image: '../../source/img/hatchet.png'
 			},
 			"12 Gauge Shells": {
 				width: 1,
 				height: 1,
+				max_stack:32,
 				name: '12 Gauge Shells',
 				image: '../../source/img/12_Gauge_Shells.png'
 			},
 			"Micro SMG": {
 				width: 3,
 				height: 2,
+				max_stack:1,
 				name: 'Micro SMG',
 				image: '../../source/img/weapon_microsmg.png'
 			},
 			"9mm Bullets": {
 				width: 1,
 				height: 1,
+				max_stack:128,
 				name: '9mm Bullets',
 				image: '../../source/img/9mm_bullets.png'
 			},
 			"Assault Rifle": {
 				width: 4,
 				height: 2,
+				max_stack:1,
 				name: 'Assault Rifle',
 				image: '../../source/img/weapon_assaultrifle.png'
 			},
 			"5.56m Bullets": {
 				width: 1,
 				height: 1,
+				max_stack:64,
 				name: '5.56m Bullets',
 				image: '../../source/img/556m_Bullets.png'
 			},
 			"Drank": {
 				width: 1,
-				height: 2,
+				height:1,
+				max_stack:15,
 				name: 'Drank',
 				image: '../../source/img/energy_drink_small.png'
 			},
 			"Drank Fresh": {
 				width: 1,
 				height: 2,
+				max_stack:14,
 				name: 'Drank Fresh',
 				image: '../../source/img/energy_drink_small.png'
+			},
+			"Gas Can": {
+				width: 3,
+				height: 3,
+				max_stack:1,
+				name: 'Gas Can',
+				image: '../../source/img/Icon_jerrycan.png'
 			}
 		}
 	}

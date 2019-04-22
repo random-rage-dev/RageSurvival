@@ -5,6 +5,7 @@ console.log = function(...a) {
 mp.isValid = function(val) {
     return val != null && val != undefined && val != "";
 }
+mp.canCrouch = true;
 mp.gameplayCam = mp.cameras.new('gameplay');
 mp.defaultCam = mp.cameras.new('default');
 mp.localPlayer = mp.players.local;

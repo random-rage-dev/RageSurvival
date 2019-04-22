@@ -1,6 +1,7 @@
 var CEFNotification = require("./browser.js").notification;
 var CEFInventory = require("./browser.js").inventory;
 var StorageSystem = require("./storage.js");
+var Notifications = require("./notifications.js");
 var streamedPools = [];
 class LootPool {
     constructor(data) {
@@ -142,9 +143,11 @@ mp.events.add("render", () => {
             pool.getLootPool().forEach(function(item, index) {
                 if (item != null) {
                     let offset_pos = pos.findRot(0, 0.5, Angle_Item * index).ground();
+                    mp.game.graphics.drawMarker(28, offset_pos.x, offset_pos.y, offset_pos.z, 0, 0, 0, 0, 0, 0, ((mp.players.local.isRunning() == true) ? item.thickness * 2 : item.thickness), ((mp.players.local.isRunning() == true) ? item.thickness * 2 : item.thickness), ((mp.players.local.isRunning() == true) ? item.thickness * 2 : item.thickness), 255, 255, 255, 150, false, false, 2, false, "", "", false);
                     if ((pointAt) && (pointAt.position)) {
                         let dist = (offset_pos.dist(pointAt.position));
                         if ((dist <= ((mp.players.local.isRunning() == true) ? item.thickness * 2 : item.thickness)) && (cur_selected == false) && (dist < cur_dist)) {
+                            item.position = offset_pos;
                             cur_selected = item;
                             cur_dist = dist;
                             pool_data = key;
@@ -187,12 +190,16 @@ mp.events.add("render", () => {
                     doesFit.then(function(fit) {
                         if (fit != undefined) {
                             mp.events.callRemote("Loot:Pickup", pool_data, cur_selected.index, cur_selected.name, cur_selected.amount);
+                            /*3d Notify*/
+
+                            let pos = cur_selected.position;
+                            Notifications.notify3D(pos.x,pos.y,pos.z,pos.x,pos.y,pos.z+0.5,`+ ${cur_selected.amount}x${cur_selected.name}`,[255,255,255]);
                             CEFNotification.call("notify", {
                                 title: "Notification",
                                 titleSize: "16px",
                                 message: `${cur_selected.name} just got picked up`,
                                 messageColor: 'rgba(50,50,50,.8)',
-                                position: "bottomCenter",
+                                position: "topCenter",
                                 backgroundColor: 'rgba(206, 206, 206, 0.9)',
                                 close: false
                             })

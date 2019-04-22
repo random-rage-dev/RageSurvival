@@ -3,12 +3,30 @@ var style = getComputedStyle(document.body);
 const cell_size = parseInt(style.getPropertyValue('--cell_size').replace("px", ""));
 const padding = parseInt(style.getPropertyValue('--padding').replace("px", ""));
 var mouseDown = 0;
+var shiftDown = 0;
+var controlDown = 0;
 document.body.onmousedown = function() {
 	mouseDown = 1;
 }
 document.body.onmouseup = function() {
 	mouseDown = 0;
 }
+$(window).keydown(function(e) {
+	if (e.originalEvent.key == "Control") {
+		controlDown = 1;
+	}
+	if (e.originalEvent.key == "Shift") {
+		shiftDown = 1;
+	}
+});
+$(window).keyup(function(e) {
+	if (e.originalEvent.key == "Control") {
+		controlDown = 0;
+	}
+	if (e.originalEvent.key == "Shift") {
+		shiftDown = 0;
+	}
+});
 var ItemStorageHandler = new class {
 	constructor() {
 		this._container = [];
@@ -50,8 +68,6 @@ var ItemStorageHandler = new class {
 					rr.flipped = true;
 				}
 			}
-
-
 			return rr;
 		});
 		console.log("traget Inv", tInv)
@@ -106,6 +122,31 @@ var DragHandler = new class {
 			self.flip(event);
 		});
 	}
+	clear() {
+		var self = this;
+		self._dragging = false;
+		$(self._sampleItem).css({
+			'width': "0px",
+			'height': "0px",
+			'height': "0px",
+			'top': "0px",
+			'left': "0px",
+			'opacity': 0
+		});
+		$(self._sampleItem).find("img").css({
+			'width': "0px",
+			'height': "0px",
+			'top': "0px",
+			'left': "0px",
+			'opacity': 0
+		});
+		$(self._sampleShadow).css({
+			'width': "0px",
+			'height': "0px",
+			'opacity': 0
+		});
+		$(self._sampleItem).removeClass("smooth");
+	}
 	refreshStorages() {
 		let self = this;
 		Object.keys(self._registeredTargets).forEach(function(key) {
@@ -123,27 +164,29 @@ var DragHandler = new class {
 			});
 			let width_cell = self._item_data.height;
 			let height_cell = self._item_data.width;
-			self._item_data.height = height_cell;
-			self._item_data.width = width_cell;
-			let oLeft = self._offset.left;
-			let oTop = self._offset.top;
-			self._offset.top = oLeft;
-			self._offset.left = oTop;
-			if (self._defaultScale != undefined) {
-				$(self._sampleItem).find("img").css({
-					'width': self._defaultScale.width + "px",
-					'height': self._defaultScale.height + "px"
-				});
-				let class_n = "";
+			if (width_cell != height_cell) {
+				self._item_data.height = height_cell;
+				self._item_data.width = width_cell;
+				let oLeft = self._offset.left;
+				let oTop = self._offset.top;
+				self._offset.top = oLeft;
+				self._offset.left = oTop;
 				if (self._defaultScale != undefined) {
-					if (width > self._defaultScale.width) {
-						class_n = "flip drag";
+					$(self._sampleItem).find("img").css({
+						'width': self._defaultScale.width + "px",
+						'height': self._defaultScale.height + "px"
+					});
+					let class_n = "";
+					if (self._defaultScale != undefined) {
+						if (width > self._defaultScale.width) {
+							class_n = "flip drag";
+						}
+						if (height > self._defaultScale.height) {
+							class_n = "flip vert drag";
+						}
 					}
-					if (height > self._defaultScale.height) {
-						class_n = "flip vert drag";
-					}
+					$(self._sampleItem).find("img").attr("class", class_n)
 				}
-				$(self._sampleItem).find("img").attr("class", class_n)
 			}
 			self.move(event);
 		}
@@ -203,35 +246,104 @@ var DragHandler = new class {
 							width: self._item_data.width,
 							height: self._item_data.height
 						}) == true) {
-						if (self._lastTarget.addItemBySlot($(slot).data("cell"), $(slot).data("row"), self._item_data.width, self._item_data.height, Object.assign(self._item_data, {
-								scale: self._defaultScale
-							})) == true) {
-							ItemStorageHandler.moveItem(self._originSource._selector.prop("id"), self._lastTarget._selector.prop("id"))
-							self._dragging = false;
-							$(self._sampleItem).css({
-								'width': "0px",
-								'height': "0px",
-								'height': "0px",
-								'top': "0px",
-								'left': "0px",
-								'opacity': 0
-							});
-							$(self._sampleItem).find("img").css({
-								'width': "0px",
-								'height': "0px",
-								'top': "0px",
-								'left': "0px",
-								'opacity': 0
-							});
-							$(self._sampleShadow).css({
-								'width': "0px",
-								'height': "0px",
-								'opacity': 0
-							});
-							$(self._sampleItem).removeClass("smooth");
+						let fullCount = self._item_data.item.amount;
+						if ((controlDown == 0) && (shiftDown == 0)) {
+							if (self._lastTarget.addItemBySlot($(slot).data("cell"), $(slot).data("row"), self._item_data.width, self._item_data.height, Object.assign(self._item_data, {
+									scale: self._defaultScale
+								})) == true) {
+								ItemStorageHandler.moveItem(self._originSource._selector.prop("id"), self._lastTarget._selector.prop("id"))
+								self.clear();
+							} else {
+								self.returnToOrigin();
+							}
+						} else if ((controlDown == 1) && (fullCount >= 2)) {
+							let itemBackup = JSON.parse(JSON.stringify(self._item_data.item));
+							let half = self._item_data.item.amount / 2;
+							let toGive = Math.floor(half);
+							let tempItemData = {
+								cell: self._item_data.cell,
+								height: self._item_data.height,
+								item: itemBackup,
+								row: self._item_data.row,
+								scale: self._item_data.scale,
+								width: self._item_data.width
+							}
+							tempItemData.item.id = "NEW";
+							tempItemData.item.amount = toGive;
+							if (self._lastTarget.addItemBySlot($(slot).data("cell"), $(slot).data("row"), self._item_data.width, self._item_data.height, Object.assign(tempItemData, {
+									scale: self._defaultScale
+								})) == true) {
+								self._item_data.item.amount = fullCount - toGive;
+								self.returnToOrigin();
+								ItemStorageHandler.moveItem(self._originSource._selector.prop("id"), self._lastTarget._selector.prop("id"))
+								self.clear();
+							} else {
+								self.returnToOrigin();
+							}
+						} else if ((shiftDown == 1) && (fullCount >= 2)) {
+							let itemBackup = JSON.parse(JSON.stringify(self._item_data.item));
+							let toGive = 1;
+							let tempItemData = {
+								cell: self._item_data.cell,
+								height: self._item_data.height,
+								item: itemBackup,
+								row: self._item_data.row,
+								scale: self._item_data.scale,
+								width: self._item_data.width
+							}
+							tempItemData.item.id = "NEW";
+							tempItemData.item.amount = toGive;
+							if (self._lastTarget.addItemBySlot($(slot).data("cell"), $(slot).data("row"), self._item_data.width, self._item_data.height, Object.assign(tempItemData, {
+									scale: self._defaultScale
+								})) == true) {
+								self._item_data.item.amount = fullCount - toGive;
+								self.returnToOrigin();
+								ItemStorageHandler.moveItem(self._originSource._selector.prop("id"), self._lastTarget._selector.prop("id"))
+								self.clear();
+							} else {
+								self.returnToOrigin();
+							}
+						} else {
+							self.returnToOrigin();
 						}
 					} else {
-						self.returnToOrigin();
+						/* Check amount transfer*/
+						let targetItem = self._lastTarget.getItemInSlot($(slot).data("cell"), $(slot).data("row")).item;
+						let tItem = targetItem.item;
+						console.log(tItem.name, self._item_data.item.name);
+						console.log(tItem.name == self._item_data.item.name);
+						if (tItem.name == self._item_data.item.name) {
+							console.log(tItem.amount, "<", tItem.max_stack, tItem.amount < tItem.max_stack);
+							if (tItem.amount < tItem.max_stack) {
+								let top = $(slot).offset().top;
+								let left = $(slot).offset().left;
+								let color = "rgba(0,0,150,0.2)";
+								console.log("set colors");
+								if (tItem.amount + self._item_data.item.amount <= tItem.max_stack) {
+									color = "rgba(150,0,0,0.5)"
+									console.log("smaller");
+									self._lastTarget.editItem($(slot).data("cell"), $(slot).data("row"), {
+										amount: tItem.amount + self._item_data.item.amount
+									})
+									self.clear();
+									ItemStorageHandler.moveItem(self._originSource._selector.prop("id"), self._lastTarget._selector.prop("id"))
+								} else if (tItem.amount + self._item_data.item.amount > tItem.max_stack) {
+									color = "rgba(0,150,0,0.5)"
+									console.log("bigger");
+									let total = tItem.amount + self._item_data.item.amount;
+									self._lastTarget.editItem($(slot).data("cell"), $(slot).data("row"), {
+										amount: tItem.max_stack
+									})
+									self._item_data.item.amount = (total - tItem.max_stack);
+									self.returnToOrigin();
+									ItemStorageHandler.moveItem(self._originSource._selector.prop("id"), self._lastTarget._selector.prop("id"))
+								} else {
+									self.returnToOrigin();
+								}
+							} else {
+								self.returnToOrigin();
+							}
+						}
 					}
 				} else {
 					self.returnToOrigin();
@@ -247,25 +359,7 @@ var DragHandler = new class {
 			if (self._originSource.addItemBySlot(self._item_data_old.cell, self._item_data_old.row, self._item_data_old.width, self._item_data_old.height, Object.assign(self._item_data, {
 					scale: self._defaultScale
 				})) == true) {
-				self._dragging = false;
-				$(self._sampleItem).css({
-					'width': "0px",
-					'height': "0px",
-					'opacity': 0
-				});
-				$(self._sampleItem).find("img").css({
-					'width': "0px",
-					'height': "0px",
-					'top': "0px",
-					'left': "0px",
-					'opacity': 0
-				});
-				$(self._sampleShadow).css({
-					'width': "0px",
-					'height': "0px",
-					'opacity': 0
-				});
-				$(self._sampleItem).removeClass("smooth");
+				self.clear();
 			}
 		}
 	}
@@ -277,6 +371,15 @@ var DragHandler = new class {
 			return true;
 		}
 		return false;
+	}
+	deleteDropable(selector) {
+		selector = selector.replace("#", "");
+		console.log("deleteDropable", selector)
+		if (this._registeredTargets[selector]) {
+			console.log("dropable exists and is registered");
+			this._registeredTargets[selector] = null;
+			delete this._registeredTargets[selector];
+		}
 	}
 	registerDropable(source, selector) {
 		selector = selector.replace("#", "");
@@ -301,7 +404,6 @@ var DragHandler = new class {
 			self._offset.top = offset_top;
 			self._offset.left = offset_left;
 			let Item_data = $(item).data("item");
-			console.log("FULL ITEM DATA", Item_data);
 			self._defaultScale = $(item).find("img").data("default");
 			self._item_data = Item_data;
 			self._item_data_old = Item_data;
@@ -333,7 +435,6 @@ var DragHandler = new class {
 				top: (event.clientY - self._offset.top) + 'px',
 				left: (event.clientX - self._offset.left) + 'px'
 			});
-			console.log(self._item_data);
 			self._sampleItem.html(`<img style="opacity:0;" class="${aClass}" id="dragItemImage" src="${self._item_data.item.image}"></img>`);
 			$($(self._sampleItem).find("img")).bind("load", function() {
 				$(self._sampleItem).find("img").attr("class", class_n)
@@ -365,20 +466,49 @@ var DragHandler = new class {
 					$(self._sampleShadow).css({
 						top: top + 'px',
 						left: left + 'px',
+						"background": "rgba(0,0,0,0.2)",
 						'opacity': 1
 					});
 					$(self._sampleShadow).css({
 						'width': self._item_data.width * cell_size + "px",
 						'height': self._item_data.height * cell_size + "px"
 					});
+					console.log("slot", $(slot));
 				} else {
-					$(self._sampleShadow).css({
-						'width': "0px",
-						'height': "0px",
-						'top': "0px",
-						'left': "0px",
-						'opacity': 0
-					});
+					let targetItem = self._lastTarget.getItemInSlot($(slot).data("cell"), $(slot).data("row")).item;
+					let tItem = targetItem.item;
+					if (tItem.name == self._item_data.item.name) {
+						if (tItem.amount < tItem.max_stack) {
+							let top = $(slot).offset().top;
+							let left = $(slot).offset().left;
+							let color = "rgba(0,0,255,1)";
+							if (tItem.amount + self._item_data.item.amount <= tItem.max_stack) {
+								color = "rgba(0,150,0,0.3)"
+							}
+							if (tItem.amount + self._item_data.item.amount > tItem.max_stack) {
+								color = "rgba(0,150,0,0.3)"
+							}
+							$(self._sampleShadow).css({
+								top: top + 'px',
+								left: left + 'px',
+								"background": color,
+								'opacity': 1
+							});
+							$(self._sampleShadow).css({
+								'width': self._item_data.width * cell_size + "px",
+								'height': self._item_data.height * cell_size + "px"
+							});
+						}
+					} else {
+						$(self._sampleShadow).css({
+							'width': "0px",
+							'height': "0px",
+							'top': "0px",
+							'left': "0px",
+							'opacity': 0
+						});
+					}
+					/**/
 				}
 			} else {
 				$(self._sampleShadow).css({
@@ -395,6 +525,7 @@ var DragHandler = new class {
 var Storage = class {
 	constructor(selector, options) {
 		let self = this;
+		this._rawSelector = selector;
 		this._selector = $(selector);
 		if (typeof options == "object") {
 			self._top = options.top || 0;
@@ -406,7 +537,7 @@ var Storage = class {
 		this._oldInventory = [];
 		this.fill();
 		this.render();
-		DragHandler.registerDropable(this, selector)
+		DragHandler.registerDropable(this, this._rawSelector)
 		ItemStorageHandler.register(selector.replace("#", ""), self);
 		/*Drag Events*/
 		self._repos_offset = {
@@ -444,11 +575,9 @@ var Storage = class {
 				let lEvent = function(event) {
 					if (DragHandler.isDraggable(cTarget) == true) {
 						let data = $(cTarget).data("item");
-						console.log("rBe4", data);
 						DragHandler.Handle(event, cTarget, self);
 						self.removeItemBySlot(data.cell, data.row);
 						self.render()
-						console.log("unbind move func");
 						$(window).unbind("mousemove", lEvent)
 					}
 				}
@@ -461,6 +590,8 @@ var Storage = class {
 	}
 	remove() {
 		$(this._selector).remove();
+		console.log("REMOVE");
+		DragHandler.deleteDropable(this._rawSelector)
 	}
 	moveWindow(top, left) {
 		let self = this;
@@ -499,6 +630,31 @@ var Storage = class {
 	}
 	inventory() {
 		return this._inventory;
+	}
+	editItem(gCell, gRow, new_item_data) {
+		let self = this;
+		let slot = self.getItemInSlot(gCell, gRow);
+		if (slot.index > -1) {
+			console.log("INVENTORY EDIT ITEM");
+			console.log(JSON.stringify(self._inventory[slot.index]));
+			console.log("NEW", JSON.stringify(new_item_data));
+			let itemRef = this._inventory[slot.index];
+			let nItem = Object.assign(itemRef.item, new_item_data)
+			itemRef.item = nItem;
+			console.log("itemRef.item", itemRef);
+			this._inventory.splice(slot.index, 1);
+			this._inventory.push({
+				cell: itemRef.cell,
+				row: itemRef.row,
+				width: itemRef.width,
+				height: itemRef.height,
+				item: itemRef.item,
+				scale: itemRef.scale
+			})
+			console.log(this._inventory);
+			console.log("INVENTORY RENDER");
+			self.render();
+		}
 	}
 	fill() {
 		this._selector.find(".grid").html("");
@@ -546,7 +702,7 @@ var Storage = class {
 	getItemInSlot(gCell, gRow) {
 		let slot = $(this._selector.find(".grid")).find(`.cell[data-row='${gRow}'][data-cell='${gCell}']`);
 		if (slot != undefined) {
-			let item = this._inventory.find(function(cell_data) {
+			let item = this._inventory.findIndex(function(cell_data) {
 				for (var row = cell_data.row; row < (cell_data.row + cell_data.height); row++) {
 					for (var cell = cell_data.cell; cell < (cell_data.cell + cell_data.width); cell++) {
 						if ((cell == gCell) && (row == gRow)) {
@@ -556,7 +712,12 @@ var Storage = class {
 				}
 				return false;
 			})
-			return item;
+			if (this._inventory[item] != undefined) {
+				return {
+					index: item,
+					item: this._inventory[item]
+				};
+			}
 		}
 		return false;
 	}
@@ -659,6 +820,7 @@ var Storage = class {
 			let scale = undefined;
 			if (data.scale) {
 				scale = data.scale;
+				data.scale = undefined;
 			}
 			if (data.item) {
 				data = data.item;
@@ -703,31 +865,30 @@ var Storage = class {
 			'top': self._top + "px",
 			'left': self.left + "px"
 		})
-		console.log("xxxxx");
+		console.log("self._inventory", self._inventory);
+		console.log("self._oldInventory", self._oldInventory);
 		let cells = $(this._selector.find(".grid")).find('.cell').toArray();
 		let toRemove = self._oldInventory.filter(function(item) {
 			let iIndex = self._inventory.findIndex(function(d) {
-				return (d.cell == item.cell) && (d.row == item.row) && (d.width == item.width) && (d.height == item.height);
+				return (d.cell == item.cell) && (d.row == item.row) && (d.width == item.width) && (d.height == item.height) && (d.item.amount == item.item.amount);
 			})
 			return iIndex == -1;
 		})
-		console.log("yyyyyy");
 		let toAdd = self._inventory.filter(function(item) {
 			let iIndex = self._oldInventory.findIndex(function(d) {
-				return (d.cell == item.cell) && (d.row == item.row) && (d.width == item.width) && (d.height == item.height);
+				return (d.cell == item.cell) && (d.row == item.row) && (d.width == item.width) && (d.height == item.height) && (d.item.amount == item.item.amount);
 			})
-			return iIndex == -1;
+			return iIndex == -1 && self._inventory[iIndex] == undefined;
 		})
-		console.log("zzzzz");
+		console.log("toRemove", toRemove);
+		console.log("toAdd", toAdd);
 		toRemove.forEach(function(item) {
 			let remove = self._selector.find(".items").find(`.item[data-cell='${item.cell}'][data-row='${item.row}']`);
 			if (remove != undefined) {
-				console.log("remove", $(remove).remove());
+				$(remove).remove()
 			}
 		})
-		console.log("aaaaaa");
 		toAdd.forEach(function(item) {
-			console.log("item", JSON.stringify(item));
 			let abs = self.getAbsoluteBySlot(item.cell, item.row);
 			let a = $(`<div data-cell=${item.cell} data-row=${item.row} data-item='${JSON.stringify(item)}' class='item' style='top:${abs.top}px;left:${abs.left}px'></div>`);
 			let width = (item.width) * cell_size;
@@ -748,8 +909,8 @@ var Storage = class {
 					old_height = item.scale.height;
 				}
 			}
-			console.log("ffff");
-			$(a).html(`<img class="${class_n}" data-default=${JSON.stringify({width:old_width,height:old_height})} src="${img}"></img>`)
+			console.log("AMOUNT", item.item.amount);
+			$(a).html(`<div class='amount'>${item.item.amount}</div><img class="${class_n}" data-default=${JSON.stringify({width:old_width,height:old_height})} src="${img}"></img>`)
 			a.height(height)
 			a.width(width)
 			let x = self._selector.find(".items").append(a);
@@ -776,7 +937,7 @@ var Storage = class {
 				}
 			})
 		})
-		this._oldInventory = this._inventory.slice();
+		this._oldInventory = JSON.parse(JSON.stringify(this._inventory));
 	};
 }
 var nonStandartContainer = [];
@@ -902,7 +1063,6 @@ rpc.register('isBusy', function() {
 	return mouseDown == 1;
 });
 rpc.register('doesFitInto', function(options) {
-	console.log("doesFitInto", options);
 	if (storageContainers["#" + options.what]) {
 		return storageContainers["#" + options.what].getNextFreeSlot(options.w, options.h)
 	}

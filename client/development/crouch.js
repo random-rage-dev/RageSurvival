@@ -30,5 +30,7 @@ mp.events.addDataHandler("isCrouched", (entity, value) => {
 });
 
 mp.keys.bind(0x11, false, () => {
-    mp.events.callRemote("Player:Crouch");
+    if (mp.canCrouch == true) {
+        mp.events.callRemote("Player:Crouch");
+    }
 });

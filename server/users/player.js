@@ -40,7 +40,11 @@ var Player = class {
         self._armor = 100;
         self._storage = {};
         self._characterData = [];
-        self._position = {x:0,y:0,z:0}
+        self._position = {
+            x: 0,
+            y: 0,
+            z: 0
+        }
     }
     log(...args) {
         console.log("Account:Log", args)
@@ -117,7 +121,6 @@ var Player = class {
     }
     death(killer, weapon, reason) {
         let self = this;
-
         self._position = mp.vector(PlayerSpawns[Math.floor(Math.random() * PlayerSpawns.length)]);
         setTimeout(function() {
             self.spawn(1);
@@ -140,7 +143,7 @@ var Player = class {
         self._player.call("Cam:Hide")
         self._player.call("Player:Spawn");
         if (fresh == 1) {
-            self._player.call("Player:WanderDuration",[1000]);
+            self._player.call("Player:WanderDuration", [1000]);
         }
         self._spawnedTimestamp = Date.now();
     }
@@ -184,15 +187,17 @@ var Player = class {
             owner_id: self._userId
         }, async function(err, arr) {
             if (err) return console.log(err);
-            if (arr != undefined ) {
+            if (arr != undefined) {
                 let cInventory = arr;
-                self._inventory = cInventory.map(function(item,i) {
+                self._inventory = cInventory.map(function(item, i) {
                     return {
-                        name:item.name,
-                        amount:item.amount,
-                        data:item.data
+                        id: item._id,
+                        name: item.name,
+                        amount: item.amount,
+                        data: item.data
                     }
                 });
+                self._player.call("Inventory:Update", [self._inventory])
                 console.log(self._inventory);
                 mp.events.call("Player:Inventory", self._player, self._inventory)
                 self.spawn();
@@ -205,17 +210,22 @@ var Player = class {
     giveItem(item) {
         let self = this;
         console.log("giveItem", item);
-        let dbItem = new Inventory({
+        Inventory.create({
             owner_id: self._userId,
             name: item.name,
             amount: item.amount,
-            data:item.data
-        });
-        dbItem.save(function(err) {
-            if (err) return console.log(err);
+            data: item.data
+        }, function(err, rV) {
+            if (err)  console.log(err);
             // saved!
-            mp.events.call("Player:Inventory:AddItem", self._player, item)
-            self._player.call("Inventory:AddItem", [item.name, item.amount])
+            let iData =  {
+                    id: rV._id,
+                    name: rV.name,
+                    amount: rV.amount,
+                    data: rV.data
+                }
+            mp.events.call("Player:Inventory:AddItem", self._player, iData)
+            self._player.call("Inventory:AddItem", [iData])
         });
     }
     removeItem(name, amount) {}
@@ -241,7 +251,7 @@ var Player = class {
                         close: false
                     }])
                     self._characterData = JSON.parse(data);
-                    self.load(self._username,1);
+                    self.load(self._username, 1);
                 }
                 return fulfill("Succesfully saved data", self._username);
             } else {
@@ -347,7 +357,7 @@ var Player = class {
                 data.resemblance * 0.01, data.tone * 0.01, 0.0);
         }
     }
-    load(username,fresh = 0) {
+    load(username, fresh = 0) {
         var self = this;
         self._username = username;
         self._player.call("Account:HideLogin")
@@ -402,7 +412,11 @@ var Player = class {
                     social_clib: social_club,
                     password: password_hash,
                     salt: salt,
-                    position:{x:position.x,y:position.y,z:position.z}
+                    position: {
+                        x: position.x,
+                        y: position.y,
+                        z: position.z
+                    }
                 }, function(err, rV) {
                     if (err) {
                         self._player.call("Account:Alert", ["Username already exsits"])

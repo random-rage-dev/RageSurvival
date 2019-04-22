@@ -1,3 +1,4 @@
+const rpc = require('rage-rpc');
 require("./libs/vector.js")
 require("./libs/array.js")
 var PlayerClass = require("./users/player.js")
@@ -33,6 +34,10 @@ mp.events.add("playerQuit", function(player, exitType, reason) {
             delete players[player_id];
         })
     }
+});
+
+mp.events.add('playerJoin', player => {
+    console.log(`[SERVER]: ${player.name} SC:${player.socialClub} HWID:${player.serial} joined`);
 });
 mp.events.add("ServerAccount:Login", function(player, username, password) {
     if (players[player.id]) {
@@ -115,3 +120,4 @@ mp.events.addCommand("savepos", (player, name = "No name") => {
         }
     });
 });
+

@@ -1,3 +1,4 @@
+mp.rpc = require("./libs/rage-rpc.min.js");
 console.log = function(...a) {
     mp.gui.chat.push("DEBUG:" + a.join(" "))
 };
@@ -19,8 +20,8 @@ require("./login.js")
 require("./combat.js")
 require("./character_creator.js")
 require("./vehicles.js")
+require("./storage.js")
 var natives = require("./natives.js")
-var CEFInterface = require("./browser.js").interface;
 var CEFNotification = require("./browser.js").notification;
 mp.events.add("Notifications:New", (notification_data) => {
     CEFNotification.call("notify", notification_data)

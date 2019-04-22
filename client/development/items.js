@@ -1,5 +1,6 @@
 var CEFNotification = require("./browser.js").notification;
-
+var CEFInventory = require("./browser.js").inventory;
+var StorageSystem = require("./storage.js");
 var streamedPools = [];
 class LootPool {
     constructor(data) {
@@ -123,7 +124,8 @@ function pointingAt() {
     }
     return result;
 }
-
+let cStatus = "";
+let cItem = 0;
 let timer_anim;
 mp.events.add("render", () => {
     /*Display Items*/
@@ -162,31 +164,50 @@ mp.events.add("render", () => {
             outline: true,
             centre: true
         });
+        if ((cItem == cur_selected) && (cStatus != "")) {
+            mp.game.graphics.drawText("\n[" + cStatus + "]", [0.5, 0.55], {
+                font: 4,
+                color: [255, 150, 150, 200],
+                scale: [0.3, 0.3],
+                outline: true,
+                centre: true
+            });
+        } else {
+            cStatus = "";
+            cItem = cur_selected
+        }
         if (mp.game.controls.isDisabledControlJustPressed(0, 51)) { // 51 == "E"
             //Loot:Pickup
             if (pool_data) {
                 let name = cur_selected.name;
                 let amount = cur_selected.amount;
                 if (amount > 0) {
-                    mp.events.callRemote("Loot:Pickup", pool_data, cur_selected.index, cur_selected.name, cur_selected.amount);
-                    CEFNotification.call("notify", {
-                        title: "Notification",
-                        titleSize: "16px",
-                        message: `${cur_selected.name} just got picked up`,
-                        messageColor: 'rgba(50,50,50,.8)',
-                        position: "bottomCenter",
-                        backgroundColor: 'rgba(206, 206, 206, 0.9)',
-                        close: false
+                    let details = StorageSystem.mapItem(name);
+                    let doesFit = StorageSystem.checkFit("inventory", details.width, details.height)
+                    doesFit.then(function(fit) {
+                        if (fit != undefined) {
+                            mp.events.callRemote("Loot:Pickup", pool_data, cur_selected.index, cur_selected.name, cur_selected.amount);
+                            CEFNotification.call("notify", {
+                                title: "Notification",
+                                titleSize: "16px",
+                                message: `${cur_selected.name} just got picked up`,
+                                messageColor: 'rgba(50,50,50,.8)',
+                                position: "bottomCenter",
+                                backgroundColor: 'rgba(206, 206, 206, 0.9)',
+                                close: false
+                            })
+                            if (timer_anim) {
+                                clearTimeout(timer_anim);
+                                mp.players.local.stopAnimTask("mp_take_money_mg", "stand_cash_in_bag_loop", 1.0);
+                            }
+                            mp.players.local.taskPlayAnim("mp_take_money_mg", "stand_cash_in_bag_loop", 16, 8.0, -1, 49, 0, false, false, false);
+                            timer_anim = setTimeout(function() {
+                                mp.players.local.stopAnimTask("mp_take_money_mg", "stand_cash_in_bag_loop", 1.0);
+                            }, 250);
+                        } else {
+                            cStatus = "Not enough Space";
+                        }
                     })
-
-                    if (timer_anim) {
-                        clearTimeout(timer_anim);
-                        mp.players.local.stopAnimTask("mp_take_money_mg", "stand_cash_in_bag_loop", 1.0);
-                    }
-                    mp.players.local.taskPlayAnim("mp_take_money_mg", "stand_cash_in_bag_loop", 16, 8.0, -1, 49, 0, false, false, false);
-                    timer_anim = setTimeout(function() {
-                        mp.players.local.stopAnimTask("mp_take_money_mg", "stand_cash_in_bag_loop", 1.0);
-                    }, 250);
                 }
             }
         }

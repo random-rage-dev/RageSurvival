@@ -246,10 +246,10 @@ setInterval(function() {
     //console.log("sync");
     ZombieManager.syncZombies();
 }, 1000 / tick_rate);
-ZombieManager.newZombie(1964.2689208984375, 3727.28271484375, 32.33523178100586);
+/*ZombieManager.newZombie(1964.2689208984375, 3727.28271484375, 32.33523178100586);
 ZombieManager.newZombie(1967.2689208984375, 3729.28271484375, 32.33523178100586);
 
-
+*/
 mp.events.add("Zombie:ReSync", function(player,id,data) {
     //console.log("Zombie:ReSync",JSON.stringify(id),JSON.stringify(data));
     let zIndex = ZombieManager.getZombieById(id);

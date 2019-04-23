@@ -12,7 +12,7 @@ var loot_tiers = [];
             Beach
             Farm
             Forest
-            Craftbar
+            Craftable
             Land
  */
 loot_tiers["Residential"] = {
@@ -26,7 +26,7 @@ loot_tiers["Residential"] = {
     "Beach": 0,
     "Farm": 0,
     "Forest": 0,
-    "Craftbar": 0,
+    "Craftable": 0,
     "Land": 0
 };
 loot_tiers["Industrial"] = {
@@ -40,7 +40,7 @@ loot_tiers["Industrial"] = {
     "Beach": 0,
     "Farm": 0,
     "Forest": 0,
-    "Craftbar": 0,
+    "Craftable": 0,
     "Land": 0
 };
 loot_tiers["Food"] = {
@@ -54,7 +54,7 @@ loot_tiers["Food"] = {
     "Beach": 0,
     "Farm": 0,
     "Forest": 0,
-    "Craftbar": 0,
+    "Craftable": 0,
     "Land": 0
 };
 loot_tiers["Other"] = {
@@ -68,7 +68,7 @@ loot_tiers["Other"] = {
     "Beach": 0,
     "Farm": 0,
     "Forest": 0,
-    "Craftbar": 0,
+    "Craftable": 0,
     "Land": 0
 };
 loot_tiers["Military"] = {
@@ -82,7 +82,7 @@ loot_tiers["Military"] = {
     "Beach": 0,
     "Farm": 0,
     "Forest": 0,
-    "Craftbar": 0,
+    "Craftable": 0,
     "Land": 0
 };
 loot_tiers["Hospital"] = {
@@ -96,7 +96,7 @@ loot_tiers["Hospital"] = {
     "Beach": 0,
     "Farm": 0,
     "Forest": 0,
-    "Craftbar": 0,
+    "Craftable": 0,
     "Land": 0
 };
 loot_tiers["Police"] = {
@@ -110,7 +110,7 @@ loot_tiers["Police"] = {
     "Beach": 0,
     "Farm": 0,
     "Forest": 0,
-    "Craftbar": 0,
+    "Craftable": 0,
     "Land": 0
 };
 loot_tiers["Beach"] = {
@@ -124,7 +124,7 @@ loot_tiers["Beach"] = {
     "Beach": 40,
     "Farm": 0,
     "Forest": 0,
-    "Craftbar": 0,
+    "Craftable": 0,
     "Land": 0
 };
 loot_tiers["Farm"] = {
@@ -138,7 +138,7 @@ loot_tiers["Farm"] = {
     "Beach": 0,
     "Farm": 45,
     "Forest": 0,
-    "Craftbar": 0,
+    "Craftable": 0,
     "Land": 0
 };
 loot_tiers["Forest"] = {
@@ -152,10 +152,10 @@ loot_tiers["Forest"] = {
     "Beach": 0,
     "Farm": 26,
     "Forest": 70,
-    "Craftbar": 0,
+    "Craftable": 0,
     "Land": 0
 };
-loot_tiers["Craftbar"] = {
+loot_tiers["Craftable"] = {
     "Residential": 0,
     "Industrial": 0,
     "Other": 0,
@@ -166,7 +166,7 @@ loot_tiers["Craftbar"] = {
     "Beach": 0,
     "Farm": 0,
     "Forest": 0,
-    "Craftbar": 0,
+    "Craftable": 0,
     "Land": 0
 };
 loot_tiers["Land"] = {
@@ -180,7 +180,7 @@ loot_tiers["Land"] = {
     "Beach": 0,
     "Farm": 0,
     "Forest": 0,
-    "Craftbar": 0,
+    "Craftable": 0,
     "Land": 0
 };
 var loot_respawn = [];
@@ -195,7 +195,7 @@ var loot_respawn = [];
             Beach
             Farm
             Forest
-            Craftbar
+            Craftable
             Land
  */
 loot_respawn["Residential"] = 30 * 60 * 1000;
@@ -208,7 +208,7 @@ loot_respawn["Police"] = 90 * 60 * 1000;
 loot_respawn["Beach"] = 15 * 60 * 1000;
 loot_respawn["Farm"] = 45 * 60 * 1000;
 loot_respawn["Forest"] = 45 * 60 * 1000;
-loot_respawn["Craftbar"] = 45 * 60 * 1000;
+loot_respawn["Craftable"] = 45 * 60 * 1000;
 loot_respawn["Land"] = 45 * 60 * 1000;
 var Loottable = class {
     constructor() {

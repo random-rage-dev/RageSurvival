@@ -1,4 +1,5 @@
 var MongoDB = require("../libs/mongodb.js")
+var Storage = require("../world/storage.js")
 var PlayerSpawns = require("../world/playerspawns.js")
 var User = MongoDB.getUserModel();
 var Inventory = MongoDB.getInventoryModel();
@@ -179,6 +180,9 @@ var Player = class {
             }
         }
     }
+    getInventory() {
+        return this._inventory;
+    }
     /* Inventory */
     loadInventory() {
         let self = this;
@@ -190,12 +194,13 @@ var Player = class {
             if (arr != undefined) {
                 let cInventory = arr;
                 self._inventory = cInventory.map(function(item, i) {
-                    return {
+                    let itemData = Storage.map({
                         id: item._id,
                         name: item.name,
                         amount: item.amount,
                         data: item.data
-                    }
+                    });
+                    return itemData;
                 });
                 self._player.call("Inventory:Update", [self._inventory])
                 console.log(self._inventory);
@@ -216,16 +221,17 @@ var Player = class {
             amount: item.amount,
             data: item.data
         }, function(err, rV) {
-            if (err)  console.log(err);
+            if (err) console.log(err);
             // saved!
-            let iData =  {
-                    id: rV._id,
-                    name: rV.name,
-                    amount: rV.amount,
-                    data: rV.data
-                }
-            mp.events.call("Player:Inventory:AddItem", self._player, iData)
-            self._player.call("Inventory:AddItem", [iData])
+            let itemData = Storage.map({
+                id: rV._id,
+                name: rV.name,
+                amount: rV.amount,
+                data: rV.data
+            });
+            self._inventory.push(itemData);
+            mp.events.call("Player:Inventory:AddItem", self._player, itemData)
+            self._player.call("Inventory:AddItem", [itemData])
         });
     }
     removeItem(name, amount) {}

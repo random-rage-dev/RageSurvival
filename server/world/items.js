@@ -107,6 +107,18 @@ var items = {
             pos: new mp.Vector3(0, 0, 0),
             rot: new mp.Vector3(0, 0, 0)
         }
+    },
+    "Wood": {
+        type: "Craftable",
+        model: "prop_fncwood_13c",
+        thickness: 0.35,
+        amount: function() {
+            return 1
+        },
+        offset: {
+            pos: new mp.Vector3(0, 0, 0),
+            rot: new mp.Vector3(0, 0, 0)
+        }
     }
 };
 module.exports = items;

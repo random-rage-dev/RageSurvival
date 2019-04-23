@@ -29,6 +29,12 @@ function checkResourceInFront(max_dist) {
     return nearest.resource != "" ? nearest.resource : false;
 }
 
+mp.rpc.register('getMaterialInFront', async (id) => {
+    let data = checkResourceInFront(2);
+    return data;
+});
+
 mp.keys.bind(0x09, false, () => {
     console.log(JSON.stringify(checkResourceInFront(2)));
 });
+module.exports = checkResourceInFront;

@@ -5,11 +5,17 @@ const padding = parseInt(style.getPropertyValue('--padding').replace("px", ""));
 var mouseDown = 0;
 var shiftDown = 0;
 var controlDown = 0;
-document.body.onmousedown = function() {
-	mouseDown = 1;
+document.body.onmousedown = function(e) {
+	console.log("onmousedown",e.which,e);
+	if (e.which == 1) {
+		mouseDown = 1;
+	};
 }
-document.body.onmouseup = function() {
-	mouseDown = 0;
+document.body.onmouseup = function(e) {
+	console.log("onmouseup",e.which,e);
+	if (e.which == 1) {
+		mouseDown = 0;
+	};
 }
 $(window).keydown(function(e) {
 	if (e.originalEvent.key == "Control") {
@@ -27,6 +33,12 @@ $(window).keyup(function(e) {
 		shiftDown = 0;
 	}
 });
+var ContextHandler = new class {
+	constructor() {}
+	open(id, source) {
+		//TODO EXTEND!!!
+	}
+}
 var ItemStorageHandler = new class {
 	constructor() {
 		this._container = [];
@@ -113,6 +125,7 @@ var DragHandler = new class {
 		});
 		$(window).mouseup(function(event) {
 			if (isToggledInto == false) return;
+			if (event.which != 1) return;
 			self.mouseup(event)
 		});
 		$(window).on('contextmenu', function(event) {
@@ -194,11 +207,6 @@ var DragHandler = new class {
 	move(event) {
 		var self = this;
 		if (self._dragging == true) {
-			$("#debug_point").css({
-				top: (event.clientY) + 'px',
-				left: (event.clientX) + 'px',
-				'opacity': 1
-			});
 			$(self._sampleItem).css({
 				top: (event.clientY - self._offset.top) + 'px',
 				left: (event.clientX - self._offset.left) + 'px',
@@ -235,10 +243,15 @@ var DragHandler = new class {
 	}
 	mouseup(event) {
 		var self = this;
-		if (event.which != 1) return false;
 		if (self._dragging) {
 			if (self._lastTarget != undefined) {
-				let slot = self._lastTarget.getSlotByAbsolute((event.clientY - self._offset.top), (event.clientX - self._offset.left))
+				let offset_top = (self._offset.top > cell_size) ? (self._offset.top - (cell_size * 0.75)) : (self._offset.top - cell_size/2)
+				let offset_left = (self._offset.left > cell_size) ? (self._offset.left - (cell_size * 0.75)) : (self._offset.left - cell_size/2)
+				let r_pos_top = (event.clientY - offset_top);
+				let r_pos_left = (event.clientX - offset_left);
+
+
+				let slot = self._lastTarget.getSlotByAbsolute(r_pos_top,r_pos_left)
 				if (slot != undefined) {
 					if (self._lastTarget.isFree({
 							cell: $(slot).data("cell"),
@@ -308,41 +321,41 @@ var DragHandler = new class {
 						}
 					} else {
 						/* Check amount transfer*/
-						let targetItem = self._lastTarget.getItemInSlot($(slot).data("cell"), $(slot).data("row")).item;
-						let tItem = targetItem.item;
-						console.log(tItem.name, self._item_data.item.name);
-						console.log(tItem.name == self._item_data.item.name);
-						if (tItem.name == self._item_data.item.name) {
-							console.log(tItem.amount, "<", tItem.max_stack, tItem.amount < tItem.max_stack);
-							if (tItem.amount < tItem.max_stack) {
-								let top = $(slot).offset().top;
-								let left = $(slot).offset().left;
-								let color = "rgba(0,0,150,0.2)";
-								console.log("set colors");
-								if (tItem.amount + self._item_data.item.amount <= tItem.max_stack) {
-									color = "rgba(150,0,0,0.5)"
-									console.log("smaller");
-									self._lastTarget.editItem($(slot).data("cell"), $(slot).data("row"), {
-										amount: tItem.amount + self._item_data.item.amount
-									})
-									self.clear();
-									ItemStorageHandler.moveItem(self._originSource._selector.prop("id"), self._lastTarget._selector.prop("id"))
-								} else if (tItem.amount + self._item_data.item.amount > tItem.max_stack) {
-									color = "rgba(0,150,0,0.5)"
-									console.log("bigger");
-									let total = tItem.amount + self._item_data.item.amount;
-									self._lastTarget.editItem($(slot).data("cell"), $(slot).data("row"), {
-										amount: tItem.max_stack
-									})
-									self._item_data.item.amount = (total - tItem.max_stack);
-									self.returnToOrigin();
-									ItemStorageHandler.moveItem(self._originSource._selector.prop("id"), self._lastTarget._selector.prop("id"))
+						let targetItem = self._lastTarget.getItemInSlot($(slot).data("cell"), $(slot).data("row"));
+						if (targetItem != false) {
+							let tItem = targetItem.item.item;
+							if (tItem.name == self._item_data.item.name) {
+								if (tItem.amount < tItem.max_stack) {
+									let top = $(slot).offset().top;
+									let left = $(slot).offset().left;
+									console.log("set colors");
+									if (tItem.amount + self._item_data.item.amount <= tItem.max_stack) {
+										console.log("smaller");
+										self._lastTarget.editItem($(slot).data("cell"), $(slot).data("row"), {
+											amount: tItem.amount + self._item_data.item.amount
+										})
+										self.clear();
+										ItemStorageHandler.moveItem(self._originSource._selector.prop("id"), self._lastTarget._selector.prop("id"))
+									} else if (tItem.amount + self._item_data.item.amount > tItem.max_stack) {
+										console.log("bigger");
+										let total = tItem.amount + self._item_data.item.amount;
+										self._lastTarget.editItem($(slot).data("cell"), $(slot).data("row"), {
+											amount: tItem.max_stack
+										})
+										self._item_data.item.amount = (total - tItem.max_stack);
+										self.returnToOrigin();
+										ItemStorageHandler.moveItem(self._originSource._selector.prop("id"), self._lastTarget._selector.prop("id"))
+									} else {
+										self.returnToOrigin();
+									}
 								} else {
 									self.returnToOrigin();
 								}
 							} else {
 								self.returnToOrigin();
 							}
+						} else {
+							self.returnToOrigin();
 						}
 					}
 				} else {
@@ -356,7 +369,19 @@ var DragHandler = new class {
 	returnToOrigin() {
 		let self = this;
 		if (self._originSource != undefined) {
-			if (self._originSource.addItemBySlot(self._item_data_old.cell, self._item_data_old.row, self._item_data_old.width, self._item_data_old.height, Object.assign(self._item_data, {
+			console.log("RETURN TO ORIGIN");
+			let itemBackup = JSON.parse(JSON.stringify(self._item_data.item));
+			let tempItemData = {
+				cell: self._item_data_old.cell,
+				row: self._item_data_old.row,
+				height: self._item_data_old.height,
+				width: self._item_data_old.width,
+				item: itemBackup,
+				scale: self._item_data.scale
+			}
+			console.log("OLD",self._item_data_old.width,self._item_data_old.height,self._item_data_old)
+			console.log("NEW",self._item_data.width,self._item_data.height,self._item_data)
+			if (self._originSource.addItemBySlot(self._item_data_old.cell, self._item_data_old.row, self._item_data_old.width, self._item_data_old.height, Object.assign(tempItemData, {
 					scale: self._defaultScale
 				})) == true) {
 				self.clear();
@@ -364,7 +389,7 @@ var DragHandler = new class {
 		}
 	}
 	isDragging() {
-		return (this._dragging || this._busy);
+		return this._dragging;
 	}
 	isDraggable(item) {
 		if (!self._dragging) {
@@ -406,7 +431,7 @@ var DragHandler = new class {
 			let Item_data = $(item).data("item");
 			self._defaultScale = $(item).find("img").data("default");
 			self._item_data = Item_data;
-			self._item_data_old = Item_data;
+			self._item_data_old = JSON.parse(JSON.stringify(Item_data));
 			let aClass = "";
 			let width = (self._item_data.width) * cell_size;
 			let height = (self._item_data.height) * cell_size;
@@ -453,7 +478,19 @@ var DragHandler = new class {
 	shadow(event) {
 		let self = this;
 		if (self._lastTarget != undefined) {
-			let slot = self._lastTarget.getSlotByAbsolute((event.clientY - self._offset.top), (event.clientX - self._offset.left))
+			let offset_top = (self._offset.top > cell_size) ? (self._offset.top - (cell_size * 0.75)) : (self._offset.top - cell_size/2)
+			let offset_left = (self._offset.left > cell_size) ? (self._offset.left - (cell_size * 0.75)) : (self._offset.left - cell_size/2)
+			let r_pos_top = (event.clientY - offset_top);
+			let r_pos_left = (event.clientX - offset_left);
+
+			$("#debug_point").css({
+				top: (r_pos_top) + 'px',
+				left: (r_pos_left) + 'px',
+				'opacity': 1
+			});
+
+
+			let slot = self._lastTarget.getSlotByAbsolute(r_pos_top, r_pos_left)
 			if (slot != undefined) {
 				if (self._lastTarget.isFree({
 						cell: $(slot).data("cell"),
@@ -475,28 +512,40 @@ var DragHandler = new class {
 					});
 					console.log("slot", $(slot));
 				} else {
-					let targetItem = self._lastTarget.getItemInSlot($(slot).data("cell"), $(slot).data("row")).item;
-					let tItem = targetItem.item;
-					if (tItem.name == self._item_data.item.name) {
-						if (tItem.amount < tItem.max_stack) {
-							let top = $(slot).offset().top;
-							let left = $(slot).offset().left;
-							let color = "rgba(0,0,255,1)";
-							if (tItem.amount + self._item_data.item.amount <= tItem.max_stack) {
-								color = "rgba(0,150,0,0.3)"
+					let targetItem = self._lastTarget.getItemInSlot($(slot).data("cell"), $(slot).data("row"));
+					if (targetItem != false) {
+						let width = targetItem.item.width;
+						let height = targetItem.item.height;
+						let tItem = targetItem.item.item;
+						if (tItem.name == self._item_data.item.name) {
+							if (tItem.amount < tItem.max_stack) {
+								let top = $(slot).offset().top;
+								let left = $(slot).offset().left;
+								let color = "rgba(0,0,255,1)";
+								if (tItem.amount + self._item_data.item.amount <= tItem.max_stack) {
+									color = "rgba(0,150,0,0.3)"
+								}
+								if (tItem.amount + self._item_data.item.amount > tItem.max_stack) {
+									color = "rgba(0,150,0,0.3)"
+								}
+								$(self._sampleShadow).css({
+									top: top + 'px',
+									left: left + 'px',
+									"background": color,
+									'opacity': 1
+								});
+								$(self._sampleShadow).css({
+									'width': width * cell_size + "px",
+									'height': height * cell_size + "px"
+								});
 							}
-							if (tItem.amount + self._item_data.item.amount > tItem.max_stack) {
-								color = "rgba(0,150,0,0.3)"
-							}
+						} else {
 							$(self._sampleShadow).css({
-								top: top + 'px',
-								left: left + 'px',
-								"background": color,
-								'opacity': 1
-							});
-							$(self._sampleShadow).css({
-								'width': self._item_data.width * cell_size + "px",
-								'height': self._item_data.height * cell_size + "px"
+								'width': "0px",
+								'height': "0px",
+								'top': "0px",
+								'left': "0px",
+								'opacity': 0
 							});
 						}
 					} else {
@@ -544,6 +593,17 @@ var Storage = class {
 			top: 0,
 			left: 0
 		}
+		$(selector).on('contextmenu', ".item, img", function(event) {
+			if (isToggledInto == false) return;
+			event.preventDefault();
+			let cTarget = event.currentTarget;
+			if ($(event.currentTarget).hasClass("item") == false) {
+				cTarget = $(event.currentTarget).parents(".item")[0];
+			}
+			if (cTarget) {
+				ContextHandler.open(cTarget, self._rawSelector);
+			}
+		});
 		$(selector).on('mousedown', ".headline", function(event) {
 			if (isToggledInto == false) return;
 			let cursor = {
@@ -572,18 +632,36 @@ var Storage = class {
 				cTarget = $(event.currentTarget).parents(".item")[0];
 			}
 			if (cTarget) {
-				let lEvent = function(event) {
-					if (DragHandler.isDraggable(cTarget) == true) {
-						let data = $(cTarget).data("item");
-						DragHandler.Handle(event, cTarget, self);
-						self.removeItemBySlot(data.cell, data.row);
-						self.render()
-						$(window).unbind("mousemove", lEvent)
+				let mEvent = function(event) {
+					if (mouseDown == 1) {
+						if (DragHandler.isDraggable(cTarget) == true) {
+							let data = $(cTarget).data("item");
+							DragHandler.Handle(event, cTarget, self);
+							self.removeItemBySlot(data.cell, data.row);
+							self.render()
+							$(window).unbind("mousemove", mEvent)
+							$(window).unbind("mouseup", uEvent)
+						} else {
+							$(window).unbind("mousemove", mEvent)
+							$(window).unbind("mouseup", uEvent)
+						}
+					} else {
+						$(window).unbind("mousemove", mEvent)
+						$(window).unbind("mouseup", uEvent)
 					}
 				}
-				$(window).mousemove(lEvent);
+				let uEvent = function(event) {
+					$(window).unbind("mousemove", mEvent);
+					$(window).unbind("mouseup", uEvent);
+					self.click(cTarget);
+				}
+				$(window).mousemove(mEvent);
+				$(window).mouseup(uEvent);
 			}
 		});
+	}
+	click(item) {
+		console.log("click",item);
 	}
 	clear() {
 		this._inventory = [];
@@ -800,12 +878,9 @@ var Storage = class {
 		}
 	}
 	addItemBySlot(gCell, gRow, gWidth, gHeight, data, flipped = false) {
-		console.log("addItemBySlot", gCell, gRow, gWidth, gHeight, data, flipped);
-		console.log("typeof data", typeof data);
 		if (typeof data == "string") {
 			data = JSON.parse(data);
 		}
-		console.log(data);
 		if (flipped == true) {
 			data.scale = {};
 			data.scale.width = gHeight * cell_size;
@@ -865,8 +940,6 @@ var Storage = class {
 			'top': self._top + "px",
 			'left': self.left + "px"
 		})
-		console.log("self._inventory", self._inventory);
-		console.log("self._oldInventory", self._oldInventory);
 		let cells = $(this._selector.find(".grid")).find('.cell').toArray();
 		let toRemove = self._oldInventory.filter(function(item) {
 			let iIndex = self._inventory.findIndex(function(d) {
@@ -880,8 +953,6 @@ var Storage = class {
 			})
 			return iIndex == -1 && self._inventory[iIndex] == undefined;
 		})
-		console.log("toRemove", toRemove);
-		console.log("toAdd", toAdd);
 		toRemove.forEach(function(item) {
 			let remove = self._selector.find(".items").find(`.item[data-cell='${item.cell}'][data-row='${item.row}']`);
 			if (remove != undefined) {
@@ -909,8 +980,7 @@ var Storage = class {
 					old_height = item.scale.height;
 				}
 			}
-			console.log("AMOUNT", item.item.amount);
-			$(a).html(`<div class='amount'>${item.item.amount}</div><img class="${class_n}" data-default=${JSON.stringify({width:old_width,height:old_height})} src="${img}"></img>`)
+			$(a).html(`<div class='amount'>${(item.item.max_stack > 1) ? item.item.amount : ``}</div><img class="${class_n}" data-default=${JSON.stringify({width:old_width,height:old_height})} src="${img}"></img>`)
 			a.height(height)
 			a.width(width)
 			let x = self._selector.find(".items").append(a);
@@ -1017,7 +1087,6 @@ function initialize(config) {
 		name: "CompactRifle",
 		image: "../../source/img/weapon_compactrifle.png"
 	}, next_slot.flipped)*/
-	show();
 }
 
 function addStorageContainer(headline, selector, config, cells, rows, items) {
@@ -1060,7 +1129,7 @@ function addStorageContainer(headline, selector, config, cells, rows, items) {
 	}
 }
 rpc.register('isBusy', function() {
-	return mouseDown == 1;
+	return mouseDown == 1 || DragHandler.isDragging() == true;
 });
 rpc.register('doesFitInto', function(options) {
 	if (storageContainers["#" + options.what]) {

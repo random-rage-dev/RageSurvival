@@ -185,7 +185,7 @@ mp.events.add("render", () => {
                 let name = cur_selected.name;
                 let amount = cur_selected.amount;
                 if (amount > 0) {
-                    let details = StorageSystem.mapItem(name);
+                    let details = StorageSystem.map(cur_selected);
                     let doesFit = StorageSystem.checkFit("inventory", details.width, details.height)
                     doesFit.then(function(fit) {
                         if (fit != undefined) {

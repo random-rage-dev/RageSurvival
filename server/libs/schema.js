@@ -77,7 +77,7 @@ var inventory = mongoose.Schema({
         type: String,
         default: "player"
     },
-    owner_id: Number,
+    owner_id: String,
     name: String,
     amount: Number,
     data:{
@@ -89,10 +89,6 @@ var inventory = mongoose.Schema({
 });
 
 var buildings = mongoose.Schema({
-    prop_id:{
-        type:Number,
-        unique:true
-    },
     health:{
         type:Number,
         default:100
@@ -111,6 +107,10 @@ var buildings = mongoose.Schema({
     last_repair:{
         type:Number,
         default:Date.now()
+    },
+    data:{
+        type:Object,
+        default:{}
     },
     owner_id:Number
 }, {

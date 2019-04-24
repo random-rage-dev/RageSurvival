@@ -6,9 +6,29 @@ function getRandomInt(min, max) {
 
 /*
  *  types : Residential,Industrial,Farm,Military,Other,Food,...
+ *  image needs to be relative to the client resources
  */
 var items = {
+    "Hatchet": {
+        width: 2,
+        height: 4,
+        max_stack: 1,
+        name: 'Hatchet',
+        image: '../../source/img/hatchet.png',
+        type: "Residential",
+        model: "w_sg_pumpshotgun",
+        thickness: 0.15,
+        offset: {
+            pos: new mp.Vector3(0, 0, 0.02),
+            rot: new mp.Vector3(90, 0, 0)
+        }
+    },
     "Pump Shotgun": {
+        width: 4,
+        height: 2,
+        max_stack: 1,
+        name: 'Pump Shotgun',
+        image: '../../source/img/weapon_pumpshotgun.png',
         type: "Residential",
         model: "w_sg_pumpshotgun",
         thickness: 0.15,
@@ -18,7 +38,11 @@ var items = {
         }
     },
     "12 Gauge Shells": {
-        name: "12 Gauge Shells",
+        width: 1,
+        height: 1,
+        max_stack: 32,
+        name: '12 Gauge Shells',
+        image: '../../source/img/12_Gauge_Shells.png',
         type: "Residential",
         model: "w_sg_assaultshotgun_mag1",
         thickness: 0.15,
@@ -31,6 +55,11 @@ var items = {
         }
     },
     "Micro SMG": {
+        width: 3,
+        height: 2,
+        max_stack: 1,
+        name: 'Micro SMG',
+        image: '../../source/img/weapon_microsmg.png',
         type: "Industrial",
         model: "w_sb_microsmg",
         thickness: 0.15,
@@ -40,6 +69,11 @@ var items = {
         }
     },
     "9mm Bullets": {
+        width: 1,
+        height: 1,
+        max_stack: 128,
+        name: '9mm Bullets',
+        image: '../../source/img/9mm_bullets.png',
         type: "Industrial",
         model: "w_sb_microsmg_mag1",
         thickness: 0.15,
@@ -52,6 +86,11 @@ var items = {
         }
     },
     "Assault Rifle": {
+        width: 4,
+        height: 2,
+        max_stack: 1,
+        name: 'Assault Rifle',
+        image: '../../source/img/weapon_assaultrifle.png',
         type: "Military",
         model: "w_ar_assaultrifle",
         thickness: 0.15,
@@ -61,6 +100,11 @@ var items = {
         }
     },
     "5.56m Bullets": {
+        width: 1,
+        height: 1,
+        max_stack: 64,
+        name: '5.56m Bullets',
+        image: '../../source/img/556m_Bullets.png',
         type: "Military",
         model: "w_ar_assaultrifle_mag1",
         thickness: 0.15,
@@ -73,6 +117,11 @@ var items = {
         }
     },
     "Drank": {
+        width: 1,
+        height: 1,
+        max_stack: 15,
+        name: 'Drank',
+        image: '../../source/img/energy_drink_small.png',
         type: "Food",
         model: "bkr_prop_coke_powderbottle_02",
         thickness: 0.3,
@@ -85,6 +134,11 @@ var items = {
         }
     },
     "Drank Fresh": {
+        width: 1,
+        height: 2,
+        max_stack: 14,
+        name: 'Drank Fresh',
+        image: '../../source/img/energy_drink_small.png',
         type: "Food",
         model: "bkr_prop_coke_powderbottle_01",
         thickness: 0.35,
@@ -97,6 +151,11 @@ var items = {
         }
     },
     "Gas Can": {
+        width: 3,
+        height: 3,
+        max_stack: 1,
+        name: 'Gas Can',
+        image: '../../source/img/Icon_jerrycan.png',
         type: "Industrial",
         model: "prop_cs_package_01",
         thickness: 0.35,
@@ -109,6 +168,11 @@ var items = {
         }
     },
     "Wood": {
+        width: 3,
+        height: 3,
+        max_stack: 128,
+        name: 'Wood',
+        image: '../../source/img/wood.png',
         type: "Craftable",
         model: "prop_fncwood_13c",
         thickness: 0.35,

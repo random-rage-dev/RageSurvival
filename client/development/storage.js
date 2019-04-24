@@ -64,11 +64,15 @@ mp.keys.bind(0x49, false, function() {
 	console.log("press bind key");
 	toggleInventory();
 });
+mp.events.add("Inventory:AddContainer", (headline, selector, config, cells, rows, items) => {
+	items = JSON.parse(items);
+	TempStorage[selector] = items;
+	CEFInventory.addStorageContainer(headline, selector, config, cells, rows, items)
+});
 mp.events.add("Inventory:Update", (inventory) => {
 	if (!TempStorage["inventory"]) {
 		TempStorage["inventory"] = [];
 	}
-	console.log("Inventory:Update");
 	CEFInventory.call("clear", "inventory");
 	TempStorage["inventory"] = [];
 	inventory.forEach(function(citem) {
@@ -87,7 +91,6 @@ mp.events.add("Inventory:Update", (inventory) => {
 			citem.width = height;
 			citem.height = width;
 		}
-		console.log("tempSettings", JSON.stringify(tempSettings));
 		TempStorage["inventory"].push({
 			id: gData.id,
 			name: gData.name,
@@ -107,14 +110,14 @@ mp.events.add("Inventory:AddItem", (citem) => {
 	if (!TempStorage["inventory"]) {
 		TempStorage["inventory"] = [];
 	}
-	console.log("Inventory:AddItem", JSON.stringify(citem));
 	let tempSettings = StorageSystem.getTempSettings(citem.id, "inventory");
 	let gData = {
 		id: citem.id,
 		name: citem.name,
 		image: citem.image,
 		scale: tempSettings.scale || {},
-		amount: citem.amount
+		amount: citem.amount,
+		max_stack: citem.max_stack
 	}
 	let width = citem.width;
 	let height = citem.height;
@@ -122,7 +125,6 @@ mp.events.add("Inventory:AddItem", (citem) => {
 		citem.width = height;
 		citem.height = width;
 	}
-	console.log("tempSettings", JSON.stringify(tempSettings));
 	TempStorage["inventory"].push({
 		id: gData.id,
 		name: gData.name,
@@ -138,8 +140,6 @@ mp.events.add("Inventory:AddItem", (citem) => {
 	CEFInventory.call("addItem", "inventory", tempSettings.cell || 0, tempSettings.row || 0, citem.width, citem.height, JSON.stringify(gData), tempSettings.flipped || false)
 });
 mp.events.add("Inventory:Transfer", (source, target) => {
-	console.log("Inventory:Transfer", source.id);
-	console.log("Inventory:Transfer", target.id);
 	source = JSON.parse(source);
 	target = JSON.parse(target);
 	Inventory_Order = {
@@ -168,8 +168,13 @@ mp.events.add("Inventory:Transfer", (source, target) => {
 	/*Manage Server Sync*/
 	source.items = source.items.map((item) => StorageSystem.minify(item));
 	target.items = target.items.map((item) => StorageSystem.minify(item));
+	if (StorageSystem.needsUpdate(source, target) == true) {
 
-	mp.events.callRemote("Inventory:Transfer", JSON.stringify(source), JSON.stringify(target));
+		TempStorage[source.id] = source.items;
+		TempStorage[target.id] = target.items;
+
+		mp.events.callRemote("Inventory:Transfer", JSON.stringify(source), JSON.stringify(target));
+	}
 });
 mp.events.add("Inventory:Drag", (positions) => {
 	positions = JSON.parse(positions);
@@ -181,85 +186,7 @@ mp.events.add("Inventory:Drag", (positions) => {
 	mp.storage.data.inventory_order = Inventory_Order;
 	mp.storage.flush();
 });
-const itemIdentity = {
-	"Pump Shotgun": {
-		width: 4,
-		height: 2,
-		max_stack: 1,
-		name: 'Pump Shotgun',
-		image: '../../source/img/weapon_pumpshotgun.png'
-	},
-	"Hatchet": {
-		width: 2,
-		height: 4,
-		max_stack: 1,
-		name: 'Hatchet',
-		image: '../../source/img/hatchet.png'
-	},
-	"12 Gauge Shells": {
-		width: 1,
-		height: 1,
-		max_stack: 32,
-		name: '12 Gauge Shells',
-		image: '../../source/img/12_Gauge_Shells.png'
-	},
-	"Micro SMG": {
-		width: 3,
-		height: 2,
-		max_stack: 1,
-		name: 'Micro SMG',
-		image: '../../source/img/weapon_microsmg.png'
-	},
-	"9mm Bullets": {
-		width: 1,
-		height: 1,
-		max_stack: 128,
-		name: '9mm Bullets',
-		image: '../../source/img/9mm_bullets.png'
-	},
-	"Assault Rifle": {
-		width: 4,
-		height: 2,
-		max_stack: 1,
-		name: 'Assault Rifle',
-		image: '../../source/img/weapon_assaultrifle.png'
-	},
-	"5.56m Bullets": {
-		width: 1,
-		height: 1,
-		max_stack: 64,
-		name: '5.56m Bullets',
-		image: '../../source/img/556m_Bullets.png'
-	},
-	"Drank": {
-		width: 1,
-		height: 1,
-		max_stack: 15,
-		name: 'Drank',
-		image: '../../source/img/energy_drink_small.png'
-	},
-	"Drank Fresh": {
-		width: 1,
-		height: 2,
-		max_stack: 14,
-		name: 'Drank Fresh',
-		image: '../../source/img/energy_drink_small.png'
-	},
-	"Gas Can": {
-		width: 3,
-		height: 3,
-		max_stack: 1,
-		name: 'Gas Can',
-		image: '../../source/img/Icon_jerrycan.png'
-	},
-	"Wood": {
-		width: 3,
-		height: 3,
-		max_stack: 128,
-		name: 'Wood',
-		image: '../../source/img/wood.png'
-	}
-}
+var itemIdentity = require("../../server/world/items.js");
 var StorageSystem = new class {
 	constructor() {}
 	minify(item) {
@@ -267,11 +194,35 @@ var StorageSystem = new class {
 			id: item.item.id,
 			name: item.item.name,
 			amount: item.item.amount,
-			max_stack: item.item.max_stack
+			max_stack: item.item.max_stack,
+			data: item.item.data
 		}
 	}
-	validate(source,target) {
+	needsUpdate(source, target) {
+		let sourceTempOld = [];
+		let targetTempOld = [];
+		if (TempStorage[source.id]) {
+			sourceTempOld = TempStorage[source.id]
+		}
+		if (TempStorage[target.id]) {
+			targetTempOld = TempStorage[target.id]
+		}
+		let remaining_items_source = sourceTempOld.filter(function(item) {
+			let fItem = source.items.findIndex(function(cItem) {
+				return (cItem.id == item.id) && (cItem.amount == item.amount);
+			})
+			return fItem != -1;
+		})
+		console.log("Items Changed source ?",remaining_items_source.length,sourceTempOld.length,remaining_items_source.length != sourceTempOld.length);
+		let remaining_items_target = targetTempOld.filter(function(item) {
+			let fItem = target.items.findIndex(function(cItem) {
+				return (cItem.id == item.id) && (cItem.amount == item.amount);
+			});
+			return fItem != -1;
+		})
+		console.log("Items Changed target ?",remaining_items_target.length,targetTempOld.length,remaining_items_target.length != targetTempOld.length);
 
+		return (remaining_items_target.length != targetTempOld.length) || (remaining_items_source.length != sourceTempOld.length);
 	}
 	checkFit(where, w, h) {
 		return new Promise(function(fulfill, reject) {
@@ -299,12 +250,6 @@ var StorageSystem = new class {
 					flipped: Inventory_Order.items[id + "_" + container].flipped,
 				}
 			}
-		}
-		return false;
-	}
-	map(object) {
-		if (itemIdentity[object.name]) {
-			return Object.assign(object, itemIdentity[object.name]);
 		}
 		return false;
 	}

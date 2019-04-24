@@ -185,8 +185,7 @@ mp.events.add("render", () => {
                 let name = cur_selected.name;
                 let amount = cur_selected.amount;
                 if (amount > 0) {
-                    let details = StorageSystem.map(cur_selected);
-                    let doesFit = StorageSystem.checkFit("inventory", details.width, details.height)
+                    let doesFit = StorageSystem.checkFit("inventory", cur_selected.width, cur_selected.height)
                     doesFit.then(function(fit) {
                         if (fit != undefined) {
                             mp.events.callRemote("Loot:Pickup", pool_data, cur_selected.index, cur_selected.name, cur_selected.amount);

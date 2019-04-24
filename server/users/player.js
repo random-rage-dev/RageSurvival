@@ -183,6 +183,10 @@ var Player = class {
     getInventory() {
         return this._inventory;
     }
+    reloadInventory() {
+        this._inventory = [];
+        this.loadInventory();
+    }
     /* Inventory */
     loadInventory() {
         let self = this;
@@ -211,6 +215,17 @@ var Player = class {
             }
         }).lean()
     }
+    setInventory(arr) {
+        this._inventory = arr.map(function(item, i) {
+            let itemData = Storage.map({
+                id: item.id,
+                name: item.name,
+                amount: item.amount,
+                data: item.data
+            });
+            return itemData;
+        });
+    }
     hasItem(name, amount) {}
     giveItem(item) {
         let self = this;
@@ -230,6 +245,7 @@ var Player = class {
                 data: rV.data
             });
             self._inventory.push(itemData);
+            console.log("itemData", itemData);
             mp.events.call("Player:Inventory:AddItem", self._player, itemData)
             self._player.call("Inventory:AddItem", [itemData])
         });

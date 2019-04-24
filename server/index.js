@@ -1,4 +1,4 @@
-const rpc = require('rage-rpc');
+var rpc = require('rage-rpc');
 require("./libs/vector.js")
 require("./libs/array.js")
 var PlayerClass = require("./users/player.js")

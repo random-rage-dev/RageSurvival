@@ -6,13 +6,13 @@ var mouseDown = 0;
 var shiftDown = 0;
 var controlDown = 0;
 document.body.onmousedown = function(e) {
-	console.log("onmousedown",e.which,e);
+	console.log("onmousedown", e.which, e);
 	if (e.which == 1) {
 		mouseDown = 1;
 	};
 }
 document.body.onmouseup = function(e) {
-	console.log("onmouseup",e.which,e);
+	console.log("onmouseup", e.which, e);
 	if (e.which == 1) {
 		mouseDown = 0;
 	};
@@ -245,13 +245,11 @@ var DragHandler = new class {
 		var self = this;
 		if (self._dragging) {
 			if (self._lastTarget != undefined) {
-				let offset_top = (self._offset.top > cell_size) ? (self._offset.top - (cell_size * 0.75)) : (self._offset.top - cell_size/2)
-				let offset_left = (self._offset.left > cell_size) ? (self._offset.left - (cell_size * 0.75)) : (self._offset.left - cell_size/2)
+				let offset_top = (self._offset.top > cell_size) ? (self._offset.top - (cell_size * 0.75)) : (self._offset.top - cell_size / 2)
+				let offset_left = (self._offset.left > cell_size) ? (self._offset.left - (cell_size * 0.75)) : (self._offset.left - cell_size / 2)
 				let r_pos_top = (event.clientY - offset_top);
 				let r_pos_left = (event.clientX - offset_left);
-
-
-				let slot = self._lastTarget.getSlotByAbsolute(r_pos_top,r_pos_left)
+				let slot = self._lastTarget.getSlotByAbsolute(r_pos_top, r_pos_left)
 				if (slot != undefined) {
 					if (self._lastTarget.isFree({
 							cell: $(slot).data("cell"),
@@ -379,8 +377,8 @@ var DragHandler = new class {
 				item: itemBackup,
 				scale: self._item_data.scale
 			}
-			console.log("OLD",self._item_data_old.width,self._item_data_old.height,self._item_data_old)
-			console.log("NEW",self._item_data.width,self._item_data.height,self._item_data)
+			console.log("OLD", self._item_data_old.width, self._item_data_old.height, self._item_data_old)
+			console.log("NEW", self._item_data.width, self._item_data.height, self._item_data)
 			if (self._originSource.addItemBySlot(self._item_data_old.cell, self._item_data_old.row, self._item_data_old.width, self._item_data_old.height, Object.assign(tempItemData, {
 					scale: self._defaultScale
 				})) == true) {
@@ -478,18 +476,15 @@ var DragHandler = new class {
 	shadow(event) {
 		let self = this;
 		if (self._lastTarget != undefined) {
-			let offset_top = (self._offset.top > cell_size) ? (self._offset.top - (cell_size * 0.75)) : (self._offset.top - cell_size/2)
-			let offset_left = (self._offset.left > cell_size) ? (self._offset.left - (cell_size * 0.75)) : (self._offset.left - cell_size/2)
+			let offset_top = (self._offset.top > cell_size) ? (self._offset.top - (cell_size * 0.75)) : (self._offset.top - cell_size / 2)
+			let offset_left = (self._offset.left > cell_size) ? (self._offset.left - (cell_size * 0.75)) : (self._offset.left - cell_size / 2)
 			let r_pos_top = (event.clientY - offset_top);
 			let r_pos_left = (event.clientX - offset_left);
-
 			$("#debug_point").css({
 				top: (r_pos_top) + 'px',
 				left: (r_pos_left) + 'px',
 				'opacity': 1
 			});
-
-
 			let slot = self._lastTarget.getSlotByAbsolute(r_pos_top, r_pos_left)
 			if (slot != undefined) {
 				if (self._lastTarget.isFree({
@@ -661,7 +656,7 @@ var Storage = class {
 		});
 	}
 	click(item) {
-		console.log("click",item);
+		console.log("click", item);
 	}
 	clear() {
 		this._inventory = [];
@@ -708,6 +703,19 @@ var Storage = class {
 	}
 	inventory() {
 		return this._inventory;
+	}
+	editID(id, name, amount, overwrite_data) {
+		let entryIndex = this.inventory().findIndex(function(item) {
+			return (item.item.id == id) && (item.item.name == name) && (item.item.amount == amount)
+		})
+		console.log("entryIndex", entryIndex);
+		if (entryIndex > -1) {
+			console.log("id,name,amount,overwrite_data", id, name, amount, overwrite_data)
+			this._inventory[entryIndex].item.id = overwrite_data.id;
+			this.render();
+			return true;
+		}
+		return false;
 	}
 	editItem(gCell, gRow, new_item_data) {
 		let self = this;
@@ -943,13 +951,13 @@ var Storage = class {
 		let cells = $(this._selector.find(".grid")).find('.cell').toArray();
 		let toRemove = self._oldInventory.filter(function(item) {
 			let iIndex = self._inventory.findIndex(function(d) {
-				return (d.cell == item.cell) && (d.row == item.row) && (d.width == item.width) && (d.height == item.height) && (d.item.amount == item.item.amount);
+				return (d.cell == item.cell) && (d.row == item.row) && (d.width == item.width) && (d.height == item.height) && (d.item.amount == item.item.amount) && (d.item.id == item.item.id);
 			})
 			return iIndex == -1;
 		})
 		let toAdd = self._inventory.filter(function(item) {
 			let iIndex = self._oldInventory.findIndex(function(d) {
-				return (d.cell == item.cell) && (d.row == item.row) && (d.width == item.width) && (d.height == item.height) && (d.item.amount == item.item.amount);
+				return (d.cell == item.cell) && (d.row == item.row) && (d.width == item.width) && (d.height == item.height) && (d.item.amount == item.item.amount) && (d.item.id == item.item.id);
 			})
 			return iIndex == -1 && self._inventory[iIndex] == undefined;
 		})
@@ -980,7 +988,8 @@ var Storage = class {
 					old_height = item.scale.height;
 				}
 			}
-			$(a).html(`<div class='amount'>${(item.item.max_stack > 1) ? item.item.amount : ``}</div><img class="${class_n}" data-default=${JSON.stringify({width:old_width,height:old_height})} src="${img}"></img>`)
+			console.log("ITEM WITH AMOUNT", item.item.amount)
+			$(a).html(`<div class='amount'>${(parseInt(item.item.max_stack) > 1) ? item.item.amount : ``}</div><img class="${class_n}" data-default=${JSON.stringify({width:old_width,height:old_height})} src="${img}"></img>`)
 			a.height(height)
 			a.width(width)
 			let x = self._selector.find(".items").append(a);
@@ -1014,6 +1023,13 @@ var nonStandartContainer = [];
 var storageContainers = [];
 
 function show() {
+	Object.keys(nonStandartContainer).forEach(function(id) {
+		if (nonStandartContainer[id]) {
+			nonStandartContainer[id].remove();
+			nonStandartContainer[id] = undefined;
+			delete nonStandartContainer[id];
+		}
+	})
 	$("body").css({
 		"opacity": "1"
 	});
@@ -1134,6 +1150,12 @@ rpc.register('isBusy', function() {
 rpc.register('doesFitInto', function(options) {
 	if (storageContainers["#" + options.what]) {
 		return storageContainers["#" + options.what].getNextFreeSlot(options.w, options.h)
+	}
+	return undefined;
+});
+rpc.register('editItemID', function(options) {
+	if (storageContainers["#" + options.selector]) {
+		return storageContainers["#" + options.selector].editID(options.id, options.name, options.amount, options.overwrite_data)
 	}
 	return undefined;
 });

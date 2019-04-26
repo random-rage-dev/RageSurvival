@@ -23,6 +23,7 @@ mp.events.addDataHandler("isCrouched", (entity, value) => {
     if (value) {
         entity.setMovementClipset(movementClipSet, clipSetSwitchTime);
         entity.setStrafeClipset(strafeClipSet);
+
     } else {
         entity.resetMovementClipset(clipSetSwitchTime);
         entity.resetStrafeClipset();

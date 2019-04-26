@@ -273,8 +273,16 @@ var Pickups = new class {
         }
     }
 }
+/*
+
+/drop Assault_Rifle 1
+/drop 5.56m_Bullets 128
+/drop 9mm_Bullets 256
+
+*/
 mp.events.addCommand("drop", (player, fulltext, name, amount) => {
     console.log(name, amount);
+    name = name.replace("_"," ");
     //player.call("Building:Start", [model])
     let pos = mp.players.local.position;
     Pickups.dropItem(name, amount, pos.x, pos.y, pos.z)

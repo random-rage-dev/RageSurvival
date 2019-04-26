@@ -49,7 +49,7 @@ var Storage = new class {
 						amount: item.amount,
 						data: item.data
 					});
-					return itemData;
+					return itemData;   
 				});
 				console.log("OUTPUT CONTAINER ITEMS");
 				console.log("dbItems", dbItems);
@@ -95,28 +95,16 @@ var Storage = new class {
 				console.log("Amount check done")
 				/* Validate tStorage*/
 				TempStorage_sStorage = TempStorage_sStorage.map(function(e) {
-					let f = {};
-					f = e;
-					f.origin = sStorage_ID;
-					return f;
+					return Object.assign(e,{origin:sStorage_ID});
 				})
 				TempStorage_tStorage = TempStorage_tStorage.map(function(e) {
-					let f = {};
-					f = e;
-					f.origin = tStorage_ID;
-					return f;
+					return Object.assign(e,{origin:tStorage_ID});
 				})
 				sStorage.items = sStorage.items.map(function(e) {
-					let f = {};
-					f = e;
-					f.origin = sStorage_ID;
-					return f;
+					return Object.assign(e,{origin:sStorage_ID});
 				})
 				tStorage.items = tStorage.items.map(function(e) {
-					let f = {};
-					f = e;
-					f.origin = tStorage_ID;
-					return f;
+					return Object.assign(e,{origin:tStorage_ID});
 				})
 				let all_items_temp = (sStorage_ID == tStorage_ID) ? TempStorage_sStorage : TempStorage_sStorage.concat(TempStorage_tStorage); // merge the two temp arrays;
 				let all_items_new = (sStorage_ID == tStorage_ID) ? sStorage.items : sStorage.items.concat(tStorage.items); // merge the two temp arrays;

@@ -12,13 +12,13 @@ var Inventory_Order = {
 };
 var CEFInventory = require("./browser.js").inventory;
 var CEFNotification = require("./browser.js").notification;
-var cells = 0;
-var rows = 0;
+var inv_cells = 0;
+var inv_rows = 0;
 mp.events.add("Inventory:getData", (cell_count, row_count) => {
-	cells = cell_count;
-	rows = row_count;
-	let clientWidth = cell_size * cells + (padding * 2)
-	let clientHeight = cell_size * rows + 37 + (padding * 2)
+	inv_cells = cell_count;
+	inv_rows = row_count;
+	let clientWidth = cell_size * inv_cells + (padding * 2)
+	let clientHeight = cell_size * inv_rows + 37 + (padding * 2)
 	if (mp.storage.data.inventory_order) {
 		let storageData = mp.storage.data.inventory_order;
 		Inventory_Order.positions = storageData.positions || {
@@ -34,7 +34,7 @@ mp.events.add("Inventory:getData", (cell_count, row_count) => {
 	CEFInventory.load("interface/index.html");
 });
 mp.events.add("Inventory:Ready", (data) => {
-	CEFInventory.call("initialize", cells, rows, {
+	CEFInventory.call("initialize", inv_cells, inv_rows, {
 		"inventory": {
 			top: Inventory_Order.positions["inventory"].top,
 			left: Inventory_Order.positions["inventory"].left
@@ -43,6 +43,7 @@ mp.events.add("Inventory:Ready", (data) => {
 });
 
 function toggleInventory() {
+	console.log("CAN CROUCH",mp.canCrouch);
 	if (toggleInvState == false) {
 		if (mp.gui.cursor.visible == false) {
 			CEFInventory.call("setPos", "inventory", Inventory_Order.positions["inventory"].top, Inventory_Order.positions["inventory"].left);
@@ -87,9 +88,6 @@ mp.keys.bind(0x09, false, () => {
 });
 mp.events.add("render", () => {
 	mp.game.controls.disableControlAction(2, 37, true);
-	/*if (mp.game.controls.isControlJustPressed(2, 37)) {
-		toggleInventory();
-	}*/
 });
 mp.events.add("Inventory:Update", (inventory) => {
 	if (!TempStorage["inventory"]) {
@@ -251,14 +249,14 @@ mp.events.add("Storage:AddContainer", (headline, selector, cells, rows, items) =
 	CEFInventory.call("setPos", "inventory", Inventory_Order.positions["inventory"].top, Inventory_Order.positions["inventory"].left);
 	let clientWidth = cell_size * cells + (padding * 2)
 	let clientHeight = cell_size * rows + 37 + (padding * 2)
-	let config = {
+	let config = {      
 		top: Inventory_Order.positions[selector] ? Inventory_Order.positions[selector].top : `calc(50% - ${clientHeight/2}px)`,
 		left: Inventory_Order.positions[selector] ? Inventory_Order.positions[selector].left : `calc(50% - ${clientWidth/2}px)`
 	};
 	CEFInventory.call("addStorageContainer", headline, selector, config, cells, rows, gItems);
+	CEFInventory.call("focus",selector);
 	CEFInventory.cursor(true);
 	toggleInvState = true;
-	mp.canCrouch = false;
 });
 var itemIdentity = require("../../server/world/items.js");
 var StorageSystem = new class {
@@ -283,22 +281,18 @@ var StorageSystem = new class {
 		}
 		if (TempStorage[target.id]) {
 			targetTempOld = TempStorage[target.id]
-		}
-		let remaining_items_source = sourceTempOld.filter(function(item) {
-			let fItem = source.items.findIndex(function(cItem) {
-				return (cItem.id == item.id) && (cItem.amount == item.amount);
-			})
-			return fItem != -1;
-		})
-		console.log("Items Changed source ?", remaining_items_source.length, sourceTempOld.length, remaining_items_source.length != sourceTempOld.length);
-		let remaining_items_target = targetTempOld.filter(function(item) {
-			let fItem = target.items.findIndex(function(cItem) {
-				return (cItem.id == item.id) && (cItem.amount == item.amount);
-			});
-			return fItem != -1;
-		})
-		console.log("Items Changed target ?", remaining_items_target.length, targetTempOld.length, remaining_items_target.length != targetTempOld.length);
-		return (remaining_items_target.length != targetTempOld.length) || (remaining_items_source.length != sourceTempOld.length);
+		} 
+		let all_items_temp = (source.id == target.id) ? sourceTempOld : sourceTempOld.concat(targetTempOld); // merge the two temp arrays;
+		let all_items_new = (source.id == target.id) ? source.items : source.items.concat(target.items); // merge the two temp arrays;
+		let temp_Amount = all_items_temp.reduce(function(total, current) {
+			return total + parseInt(current.amount) || 0;
+		}, 0)
+		let new_Amount = all_items_new.reduce(function(total, current) {
+			return total + parseInt(current.amount) || 0;
+		}, 0)
+		/*TODO LOOK OVER needsUpdate*/
+		console.log("Items Changed target ?", temp_Amount, new_Amount);
+		return (temp_Amount != new_Amount);
 	}
 	checkFit(where, w, h) {
 		return new Promise(function(fulfill, reject) {

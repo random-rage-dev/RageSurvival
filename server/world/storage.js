@@ -158,10 +158,10 @@ var Storage = new class {
 						}
 					}
 					return Object.assign(e, t);
-				})
+				})/*
 				console.log("toCreate", toCreate)
 				console.log("moved", moved)
-				console.log("removed", removed)
+				console.log("removed", removed)*/
 				try {
 					removed.forEach(async item => {
 						let removed = await Inventory.deleteOne({
@@ -194,7 +194,6 @@ var Storage = new class {
 						})
 					})
 					moved.forEach(async (item) => {
-						console.log("udpate item sStorage");
 						let inv_update = await Inventory.updateOne({
 							_id: item.id
 						}, {
@@ -210,7 +209,6 @@ var Storage = new class {
 				self._tempStorage[tStorage.id] = tStorage.items;
 				self.tempStorage = self._tempStorage;
 				if ((sStorage_Type == "player") || (tStorage_Type == "player")) {
-					console.log("is inventory");
 					let storage = (sStorage_Type == "player") ? sStorage.items : tStorage.items;
 					console.log("set inventory");
 					player.class.setInventory(storage);

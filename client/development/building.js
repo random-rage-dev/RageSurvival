@@ -18,10 +18,12 @@ var Building = new class {
             this._cObj = null;
             mp.events.callRemote("Building:Canceled");
             this._state = false;
+            mp.canCrouch = true;
         }
     }
     loadObject(model) {
         let self = this;
+        self._tempModel = model
         let temp_obj = mp.objects.new(mp.game.joaat(model), mp.vector(mp.players.local.position).sub(0, 0, 10), {
             alpha: 255,
             dimension: 0
@@ -74,11 +76,14 @@ var Building = new class {
                 centre: true
             });
             self._renderHelp();
+            mp.canCrouch = false;
             let can_place = (ground.dist(targetPos) > 0.001) ? false : true;
             if (mp.game.controls.isDisabledControlPressed(0, 24)) {
                 if (can_place == true) {
                     self._place();
                 }
+            } else if (mp.game.controls.isDisabledControlPressed(0, 25)) {
+                self.cancel();
             }
         }
     }
@@ -87,11 +92,10 @@ var Building = new class {
         if (self._cObj) {
             let rot = self._cObj.getRotation(0);
             let pos = self._cObj.getCoords(false);
-            let model = self._cObj.getModel();
             self._cObj.destroy();
             self._cObj = null;
             let obj_data = {
-                model: model,
+                model: self._tempModel,
                 pos: {
                     x: pos.x,
                     y: pos.y,
@@ -104,6 +108,7 @@ var Building = new class {
                 }
             }
             mp.events.callRemote("Building:Place", JSON.stringify(obj_data));
+            mp.canCrouch = true;
         }
         self._state = false;
     }
@@ -124,6 +129,13 @@ var Building = new class {
             centre: true
         });
         mp.game.graphics.drawText("[LMB] Place Object", [0.5, 0.65], {
+            font: 4,
+            color: [255, 255, 255, 200],
+            scale: [0.3, 0.3],
+            outline: true,
+            centre: true
+        });
+        mp.game.graphics.drawText("[RMB] Cancel Placement", [0.5, 0.67], {
             font: 4,
             color: [255, 255, 255, 200],
             scale: [0.3, 0.3],

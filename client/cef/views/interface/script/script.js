@@ -1061,6 +1061,17 @@ function clear(container) {
 	}
 }
 
+function focus(selector) {
+	$(document).find(".storage").each(function(t, e) {
+		$(e).css({
+			"z-index": 0
+		})
+	})
+	$("#"+selector).css({
+		"z-index": 15
+	})
+}
+
 function addItem(container, gCell, gRow, gWidth, gHeight, gData, flipped = false) {
 	if (storageContainers["#" + container]) {
 		let Unit = storageContainers["#" + container];

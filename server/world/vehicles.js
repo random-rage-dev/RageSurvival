@@ -20,7 +20,6 @@ var Vehicle = class {
             self.save();
         }, 5 * 60 * 1000); // Save Interval 5 Min
         this.create();
-        console.log("new Vehicle instance")
     }
     getInventory() {
         Inventory.find({
@@ -29,7 +28,6 @@ var Vehicle = class {
         }, async function(err, arr) {
             if (err) return console.log("error", err);
             if ((arr) && (arr.length)) {
-                console.log("Inventory",arr);
             }
         });
     }
@@ -50,7 +48,6 @@ var Vehicle = class {
         /*TODO SAVE*/
         this._position = this._veh.position;
         this._rotation = this._veh.rotation;
-        console.log("save veh", this._id);
         Vehicles.updateOne({
             veh_id: this._id
         }, {
@@ -169,7 +166,6 @@ var VehicleManager = new class {
         console.log("-- Load Vehicles")
         let dbVehicles = await Vehicles.find({});
         dbVehicles.forEach(function(dbVehicle) {
-            console.log("Vehicle", dbVehicle);
             self._allVehicles[dbVehicle.veh_id] = new Vehicle(dbVehicle);
         })
     }

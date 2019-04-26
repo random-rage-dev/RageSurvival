@@ -34,7 +34,7 @@ mp.rpc.register('getMaterialInFront', async (id) => {
     return data;
 });
 
-mp.keys.bind(0x09, false, () => {
+/*mp.keys.bind(0x09, false, () => {
     console.log(JSON.stringify(checkResourceInFront(2)));
-});
+});*/
 module.exports = checkResourceInFront;

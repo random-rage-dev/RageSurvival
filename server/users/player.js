@@ -124,7 +124,7 @@ var Player = class {
     death(killer, weapon, reason) {
         let self = this;
 
-        Building.addTempObject(model, pos, rot, data = {})
+        //Building.addTempObject(model, pos, rot, data = {})
 
 
 

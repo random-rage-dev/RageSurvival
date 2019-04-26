@@ -111,7 +111,7 @@ img.flip.vert.drag{
     transform: rotate(90deg) ;
 }
 
-img.flip.vert[src*="weapon_microsmg.png"] {
+img.flip.vert[src*="weapon_microsmg.png"]:not(.drag) {
     top: 15%;
     left: 0;
     transform: rotate(90deg) scale(1.5);

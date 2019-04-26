@@ -113,12 +113,12 @@ mp.events.add("Loot:Reload", (id, new_data) => {
         streamedPools[id].reload(new_data);
     }
 });
-
+ 
 function pointingAt() {
-    let distance = 10;
+    let ray_dist = 25;
     direction = mp.gameplayCam.getDirection();
     coords = mp.gameplayCam.getCoord();
-    const farAway = new mp.Vector3((direction.x * distance) + (coords.x), (direction.y * distance) + (coords.y), (direction.z * distance) + (coords.z));
+    const farAway = new mp.Vector3((direction.x * ray_dist) + (coords.x), (direction.y * ray_dist) + (coords.y), (direction.z * ray_dist) + (coords.z));
     const result = mp.raycasting.testPointToPoint(coords, farAway, mp.players.local, -1);
     if (result === undefined) {
         return undefined;
@@ -135,28 +135,38 @@ mp.events.add("render", () => {
     let pool_data = null;
     let pointAt = pointingAt();
     let Angle_Item = 360 / 8;
-    if ((pointAt) && (pointAt.position)) {
-        Object.keys(streamedPools).forEach(function(key) {
-            let pool = streamedPools[key]
-            if (pool.isInRange() == true) {
-                let pos = pool.position;
-                pos.z += 1;
-                pool.getLootPool().forEach(function(item, index) {
-                    if (item != null) {
-                        let offset_pos = pos.findRot(0, 0.5, Angle_Item * index).ground();
-                        mp.game.graphics.drawMarker(28, offset_pos.x, offset_pos.y, offset_pos.z, 0, 0, 0, 0, 0, 0, ((mp.players.local.isRunning() == true) ? item.thickness * 2 : item.thickness), ((mp.players.local.isRunning() == true) ? item.thickness * 2 : item.thickness), ((mp.players.local.isRunning() == true) ? item.thickness * 2 : item.thickness), 255, 255, 255, 150, false, false, 2, false, "", "", false);
-                        let dist = (offset_pos.dist(pointAt.position));
-                        if ((dist <= ((mp.players.local.isRunning() == true) ? item.thickness * 2 : item.thickness)) && (cur_selected == false) && (dist < cur_dist)) {
-                            item.position = offset_pos;
-                            cur_selected = item;
-                            cur_dist = dist;
-                            pool_data = key;
+    Object.keys(streamedPools).forEach(function(key) {
+        let pool = streamedPools[key]
+        if (pool.isInRange() == true) {
+            let pos = pool.position;
+            pos.z += 1;
+            pool.getLootPool().forEach(function(item, index) {
+                if (item != null) {
+                    let offset_pos = pos.findRot(0, 0.5, Angle_Item * index).ground();
+                    let thickness = (mp.players.local.isRunning() == true) ? item.thickness * 2 : item.thickness;
+                    //mp.game.graphics.drawMarker(28, offset_pos.x, offset_pos.y, offset_pos.z, 0, 0, 0, 0, 0, 0, thickness, thickness, thickness, 255, 255, 255, 150, false, false, 2, false, "", "", false);
+                    let player_pos = mp.vector(mp.localPlayer.position).ground();
+                    let near_dist = thickness * 2.5;
+                    let pointAtPos;
+                    if ((pointAt) && (pointAt.position)) {
+                        if (player_pos.dist2d(pointAt.position) < 2) {
+                            pointAtPos = pointAt.position;
                         }
                     }
-                })
-            }
-        });
-    }
+                    let dist;
+                    if (((pointAtPos != undefined) && (offset_pos.dist(pointAtPos) <= thickness)) || (offset_pos.dist(player_pos) <= near_dist)) {
+                        dist = ((pointAtPos != undefined) && (offset_pos.dist(pointAtPos) <= thickness)) ? offset_pos.dist(pointAtPos) : offset_pos.dist(player_pos);
+                    }
+                    if ((dist) && (cur_selected == false) && (dist < cur_dist)) {
+                        item.position = offset_pos;
+                        cur_selected = item;
+                        cur_dist = dist //((pointAtPos != undefined) && (offset_pos.dist(pointAtPos) <= thickness)) ? offset_pos.dist(pointAtPos) : offset_pos.dist(player_pos);
+                        pool_data = key;
+                    }
+                }
+            })
+        }
+    });
     if ((cur_selected) && (pool_data)) {
         mp.game.controls.disableControlAction(0, 51, true);
         mp.game.ui.showHudComponentThisFrame(14);
@@ -219,19 +229,21 @@ mp.events.add("render", () => {
     } else {
         if ((pointAt) && (pointAt.entity)) {
             if (typeof pointAt.entity == "object") {
-                if (pointAt.entity.getVariable("container") == true) {
-                    if (pointAt.entity.getVariable("opened") == false) {
-                        mp.game.ui.showHudComponentThisFrame(14);
-                        mp.game.graphics.drawText("[E] Open Container", [0.5, 0.55], {
-                            font: 4,
-                            color: [255, 255, 255, 200],
-                            scale: [0.3, 0.3],
-                            outline: true,
-                            centre: true
-                        });
-                        if (mp.game.controls.isDisabledControlJustPressed(0, 51)) { // 51 == "E"
-                            let id = pointAt.entity.getVariable("id");
-                            mp.events.callRemote("Building:Interact",id);
+                if (mp.vector(mp.localPlayer.position).dist(pointAt.entity.getCoords(true)) < 3) {
+                    if (pointAt.entity.getVariable("container") == true) {
+                        if (pointAt.entity.getVariable("opened") == false) {
+                            mp.game.ui.showHudComponentThisFrame(14);
+                            mp.game.graphics.drawText("[E] Open Container", [0.5, 0.55], {
+                                font: 4,
+                                color: [255, 255, 255, 200],
+                                scale: [0.3, 0.3],
+                                outline: true,
+                                centre: true
+                            });
+                            if (mp.game.controls.isDisabledControlJustPressed(0, 51)) { // 51 == "E"
+                                let id = pointAt.entity.getVariable("id");
+                                mp.events.callRemote("Building:Interact", id);
+                            }
                         }
                     }
                 }

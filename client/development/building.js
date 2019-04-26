@@ -5,7 +5,7 @@ var Building = new class {
     _setup() {
         let self = this;
         self._cObj = null;
-        self._maxDist = 15;
+        self._maxDist = 10;
         self._state = false;
         mp.events.add("render", e => self._render(e));
     }

@@ -26,6 +26,7 @@ var Storage = new class {
 		this._tempStorage = data;
 	}
 	log(...msg) {}
+	error(...msg) {}
 	async canInteract(player, data) {
 		console.log("check can interact");
 		if (!this._interactionOpen[data.id]) {
@@ -49,7 +50,7 @@ var Storage = new class {
 						amount: item.amount,
 						data: item.data
 					});
-					return itemData;   
+					return itemData;
 				});
 				console.log("OUTPUT CONTAINER ITEMS");
 				console.log("dbItems", dbItems);
@@ -76,8 +77,10 @@ var Storage = new class {
 			let TempStorage_tStorage = (tStorage.id == "inventory") ? player.class.getInventory() : (this._tempStorage[tStorage.id] || []);
 			console.log("sStorage_Type", sStorage_Type)
 			console.log("sStorage_ID", sStorage_ID)
+			console.log("TempStorage_sStorage", TempStorage_sStorage)
 			console.log("tStorage_Type", tStorage_Type)
 			console.log("tStorage_ID", tStorage_ID)
+			console.log("TempStorage_tStorage", TempStorage_tStorage)
 			let sStorage_Amount = sStorage.items.reduce(function(total, current) {
 				return total + parseInt(current.amount) || 0;
 			}, 0)
@@ -95,20 +98,34 @@ var Storage = new class {
 				console.log("Amount check done")
 				/* Validate tStorage*/
 				TempStorage_sStorage = TempStorage_sStorage.map(function(e) {
-					return Object.assign(e,{origin:sStorage_ID});
+					return Object.assign(e, {
+						origin: sStorage_ID
+					});
 				})
 				TempStorage_tStorage = TempStorage_tStorage.map(function(e) {
-					return Object.assign(e,{origin:tStorage_ID});
+					return Object.assign(e, {
+						origin: tStorage_ID
+					});
 				})
 				sStorage.items = sStorage.items.map(function(e) {
-					return Object.assign(e,{origin:sStorage_ID});
+					return Object.assign(e, {
+						origin: sStorage_ID
+					});
 				})
 				tStorage.items = tStorage.items.map(function(e) {
-					return Object.assign(e,{origin:tStorage_ID});
+					return Object.assign(e, {
+						origin: tStorage_ID
+					});
 				})
 				let all_items_temp = (sStorage_ID == tStorage_ID) ? TempStorage_sStorage : TempStorage_sStorage.concat(TempStorage_tStorage); // merge the two temp arrays;
 				let all_items_new = (sStorage_ID == tStorage_ID) ? sStorage.items : sStorage.items.concat(tStorage.items); // merge the two temp arrays;
 				let toCreate = all_items_new.filter(e => e.id == "NEW");
+				let removed = all_items_temp.filter(e => {
+					let fItem = all_items_new.findIndex(function(cItem) {
+						return (cItem.id == e.id);
+					})
+					return (fItem == -1) && (e.id != "NEW");
+				})
 				let moved = all_items_new.filter(e => {
 					let fItem = all_items_temp.findIndex(function(cItem) {
 						return (cItem.id == e.id) && ((e.origin != cItem.origin) || (e.amount != cItem.amount));
@@ -122,8 +139,6 @@ var Storage = new class {
 					let tDoesExist = tStorage.items.findIndex(x => {
 						return x.id == e.id;
 					})
-					console.log("tDoesExist", tDoesExist)
-					console.log("sDoesExist", sDoesExist)
 					if (e.origin != sStorage_ID) {
 						t.target = {
 							id: (tDoesExist > -1) ? tStorage_ID : sStorage_ID,
@@ -142,12 +157,20 @@ var Storage = new class {
 							};
 						}
 					}
-					console.log("t.target", t.target);
 					return Object.assign(e, t);
 				})
 				console.log("toCreate", toCreate)
 				console.log("moved", moved)
+				console.log("removed", removed)
 				try {
+					removed.forEach(async item => {
+						let removed = await Inventory.deleteOne({
+							_id: item.id
+						});
+						if (removed.ok == 1) {
+							self.log("Removed item out of db",item.id)
+						}
+					});
 					toCreate.forEach(async item => {
 						let dbItem = await new Inventory({
 							owner_type: ((item.origin == tStorage_ID) ? tStorage_Type : sStorage_Type),
@@ -156,6 +179,19 @@ var Storage = new class {
 							amount: item.amount,
 							data: item.data
 						}).save();
+						rpc.callBrowsers(player, 'editItemID', {
+							selector: sStorage.id,
+							id: "NEW",
+							name: dbItem.name,
+							amount: dbItem.amount,
+							overwrite_data: {
+								id: dbItem._id
+							}
+						}).then((success) => {
+							self.log("Editing Item", dbItem._id, "success:", success)
+						}).catch((error) => {
+							self.error("Error Edit Item", dbItem._id)
+						})
 					})
 					moved.forEach(async (item) => {
 						console.log("udpate item sStorage");

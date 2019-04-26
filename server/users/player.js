@@ -1,6 +1,7 @@
 var MongoDB = require("../libs/mongodb.js")
 var Storage = require("../world/storage.js")
 var PlayerSpawns = require("../world/playerspawns.js")
+var Building = require("../world/building.js")
 var User = MongoDB.getUserModel();
 var Inventory = MongoDB.getInventoryModel();
 var md5 = require("md5");
@@ -122,6 +123,25 @@ var Player = class {
     }
     death(killer, weapon, reason) {
         let self = this;
+
+        Building.addTempObject(model, pos, rot, data = {})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         self._position = mp.vector(PlayerSpawns[Math.floor(Math.random() * PlayerSpawns.length)]);
         setTimeout(function() {
             self.spawn(1);
@@ -287,17 +307,19 @@ var Player = class {
         if (data.gender == "Male") {
             self._player.model = mp.joaat('mp_m_freemode_01');
             self._player.setClothes(3, 15, 0, 2);
-            self._player.setClothes(4, 21, 0, 2);
+            self._player.setClothes(4, 102, 0, 2);
             self._player.setClothes(6, 34, 0, 2);
             self._player.setClothes(8, 15, 0, 2);
-            self._player.setClothes(11, 15, 0, 2);
+            self._player.setClothes(11, 34, 0, 2);
+            self._player.setClothes(5, 40, 0, 2);
         } else {
             self._player.model = mp.joaat('mp_f_freemode_01');
-            self._player.setClothes(3, 15, 0, 2);
-            self._player.setClothes(4, 10, 0, 2);
+            self._player.setClothes(3, 3, 0, 2);
+            self._player.setClothes(4, 110, 0, 2);
             self._player.setClothes(6, 35, 0, 2);
             self._player.setClothes(8, 15, 0, 2);
-            self._player.setClothes(11, 15, 0, 2);
+            self._player.setClothes(11, 3, 0, 2);
+            self._player.setClothes(5, 40, 0, 2);
         }
         /*appearanceIndex*/
         if (data.makeup) {

@@ -88,7 +88,7 @@ var ItemStorageHandler = new class {
 		this.update(source, target);
 	}
 	update(source, target) {
-		mp.trigger("Inventory:Transfer", JSON.stringify({
+		mp.trigger("Storage:Transfer", JSON.stringify({
 			id: source,
 			items: this._container[source].items
 		}), JSON.stringify({
@@ -574,6 +574,10 @@ var Storage = class {
 		if (typeof options == "object") {
 			self._top = options.top || 0;
 			self._left = options.left || 0;
+			self._selector.css({
+				'top': self._top + "px",
+				'left': self._left + "px"
+			})
 		}
 		this._rows = $(selector).data("rows");
 		this._cells = $(selector).data("cells");
@@ -669,10 +673,10 @@ var Storage = class {
 	moveWindow(top, left) {
 		let self = this;
 		self._top = top;
-		self.left = left;
+		self._left = left;
 		self._selector.css({
-			'top': self._top + "px",
-			'left': self.left + "px"
+			'top': self._top,
+			'left': self._left
 		})
 	}
 	dragStorage() {
@@ -680,17 +684,16 @@ var Storage = class {
 		let lEvent = function(event) {
 			window.requestAnimationFrame(function() {
 				self._top = (event.clientY - self._repos_offset.top);
-				self.left = (event.clientX - self._repos_offset.left)
+				self._left = (event.clientX - self._repos_offset.left)
 				self._selector.css({
-					'top': self._top + "px",
-					'left': self.left + "px"
+					'top': self._top,
+					'left': self._left
 				})
-				if (self._selector.attr("id") == "inventory") {
-					mp.trigger("Inventory:Drag", JSON.stringify({
-						'top': self._top,
-						'left': self.left
-					}));
-				}
+				mp.trigger("Storage:Drag", JSON.stringify({
+					id: self._selector.attr("id"),
+					'top': self._top,
+					'left': self._left
+				}));
 				if (mouseDown <= 0) {
 					$(window).unbind("mousemove", lEvent)
 				};
@@ -945,8 +948,8 @@ var Storage = class {
 	render() {
 		let self = this;
 		self._selector.css({
-			'top': self._top + "px",
-			'left': self.left + "px"
+			'top': self._top,
+			'left': self._left
 		})
 		let cells = $(this._selector.find(".grid")).find('.cell').toArray();
 		let toRemove = self._oldInventory.filter(function(item) {
@@ -1023,13 +1026,6 @@ var nonStandartContainer = [];
 var storageContainers = [];
 
 function show() {
-	Object.keys(nonStandartContainer).forEach(function(id) {
-		if (nonStandartContainer[id]) {
-			nonStandartContainer[id].remove();
-			nonStandartContainer[id] = undefined;
-			delete nonStandartContainer[id];
-		}
-	})
 	$("body").css({
 		"opacity": "1"
 	});
@@ -1044,6 +1040,7 @@ function hide() {
 	isToggledInto = false;
 	Object.keys(nonStandartContainer).forEach(function(id) {
 		if (nonStandartContainer[id]) {
+			mp.trigger("Storage:Close", id);
 			nonStandartContainer[id].remove();
 			nonStandartContainer[id] = undefined;
 			delete nonStandartContainer[id];
@@ -1083,30 +1080,28 @@ function addItem(container, gCell, gRow, gWidth, gHeight, gData, flipped = false
 	}
 }
 
-function initialize(config) {
-	console.log("config", config)
+function initialize(cells, rows, config) {
+	if (storageContainers["#inventory"]) {
+		storageContainers["#inventory"].remove()
+		storageContainers["#inventory"] = undefined;
+		delete storageContainers["#inventory"];
+	}
+	let container = `<div id="inventory" class="storage" data-cells="${cells}" data-rows="${rows}" style="display: block;">
+						    <div class="headline">Inventory</div>
+						    <div class="grid"></div>
+						    <div class="items">
+						    </div>
+						</div>`
+	$(container).appendTo(document.body);
 	var Inventory = new Storage("#inventory", {
 		top: config["inventory"].top || 0,
 		left: config["inventory"].left || 0,
 	});
 	storageContainers["#inventory"] = Inventory;
-	/*Inventory.addItemBySlot(0, 0, 4, 2, {
-		name: "CompactRifle",
-		image: "../../source/img/weapon_compactrifle.png"
-	})
-	Inventory.addItemBySlot(6, 0, 4, 2, {
-		name: "CompactRifle",
-		image: "../../source/img/weapon_compactrifle.png"
-	})
-	let next_slot = Inventory.getNextFreeSlot(4, 2)
-	Inventory.addItemBySlot(next_slot.cell, next_slot.row, next_slot.width, next_slot.height, {
-		name: "CompactRifle",
-		image: "../../source/img/weapon_compactrifle.png"
-	}, next_slot.flipped)*/
 }
 
 function addStorageContainer(headline, selector, config, cells, rows, items) {
-	console.log($("#" + selector).length)
+	console.log("config", config)
 	if ($("#" + selector).length == 0) {
 		let container = `<div id="${selector}" class="storage" data-cells="${cells}" data-rows="${rows}" style="display: block;">
 						    <div class="headline">${headline}</div>

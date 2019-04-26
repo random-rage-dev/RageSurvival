@@ -5,6 +5,13 @@ console.log = function(...a) {
 mp.isValid = function(val) {
     return val != null && val != undefined && val != "";
 }
+mp.gui.execute("const _enableChatInput = enableChatInput;enableChatInput = (enable) => { mp.trigger('chatEnabled', enable); _enableChatInput(enable) };");
+
+mp.events.add('chatEnabled', (isEnabled) => {
+    mp.gui.chat.enabled = isEnabled;
+});
+
+
 mp.canCrouch = true;
 mp.gameplayCam = mp.cameras.new('gameplay');
 mp.defaultCam = mp.cameras.new('default');

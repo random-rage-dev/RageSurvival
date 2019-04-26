@@ -6,8 +6,8 @@ var ItemPickups = require("./world/pickups.js")
 var Zombies = require("./world/zombies.js")
 var Building = require("./world/building.js")
 var Vehicles = require("./world/vehicles.js")
+var Storage = require("./world/storage.js")
 require("./world/crafting.js")
-require("./dev/loot_placement.js")
 var players = [];
 mp.events.add("ServerAccount:Ready", function(player) {
     player.setVariable("loggedIn", false);

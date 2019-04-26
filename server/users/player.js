@@ -226,7 +226,7 @@ var Player = class {
                     });
                     return itemData;
                 });
-                self._player.call("Inventory:getData", [10,10])
+                self._player.call("Inventory:Resize", [10,10])
                 self._player.call("Inventory:Update", [self._inventory])
                 console.log(self._inventory);
                 mp.events.call("Player:Inventory", self._player, self._inventory)

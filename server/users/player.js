@@ -306,7 +306,7 @@ var Player = class {
         let self = this;
         if (data.gender == "Male") {
             self._player.model = mp.joaat('mp_m_freemode_01');
-            self._player.setClothes(3, 15, 0, 2);
+            self._player.setClothes(3, 0, 0, 2);
             self._player.setClothes(4, 102, 0, 2);
             self._player.setClothes(6, 34, 0, 2);
             self._player.setClothes(8, 15, 0, 2);

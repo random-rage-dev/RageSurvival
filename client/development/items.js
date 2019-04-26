@@ -133,18 +133,18 @@ mp.events.add("render", () => {
     let cur_selected = false;
     let cur_dist = 999;
     let pool_data = null;
-    Object.keys(streamedPools).forEach(function(key) {
-        let pool = streamedPools[key]
-        if (pool.isInRange() == true) {
-            let pos = pool.position;
-            pos.z += 1;
-            let Angle_Item = 360 / 8;
-            let pointAt = pointingAt();
-            pool.getLootPool().forEach(function(item, index) {
-                if (item != null) {
-                    let offset_pos = pos.findRot(0, 0.5, Angle_Item * index).ground();
-                    mp.game.graphics.drawMarker(28, offset_pos.x, offset_pos.y, offset_pos.z, 0, 0, 0, 0, 0, 0, ((mp.players.local.isRunning() == true) ? item.thickness * 2 : item.thickness), ((mp.players.local.isRunning() == true) ? item.thickness * 2 : item.thickness), ((mp.players.local.isRunning() == true) ? item.thickness * 2 : item.thickness), 255, 255, 255, 150, false, false, 2, false, "", "", false);
-                    if ((pointAt) && (pointAt.position)) {
+    let pointAt = pointingAt();
+    let Angle_Item = 360 / 8;
+    if ((pointAt) && (pointAt.position)) {
+        Object.keys(streamedPools).forEach(function(key) {
+            let pool = streamedPools[key]
+            if (pool.isInRange() == true) {
+                let pos = pool.position;
+                pos.z += 1;
+                pool.getLootPool().forEach(function(item, index) {
+                    if (item != null) {
+                        let offset_pos = pos.findRot(0, 0.5, Angle_Item * index).ground();
+                        mp.game.graphics.drawMarker(28, offset_pos.x, offset_pos.y, offset_pos.z, 0, 0, 0, 0, 0, 0, ((mp.players.local.isRunning() == true) ? item.thickness * 2 : item.thickness), ((mp.players.local.isRunning() == true) ? item.thickness * 2 : item.thickness), ((mp.players.local.isRunning() == true) ? item.thickness * 2 : item.thickness), 255, 255, 255, 150, false, false, 2, false, "", "", false);
                         let dist = (offset_pos.dist(pointAt.position));
                         if ((dist <= ((mp.players.local.isRunning() == true) ? item.thickness * 2 : item.thickness)) && (cur_selected == false) && (dist < cur_dist)) {
                             item.position = offset_pos;
@@ -153,10 +153,10 @@ mp.events.add("render", () => {
                             pool_data = key;
                         }
                     }
-                }
-            })
-        }
-    });
+                })
+            }
+        });
+    }
     if ((cur_selected) && (pool_data)) {
         mp.game.controls.disableControlAction(0, 51, true);
         mp.game.ui.showHudComponentThisFrame(14);
@@ -190,9 +190,8 @@ mp.events.add("render", () => {
                         if (fit != undefined) {
                             mp.events.callRemote("Loot:Pickup", pool_data, cur_selected.index, cur_selected.name, cur_selected.amount);
                             /*3d Notify*/
-
                             let pos = cur_selected.position;
-                            Notifications.notify3D(pos.x,pos.y,pos.z,pos.x,pos.y,pos.z+0.5,`+ ${cur_selected.amount}x${cur_selected.name}`,[255,255,255]);
+                            Notifications.notify3D(pos.x, pos.y, pos.z, pos.x, pos.y, pos.z + 0.5, `+ ${cur_selected.amount}x${cur_selected.name}`, [255, 255, 255]);
                             CEFNotification.call("notify", {
                                 title: "Notification",
                                 titleSize: "16px",
@@ -214,6 +213,27 @@ mp.events.add("render", () => {
                             cStatus = "Not enough Space";
                         }
                     })
+                }
+            }
+        }
+    } else {
+        if ((pointAt) && (pointAt.entity)) {
+            if (typeof pointAt.entity == "object") {
+                if (pointAt.entity.getVariable("container") == true) {
+                    if (pointAt.entity.getVariable("opened") == false) {
+                        mp.game.ui.showHudComponentThisFrame(14);
+                        mp.game.graphics.drawText("[E] Open Container", [0.5, 0.55], {
+                            font: 4,
+                            color: [255, 255, 255, 200],
+                            scale: [0.3, 0.3],
+                            outline: true,
+                            centre: true
+                        });
+                        if (mp.game.controls.isDisabledControlJustPressed(0, 51)) { // 51 == "E"
+                            let id = pointAt.entity.getVariable("id");
+                            mp.events.callRemote("Building:Interact",id);
+                        }
+                    }
                 }
             }
         }

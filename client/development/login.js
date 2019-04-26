@@ -15,6 +15,7 @@ function clearBlips() {
     mp.game.wait(50);
 }
 // Account Stuff
+mp.gui.chat.show(false);
 mp.events.callRemote("ServerAccount:Ready");
 mp.game.graphics.transitionToBlurred(1);
 var LastCam;
@@ -51,7 +52,8 @@ mp.events.add("Account:LoginDone", () => {
     mp.game.player.setHealthRechargeMultiplier(0.0);
     mp.game.ui.displayRadar(true);
     mp.game.ui.displayHud(true);
-    mp.game.ui.setMinimapVisible(false)
+    mp.game.ui.setMinimapVisible(false);
+    mp.gui.chat.show(true);
     //CEFInventory.load("user_interface/index.html");
 })
 mp.events.add("Cam:Hide", () => {

@@ -367,7 +367,6 @@ var DragHandler = new class {
 	returnToOrigin() {
 		let self = this;
 		if (self._originSource != undefined) {
-			console.log("RETURN TO ORIGIN");
 			let itemBackup = JSON.parse(JSON.stringify(self._item_data.item));
 			let tempItemData = {
 				cell: self._item_data_old.cell,
@@ -377,8 +376,6 @@ var DragHandler = new class {
 				item: itemBackup,
 				scale: self._item_data.scale
 			}
-			console.log("OLD", self._item_data_old.width, self._item_data_old.height, self._item_data_old)
-			console.log("NEW", self._item_data.width, self._item_data.height, self._item_data)
 			if (self._originSource.addItemBySlot(self._item_data_old.cell, self._item_data_old.row, self._item_data_old.width, self._item_data_old.height, Object.assign(tempItemData, {
 					scale: self._defaultScale
 				})) == true) {
@@ -505,7 +502,6 @@ var DragHandler = new class {
 						'width': self._item_data.width * cell_size + "px",
 						'height': self._item_data.height * cell_size + "px"
 					});
-					console.log("slot", $(slot));
 				} else {
 					let targetItem = self._lastTarget.getItemInSlot($(slot).data("cell"), $(slot).data("row"));
 					if (targetItem != false) {

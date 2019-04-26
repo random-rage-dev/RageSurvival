@@ -35,6 +35,13 @@ mp.Vector3.prototype.dist = function(to) {
     let c = this.z - to.z;
     return Math.sqrt(a * a + b * b + c * c);;
 }
+
+mp.Vector3.prototype.dist2d = function(to) {
+    let a = this.x - to.x;
+    let b = this.y - to.y;
+    return Math.sqrt(a * a + b * b);
+}
+
 mp.Vector3.prototype.getOffset = function(to) {
     let x = this.x - to.x;
     let y = this.y - to.y;

@@ -659,6 +659,12 @@ var Storage = class {
 			}
 		});
 	}
+	resize(cells,rows) {
+		this._rows = rows;
+		this._cells = cells;
+		this.fill();
+		this.render();
+	}
 	click(item) {
 		console.log("click", item);
 	}
@@ -1053,11 +1059,15 @@ function setPos(container, top, left) {
 		storageContainers["#" + container].moveWindow(top, left);
 	};
 }
+function resize(container, cells, rows) {
+	if (storageContainers["#" + container]) {
+		storageContainers["#" + container].resize(cells,rows);
+	};
+}
 
 function clear(container) {
 	if (storageContainers["#" + container]) {
-		let Unit = storageContainers["#" + container];
-		Unit.clear();
+		let Unit = storageContainers["#" + container].clear();
 	}
 }
 

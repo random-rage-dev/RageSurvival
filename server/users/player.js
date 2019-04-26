@@ -206,6 +206,7 @@ var Player = class {
                     });
                     return itemData;
                 });
+                self._player.call("Inventory:getData", [10,10])
                 self._player.call("Inventory:Update", [self._inventory])
                 console.log(self._inventory);
                 mp.events.call("Player:Inventory", self._player, self._inventory)
@@ -255,7 +256,6 @@ var Player = class {
     /*Character*/
     saveChar(data) {
         let self = this;
-        console.log("DATA", data);
         User.updateOne({
             user_id: self._userId
         }, {
@@ -389,12 +389,11 @@ var Player = class {
         }, async function(err, arr) {
             if (arr.length) {
                 let cUser = arr[0];
-                console.log("cUser", cUser);
                 self._playtime = cUser.playtime;
                 self._warns = cUser.warns;
                 self._userId = cUser.user_id;
                 self._position = cUser.position;
-                if (cUser.character.length > 0) {
+                if ((cUser.character) && (cUser.character.length > 0)) {
                     self._characterData = cUser.character[0];
                     self._player.setVariable("user_id", self._userId)
                     self._player.setVariable("loggedIn", true);

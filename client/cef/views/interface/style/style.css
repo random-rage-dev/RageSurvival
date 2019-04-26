@@ -102,7 +102,7 @@ img.flip.vert{
    position: relative;
    top: 25%;
    left:0;
-   transform:rotate(90deg) scale(2) ;
+   transform:rotate(90deg) scale(2);
 }
 img.flip.vert.drag{
     position: relative;
@@ -110,6 +110,15 @@ img.flip.vert.drag{
     left: -50%;
     transform: rotate(90deg) ;
 }
+
+img.flip.vert[src*="weapon_microsmg.png"] {
+    top: 15%;
+    left: 0;
+    transform: rotate(90deg) scale(1.5);
+}
+
+
+
 
 #dragitem {
 	position: absolute;

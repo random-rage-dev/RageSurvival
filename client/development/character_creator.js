@@ -45,7 +45,7 @@ mp.events.add("Character:Update", (data) => {
     if (data.gender != cModel) {
         if (data.gender == "Male") {
             mp.localPlayer.model = mp.game.joaat('mp_m_freemode_01');
-            mp.localPlayer.setComponentVariation(3, 15, 0, 2);
+            mp.localPlayer.setComponentVariation(3, 0, 0, 2);
             mp.localPlayer.setComponentVariation(4, 102, 0, 2);
             mp.localPlayer.setComponentVariation(6, 34, 0, 2);
             mp.localPlayer.setComponentVariation(8, 15, 0, 2);

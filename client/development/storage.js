@@ -1,40 +1,61 @@
+var cell_size = 40;
+var padding = 5;
 var TempStorage = [];
 var Inventory_Order = {
-	top: 0,
-	left: 0,
+	positions: {
+		"inventory": {
+			top: 0,
+			left: 0
+		}
+	},
 	items: {}
 };
-if (mp.storage.data.inventory_order) {
-	let storageData = mp.storage.data.inventory_order;
-	Inventory_Order.top = storageData.top || 0;
-	Inventory_Order.left = storageData.left || 0;
-	Inventory_Order.items = storageData.items || {};
-} else {
-	mp.storage.data.inventory_order = Inventory_Order;
-}
 var CEFInventory = require("./browser.js").inventory;
 var CEFNotification = require("./browser.js").notification;
-CEFInventory.load("interface/index.html");
+var cells = 0;
+var rows = 0;
+mp.events.add("Inventory:getData", (cell_count, row_count) => {
+	cells = cell_count;
+	rows = row_count;
+	let clientWidth = cell_size * cells + (padding * 2)
+	let clientHeight = cell_size * rows + 37 + (padding * 2)
+	if (mp.storage.data.inventory_order) {
+		let storageData = mp.storage.data.inventory_order;
+		Inventory_Order.positions = storageData.positions || {
+			"inventory": {
+				top: `calc(50% - ${clientHeight/2}px)`,
+				left: `calc(50% - ${clientWidth/2}px)`
+			}
+		};
+		Inventory_Order.items = storageData.items || {};
+	} else {
+		mp.storage.data.inventory_order = Inventory_Order;
+	}
+	CEFInventory.load("interface/index.html");
+});
 mp.events.add("Inventory:Ready", (data) => {
-	CEFInventory.call("initialize", {
+	CEFInventory.call("initialize", cells, rows, {
 		"inventory": {
-			top: Inventory_Order.top,
-			left: Inventory_Order.left
+			top: Inventory_Order.positions["inventory"].top,
+			left: Inventory_Order.positions["inventory"].left
 		}
 	})
 });
 
 function toggleInventory() {
 	if (toggleInvState == false) {
-		CEFInventory.call("setPos", "inventory", Inventory_Order.top, Inventory_Order.left);
-		CEFInventory.call("show");
-		CEFInventory.cursor(true);
-		toggleInvState = true;
-		mp.canCrouch = false;
+		if (mp.gui.cursor.visible == false) {
+			CEFInventory.call("setPos", "inventory", Inventory_Order.positions["inventory"].top, Inventory_Order.positions["inventory"].left);
+			CEFInventory.call("show");
+			CEFInventory.cursor(true);
+			toggleInvState = true;
+			mp.canCrouch = false;
+			mp.gui.chat.activate(false)
+		}
 	} else {
 		mp.rpc.callBrowser(CEFInventory.browser, 'isBusy').then(value => {
-			console.log("isBusy", value);
 			if (value == false) {
+				mp.gui.chat.activate(true)
 				CEFInventory.call("hide");
 				CEFInventory.cursor(false);
 				toggleInvState = false;
@@ -56,18 +77,19 @@ function toggleInventory() {
 			CEFInventory.cursor(false);
 			toggleInvState = false;
 			mp.canCrouch = true;
+			mp.gui.chat.activate(true)
 		});
 	}
 }
 let toggleInvState = false;
-mp.keys.bind(0x49, false, function() {
-	console.log("press bind key");
+mp.keys.bind(0x09, false, () => {
 	toggleInventory();
 });
-mp.events.add("Inventory:AddContainer", (headline, selector, config, cells, rows, items) => {
-	items = JSON.parse(items);
-	TempStorage[selector] = items;
-	CEFInventory.addStorageContainer(headline, selector, config, cells, rows, items)
+mp.events.add("render", () => {
+	mp.game.controls.disableControlAction(2, 37, true);
+	/*if (mp.game.controls.isControlJustPressed(2, 37)) {
+		toggleInventory();
+	}*/
 });
 mp.events.add("Inventory:Update", (inventory) => {
 	if (!TempStorage["inventory"]) {
@@ -75,6 +97,9 @@ mp.events.add("Inventory:Update", (inventory) => {
 	}
 	CEFInventory.call("clear", "inventory");
 	TempStorage["inventory"] = [];
+	inventory = inventory.sort(function(a, b) {
+		return b.height - a.height || b.width - a.width;
+	})
 	inventory.forEach(function(citem) {
 		let tempSettings = StorageSystem.getTempSettings(citem.id, "inventory");
 		let gData = {
@@ -139,12 +164,29 @@ mp.events.add("Inventory:AddItem", (citem) => {
 	})
 	CEFInventory.call("addItem", "inventory", tempSettings.cell || 0, tempSettings.row || 0, citem.width, citem.height, JSON.stringify(gData), tempSettings.flipped || false)
 });
-mp.events.add("Inventory:Transfer", (source, target) => {
+mp.events.add("Storage:Drag", (positions) => {
+	positions = JSON.parse(positions);
+	if (!Inventory_Order.positions[positions.id]) {
+		Inventory_Order.positions[positions.id] = {
+			top: "40%",
+			left: "25%"
+		}
+	}
+	Inventory_Order.positions[positions.id] = {
+		top: positions.top + "px",
+		left: positions.left + "px"
+	};
+	mp.storage.data.inventory_order = Inventory_Order;
+	mp.storage.flush();
+});
+mp.events.add("Storage:Close", (id) => {
+	mp.events.callRemote("Storage:Close", id.replace("#", ""));
+});
+mp.events.add("Storage:Transfer", (source, target) => {
 	source = JSON.parse(source);
 	target = JSON.parse(target);
 	Inventory_Order = {
-		top: Inventory_Order.top,
-		left: Inventory_Order.left,
+		positions: Inventory_Order.positions,
 		items: Inventory_Order.items
 	};
 	target.items.forEach(function(item) {
@@ -169,26 +211,61 @@ mp.events.add("Inventory:Transfer", (source, target) => {
 	source.items = source.items.map((item) => StorageSystem.minify(item));
 	target.items = target.items.map((item) => StorageSystem.minify(item));
 	if (StorageSystem.needsUpdate(source, target) == true) {
-
 		TempStorage[source.id] = source.items;
 		TempStorage[target.id] = target.items;
-
-		mp.events.callRemote("Inventory:Transfer", JSON.stringify(source), JSON.stringify(target));
+		mp.events.callRemote("Storage:Transfer", JSON.stringify(source), JSON.stringify(target));
 	}
 });
-mp.events.add("Inventory:Drag", (positions) => {
-	positions = JSON.parse(positions);
-	Inventory_Order = {
-		top: positions.top,
-		left: positions.left,
-		items: Inventory_Order.items
+mp.events.add("Storage:AddContainer", (headline, selector, cells, rows, items) => {
+	items = JSON.parse(items);
+	if (!TempStorage[selector]) {
+		TempStorage[selector] = [];
+	}
+	let gItems = items.map(function(citem) {
+		let tempSettings = StorageSystem.getTempSettings(citem.id, selector);
+		let width = citem.width;
+		let height = citem.height;
+		if (tempSettings.flipped == true) {
+			citem.width = height;
+			citem.height = width;
+		}
+		let gData = {
+			id: citem.id,
+			name: citem.name,
+			image: citem.image,
+			scale: tempSettings.scale || {},
+			amount: citem.amount,
+			max_stack: citem.max_stack
+		}
+		let gItem = {
+			width: citem.width,
+			height: citem.height,
+			cell: tempSettings.cell || 0,
+			row: tempSettings.row || 0,
+			item: gData
+		}
+		return gItem;
+	})
+	TempStorage[selector] = gItems;
+	CEFInventory.call("show");
+	CEFInventory.call("setPos", "inventory", Inventory_Order.positions["inventory"].top, Inventory_Order.positions["inventory"].left);
+	let clientWidth = cell_size * cells + (padding * 2)
+	let clientHeight = cell_size * rows + 37 + (padding * 2)
+	let config = {
+		top: Inventory_Order.positions[selector] ? Inventory_Order.positions[selector].top : `calc(50% - ${clientHeight/2}px)`,
+		left: Inventory_Order.positions[selector] ? Inventory_Order.positions[selector].left : `calc(50% - ${clientWidth/2}px)`
 	};
-	mp.storage.data.inventory_order = Inventory_Order;
-	mp.storage.flush();
+	CEFInventory.call("addStorageContainer", headline, selector, config, cells, rows, gItems);
+	CEFInventory.cursor(true);
+	toggleInvState = true;
+	mp.canCrouch = false;
 });
 var itemIdentity = require("../../server/world/items.js");
 var StorageSystem = new class {
-	constructor() {}
+	constructor() {
+		this._openContainer = [];
+	}
+	closeOpenContainer() {}
 	minify(item) {
 		return {
 			id: item.item.id,
@@ -213,15 +290,14 @@ var StorageSystem = new class {
 			})
 			return fItem != -1;
 		})
-		console.log("Items Changed source ?",remaining_items_source.length,sourceTempOld.length,remaining_items_source.length != sourceTempOld.length);
+		console.log("Items Changed source ?", remaining_items_source.length, sourceTempOld.length, remaining_items_source.length != sourceTempOld.length);
 		let remaining_items_target = targetTempOld.filter(function(item) {
 			let fItem = target.items.findIndex(function(cItem) {
 				return (cItem.id == item.id) && (cItem.amount == item.amount);
 			});
 			return fItem != -1;
 		})
-		console.log("Items Changed target ?",remaining_items_target.length,targetTempOld.length,remaining_items_target.length != targetTempOld.length);
-
+		console.log("Items Changed target ?", remaining_items_target.length, targetTempOld.length, remaining_items_target.length != targetTempOld.length);
 		return (remaining_items_target.length != targetTempOld.length) || (remaining_items_source.length != sourceTempOld.length);
 	}
 	checkFit(where, w, h) {

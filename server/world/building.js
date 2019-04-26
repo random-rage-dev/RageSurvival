@@ -51,15 +51,33 @@ var Building = class {
 	container() {
 		this._obj.setVariable("container", true);
 		this._obj.setVariable("opened", false);
-	}
+	} 
 }
 var BuildingManager = new class {
 	constructor() {
 		this._allObjects = [];
 		this.loadObjects();
 	}
-	getObject(id) {
+	getObject(id) {  
 		return this._allObjects[id] || undefined;
+	}
+	async addTempObject(model, pos, rot, data = {}) {
+		let u_id = "TEMP_"+(Date.now() + pos.x + pos.y + pos.z).toString();
+		let prep = {
+			_id:u_id,
+			health: 1000,
+			model: model,
+			x: pos.x,
+			y: pos.y,
+			z: pos.z,
+			rot_x: rot.x,
+			rot_y: rot.y,
+			rot_z: rot.z,
+			data: data,
+			owner_id: -1
+		}
+		self._allObjects[u_id] = new Building(prep);
+		return u_id;
 	}
 	async loadObjects() {
 		let self = this;

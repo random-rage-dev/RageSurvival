@@ -3,7 +3,6 @@ function getRandomInt(min, max) {
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min)) + min;
 }
-
 /*
  *  types : Residential,Industrial,Farm,Military,Other,Food,...
  *  image needs to be relative to the client resources
@@ -18,7 +17,7 @@ var items = {
         type: "Residential",
         model: "w_sg_pumpshotgun",
         thickness: 0.15,
-        amount:1,
+        amount: 1,
         offset: {
             pos: new mp.Vector3(0, 0, 0.02),
             rot: new mp.Vector3(90, 0, 0)
@@ -33,7 +32,7 @@ var items = {
         type: "Residential",
         model: "w_sg_pumpshotgun",
         thickness: 0.15,
-        amount:1,
+        amount: 1,
         offset: {
             pos: new mp.Vector3(0, 0, 0.02),
             rot: new mp.Vector3(90, 0, 0)
@@ -52,7 +51,7 @@ var items = {
             return getRandomInt(5, 15)
         },
         offset: {
-            pos: new mp.Vector3(0, 0, 0.01),
+            pos: new mp.Vector3(0, 0, 0.02),
             rot: new mp.Vector3(90, 0, 0)
         }
     },
@@ -65,7 +64,7 @@ var items = {
         type: "Industrial",
         model: "w_sb_microsmg",
         thickness: 0.15,
-        amount:1,
+        amount: 1,
         offset: {
             pos: new mp.Vector3(0, 0, 0.02),
             rot: new mp.Vector3(90, 0, 0)
@@ -97,7 +96,7 @@ var items = {
         type: "Military",
         model: "w_ar_assaultrifle",
         thickness: 0.15,
-        amount:1,
+        amount: 1,
         offset: {
             pos: new mp.Vector3(0, 0, 0.02),
             rot: new mp.Vector3(90, 0, 0)
@@ -120,15 +119,15 @@ var items = {
             rot: new mp.Vector3(90, 0, 0)
         }
     },
-    "Drank": {
+    "Sprunk Can": {
         width: 1,
         height: 1,
         max_stack: 15,
-        name: 'Drank',
+        name: 'Sprunk Can',
         image: '../../source/img/energy_drink_small.png',
         type: "Food",
-        model: "bkr_prop_coke_powderbottle_02",
-        thickness: 0.3,
+        model: "ng_proc_sodacan_01a",
+        thickness: 0.25,
         amount: function() {
             return getRandomInt(1, this.max_stack)
         },
@@ -137,21 +136,157 @@ var items = {
             rot: new mp.Vector3(0, 0, 0)
         }
     },
-    "Drank Fresh": {
+    "Sprunk 2 Can": {
         width: 1,
         height: 2,
         max_stack: 14,
-        name: 'Drank Fresh',
-        image: '../../source/img/energy_drink_small.png',
+        name: 'Sprunk 2 Can',
+        image: 'https://via.placeholder.com/40x80',
         type: "Food",
-        model: "bkr_prop_coke_powderbottle_01",
-        thickness: 0.25,
+        model: "ng_proc_sodacan_01a",
+        thickness: 0.15,
         amount: function() {
             return getRandomInt(3, this.max_stack)
         },
         offset: {
             pos: new mp.Vector3(0, 0, 0),
             rot: new mp.Vector3(0, 0, 0)
+        }
+    },
+    "Sprunk Bottle": {
+        width: 1,
+        height: 1,
+        max_stack: 15,
+        name: 'Drank',
+        image: 'https://via.placeholder.com/40x40',
+        type: "Food",
+        model: "ng_proc_sodabot_01a",
+        thickness: 0.25,
+        amount: function() {
+            return getRandomInt(1, this.max_stack)
+        },
+        offset: {
+            pos: new mp.Vector3(0, 0, 0),
+            rot: new mp.Vector3(0, 0, 0)
+        }
+    },
+    "Drank Bottle": {
+        width: 1,
+        height: 2,
+        max_stack: 14,
+        name: 'Drank Fresh',
+        image: 'https://via.placeholder.com/40x80',
+        type: "Food",
+        model: "ng_proc_ojbot_01a",
+        thickness: 0.2,
+        amount: function() {
+            return getRandomInt(1, this.max_stack)
+        },
+        offset: {
+            pos: new mp.Vector3(0, 0, 0),
+            rot: new mp.Vector3(0, 0, 0)
+        }
+    },
+    "Banana": {
+        width: 2,
+        height: 1,
+        max_stack: 24,
+        name: 'Banana',
+        image: 'https://via.placeholder.com/80x40',
+        type: "Food",
+        model: "ng_proc_food_nana1a",
+        thickness: 0.15,
+        amount: function() {
+            return getRandomInt(1, this.max_stack)
+        },
+        offset: {
+            pos: new mp.Vector3(0, 0, 0),
+            rot: new mp.Vector3(0, 0, 0)
+        }
+    },
+    "Orange": {
+        width: 1,
+        height: 1,
+        max_stack: 24,
+        name: 'Orange',
+        image: 'https://via.placeholder.com/40x40',
+        type: "Food",
+        model: "ng_proc_food_ornge1a",
+        thickness: 0.15,
+        amount: function() {
+            return getRandomInt(1, this.max_stack)
+        },
+        offset: {
+            pos: new mp.Vector3(0, 0, 0),
+            rot: new mp.Vector3(0, 0, 0)
+        }
+    },
+    "Crackles O`Dawn": {
+        width: 1,
+        height: 2,
+        max_stack: 24,
+        name: "Crackles O`Dawn",
+        image: 'https://via.placeholder.com/40x80',
+        type: "Food",
+        model: "v_res_tt_cereal02",
+        thickness: 0.2,
+        amount: function() {
+            return getRandomInt(1, this.max_stack)
+        },
+        offset: {
+            pos: new mp.Vector3(0, 0, 0.0),
+            rot: new mp.Vector3(0, 0, 0)
+        }
+    },
+    "Strawberry Rails": {
+        width: 1,
+        height: 2,
+        max_stack: 24,
+        name: "Strawberry Rails",
+        image: 'https://via.placeholder.com/40x80',
+        type: "Food",
+        model: "v_res_fa_cereal01",
+        thickness: 0.35,
+        amount: function() {
+            return getRandomInt(1, this.max_stack)
+        },
+        offset: {
+            pos: new mp.Vector3(0, 0, 0),
+            rot: new mp.Vector3(0, 0, 0)
+        }
+    },
+    "Chicken Noodles": {
+        width: 1,
+        height: 2,
+        max_stack: 24,
+        name: "Chicken Noodles",
+        image: 'https://via.placeholder.com/40x80',
+        type: "Food",
+        model: "v_res_fa_potnoodle",
+        thickness: 0.15,
+        amount: function() {
+            return getRandomInt(1, this.max_stack)
+        },
+        offset: {
+            pos: new mp.Vector3(0, 0, 0),
+            rot: new mp.Vector3(0, 0, 0)
+        }
+    },
+    "Bread": {
+        width: 1,
+        height: 2,
+        max_stack: 24,
+        name: "Bread",
+        image: 'https://via.placeholder.com/40x80',
+        type: "Food",
+        model: "v_res_fa_bread01",
+        thickness: 0.25,
+        amount: function() {
+            return getRandomInt(1, this.max_stack)
+        },
+        offset: {
+            pos: new mp.Vector3(0, 0, 0.03),
+            rot: new mp.Vector3(90, 0, 0)
         }
     },
     "Gas Can": {
@@ -161,7 +296,7 @@ var items = {
         name: 'Gas Can',
         image: '../../source/img/Icon_jerrycan.png',
         type: "Industrial",
-        model: "prop_cs_package_01",
+        model: "prop_oilcan_01a",
         thickness: 0.25,
         amount: function() {
             return 1
@@ -181,7 +316,7 @@ var items = {
         model: "prop_fncwood_13c",
         thickness: 0.35,
         amount: function() {
-            return 1
+            return getRandomInt(1, this.max_stack)
         },
         offset: {
             pos: new mp.Vector3(0, 0, 0),

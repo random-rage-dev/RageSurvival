@@ -18,6 +18,7 @@ var items = {
         type: "Residential",
         model: "w_sg_pumpshotgun",
         thickness: 0.15,
+        amount:1,
         offset: {
             pos: new mp.Vector3(0, 0, 0.02),
             rot: new mp.Vector3(90, 0, 0)
@@ -32,6 +33,7 @@ var items = {
         type: "Residential",
         model: "w_sg_pumpshotgun",
         thickness: 0.15,
+        amount:1,
         offset: {
             pos: new mp.Vector3(0, 0, 0.02),
             rot: new mp.Vector3(90, 0, 0)
@@ -63,6 +65,7 @@ var items = {
         type: "Industrial",
         model: "w_sb_microsmg",
         thickness: 0.15,
+        amount:1,
         offset: {
             pos: new mp.Vector3(0, 0, 0.02),
             rot: new mp.Vector3(90, 0, 0)
@@ -78,7 +81,7 @@ var items = {
         model: "w_sb_microsmg_mag1",
         thickness: 0.15,
         amount: function() {
-            return getRandomInt(10, 25)
+            return getRandomInt(10, this.max_stack)
         },
         offset: {
             pos: new mp.Vector3(0, 0, 0.01),
@@ -94,6 +97,7 @@ var items = {
         type: "Military",
         model: "w_ar_assaultrifle",
         thickness: 0.15,
+        amount:1,
         offset: {
             pos: new mp.Vector3(0, 0, 0.02),
             rot: new mp.Vector3(90, 0, 0)
@@ -109,7 +113,7 @@ var items = {
         model: "w_ar_assaultrifle_mag1",
         thickness: 0.15,
         amount: function() {
-            return getRandomInt(10, 25)
+            return getRandomInt(10, this.max_stack)
         },
         offset: {
             pos: new mp.Vector3(0, 0, 0.01),
@@ -126,7 +130,7 @@ var items = {
         model: "bkr_prop_coke_powderbottle_02",
         thickness: 0.3,
         amount: function() {
-            return getRandomInt(1, 150)
+            return getRandomInt(1, this.max_stack)
         },
         offset: {
             pos: new mp.Vector3(0, 0, 0),
@@ -141,9 +145,9 @@ var items = {
         image: '../../source/img/energy_drink_small.png',
         type: "Food",
         model: "bkr_prop_coke_powderbottle_01",
-        thickness: 0.35,
+        thickness: 0.25,
         amount: function() {
-            return getRandomInt(3, 15)
+            return getRandomInt(3, this.max_stack)
         },
         offset: {
             pos: new mp.Vector3(0, 0, 0),
@@ -158,7 +162,7 @@ var items = {
         image: '../../source/img/Icon_jerrycan.png',
         type: "Industrial",
         model: "prop_cs_package_01",
-        thickness: 0.35,
+        thickness: 0.25,
         amount: function() {
             return 1
         },

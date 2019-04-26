@@ -118,7 +118,6 @@ var buildings = mongoose.Schema({
 })
 
 buildings.index({
-    prop_id: 1,
     placed: 1,
     owner_id: 1
 });

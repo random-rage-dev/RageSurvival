@@ -34,8 +34,15 @@ $(window).keyup(function(e) {
 	}
 });
 var ContextHandler = new class {
-	constructor() {}
-	open(id, source) {
+	constructor() {
+		$(window).on('contextmenu', function(event) {
+			if (isToggledInto == true) return;
+			event.preventDefault();
+			console.log("context");
+			self.contextmenu(event);
+		});
+	}
+	contextmenu(id, source) {
 		//TODO EXTEND!!!
 	}
 }
@@ -1142,8 +1149,8 @@ function initialize(cells, rows, config) {
 						</div>`
 	$(container).appendTo(document.body);
 	var Inventory = new Storage("#inventory", {
-		top: config["inventory"].top || 0,
-		left: config["inventory"].left || 0,
+		top: config.top || 0,
+		left: config.left || 0,
 	});
 	storageContainers["#inventory"] = Inventory;
 }

@@ -24,12 +24,12 @@ mp.events.add("playerQuit", function(player, exitType, reason) {
         console.log("Data Saving")
         players[player_id].save().then(function() {
             console.log("Data Saved")
-            players[player_id].logout();
+            //players[player_id].logout();
             players[player_id] = null;
             delete players[player_id];
         }).catch(function(err) {
             console.log("Data Error", err)
-            players[player_id].logout();
+            //players[player_id].logout();
             players[player_id] = null;
             delete players[player_id];
         })

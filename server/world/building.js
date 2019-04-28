@@ -4,7 +4,6 @@ var Buildings = MongoDB.getBuildingModel();
 /*Building Class*/
 var Building = class {
 	constructor(data) {
-		console.log("constructor");
 		try {
 			this._data = data;
 			this._id = data._id;
@@ -39,9 +38,6 @@ var Building = class {
 			alpha: 255,
 			dimension: 0
 		});
-		console.log(this);
-		console.log("created object");
-		this._obj.setVariable("id", this._id);
 		if (this.dataStorage != undefined) {
 			if (this.dataStorage.container != undefined) {
 				this.container();
@@ -84,7 +80,6 @@ var BuildingManager = new class {
 		console.log("-- Load Objects")
 		let dbObjects = await Buildings.find({});
 		dbObjects.forEach(function(dbObject) {
-			console.log("dbObject", dbObject);
 			self._allObjects[dbObject._id] = new Building(dbObject);
 		})
 	}

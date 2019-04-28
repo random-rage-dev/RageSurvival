@@ -2,6 +2,7 @@ var MongoDB = require("../libs/mongodb.js")
 var Storage = require("../world/storage.js")
 var PlayerSpawns = require("../world/playerspawns.js")
 var Building = require("../world/building.js")
+var WeatherManager = require("../world/weather.js")
 var User = MongoDB.getUserModel();
 var Inventory = MongoDB.getInventoryModel();
 var md5 = require("md5");
@@ -125,23 +126,6 @@ var Player = class {
         let self = this;
 
         //Building.addTempObject(model, pos, rot, data = {})
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         self._position = mp.vector(PlayerSpawns[Math.floor(Math.random() * PlayerSpawns.length)]);
         setTimeout(function() {
             self.spawn(1);
@@ -199,6 +183,9 @@ var Player = class {
                 //self._player.removeWeapon(Number(id));
             }
         }
+    }
+    getInventoryItemByIndex(index = 0) {
+        return this._inventory[index];
     }
     getInventory() {
         return this._inventory;
@@ -415,12 +402,15 @@ var Player = class {
                 self._warns = cUser.warns;
                 self._userId = cUser.user_id;
                 self._position = cUser.position;
+                self._player.name = self._username;
                 if ((cUser.character) && (cUser.character.length > 0)) {
                     self._characterData = cUser.character[0];
                     self._player.setVariable("user_id", self._userId)
                     self._player.setVariable("loggedIn", true);
                     self._player.setVariable("spawned", false)
                     self._player.call("Account:LoginDone")
+
+                    WeatherManager.call(self._player);
                     self.log("loaded player data for", self._player.name)
                     console.log(self._player)
                     mp.events.call("Player:Loaded", self._player)

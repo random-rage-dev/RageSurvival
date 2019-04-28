@@ -38,6 +38,7 @@ var Building = class {
 			alpha: 255,
 			dimension: 0
 		});
+		this._obj.setVariable("id", this._id);
 		if (this.dataStorage != undefined) {
 			if (this.dataStorage.container != undefined) {
 				this.container();
@@ -47,20 +48,20 @@ var Building = class {
 	container() {
 		this._obj.setVariable("container", true);
 		this._obj.setVariable("opened", false);
-	} 
+	}
 }
 var BuildingManager = new class {
 	constructor() {
 		this._allObjects = [];
 		this.loadObjects();
 	}
-	getObject(id) {  
+	getObject(id) {
 		return this._allObjects[id] || undefined;
 	}
 	async addTempObject(model, pos, rot, data = {}) {
-		let u_id = "TEMP_"+(Date.now() + pos.x + pos.y + pos.z).toString();
+		let u_id = "TEMP_" + (Date.now() + pos.x + pos.y + pos.z).toString();
 		let prep = {
-			_id:u_id,
+			_id: u_id,
 			health: 1000,
 			model: model,
 			x: pos.x,
@@ -119,13 +120,16 @@ var BuildingManager = new class {
 	}
 	async interact(player, id) {
 		let obj = this.getObject(id);
+		console.log("obj", obj);
 		if (obj != undefined) {
 			let packages = {
 				id: obj._id,
 				data: obj.dataStorage
 			}
+			console.log("packages", packages);
 			if (obj.dataStorage.container != undefined) {
 				if (Storage.canInteract(player, packages)) {
+					console.log("canInteract");
 					Storage.Interact(player, packages, obj.object);
 					obj.object.setVariable("opened", true);
 				}
@@ -149,5 +153,6 @@ mp.events.add("Building:Canceled", function(player, data) {
 	console.log("GIVE BACK ITEM TO PLAYER");
 });
 mp.events.add("Building:Interact", function(player, id) {
+	console.log("Building:Interact");
 	BuildingManager.interact(player, id)
 });

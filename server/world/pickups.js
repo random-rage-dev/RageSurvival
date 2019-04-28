@@ -137,22 +137,20 @@ var Pickups = new class {
             created: Date.now()
         }
     }
-    dropItem(item, amount, x, y, z, data = {}) {
+    dropItem(item_data, x, y, z) {
         let self = this;
-        item = item.replace("_", " ");
-        let item_data = LootTable.getItemData(item);
-        console.log(item_data);
+        //let item_offsets = LootTable.getItemData(item_data.name).offset;
         if (item_data != undefined) {
-            let id = (item + "." + amount + "." + x + "." + y + "." + z).substr(0, 4) + (Date.now() + Math.random()).toString().replace('.', '').substr(-6);
+            let id = (item_data.amount + "." + item_data.name + "." + x + "." + y + "." + z).substr(0, 4) + (Date.now() + Math.random()).toString().replace('.', '').substr(-6);
             if (self.isUnique(id) == true) {
                 let temp_item = [{
                     type: item_data.type,
                     model: item_data.model,
                     thickness: item_data.thickness,
-                    amount: amount,
+                    amount: item_data.amount,
                     offset: item_data.offset,
-                    name: item,
-                    data: data
+                    name: item_data.name,
+                    data: item_data.data
                 }]
                 console.log("item_data", item_data);
                 let colshape = mp.colshapes.newSphere(x, y, z, self._streamRadius, 0);
@@ -187,14 +185,14 @@ var Pickups = new class {
         loot_spawns.forEach(function(spawn) {
             let count = LootTable.getItemCountForSpawn(spawn.type);
             let items = LootTable.getItemsForSpawn(spawn.type, count);
-            items = items.map(function(a, i) {
+            /*items = items.map(function(a, i) {
                 if (typeof a.amount === "function") {
                     a.amount = a.amount();
                 } else if (typeof a.amount !== "number") {
                     a.amount = 1;
                 }
                 return a;
-            })
+            })*/
             let colshape = mp.colshapes.newSphere(spawn.x, spawn.y, spawn.z, self._streamRadius, 0);
             let blip = mp.blips.new(1, new mp.Vector3(spawn.x, spawn.y, spawn.z), {
                 name: spawn.type,
@@ -280,11 +278,12 @@ var Pickups = new class {
 /drop 9mm_Bullets 256
 
 */
-mp.events.addCommand("drop", (player, fulltext, name, amount) => {
-    console.log(name, amount);
-    name = name.replace("_"," ");
+mp.events.addCommand("drop", (player, fulltext) => {
     //player.call("Building:Start", [model])
     let pos = mp.players.local.position;
-    Pickups.dropItem(name, amount, pos.x, pos.y, pos.z)
+    let item = player.class.getInventoryItemByIndex();
+    console.log("f",item);
+    Pickups.dropItem(item, pos.x, pos.y, pos.z)
+    //Pickups.dropItem(name, amount, pos.x, pos.y, pos.z)
 });
 module.exports = Pickups;

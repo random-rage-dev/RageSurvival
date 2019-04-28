@@ -10,8 +10,7 @@ mp.gui.execute("const _enableChatInput = enableChatInput;enableChatInput = (enab
 mp.events.add('chatEnabled', (isEnabled) => {
     mp.gui.chat.enabled = isEnabled;
 });
-
-
+mp.game.graphics.setBlackout(true);
 mp.canCrouch = true;
 mp.gameplayCam = mp.cameras.new('gameplay');
 mp.defaultCam = mp.cameras.new('default');

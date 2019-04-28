@@ -112,7 +112,7 @@ mp.events.addCommand("savepos", (player, name = "No name") => {
     let pos = (player.vehicle) ? player.vehicle.position : player.position;
     let rot = (player.vehicle) ? player.vehicle.rotation : player.heading;
     rot = (player.vehicle) ? `${rot.x}, ${rot.y}, ${rot.z}` : player.heading
-    fs.appendFile(saveFile, `${pos.x}, ${pos.y}, ${pos.z}, ${rot}\r\n`, (err) => {
+    fs.appendFile(saveFile, `x:${pos.x}, y:${pos.y}, z:${pos.z}\r\n`, (err) => {
         if (err) {
             player.notify(`~r~SavePos Error: ~w~${err.message}`);
         } else {

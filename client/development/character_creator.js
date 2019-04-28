@@ -168,11 +168,12 @@ function BeginCharacterCreator() {
     // Set To Male ( Male : mp_m_freemode_01, female : mp_f_freemode_01)
     mp.localPlayer.model = mp.game.joaat('mp_m_freemode_01');
     mp.localPlayer.setDefaultComponentVariation();
-    mp.localPlayer.setComponentVariation(3, 15, 0, 2);
-    mp.localPlayer.setComponentVariation(4, 21, 0, 2);
+    mp.localPlayer.setComponentVariation(3, 0, 0, 2);
+    mp.localPlayer.setComponentVariation(4, 102, 0, 2);
     mp.localPlayer.setComponentVariation(6, 34, 0, 2);
     mp.localPlayer.setComponentVariation(8, 15, 0, 2);
-    mp.localPlayer.setComponentVariation(11, 15, 0, 2);
+    mp.localPlayer.setComponentVariation(11, 34, 0, 2);
+    mp.localPlayer.setComponentVariation(5, 40, 0, 2);
     mp.localPlayer.setHeadBlendData(
         // shape
         values["mother"][0], values["father"][0], 0,

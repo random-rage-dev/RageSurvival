@@ -170,7 +170,7 @@ mp.events.add("render", () => {
     if ((cur_selected) && (pool_data)) {
         mp.game.controls.disableControlAction(0, 51, true);
         mp.game.ui.showHudComponentThisFrame(14);
-        mp.game.graphics.drawText("[E] " + ((cur_selected.amount != 1) ? cur_selected.amount + "x " : "") + cur_selected.name, [0.5, 0.55], {
+        mp.game.graphics.drawText("[E] " + cur_selected.name, [0.5, 0.55], {
             font: 4,
             color: [255, 255, 255, 200],
             scale: [0.3, 0.3],
@@ -201,7 +201,7 @@ mp.events.add("render", () => {
                             mp.events.callRemote("Loot:Pickup", pool_data, cur_selected.index, cur_selected.name, cur_selected.amount);
                             /*3d Notify*/
                             let pos = cur_selected.position;
-                            Notifications.notify3D(pos.x, pos.y, pos.z, pos.x, pos.y, pos.z + 0.5, `+ ${cur_selected.amount}x${cur_selected.name}`, [255, 255, 255]);
+                            Notifications.notify3D(pos.x, pos.y, pos.z, pos.x, pos.y, pos.z + 0.5, `+ ${cur_selected.name}`, [255, 255, 255]);
                             CEFNotification.call("notify", {
                                 title: "Notification",
                                 titleSize: "16px",
@@ -227,6 +227,7 @@ mp.events.add("render", () => {
             }
         }
     } else {
+        cStatus = "";
         if ((pointAt) && (pointAt.entity)) {
             if (typeof pointAt.entity == "object") {
                 if (mp.vector(mp.localPlayer.position).dist(pointAt.entity.getCoords(true)) < 3) {
@@ -241,7 +242,9 @@ mp.events.add("render", () => {
                                 centre: true
                             });
                             if (mp.game.controls.isDisabledControlJustPressed(0, 51)) { // 51 == "E"
+                                console.log("E Pressed");
                                 let id = pointAt.entity.getVariable("id");
+                                console.log("entity id",id);
                                 mp.events.callRemote("Building:Interact", id);
                             }
                         }

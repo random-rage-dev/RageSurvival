@@ -599,6 +599,7 @@ var Storage = class {
 				ContextHandler.open(cTarget, self._rawSelector);
 			}
 		});
+		self._wasDown = 0;
 		$(selector).on('mousedown', ".headline", function(event) {
 			if (isToggledInto == false) return;
 			let cursor = {
@@ -646,23 +647,52 @@ var Storage = class {
 					}
 				}
 				let uEvent = function(event) {
+					console.log("event");
 					$(window).unbind("mousemove", mEvent);
 					$(window).unbind("mouseup", uEvent);
-					self.click(cTarget);
+					if (self._wasDown == 0) {
+						self._wasDown = 1;
+						self.click(cTarget);
+					}
 				}
 				$(window).mousemove(mEvent);
 				$(window).mouseup(uEvent);
 			}
 		});
 	}
-	resize(cells,rows) {
+	resize(cells, rows) {
 		this._rows = rows;
 		this._cells = cells;
 		this.fill();
 		this.render();
 	}
 	click(item) {
+		let self = this;
 		console.log("click", item);
+		$(item).animate({
+			backgroundColor: "rgba(50,200,50,0.4)"
+		}, 70, function() {
+			console.log("done");
+			$(item).animate({
+				backgroundColor: "rgba(0,0,0,0.6)"
+			}, 70, function() {
+				console.log("done1");
+
+				let itemData = $(item).data("item");
+				console.log(itemData);
+				self.removeItem(itemData.item.id);
+				mp.trigger("Storage:Interact", itemData);
+				self._wasDown = 0;
+			});
+		});
+	}
+	removeItem(id) {
+		console.log("id",id);
+		let item = this._inventory.filter((e) => {
+			console.log("e",e);
+			return (e.item.id == id)
+		});
+		console.log("removeItem",item);
 	}
 	clear() {
 		this._inventory = [];
@@ -1055,9 +1085,10 @@ function setPos(container, top, left) {
 		storageContainers["#" + container].moveWindow(top, left);
 	};
 }
+
 function resize(container, cells, rows) {
 	if (storageContainers["#" + container]) {
-		storageContainers["#" + container].resize(cells,rows);
+		storageContainers["#" + container].resize(cells, rows);
 	};
 }
 
@@ -1073,7 +1104,7 @@ function focus(selector) {
 			"z-index": 0
 		})
 	})
-	$("#"+selector).css({
+	$("#" + selector).css({
 		"z-index": 15
 	})
 }

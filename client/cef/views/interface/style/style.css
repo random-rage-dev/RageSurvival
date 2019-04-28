@@ -57,7 +57,7 @@
 }
 .storage .items>.item {
     position: absolute;
-    background: black;
+    background: rgba(0,0,0,0.6);
     opacity: 0;
     overflow: hidden;
     cursor: pointer;

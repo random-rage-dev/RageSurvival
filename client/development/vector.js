@@ -109,6 +109,22 @@ mp.Vector3.prototype.add = function(x, y, z) {
 mp.vector = function(vec) {
     return new mp.Vector3(vec.x, vec.y, vec.z);
 }
+
+mp.Vector3.prototype.insidePolygon = function(polygon) {
+    var x = this.x,
+        y = this.y;
+    var inside = false;
+    for (var i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+        var xi = polygon[i][0],
+            yi = polygon[i][1];
+        var xj = polygon[j][0],
+            yj = polygon[j][1];
+        var intersect = ((yi > y) != (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+        if (intersect) inside = !inside;
+    }
+    return inside;
+};
+
 Array.prototype.shuffle = function() {
     var i = this.length;
     while (i) {

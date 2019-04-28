@@ -54,7 +54,8 @@ mp.events.add("Account:LoginDone", () => {
     mp.game.ui.displayHud(true);
     mp.game.ui.setMinimapVisible(false);
     mp.gui.chat.show(true);
-    //CEFInventory.load("user_interface/index.html");
+
+
 })
 mp.events.add("Cam:Hide", () => {
     mp.game.graphics.transitionFromBlurred(100);

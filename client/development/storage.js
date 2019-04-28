@@ -1,22 +1,23 @@
 var cell_size = 40;
 var padding = 5;
+var inv_cells = 6;
+var inv_rows = 5;
 var TempStorage = [];
+var CEFInventory = require("./browser.js").inventory;
+var CEFNotification = require("./browser.js").notification;
+var ScreenResolution = mp.game.graphics.getScreenActiveResolution(0, 0);
+CEFInventory.load("interface/index.html");
+let clientWidth = cell_size * inv_cells + (padding * 2)
+let clientHeight = cell_size * inv_rows + 37 + (padding * 2)
 var Inventory_Order = {
 	positions: {
 		"inventory": {
-			top: 0,
-			left: 0
+			top: `calc(50% - ${clientHeight/2}px)`,
+			left: `calc(50% - ${clientWidth/2}px)`
 		}
 	},
 	items: {}
 };
-var CEFInventory = require("./browser.js").inventory;
-var CEFNotification = require("./browser.js").notification;
-CEFInventory.load("interface/index.html");
-var inv_cells = 6;
-var inv_rows = 5;
-let clientWidth = cell_size * inv_cells + (padding * 2)
-let clientHeight = cell_size * inv_rows + 37 + (padding * 2)
 if (mp.storage.data.inventory_order) {
 	let storageData = mp.storage.data.inventory_order;
 	Inventory_Order.positions = storageData.positions || {
@@ -36,14 +37,13 @@ mp.events.add("Inventory:Resize", (cell_count, row_count) => {
 });
 mp.events.add("Inventory:Ready", (data) => {
 	CEFInventory.call("initialize", inv_cells, inv_rows, {
-		"inventory": {
-			top: Inventory_Order.positions["inventory"].top,
-			left: Inventory_Order.positions["inventory"].left
-		}
+		top: Inventory_Order.positions["inventory"].top,
+		left: Inventory_Order.positions["inventory"].left
 	})
 });
 
 function toggleInventory() {
+	console.log("toggle inventory");
 	if (toggleInvState == false) {
 		if (mp.gui.cursor.visible == false) {
 			CEFInventory.call("setPos", "inventory", Inventory_Order.positions["inventory"].top, Inventory_Order.positions["inventory"].left);
@@ -215,6 +215,7 @@ mp.events.add("Storage:Transfer", (source, target) => {
 	}
 });
 mp.events.add("Storage:AddContainer", (headline, selector, cells, rows, items) => {
+	console.log("add container");
 	items = JSON.parse(items);
 	if (!TempStorage[selector]) {
 		TempStorage[selector] = [];
@@ -327,8 +328,9 @@ var StorageSystem = new class {
 		let new_Amount = all_items_new.reduce(function(total, current) {
 			return total + parseInt(current.amount);
 		}, 0);
-		let toCreate = all_items_new.filter(e => {return e.id == "NEW"});
-
+		let toCreate = all_items_new.filter(e => {
+			return e.id == "NEW"
+		});
 		if (toCreate.length > 0) {
 			toUpdate = true;
 		}

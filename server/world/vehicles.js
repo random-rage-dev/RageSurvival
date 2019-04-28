@@ -27,8 +27,7 @@ var Vehicle = class {
             owner_id: this._storage_id
         }, async function(err, arr) {
             if (err) return console.log("error", err);
-            if ((arr) && (arr.length)) {
-            }
+            if ((arr) && (arr.length)) {}
         });
     }
     putIntoInventory(item) {
@@ -46,31 +45,32 @@ var Vehicle = class {
     save() {
         let self = this;
         /*TODO SAVE*/
-        this._position = this._veh.position;
-        this._rotation = this._veh.rotation;
-        Vehicles.updateOne({
-            veh_id: this._id
-        }, {
-            position: this._position,
-            rotation: this._rotation,
-            health: this._health,
-            running: this._running,
-            components: this.components,
-        }, function(err, numberAffected, rawResponse) {
-            if (err) {
-                self.error("Vehicle:Save Fail", err)
-            }
-        });
+        if (this._veh) {
+            this._position = this._veh.position;
+            this._rotation = this._veh.rotation;
+            Vehicles.updateOne({
+                veh_id: this._id
+            }, {
+                position: this._position,
+                rotation: this._rotation,
+                health: this._health,
+                running: this._running,
+                components: this.components,
+            }, function(err, numberAffected, rawResponse) {
+                if (err) {
+                    self.error("Vehicle:Save Fail", err)
+                }
+            });
+        }
     }
     getFuelUsage(distance) {
-        return (distance/1000) * 12;
+        return (distance / 1000) * 1;
     }
     get fuel() {
         return this.components.fuel;
     }
     set fuel(val) {
         this.components.fuel = val;
-
         this._veh.setVariable("components", this.components);
         if (this.components.fuel <= 0) {
             this._veh.setVariable("running", false);
@@ -100,19 +100,17 @@ var Vehicle = class {
         this._veh.setVariable("health", this._health);
     }
 }
-mp.events.add("Vehicles:createVehicle", function(vehicle) {
-    console.log("vehicle", vehicle);
-});
+mp.events.add("Vehicles:createVehicle", function(vehicle) {});
 mp.events.add("Vehicles:RequestInventory", function(player) {
     if (player.vehicle) {
         let id = player.vehicle.getVariable("id");
         if (VehicleManager.getVehicle(id) != false) {
             let veh = VehicleManager.getVehicle(id);
-            let inv =  veh.getInventory();
+            let inv = veh.getInventory();
         }
     }
 });
-mp.events.add("Vehicles:PutIntoVehicle", function(player,item) {
+mp.events.add("Vehicles:PutIntoVehicle", function(player, item) {
     if (player.vehicle) {
         let id = player.vehicle.getVariable("id");
         if (VehicleManager.getVehicle(id) != false) {
@@ -173,7 +171,6 @@ var VehicleManager = new class {
         let self = this;
         console.log("Add Vehicle")
         let VehicleCount = await Vehicles.find({});
-        console.log("VehicleCount", VehicleCount.length);
         let id = Math.floor(Date.now() / 1000 + (Math.random() * 1000));
         let dbVehicle = new Vehicles({
             veh_id: id,

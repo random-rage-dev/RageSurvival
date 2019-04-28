@@ -143,7 +143,7 @@ mp.events.add("render", () => {
             pool.getLootPool().forEach(function(item, index) {
                 if (item != null) {
                     let offset_pos = pos.findRot(0, 0.5, Angle_Item * index).ground();
-                    let thickness = (mp.players.local.isRunning() == true) ? item.thickness * 2 : item.thickness;
+                    let thickness = item.thickness//(mp.players.local.isRunning() == true) ? item.thickness * 2 : item.thickness;
                     mp.game.graphics.drawMarker(28, offset_pos.x, offset_pos.y, offset_pos.z, 0, 0, 0, 0, 0, 0, thickness, thickness, thickness, 255, 255, 255, 150, false, false, 2, false, "", "", false);
                     let player_pos = mp.vector(mp.localPlayer.position).ground();
                     let near_dist = thickness * 2.5;

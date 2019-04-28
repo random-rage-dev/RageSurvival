@@ -124,7 +124,6 @@ var Player = class {
     }
     death(killer, weapon, reason) {
         let self = this;
-
         //Building.addTempObject(model, pos, rot, data = {})
         self._position = mp.vector(PlayerSpawns[Math.floor(Math.random() * PlayerSpawns.length)]);
         setTimeout(function() {
@@ -195,7 +194,7 @@ var Player = class {
         this.loadInventory();
     }
     /* Inventory */
-    loadInventory() {
+    async loadInventory() {
         let self = this;
         Inventory.find({
             owner_type: "player",
@@ -213,7 +212,7 @@ var Player = class {
                     });
                     return itemData;
                 });
-                self._player.call("Inventory:Resize", [10,10])
+                self._player.call("Inventory:Resize", [10, 10])
                 self._player.call("Inventory:Update", [self._inventory])
                 console.log(self._inventory);
                 mp.events.call("Player:Inventory", self._player, self._inventory)
@@ -234,29 +233,39 @@ var Player = class {
             return itemData;
         });
     }
-    hasItem(name, amount) {}
-    giveItem(item) {
+    hasItem(name) {
+        let stack = Storage.getMaxStack(name);
+        let index = this._inventory.findIndex(function(item) {
+            return (item.name == name) && (item.amount < stack);
+        })
+        return index > -1 ? this._inventory[index] : false;
+    }
+    async giveItem(item, sub = false) {
         let self = this;
-        console.log("giveItem", item);
-        Inventory.create({
-            owner_id: self._userId,
-            name: item.name,
-            amount: item.amount,
-            data: item.data
-        }, function(err, rV) {
-            if (err) console.log(err);
-            // saved!
-            let itemData = Storage.map({
-                id: rV._id,
-                name: rV.name,
-                amount: rV.amount,
-                data: rV.data
-            });
-            self._inventory.push(itemData);
-            console.log("itemData", itemData);
-            mp.events.call("Player:Inventory:AddItem", self._player, itemData)
-            self._player.call("Inventory:AddItem", [itemData])
-        });
+        return new Promise(async function(resolve, reject) {
+            try {
+                console.log("giveItem", item);
+                let dbItem = await new Inventory({
+                    owner_id: self._userId,
+                    name: item.name,
+                    amount: item.amount,
+                    data: item.data
+                }).save();
+                let itemData = Storage.map({
+                    id: dbItem._id,
+                    name: dbItem.name,
+                    amount: dbItem.amount,
+                    data: dbItem.data
+                });
+                self._inventory.push(itemData);
+                console.log("itemData", itemData);
+                mp.events.call("Player:Inventory:AddItem", self._player, itemData)
+                self._player.call("Inventory:AddItem", [itemData])
+                return resolve();
+            } catch (err) {
+                return reject(err);
+            }
+        })
     }
     removeItem(name, amount) {}
     /* Inventory */
@@ -409,7 +418,6 @@ var Player = class {
                     self._player.setVariable("loggedIn", true);
                     self._player.setVariable("spawned", false)
                     self._player.call("Account:LoginDone")
-
                     WeatherManager.call(self._player);
                     self.log("loaded player data for", self._player.name)
                     console.log(self._player)

@@ -35,6 +35,7 @@ var Storage = new class {
 		return false;
 	}
 	async Interact(player, storData, obj) {
+		console.log("Interact",player, storData, obj);
 		if (!this._interactionOpen[storData.id]) {
 			this._interactionOpen[storData.id] = obj;
 			try {
@@ -223,6 +224,9 @@ var Storage = new class {
 		}
 	}
 	async save(player, storage) {}
+	getMaxStack(name) {
+		return itemIdentity[name].max_stack || undefined;
+	}
 	map(object) {
 		if (itemIdentity[object.name]) {
 			let masked = {

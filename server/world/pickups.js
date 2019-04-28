@@ -260,13 +260,16 @@ var Pickups = new class {
                 self._pickups[id].items[doesExist] = null;
                 /*Add Item to Inventory*/
                 console.log("pick item up", id, item_data.name, item_data.amount);
-                playerInstance.giveItem(item_data);
-                /*Add Item to Inventory*/
-                if (self.isEmpty(id) == true) {
-                    self.unloadPickup(id);
-                } else {
-                    self.updatePickup(id)
-                }
+                playerInstance.giveItem(item_data).then(() => {
+                    /*Add Item to Inventory*/
+                    if (self.isEmpty(id) == true) {
+                        self.unloadPickup(id);
+                    } else {
+                        self.updatePickup(id)
+                    }
+                }).catch((err) => {
+                    console.log("error giveItem",err);
+                })
             }
         }
     }

@@ -1,3 +1,4 @@
+var Offsets = require("./object_offsets.js")
 var Building = new class {
     constructor() {
         this._setup();

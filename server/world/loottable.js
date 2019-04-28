@@ -261,9 +261,22 @@ var Loottable = class {
         let item = Items[item_name];
         if (item != undefined) {
             item.name = item_name;
+            if (typeof item.amount === "function") {
+                item.amount = item.amount();
+            } else if (typeof item.amount !== "number") {
+                item.amount = 1;
+            }
+            item.data = {};
+            if (item.modifiers != undefined) {
+                Object.keys(item.modifiers).forEach(function(key) {
+                    let val = item.modifiers[key]();
+                    item.data [key]= val;
+                })
+            }
+            /*
             item.data = {
                 value: Math.random() * 100
-            }
+            }*/
         }
         return item;
     }

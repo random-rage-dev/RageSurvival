@@ -516,27 +516,27 @@ var DragHandler = new class {
 						let height = targetItem.item.height;
 						let tItem = targetItem.item.item;
 						if (tItem.name == self._item_data.item.name) {
+							let top = $(slot).offset().top;
+							let left = $(slot).offset().left;
+							let color = "rgba(150,0,0,0.3)";
 							if (tItem.amount < tItem.max_stack) {
-								let top = $(slot).offset().top;
-								let left = $(slot).offset().left;
-								let color = "rgba(0,0,255,1)";
 								if (tItem.amount + self._item_data.item.amount <= tItem.max_stack) {
 									color = "rgba(0,150,0,0.3)"
 								}
 								if (tItem.amount + self._item_data.item.amount > tItem.max_stack) {
 									color = "rgba(0,150,0,0.3)"
 								}
-								$(self._sampleShadow).css({
-									top: top + 'px',
-									left: left + 'px',
-									"background": color,
-									'opacity': 1
-								});
-								$(self._sampleShadow).css({
-									'width': width * cell_size + "px",
-									'height': height * cell_size + "px"
-								});
 							}
+							$(self._sampleShadow).css({
+								top: top + 'px',
+								left: left + 'px',
+								"background": color,
+								'opacity': 1
+							});
+							$(self._sampleShadow).css({
+								'width': width * cell_size + "px",
+								'height': height * cell_size + "px"
+							});
 						} else {
 							$(self._sampleShadow).css({
 								'width': "0px",
@@ -684,7 +684,6 @@ var Storage = class {
 				backgroundColor: "rgba(0,0,0,0.6)"
 			}, 70, function() {
 				console.log("done1");
-
 				let itemData = $(item).data("item");
 				console.log(itemData);
 				self.removeItem(itemData.item.id);
@@ -694,12 +693,12 @@ var Storage = class {
 		});
 	}
 	removeItem(id) {
-		console.log("id",id);
+		console.log("id", id);
 		let item = this._inventory.filter((e) => {
-			console.log("e",e);
+			console.log("e", e);
 			return (e.item.id == id)
 		});
-		console.log("removeItem",item);
+		console.log("removeItem", item);
 	}
 	clear() {
 		this._inventory = [];

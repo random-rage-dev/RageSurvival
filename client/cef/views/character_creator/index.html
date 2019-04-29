@@ -43,10 +43,10 @@
 					</div>
 		    		<div class="group_div">
 			    		<div class="headline">Resemblance</div>
-			    		<div class="slider">
+			    		<div class="slider"  >
 				    		<div class="notice left">Mother</div>
-				    		<div class="notice right">Father</div>
-			    			<input oninput="CharacterCreator.slide('resemblance',this.value)" onchange="CharacterCreator.slide('resemblance',this.value)" type="range" min="0" max="100" value="100" step="1" ></input>
+				    		<div class="notice right">Father</div><!-- oninput="SliderManager.start('resemblance',this)" onchange="SliderManager.start('resemblance',this.value)"  --> 
+			    			<input oninput="SliderManager.start('resemblance',this)" type="range" min="0" max="100" value="100" step="1" ></input>
 						</div>
 					</div>
 		    		
@@ -67,121 +67,121 @@
 		    		<div class="group_div">
 			    		<div class="headline">Nose Width</div>
 			    		<div class="slider">
-			    			<input oninput="CharacterCreator.slide('FacialFeature_0',this.value)" onchange="CharacterCreator.slide('FacialFeature_0',this.value)" type="range" min="0" max="100" value="50" step="1" id="Nose_Width"></input>
+			    			<input oninput="SliderManager.start('FacialFeature_0',this)"type="range" min="0" max="100" value="50" step="1" id="Nose_Width"></input>
 						</div>
 					</div>
 		    		<div class="group_div">
 			    		<div class="headline">Nose Bottom Height</div>
 			    		<div class="slider">
-			    			<input oninput="CharacterCreator.slide('FacialFeature_1',this.value)" onchange="CharacterCreator.slide('FacialFeature_1',this.value)" type="range" min="0" max="100" value="50" step="1" id="Nose_Bottom_Height"></input>
+			    			<input oninput="SliderManager.start('FacialFeature_1',this)" type="range" min="0" max="100" value="50" step="1" id="Nose_Bottom_Height"></input>
 						</div>
 					</div>
 		    		<div class="group_div">
 			    		<div class="headline">Nose Tip Length</div>
 			    		<div class="slider">
-			    			<input oninput="CharacterCreator.slide('FacialFeature_2',this.value)" onchange="CharacterCreator.slide('FacialFeature_2',this.value)" type="range" min="0" max="100" value="50" step="1" id="Nose_Tip_Length"></input>
+			    			<input oninput="SliderManager.start('FacialFeature_2',this)" type="range" min="0" max="100" value="50" step="1" id="Nose_Tip_Length"></input>
 						</div>
 					</div>
 		    		<div class="group_div">
 			    		<div class="headline">Nose Bridge Depth</div>
 			    		<div class="slider">
-			    			<input oninput="CharacterCreator.slide('FacialFeature_3',this.value)" onchange="CharacterCreator.slide('FacialFeature_3',this.value)" type="range" min="0" max="100" value="50" step="1" id="Nose_Bridge_Depth"></input>
+			    			<input oninput="SliderManager.start('FacialFeature_3',this)" type="range" min="0" max="100" value="50" step="1" id="Nose_Bridge_Depth"></input>
 						</div>
 					</div>
 		    		<div class="group_div">
 			    		<div class="headline">Nose Tip Height</div>
 			    		<div class="slider">
-			    			<input oninput="CharacterCreator.slide('FacialFeature_4',this.value)" onchange="CharacterCreator.slide('FacialFeature_4',this.value)" type="range" min="0" max="100" value="50" step="1" id="Nose_Tip_Height"></input>
+			    			<input oninput="SliderManager.start('FacialFeature_4',this)" type="range" min="0" max="100" value="50" step="1" id="Nose_Tip_Height"></input>
 						</div>
 					</div>
 		    		<div class="group_div">
 			    		<div class="headline">Nose Broken</div>
 			    		<div class="slider">
-			    			<input oninput="CharacterCreator.slide('FacialFeature_5',this.value)" onchange="CharacterCreator.slide('FacialFeature_5',this.value)" type="range" min="0" max="100" value="50" step="1" id="Nose_Broken"></input>
+			    			<input oninput="SliderManager.start('FacialFeature_5',this)" type="range" min="0" max="100" value="50" step="1" id="Nose_Broken"></input>
 						</div>
 					</div>
 		    		<div class="group_div">
 			    		<div class="headline">Brow Height</div>
 			    		<div class="slider">
-			    			<input oninput="CharacterCreator.slide('FacialFeature_6',this.value)" onchange="CharacterCreator.slide('FacialFeature_6',this.value)" type="range" min="0" max="100" value="50" step="1" id="Brow_Height"></input>
+			    			<input oninput="SliderManager.start('FacialFeature_6',this)" type="range" min="0" max="100" value="50" step="1" id="Brow_Height"></input>
 						</div>
 					</div>
 		    		<div class="group_div">
 			    		<div class="headline">Brow Depth</div>
 			    		<div class="slider">
-			    			<input oninput="CharacterCreator.slide('FacialFeature_7',this.value)" onchange="CharacterCreator.slide('FacialFeature_7',this.value)" type="range" min="0" max="100" value="50" step="1" id="Brow_Depth"></input>
+			    			<input oninput="SliderManager.start('FacialFeature_7',this)" type="range" min="0" max="100" value="50" step="1" id="Brow_Depth"></input>
 						</div>
 					</div>
 		    		<div class="group_div">
 			    		<div class="headline">Cheekbone Height</div>
 			    		<div class="slider">
-			    			<input oninput="CharacterCreator.slide('FacialFeature_8',this.value)" onchange="CharacterCreator.slide('FacialFeature_8',this.value)" type="range" min="0" max="100" value="50" step="1" id="Cheekbone_Height"></input>
+			    			<input oninput="SliderManager.start('FacialFeature_8',this)" type="range" min="0" max="100" value="50" step="1" id="Cheekbone_Height"></input>
 						</div>
 					</div>
 		    		<div class="group_div">
 			    		<div class="headline">Cheekbone Width</div>
 			    		<div class="slider">
-			    			<input oninput="CharacterCreator.slide('FacialFeature_9',this.value)" onchange="CharacterCreator.slide('FacialFeature_9',this.value)" type="range" min="0" max="100" value="50" step="1" id="Cheekbone_Width"></input>
+			    			<input oninput="SliderManager.start('FacialFeature_9',this)" type="range" min="0" max="100" value="50" step="1" id="Cheekbone_Width"></input>
 						</div>
 					</div>
 		    		<div class="group_div">
 			    		<div class="headline">Cheek Depth</div>
 			    		<div class="slider">
-			    			<input oninput="CharacterCreator.slide('FacialFeature_10',this.value)" onchange="CharacterCreator.slide('FacialFeature_10',this.value)" type="range" min="0" max="100" value="50" step="1" id="Cheek_Depth"></input>
+			    			<input oninput="SliderManager.start('FacialFeature_10',this)"  type="range" min="0" max="100" value="50" step="1" id="Cheek_Depth"></input>
 						</div>
 					</div>
 		    		<div class="group_div">
 			    		<div class="headline">Eye Size</div>
 			    		<div class="slider">
-			    			<input oninput="CharacterCreator.slide('FacialFeature_11',this.value)" onchange="CharacterCreator.slide('FacialFeature_11',this.value)" type="range" min="0" max="100" value="50" step="1" id="Eye_Size"></input>
+			    			<input oninput="SliderManager.start('FacialFeature_11',this)" type="range" min="0" max="100" value="50" step="1" id="Eye_Size"></input>
 						</div>
 					</div>
 		    		<div class="group_div">
 			    		<div class="headline">Lip Thickness</div>
 			    		<div class="slider">
-			    			<input oninput="CharacterCreator.slide('FacialFeature_12',this.value)" onchange="CharacterCreator.slide('FacialFeature_12',this.value)" type="range" min="0" max="100" value="50" step="1" id="Lip_Thickness"></input>
+			    			<input oninput="SliderManager.start('FacialFeature_12',this)"  type="range" min="0" max="100" value="50" step="1" id="Lip_Thickness"></input>
 						</div>
 					</div>
 		    		<div class="group_div">
 			    		<div class="headline">Jaw Width</div>
 			    		<div class="slider">
-			    			<input oninput="CharacterCreator.slide('FacialFeature_13',this.value)" onchange="CharacterCreator.slide('FacialFeature_13',this.value)" type="range" min="0" max="100" value="50" step="1" id="Jaw_Width"></input>
+			    			<input oninput="SliderManager.start('FacialFeature_13',this)" type="range" min="0" max="100" value="50" step="1" id="Jaw_Width"></input>
 						</div>
 					</div>
 		    		<div class="group_div">
 			    		<div class="headline">Jaw Shape</div>
 			    		<div class="slider">
-			    			<input oninput="CharacterCreator.slide('FacialFeature_14',this.value)" onchange="CharacterCreator.slide('FacialFeature_14',this.value)" type="range" min="0" max="100" value="50" step="1" id="Jaw_Shape"></input>
+			    			<input oninput="SliderManager.start('FacialFeature_14',this)" type="range" min="0" max="100" value="50" step="1" id="Jaw_Shape"></input>
 						</div>
 					</div>
 		    		<div class="group_div">
 			    		<div class="headline">Chin Height</div>
 			    		<div class="slider">
-			    			<input oninput="CharacterCreator.slide('FacialFeature_15',this.value)" onchange="CharacterCreator.slide('FacialFeature_15',this.value)" type="range" min="0" max="100" value="50" step="1" id="Chin_Height"></input>
+			    			<input oninput="SliderManager.start('FacialFeature_15',this)" type="range" min="0" max="100" value="50" step="1" id="Chin_Height"></input>
 						</div>
 					</div>
 		    		<div class="group_div">
 			    		<div class="headline">Chin Depth</div>
 			    		<div class="slider">
-			    			<input oninput="CharacterCreator.slide('FacialFeature_16',this.value)" onchange="CharacterCreator.slide('FacialFeature_16',this.value)" type="range" min="0" max="100" value="50" step="1" id="Chin_Depth"></input>
+			    			<input oninput="SliderManager.start('FacialFeature_16',this)" type="range" min="0" max="100" value="50" step="1" id="Chin_Depth"></input>
 						</div>
 					</div>
 		    		<div class="group_div">
 			    		<div class="headline">Chin Width</div>
 			    		<div class="slider">
-			    			<input oninput="CharacterCreator.slide('FacialFeature_17',this.value)" onchange="CharacterCreator.slide('FacialFeature_17',this.value)" type="range" min="0" max="100" value="50" step="1" id="Chin_Width"></input>
+			    			<input oninput="SliderManager.start('FacialFeature_17',this)" type="range" min="0" max="100" value="50" step="1" id="Chin_Width"></input>
 						</div>
 					</div>
 		    		<div class="group_div">
 			    		<div class="headline">Chin Indent</div>
 			    		<div class="slider">
-			    			<input oninput="CharacterCreator.slide('FacialFeature_18',this.value)" onchange="CharacterCreator.slide('FacialFeature_18',this.value)" type="range" min="0" max="100" value="50" step="1" id="Chin_Indent"></input>
+			    			<input oninput="SliderManager.start('FacialFeature_18',this)"type="range" min="0" max="100" value="50" step="1" id="Chin_Indent"></input>
 						</div>
 					</div>
 		    		<div class="group_div">
 			    		<div class="headline">Neck Width</div>
 			    		<div class="slider">
-			    			<input oninput="CharacterCreator.slide('FacialFeature_19',this.value)" onchange="CharacterCreator.slide('FacialFeature_19',this.value)" type="range" min="0" max="100" value="50" step="1" id="Neck_Width"></input>
+			    			<input oninput="SliderManager.start('FacialFeature_19',this)" type="range" min="0" max="100" value="50" step="1" id="Neck_Width"></input>
 						</div>
 					</div>
 		    	</div>
@@ -194,7 +194,7 @@
 			    		<div class="slider">
 				    		<div class="notice left">Mother</div>
 				    		<div class="notice right">Father</div>
-			    			<input oninput="CharacterCreator.slide('tone',this.value)" onchange="CharacterCreator.slide('tone',this.value)" type="range" min="0" max="100" value="100" step="1" ></input>
+			    			<input oninput="SliderManager.start('tone',this)" type="range" min="0" max="100" value="100" step="1" ></input>
 						</div>
 					</div>
 
@@ -209,7 +209,7 @@
 				    		<div class="top_notice">Transparency</div>
 				    		<div class="notice left">0%</div>
 				    		<div class="notice right">100%</div>
-			    			<input oninput="CharacterCreator.slide('ageing_opacity',this.value)" onchange="CharacterCreator.slide('ageing_opacity',this.value)" type="range" min="0" max="100" value="100" step="1" ></input>
+			    			<input oninput="SliderManager.start('ageing_opacity',this)" type="range" min="0" max="100" value="100" step="1" ></input>
 						</div>
 					</div>
 					<div class="group_div big">
@@ -223,7 +223,7 @@
 				    		<div class="top_notice">Transparency</div>
 				    		<div class="notice left">0%</div>
 				    		<div class="notice right">100%</div>
-			    			<input oninput="CharacterCreator.slide('blemisch_opacity',this.value)" onchange="CharacterCreator.slide('blemisch_opacity',this.value)" type="range" min="0" max="100" value="100" step="1" ></input>
+			    			<input oninput="SliderManager.start('blemisch_opacity',this)" type="range" min="0" max="100" value="100" step="1" ></input>
 						</div>
 					</div>
 					<div class="group_div big">
@@ -237,7 +237,7 @@
 				    		<div class="top_notice">Transparency</div>
 				    		<div class="notice left">0%</div>
 				    		<div class="notice right">100%</div>
-			    			<input oninput="CharacterCreator.slide('sundamage_opacity',this.value)" onchange="CharacterCreator.slide('sundamage_opacity',this.value)" type="range" min="0" max="100" value="100" step="1" ></input>
+			    			<input oninput="SliderManager.start('sundamage_opacity',this)" type="range" min="0" max="100" value="100" step="1" ></input>
 						</div>
 					</div>
 					<div class="group_div big">
@@ -251,7 +251,7 @@
 				    		<div class="top_notice">Transparency</div>
 				    		<div class="notice left">0%</div>
 				    		<div class="notice right">100%</div>
-			    			<input oninput="CharacterCreator.slide('molesfreckles_opacity',this.value)" onchange="CharacterCreator.slide('molesfreckles_opacity',this.value)" type="range" min="0" max="100" value="100" step="1" ></input>
+			    			<input oninput="SliderManager.start('molesfreckles_opacity',this)" type="range" min="0" max="100" value="100" step="1" ></input>
 						</div>
 					</div>
 		    	</div>
@@ -270,7 +270,7 @@
 				    		<div class="top_notice">Transparency</div>
 				    		<div class="notice left">0%</div>
 				    		<div class="notice right">100%</div>
-			    			<input oninput="CharacterCreator.slide('complexion_opacity',this.value)" onchange="CharacterCreator.slide('complexion_opacity',this.value)" type="range" min="0" max="100" value="100" step="1" ></input>
+			    			<input oninput="SliderManager.start('complexion_opacity',this)" type="range" min="0" max="100" value="100" step="1" ></input>
 						</div>
 					</div>
 					<div class="group_div big">
@@ -284,7 +284,7 @@
 				    		<div class="top_notice">Transparency</div>
 				    		<div class="notice left">0%</div>
 				    		<div class="notice right">100%</div>
-			    			<input oninput="CharacterCreator.slide('makeup_opacity',this.value)" onchange="CharacterCreator.slide('makeup_opacity',this.value)" type="range" min="0" max="100" value="100" step="1" ></input>
+			    			<input oninput="SliderManager.start('makeup_opacity',this)" type="range" min="0" max="100" value="100" step="1" ></input>
 						</div>
 					</div>
 					<div class="group_div huge">
@@ -304,7 +304,7 @@
 				    		<div class="top_notice">Transparency</div>
 				    		<div class="notice left">0%</div>
 				    		<div class="notice right">100%</div>
-			    			<input oninput="CharacterCreator.slide('blush_opacity',this.value)" onchange="CharacterCreator.slide('blush_opacity',this.value)" type="range" min="0" max="100" value="100" step="1" ></input>
+			    			<input oninput="SliderManager.start('blush_opacity',this)" type="range" min="0" max="100" value="100" step="1" ></input>
 						</div>
 					</div>
 					<div class="group_div huge">
@@ -318,7 +318,7 @@
 				    		<div class="top_notice">Transparency</div>
 				    		<div class="notice left">0%</div>
 				    		<div class="notice right">100%</div>
-			    			<input oninput="CharacterCreator.slide('lipstick_opacity',this.value)" onchange="CharacterCreator.slide('lipstick_opacity',this.value)" type="range" min="0" max="100" value="100" step="1" ></input>
+			    			<input oninput="SliderManager.start('lipstick_opacity',this)" type="range" min="0" max="100" value="100" step="1" ></input>
 						</div>
 					</div>
 		    	</div>
@@ -366,7 +366,7 @@
 				    		<div class="top_notice">Transparency</div>
 				    		<div class="notice left">0%</div>
 				    		<div class="notice right">100%</div>
-			    			<input oninput="CharacterCreator.slide('facial_hair_opacity',this.value)" onchange="CharacterCreator.slide('facial_hair_opacity',this.value)" type="range" min="0" max="100" value="100" step="1" ></input>
+			    			<input oninput="SliderManager.start('facial_hair_opacity',this)" type="range" min="0" max="100" value="100" step="1" ></input>
 						</div>
 					</div>
 					<div class="group_div huge">
@@ -386,7 +386,7 @@
 				    		<div class="top_notice">Transparency</div>
 				    		<div class="notice left">0%</div>
 				    		<div class="notice right">100%</div>
-			    			<input oninput="CharacterCreator.slide('eyebrows_opacity',this.value)" onchange="CharacterCreator.slide('eyebrows_opacity',this.value)" type="range" min="0" max="100" value="100" step="1" ></input>
+			    			<input oninput="SliderManager.start('eyebrows_opacity',this)" type="range" min="0" max="100" value="100" step="1" ></input>
 						</div>
 					</div>
 					<div class="group_div huge">
@@ -408,7 +408,7 @@
 				    		<div class="top_notice">Transparency</div>
 				    		<div class="notice left">0%</div>
 				    		<div class="notice right">100%</div>
-			    			<input oninput="CharacterCreator.slide('chesthair_opacity',this.value)" onchange="CharacterCreator.slide('chesthair_opacity',this.value)" type="range" min="0" max="100" value="100" step="1" ></input>
+			    			<input oninput="SliderManager.start('chesthair_opacity',this)" type="range" min="0" max="100" value="100" step="1" ></input>
 						</div>
 					</div>
 				</div>	    	

@@ -20,7 +20,6 @@ values["maxHairColor"] = 64;
 values["maxBlushColor"] = 27;
 values["maxLipstickColor"] = 32;
 const featureNames = ["Nose Width", "Nose Bottom Height", "Nose Tip Length", "Nose Bridge Depth", "Nose Tip Height", "Nose Broken", "Brow Height", "Brow Depth", "Cheekbone Height", "Cheekbone Width", "Cheek Depth", "Eye Size", "Lip Thickness", "Jaw Width", "Jaw Shape", "Chin Height", "Chin Depth", "Chin Width", "Chin Indent", "Neck Width"];
-
 const hairList = [
     // male
     [{
@@ -458,9 +457,7 @@ var CharacterCreator = new class {
         this.hair_color = 0;
         this.hair_highlight_color = 0;
         this.facialFeatures = [];
-
-
-        featureNames.forEach(function(name,i) {
+        featureNames.forEach(function(name, i) {
             self.facialFeatures[i] = 0.5;
         });
     }
@@ -687,9 +684,49 @@ var CharacterCreator = new class {
         }
     }
 }
-$("#create_button").on("click",function(e) {
+$("#create_button").on("click", function(e) {
     CharacterCreator.save()
 })
+var SliderManager = new class {
+    constructor() {
+        let self = this;
+        this._offset;
+        this._currentSlider;
+        this._target;
+        this._mouseDown = false;
+        $(window).mousemove(function(event) {
+            self.update(event);
+        });
+        $(window).mouseup(function(event) {
+            self.mouseup(event);
+        });
+    }
+    mouseup(e) {
+        this._target = null;
+        this._currentSlider = null;
+        this._offset = null;
+        this._offset.width = null;
+        this._mouseDown = false;
+    }
+    update(e) {
+        let self = this;
+        if (self._mouseDown && e.pageX >= self._offset.left && e.pageX <= (self._offset.left + self._offset.width)) {
+            if (self._target) {
+                let val = Math.round(((e.pageX - self._offset.left) / self._offset.width) * 100);
+                self._target.val(val);
+                CharacterCreator.slide(self._currentSlider, val);
+            }
+        }
+    }
+    start(slider, target) {
+        this._target = $(target);
+        this._currentSlider = slider;
+        this._offset = $(target).offset();
+        this._offset.width = $(target).width();
+        this._mouseDown = true;
+    }
+}
+
 /*SLIDER END*/
 $(".group").on("click", function() {
     let f = $(this).attr("for");

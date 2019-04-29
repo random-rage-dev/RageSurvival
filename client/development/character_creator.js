@@ -53,11 +53,11 @@ mp.events.add("Character:Update", (data) => {
             mp.localPlayer.setComponentVariation(5, 40, 0, 2);
         } else {
             mp.localPlayer.model = mp.game.joaat('mp_f_freemode_01');
-            mp.localPlayer.setComponentVariation(3, 3, 0, 2);
+            mp.localPlayer.setComponentVariation(3, 14, 0, 2);
             mp.localPlayer.setComponentVariation(4, 110, 0, 2);
             mp.localPlayer.setComponentVariation(6, 35, 0, 2);
             mp.localPlayer.setComponentVariation(8, 15, 0, 2);
-            mp.localPlayer.setComponentVariation(11, 3, 0, 2);
+            mp.localPlayer.setComponentVariation(11, 49, 0, 2);
             mp.localPlayer.setComponentVariation(5, 40, 0, 2);
         }
     }

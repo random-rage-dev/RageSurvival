@@ -35,7 +35,6 @@ mp.events.add("playerQuit", function(player, exitType, reason) {
         })
     }
 });
-
 mp.events.add('playerJoin', player => {
     console.log(`[SERVER]: ${player.name} SC:${player.socialClub} HWID:${player.serial} joined`);
 });
@@ -52,7 +51,7 @@ mp.events.add("ServerAccount:Register", function(player, username, hash_password
 mp.events.add("Player:Loaded", function(player) {
     console.log("Player Loaded " + player.name)
 });
-mp.events.add("Character:Save", function(player,data) {
+mp.events.add("Character:Save", function(player, data) {
     if (players[player.id]) {
         players[player.id].saveChar(data)
     }
@@ -120,4 +119,6 @@ mp.events.addCommand("savepos", (player, name = "No name") => {
         }
     });
 });
-
+mp.events.addCommand("c", (player, full, index, drawable, texture) => {
+    player.setClothes(parseInt(index), parseInt(drawable), parseInt(texture), 2);
+});

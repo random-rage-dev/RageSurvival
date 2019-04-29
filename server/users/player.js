@@ -310,11 +310,11 @@ var Player = class {
             self._player.setClothes(5, 40, 0, 2);
         } else {
             self._player.model = mp.joaat('mp_f_freemode_01');
-            self._player.setClothes(3, 3, 0, 2);
+            self._player.setClothes(3, 14, 0, 2);
             self._player.setClothes(4, 110, 0, 2);
             self._player.setClothes(6, 35, 0, 2);
             self._player.setClothes(8, 15, 0, 2);
-            self._player.setClothes(11, 3, 0, 2);
+            self._player.setClothes(11, 49, 0, 2);
             self._player.setClothes(5, 40, 0, 2);
         }
         /*appearanceIndex*/

@@ -162,6 +162,11 @@ mp.events.add("Inventory:AddItem", (citem) => {
 	})
 	CEFInventory.call("addItem", "inventory", tempSettings.cell || 0, tempSettings.row || 0, citem.width, citem.height, JSON.stringify(gData), tempSettings.flipped || false)
 });
+
+mp.events.add("Storage:Use", (item) => {
+		
+});
+
 mp.events.add("Storage:Drag", (positions) => {
 	positions = JSON.parse(positions);
 	if (!Inventory_Order.positions[positions.id]) {

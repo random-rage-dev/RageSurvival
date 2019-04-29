@@ -27,6 +27,14 @@ var user = mongoose.Schema({
     character: {
         type:Array,
         default:[]
+    },
+    equipment:{
+        type:Object,
+        default:{
+            head:{},
+            body:{},
+            clothes:{}
+        }
     }
 }, {
     autoIndex: true

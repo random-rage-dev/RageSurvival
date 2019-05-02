@@ -233,6 +233,7 @@ var DragHandler = new class {
 		if (self._dragging) {
 			let isInArea = undefined;
 			Object.keys(self._registeredTargets).forEach(function(key) {
+				console.log("grid", $("#" + key).find(".grid"));
 				let bounds = $("#" + key).find(".grid")[0].getBoundingClientRect();
 				if ((event.clientY >= bounds.top) && (event.clientY <= bounds.bottom)) {
 					if ((event.clientX >= bounds.left) && (event.clientX <= bounds.right)) {
@@ -251,104 +252,108 @@ var DragHandler = new class {
 		var self = this;
 		if (self._dragging) {
 			if (self._lastTarget != undefined) {
-				let offset_top = (self._offset.top > cell_size) ? (self._offset.top - (cell_size * 0.75)) : (self._offset.top - cell_size / 2)
-				let offset_left = (self._offset.left > cell_size) ? (self._offset.left - (cell_size * 0.75)) : (self._offset.left - cell_size / 2)
-				let r_pos_top = (event.clientY - offset_top);
-				let r_pos_left = (event.clientX - offset_left);
-				let slot = self._lastTarget.getSlotByAbsolute(r_pos_top, r_pos_left)
-				if (slot != undefined) {
-					if (self._lastTarget.isFree({
-							cell: $(slot).data("cell"),
-							row: $(slot).data("row"),
-							width: self._item_data.width,
-							height: self._item_data.height
-						}) == true) {
-						let fullCount = self._item_data.item.amount;
-						if ((controlDown == 0) && (shiftDown == 0)) {
-							if (self._lastTarget.addItemBySlot($(slot).data("cell"), $(slot).data("row"), self._item_data.width, self._item_data.height, Object.assign(self._item_data, {
-									scale: self._defaultScale
-								})) == true) {
-								ItemStorageHandler.moveItem(self._originSource._selector.prop("id"), self._lastTarget._selector.prop("id"))
-								self.clear();
-							} else {
-								self.returnToOrigin();
-							}
-						} else if ((controlDown == 1) && (fullCount >= 2)) {
-							let itemBackup = JSON.parse(JSON.stringify(self._item_data.item));
-							let half = self._item_data.item.amount / 2;
-							let toGive = Math.floor(half);
-							let tempItemData = {
-								cell: self._item_data.cell,
-								height: self._item_data.height,
-								item: itemBackup,
-								row: self._item_data.row,
-								scale: self._item_data.scale,
-								width: self._item_data.width
-							}
-							tempItemData.item.id = "NEW";
-							tempItemData.item.amount = toGive;
-							if (self._lastTarget.addItemBySlot($(slot).data("cell"), $(slot).data("row"), self._item_data.width, self._item_data.height, Object.assign(tempItemData, {
-									scale: self._defaultScale
-								})) == true) {
-								self._item_data.item.amount = fullCount - toGive;
-								self.returnToOrigin();
-								ItemStorageHandler.moveItem(self._originSource._selector.prop("id"), self._lastTarget._selector.prop("id"))
-								self.clear();
-							} else {
-								self.returnToOrigin();
-							}
-						} else if ((shiftDown == 1) && (fullCount >= 2)) {
-							let itemBackup = JSON.parse(JSON.stringify(self._item_data.item));
-							let toGive = 1;
-							let tempItemData = {
-								cell: self._item_data.cell,
-								height: self._item_data.height,
-								item: itemBackup,
-								row: self._item_data.row,
-								scale: self._item_data.scale,
-								width: self._item_data.width
-							}
-							tempItemData.item.id = "NEW";
-							tempItemData.item.amount = toGive;
-							if (self._lastTarget.addItemBySlot($(slot).data("cell"), $(slot).data("row"), self._item_data.width, self._item_data.height, Object.assign(tempItemData, {
-									scale: self._defaultScale
-								})) == true) {
-								self._item_data.item.amount = fullCount - toGive;
-								self.returnToOrigin();
-								ItemStorageHandler.moveItem(self._originSource._selector.prop("id"), self._lastTarget._selector.prop("id"))
-								self.clear();
+				if (self._lastTarget.type == "storage") {
+					let offset_top = (self._offset.top > cell_size) ? (self._offset.top - (cell_size * 0.75)) : (self._offset.top - cell_size / 2)
+					let offset_left = (self._offset.left > cell_size) ? (self._offset.left - (cell_size * 0.75)) : (self._offset.left - cell_size / 2)
+					let r_pos_top = (event.clientY - offset_top);
+					let r_pos_left = (event.clientX - offset_left);
+					let slot = self._lastTarget.getSlotByAbsolute(r_pos_top, r_pos_left)
+					if (slot != undefined) {
+						if (self._lastTarget.isFree({
+								cell: $(slot).data("cell"),
+								row: $(slot).data("row"),
+								width: self._item_data.width,
+								height: self._item_data.height
+							}) == true) {
+							let fullCount = self._item_data.item.amount;
+							if ((controlDown == 0) && (shiftDown == 0)) {
+								if (self._lastTarget.addItemBySlot($(slot).data("cell"), $(slot).data("row"), self._item_data.width, self._item_data.height, Object.assign(self._item_data, {
+										scale: self._defaultScale
+									})) == true) {
+									ItemStorageHandler.moveItem(self._originSource._selector.prop("id"), self._lastTarget._selector.prop("id"))
+									self.clear();
+								} else {
+									self.returnToOrigin();
+								}
+							} else if ((controlDown == 1) && (fullCount >= 2)) {
+								let itemBackup = JSON.parse(JSON.stringify(self._item_data.item));
+								let half = self._item_data.item.amount / 2;
+								let toGive = Math.floor(half);
+								let tempItemData = {
+									cell: self._item_data.cell,
+									height: self._item_data.height,
+									item: itemBackup,
+									row: self._item_data.row,
+									scale: self._item_data.scale,
+									width: self._item_data.width
+								}
+								tempItemData.item.id = "NEW";
+								tempItemData.item.amount = toGive;
+								if (self._lastTarget.addItemBySlot($(slot).data("cell"), $(slot).data("row"), self._item_data.width, self._item_data.height, Object.assign(tempItemData, {
+										scale: self._defaultScale
+									})) == true) {
+									self._item_data.item.amount = fullCount - toGive;
+									self.returnToOrigin();
+									ItemStorageHandler.moveItem(self._originSource._selector.prop("id"), self._lastTarget._selector.prop("id"))
+									self.clear();
+								} else {
+									self.returnToOrigin();
+								}
+							} else if ((shiftDown == 1) && (fullCount >= 2)) {
+								let itemBackup = JSON.parse(JSON.stringify(self._item_data.item));
+								let toGive = 1;
+								let tempItemData = {
+									cell: self._item_data.cell,
+									height: self._item_data.height,
+									item: itemBackup,
+									row: self._item_data.row,
+									scale: self._item_data.scale,
+									width: self._item_data.width
+								}
+								tempItemData.item.id = "NEW";
+								tempItemData.item.amount = toGive;
+								if (self._lastTarget.addItemBySlot($(slot).data("cell"), $(slot).data("row"), self._item_data.width, self._item_data.height, Object.assign(tempItemData, {
+										scale: self._defaultScale
+									})) == true) {
+									self._item_data.item.amount = fullCount - toGive;
+									self.returnToOrigin();
+									ItemStorageHandler.moveItem(self._originSource._selector.prop("id"), self._lastTarget._selector.prop("id"))
+									self.clear();
+								} else {
+									self.returnToOrigin();
+								}
 							} else {
 								self.returnToOrigin();
 							}
 						} else {
-							self.returnToOrigin();
-						}
-					} else {
-						/* Check amount transfer*/
-						let targetItem = self._lastTarget.getItemInSlot($(slot).data("cell"), $(slot).data("row"));
-						if (targetItem != false) {
-							let tItem = targetItem.item.item;
-							if (tItem.name == self._item_data.item.name) {
-								if (tItem.amount < tItem.max_stack) {
-									let top = $(slot).offset().top;
-									let left = $(slot).offset().left;
-									console.log("set colors");
-									if (tItem.amount + self._item_data.item.amount <= tItem.max_stack) {
-										console.log("smaller");
-										self._lastTarget.editItem($(slot).data("cell"), $(slot).data("row"), {
-											amount: tItem.amount + self._item_data.item.amount
-										})
-										self.clear();
-										ItemStorageHandler.moveItem(self._originSource._selector.prop("id"), self._lastTarget._selector.prop("id"))
-									} else if (tItem.amount + self._item_data.item.amount > tItem.max_stack) {
-										console.log("bigger");
-										let total = tItem.amount + self._item_data.item.amount;
-										self._lastTarget.editItem($(slot).data("cell"), $(slot).data("row"), {
-											amount: tItem.max_stack
-										})
-										self._item_data.item.amount = (total - tItem.max_stack);
-										self.returnToOrigin();
-										ItemStorageHandler.moveItem(self._originSource._selector.prop("id"), self._lastTarget._selector.prop("id"))
+							/* Check amount transfer*/
+							let targetItem = self._lastTarget.getItemInSlot($(slot).data("cell"), $(slot).data("row"));
+							if (targetItem != false) {
+								let tItem = targetItem.item.item;
+								if (tItem.name == self._item_data.item.name) {
+									if (tItem.amount < tItem.max_stack) {
+										let top = $(slot).offset().top;
+										let left = $(slot).offset().left;
+										console.log("set colors");
+										if (tItem.amount + self._item_data.item.amount <= tItem.max_stack) {
+											console.log("smaller");
+											self._lastTarget.editItem($(slot).data("cell"), $(slot).data("row"), {
+												amount: tItem.amount + self._item_data.item.amount
+											})
+											self.clear();
+											ItemStorageHandler.moveItem(self._originSource._selector.prop("id"), self._lastTarget._selector.prop("id"))
+										} else if (tItem.amount + self._item_data.item.amount > tItem.max_stack) {
+											console.log("bigger");
+											let total = tItem.amount + self._item_data.item.amount;
+											self._lastTarget.editItem($(slot).data("cell"), $(slot).data("row"), {
+												amount: tItem.max_stack
+											})
+											self._item_data.item.amount = (total - tItem.max_stack);
+											self.returnToOrigin();
+											ItemStorageHandler.moveItem(self._originSource._selector.prop("id"), self._lastTarget._selector.prop("id"))
+										} else {
+											self.returnToOrigin();
+										}
 									} else {
 										self.returnToOrigin();
 									}
@@ -358,12 +363,12 @@ var DragHandler = new class {
 							} else {
 								self.returnToOrigin();
 							}
-						} else {
-							self.returnToOrigin();
 						}
+					} else {
+						self.returnToOrigin();
 					}
 				} else {
-					self.returnToOrigin();
+					/*NOT STORAGE*/
 				}
 			} else {
 				self.returnToOrigin();
@@ -621,6 +626,9 @@ var Storage = class {
 					"z-index": 0
 				})
 			})
+			$("#equipment").css({
+				"z-index": 0
+			})
 			$(self._selector).css({
 				"z-index": 15
 			})
@@ -665,6 +673,9 @@ var Storage = class {
 				$(window).mouseup(uEvent);
 			}
 		});
+	}
+	get type() {
+		return "storage";
 	}
 	resize(cells, rows) {
 		this._rows = rows;
@@ -1059,13 +1070,238 @@ var Storage = class {
 		this._oldInventory = JSON.parse(JSON.stringify(this._inventory));
 	};
 }
-var SingleSlot = class {
-	constructor(selector,mask) {
+var CustomSlots = class {
+	constructor(selector, slots = [{
+		id: "",
+		mask: ""
+	}]) {
+		console.log("G");
+		let self = this;
+		self._selector = $(selector);
+		self._slots = slots;
+		self._wasDown = 0;
+		self._repos_offset = {
+			top: 0,
+			left: 0
+		}
+		$(selector).on('mousedown', ".headline", function(event) {
+			//if (isToggledInto == false) return;
+			let cursor = {
+				top: event.clientY,
+				left: event.clientX
+			}
+			let offset_top = cursor.top - $(event.currentTarget).offset().top;
+			let offset_left = cursor.left - $(event.currentTarget).offset().left;
+			self._repos_offset.top = offset_top;
+			self._repos_offset.left = offset_left;
+			$(document).find(".storage").each(function(t, e) {
+				$(e).css({
+					"z-index": 0
+				})
+			})
+			$("#equipment").css({
+				"z-index": 0
+			})
+			$(self._selector).css({
+				"z-index": 15
+			})
+			self.dragStorage();
+		});
+		$(selector).on('mousedown', ".item, img", function(event) {
+			//if (isToggledInto == false) return;
+			event.preventDefault();
+			let cTarget = event.currentTarget;
+			if ($(event.currentTarget).hasClass("item") == false) {
+				cTarget = $(event.currentTarget).parents(".item")[0];
+			}
+			if (cTarget) {
+				let mEvent = function(event) {
+					if (mouseDown == 1) {
+						if (DragHandler.isDraggable(cTarget) == true) {
+							let data = $(cTarget).data("item");
+							//DragHandler.Handle(event, cTarget, self);
+							alert("Start Drag");
+							//self.removeItemBySlot(data.cell, data.row);
+							//self.render()
+							$(window).unbind("mousemove", mEvent)
+						} else {
+							$(window).unbind("mousemove", mEvent)
+						}
+					} else {
+						$(window).unbind("mousemove", mEvent)
+					}
+				}
+				$(window).mousemove(mEvent);
+			}
+		});
+		self.render();
+	}
+	loadItem(place, item) {
 
+
+
+
+	}
+	getSlotByAbsolute(top, left) {
+		let self = this;
+		let slot = self._slots.find(function(slot) {
+			if ($("#" + slot.id).length > 0) {
+				let offset = $("#" + slot.id).offset();
+				let wh = {
+					width: $("#" + slot.id).width(),
+					height: $("#" + slot.id).height()
+				};
+				if ((top >= offset.top) && (top <= (offset.top + wh.height))) {
+					if ((left >= offset.left) && (left <= (offset.left + wh.width))) {
+						return true;
+					}
+				}
+			}
+			return false;
+		})
+		return slot;
+	}
+	canBeDropped(item) {
+		return true;
+	}
+	render() {
+		let self = this;
+		self._slots.forEach(function(slot) {
+			if (slot.item != undefined) {
+				let item = slot.item;
+				let a = $(`<div data-item='${JSON.stringify(item)}' class='item big' ></div>`);
+				let width = (item.width) * cell_size;
+				let height = (item.height) * cell_size;
+				let img = item.image
+				let old_width = width;
+				let old_height = height;
+				let class_n = "";
+				if (item.scale != undefined) {
+					if (width > item.scale.width) {
+						class_n = "flip";
+						old_width = item.scale.width;
+						old_height = item.scale.height;
+					}
+					if (height > item.scale.height) {
+						class_n = "flip vert";
+						old_width = item.scale.width;
+						old_height = item.scale.height;
+					}
+				}
+				$(a).html(`<div class='amount'>${(parseInt(item.max_stack) > 1) ? item.amount : ``}</div><img class="${class_n}" data-default=${JSON.stringify({width:old_width,height:old_height})} src="${img}"></img>`)
+				a.height(((height > cell_size*2) || (width > cell_size*2)) ? cell_size*2 : height)
+				a.width(((height > cell_size*2) || (width > cell_size*2)) ? cell_size*2 : width)
+				let x = $("#"+slot.id).find(".slot_content").append(a);
+				$($(a).find("img")).bind("load", function() {
+					$(a).addClass("loaded");
+					let w = $(a).find("img").width();
+					let h = $(a).find("img").height();
+					if ((w <= old_width) && (h <= old_height)) {
+						let padding_w = (width - w);
+						let padding_h = (height - h);
+						$(a).find("img").css({
+							'max-width': cell_size*2 + "px",
+							'max-height': cell_size*2 + "px",
+							'top': (padding_h / 2) + "px",
+							'left': (padding_w / 2) + "px"
+						});
+					} else {
+						$(a).find("img").css({
+							'max-width': cell_size*2 + "px",
+							'max-height': cell_size*2 + "px",
+							'width': ((height > cell_size*2) || (width > cell_size*2)) ? cell_size*2 : height + "px",
+							'height': ((height > cell_size*2) || (width > cell_size*2)) ? cell_size*2 : width + "px"
+						});
+					}
+				})
+			}
+			//$("#"+slot.id)
+		})
+	}
+	get type() {
+		return "slot";
+	}
+	shadow() {}
+	moveWindow(top, left) {
+		let self = this;
+		self._top = top;
+		self._left = left;
+		self._selector.css({
+			'top': self._top,
+			'left': self._left
+		})
+	}
+	dragStorage() {
+		let self = this;
+		let lEvent = function(event) {
+			window.requestAnimationFrame(function() {
+				self._top = (event.clientY - self._repos_offset.top);
+				self._left = (event.clientX - self._repos_offset.left)
+				self._selector.css({
+					'top': self._top,
+					'left': self._left
+				})
+				if (mouseDown <= 0) {
+					$(window).unbind("mousemove", lEvent)
+				};
+				mp.trigger("Storage:Drag", JSON.stringify({
+					id: self._selector.attr("id"),
+					'top': self._top,
+					'left': self._left
+				}));
+			});
+		}
+		$(window).mousemove(lEvent);
 	}
 }
 var nonStandartContainer = [];
 var storageContainers = [];
+var equipment = new CustomSlots("#equipment", [
+	{
+		id: "clothes_head",
+		mask: ""
+	},
+	{
+		id: "helmet",
+		mask: ""
+	},
+	{
+		id: "armor",
+		mask: "",
+		item: {
+			name: "Armour Light",
+			type: "Armour Light",
+			image: "../../source/img/ArmorNormal.png",
+			width: 2,
+	        height: 2,
+	        type:"Armor"
+		}
+	},
+	{
+		id: "clothes_body",
+		mask: ""
+	},
+	{
+		id: "clothes_pants",
+		mask: ""
+	},
+	{
+		id: "clothes_shoes",
+		mask: ""
+	},
+	{
+		id: "weapon_primary",
+		mask: ""
+	},
+	{
+		id: "weapon_secondary",
+		mask: ""
+	},
+	{
+		id: "weapon_meele",
+		mask: ""
+	}
+		]);
 
 function show(interface = "storage_interface") {
 	$("#" + interface).css({
@@ -1114,6 +1350,9 @@ function focus(selector) {
 			"z-index": 0
 		})
 	})
+	$("#equipment").css({
+		"z-index": 0
+	})
 	$("#" + selector).css({
 		"z-index": 15
 	})
@@ -1138,31 +1377,31 @@ function addItem(container, gCell, gRow, gWidth, gHeight, gData, flipped = false
 	}
 }
 
-function initialize(id,cells, rows, config) {
-	if (storageContainers["#"+id]) {
-		storageContainers["#"+id].remove()
-		storageContainers["#"+id] = undefined;
+function initialize(id, cells, rows, config) {
+	if (storageContainers["#" + id]) {
+		storageContainers["#" + id].remove()
+		storageContainers["#" + id] = undefined;
 		delete storageContainers["#inventory"];
 	}
 	let container = `<div id="${id}" class="storage" data-cells="${cells}" data-rows="${rows}" style="display: block;">
-						    <div class="headline">${id}</div>
+						    <div class="headline"><span class="pattern"></span>${id}</div>
 						    <div class="grid"></div>
 						    <div class="items">
 						    </div>
 						</div>`
 	$(container).appendTo($("#storage_interface"));
-	var Inventory = new Storage("#"+id, {
+	var Inventory = new Storage("#" + id, {
 		top: config.top || 0,
 		left: config.left || 0,
 	});
-	storageContainers["#"+id] = Inventory;
+	storageContainers["#" + id] = Inventory;
 }
 
 function addStorageContainer(headline, selector, config, cells, rows, items) {
 	console.log("config", config)
 	if ($("#" + selector).length == 0) {
 		let container = `<div id="${selector}" class="storage" data-cells="${cells}" data-rows="${rows}" style="display: block;">
-						    <div class="headline">${headline}</div>
+						    <div class="headline"><span class="pattern"></span>${headline}</div>
 						    <div class="grid"></div>
 						    <div class="items">
 						    </div>

@@ -6,13 +6,11 @@ var mouseDown = 0;
 var shiftDown = 0;
 var controlDown = 0;
 document.body.onmousedown = function(e) {
-	console.log("onmousedown", e.which, e);
 	if (e.which == 1) {
 		mouseDown = 1;
 	};
 }
 document.body.onmouseup = function(e) {
-	console.log("onmouseup", e.which, e);
 	if (e.which == 1) {
 		mouseDown = 0;
 	};
@@ -35,6 +33,7 @@ $(window).keyup(function(e) {
 });
 var ContextHandler = new class {
 	constructor() {
+		let self = this;
 		$(window).on('contextmenu', function(event) {
 			if (isToggledInto == true) return;
 			event.preventDefault();
@@ -727,14 +726,14 @@ var Storage = class {
 					'top': self._top,
 					'left': self._left
 				})
+				if (mouseDown <= 0) {
+					$(window).unbind("mousemove", lEvent)
+				};
 				mp.trigger("Storage:Drag", JSON.stringify({
 					id: self._selector.attr("id"),
 					'top': self._top,
 					'left': self._left
 				}));
-				if (mouseDown <= 0) {
-					$(window).unbind("mousemove", lEvent)
-				};
 			});
 		}
 		$(window).mousemove(lEvent);
@@ -1060,28 +1059,33 @@ var Storage = class {
 		this._oldInventory = JSON.parse(JSON.stringify(this._inventory));
 	};
 }
+var SingleSlot = class {
+	constructor(selector,mask) {
+
+	}
+}
 var nonStandartContainer = [];
 var storageContainers = [];
 
-function show() {
-	$("body").css({
+function show(interface = "storage_interface") {
+	$("#" + interface).css({
 		"opacity": "1"
 	});
 	DragHandler.refreshStorages();
 	isToggledInto = true;
 }
 
-function hide() {
-	$("body").css({
+function hide(interface = "storage_interface") {
+	$("#" + interface).css({
 		"opacity": "0"
 	});
 	isToggledInto = false;
 	Object.keys(nonStandartContainer).forEach(function(id) {
 		if (nonStandartContainer[id]) {
-			mp.trigger("Storage:Close", id);
 			nonStandartContainer[id].remove();
 			nonStandartContainer[id] = undefined;
 			delete nonStandartContainer[id];
+			mp.trigger("Storage:Close", id);
 		}
 	})
 }
@@ -1105,7 +1109,7 @@ function clear(container) {
 }
 
 function focus(selector) {
-	$(document).find(".storage").each(function(t, e) {
+	$("#storage_interface").find(".storage").each(function(t, e) {
 		$(e).css({
 			"z-index": 0
 		})
@@ -1134,24 +1138,24 @@ function addItem(container, gCell, gRow, gWidth, gHeight, gData, flipped = false
 	}
 }
 
-function initialize(cells, rows, config) {
-	if (storageContainers["#inventory"]) {
-		storageContainers["#inventory"].remove()
-		storageContainers["#inventory"] = undefined;
+function initialize(id,cells, rows, config) {
+	if (storageContainers["#"+id]) {
+		storageContainers["#"+id].remove()
+		storageContainers["#"+id] = undefined;
 		delete storageContainers["#inventory"];
 	}
-	let container = `<div id="inventory" class="storage" data-cells="${cells}" data-rows="${rows}" style="display: block;">
-						    <div class="headline">Inventory</div>
+	let container = `<div id="${id}" class="storage" data-cells="${cells}" data-rows="${rows}" style="display: block;">
+						    <div class="headline">${id}</div>
 						    <div class="grid"></div>
 						    <div class="items">
 						    </div>
 						</div>`
-	$(container).appendTo(document.body);
-	var Inventory = new Storage("#inventory", {
+	$(container).appendTo($("#storage_interface"));
+	var Inventory = new Storage("#"+id, {
 		top: config.top || 0,
 		left: config.left || 0,
 	});
-	storageContainers["#inventory"] = Inventory;
+	storageContainers["#"+id] = Inventory;
 }
 
 function addStorageContainer(headline, selector, config, cells, rows, items) {
@@ -1163,7 +1167,7 @@ function addStorageContainer(headline, selector, config, cells, rows, items) {
 						    <div class="items">
 						    </div>
 						</div>`
-		$(container).appendTo(document.body);
+		$(container).appendTo($("#storage_interface"));
 		var StorageUnit = new Storage("#" + selector, {
 			top: config.top || 0,
 			left: config.left || 0,
@@ -1193,21 +1197,23 @@ function addStorageContainer(headline, selector, config, cells, rows, items) {
 		})
 	}
 }
-rpc.register('isBusy', function() {
-	return mouseDown == 1 || DragHandler.isDragging() == true;
-});
-rpc.register('doesFitInto', function(options) {
-	if (storageContainers["#" + options.what]) {
-		return storageContainers["#" + options.what].getNextFreeSlot(options.w, options.h)
-	}
-	return undefined;
-});
-rpc.register('editItemID', function(options) {
-	if (storageContainers["#" + options.selector]) {
-		return storageContainers["#" + options.selector].editID(options.id, options.name, options.amount, options.overwrite_data)
-	}
-	return undefined;
-});
+if (mp !== undefined) {
+	rpc.register('isBusy', function() {
+		return mouseDown == 1 || DragHandler.isDragging() == true;
+	});
+	rpc.register('doesFitInto', function(options) {
+		if (storageContainers["#" + options.what]) {
+			return storageContainers["#" + options.what].getNextFreeSlot(options.w, options.h)
+		}
+		return undefined;
+	});
+	rpc.register('editItemID', function(options) {
+		if (storageContainers["#" + options.selector]) {
+			return storageContainers["#" + options.selector].editID(options.id, options.name, options.amount, options.overwrite_data)
+		}
+		return undefined;
+	});
+}
 $(document).ready(function(event) {
 	mp.trigger("Inventory:Ready");
 });

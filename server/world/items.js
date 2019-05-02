@@ -18,6 +18,7 @@ var items = {
         model: "prop_w_me_hatchet",
         thickness: 0.15,
         amount: 1,
+        type:"Tool",
         offset: {
             pos: new mp.Vector3(0, 0, 0.02),
             rot: new mp.Vector3(90, 0, 0)
@@ -38,6 +39,7 @@ var items = {
         model: "w_sg_pumpshotgun",
         thickness: 0.15,
         amount: 1,
+        type:"Weapon",
         offset: {
             pos: new mp.Vector3(0, 0, 0.02),
             rot: new mp.Vector3(90, 0, 0)

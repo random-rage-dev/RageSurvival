@@ -36,7 +36,7 @@ mp.events.add("Inventory:Resize", (cell_count, row_count) => {
 	CEFInventory.call("resize", "inventory", inv_cells, inv_rows);
 });
 mp.events.add("Inventory:Ready", (data) => {
-	CEFInventory.call("initialize", inv_cells, inv_rows, {
+	CEFInventory.call("initialize", "inventory", inv_cells, inv_rows, {
 		top: Inventory_Order.positions["inventory"].top,
 		left: Inventory_Order.positions["inventory"].left
 	})
@@ -162,11 +162,7 @@ mp.events.add("Inventory:AddItem", (citem) => {
 	})
 	CEFInventory.call("addItem", "inventory", tempSettings.cell || 0, tempSettings.row || 0, citem.width, citem.height, JSON.stringify(gData), tempSettings.flipped || false)
 });
-
-mp.events.add("Storage:Use", (item) => {
-		
-});
-
+mp.events.add("Storage:Use", (item) => {});
 mp.events.add("Storage:Drag", (positions) => {
 	positions = JSON.parse(positions);
 	if (!Inventory_Order.positions[positions.id]) {

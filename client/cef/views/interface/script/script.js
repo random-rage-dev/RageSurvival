@@ -1137,10 +1137,15 @@ var CustomSlots = class {
 		self.render();
 	}
 	loadItem(place, item) {
+		let slot = self._slots.findIndex(function(slot) {
+			return slot.id == place;
+		});
+		if (slot > -1) {
+			this._slots[slot].item = item;
 
 
 
-
+		}
 	}
 	getSlotByAbsolute(top, left) {
 		let self = this;
@@ -1167,6 +1172,7 @@ var CustomSlots = class {
 	render() {
 		let self = this;
 		self._slots.forEach(function(slot) {
+			$("#" + slot.id).find(".slot_content").html("");
 			if (slot.item != undefined) {
 				let item = slot.item;
 				let a = $(`<div data-item='${JSON.stringify(item)}' class='item big' ></div>`);
@@ -1189,9 +1195,9 @@ var CustomSlots = class {
 					}
 				}
 				$(a).html(`<div class='amount'>${(parseInt(item.max_stack) > 1) ? item.amount : ``}</div><img class="${class_n}" data-default=${JSON.stringify({width:old_width,height:old_height})} src="${img}"></img>`)
-				a.height(((height > cell_size*2) || (width > cell_size*2)) ? cell_size*2 : height)
-				a.width(((height > cell_size*2) || (width > cell_size*2)) ? cell_size*2 : width)
-				let x = $("#"+slot.id).find(".slot_content").append(a);
+				a.height(((height > cell_size * 2) || (width > cell_size * 2)) ? cell_size * 2 : height)
+				a.width(((height > cell_size * 2) || (width > cell_size * 2)) ? cell_size * 2 : width)
+				let x = $("#" + slot.id).find(".slot_content").append(a);
 				$($(a).find("img")).bind("load", function() {
 					$(a).addClass("loaded");
 					let w = $(a).find("img").width();
@@ -1200,17 +1206,17 @@ var CustomSlots = class {
 						let padding_w = (width - w);
 						let padding_h = (height - h);
 						$(a).find("img").css({
-							'max-width': cell_size*2 + "px",
-							'max-height': cell_size*2 + "px",
+							'max-width': cell_size * 2 + "px",
+							'max-height': cell_size * 2 + "px",
 							'top': (padding_h / 2) + "px",
 							'left': (padding_w / 2) + "px"
 						});
 					} else {
 						$(a).find("img").css({
-							'max-width': cell_size*2 + "px",
-							'max-height': cell_size*2 + "px",
-							'width': ((height > cell_size*2) || (width > cell_size*2)) ? cell_size*2 : height + "px",
-							'height': ((height > cell_size*2) || (width > cell_size*2)) ? cell_size*2 : width + "px"
+							'max-width': cell_size * 2 + "px",
+							'max-height': cell_size * 2 + "px",
+							'width': ((height > cell_size * 2) || (width > cell_size * 2)) ? cell_size * 2 : height + "px",
+							'height': ((height > cell_size * 2) || (width > cell_size * 2)) ? cell_size * 2 : width + "px"
 						});
 					}
 				})
@@ -1273,8 +1279,8 @@ var equipment = new CustomSlots("#equipment", [
 			type: "Armour Light",
 			image: "../../source/img/ArmorNormal.png",
 			width: 2,
-	        height: 2,
-	        type:"Armor"
+			height: 2,
+			type: "Armor"
 		}
 	},
 	{

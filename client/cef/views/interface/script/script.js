@@ -1297,11 +1297,27 @@ var equipment = new CustomSlots("#equipment", [
 	},
 	{
 		id: "weapon_primary",
-		mask: ""
+		mask: "",
+		item: {
+			name: "Pump Shotgun",
+			type: "Pump Shotgun",
+			image: "../../source/img/weapon_pumpshotgun.png",
+			width: 4,
+			height: 2,
+			type: "primary"
+		}
 	},
 	{
 		id: "weapon_secondary",
-		mask: ""
+		mask: "",
+		item: {
+			name: "Pump Shotgun",
+			type: "Pump Shotgun",
+			image: "../../source/img/weapon_microsmg.png",
+			width: 3,
+			height: 2,
+			type: "primary"
+		}
 	},
 	{
 		id: "weapon_meele",

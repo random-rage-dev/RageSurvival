@@ -106,7 +106,8 @@ mp.events.add("Inventory:Update", (inventory) => {
 			image: citem.image,
 			scale: tempSettings.scale || {},
 			amount: citem.amount,
-			max_stack: citem.max_stack
+			max_stack: citem.max_stack,
+			mask:citem.mask
 		}
 		let width = citem.width;
 		let height = citem.height;

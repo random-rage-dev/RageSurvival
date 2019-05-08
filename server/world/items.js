@@ -18,7 +18,7 @@ var items = {
         model: "prop_w_me_hatchet",
         thickness: 0.15,
         amount: 1,
-        type:"Tool",
+        mask:"Meele",
         offset: {
             pos: new mp.Vector3(0, 0, 0.02),
             rot: new mp.Vector3(90, 0, 0)
@@ -39,7 +39,7 @@ var items = {
         model: "w_sg_pumpshotgun",
         thickness: 0.15,
         amount: 1,
-        type:"Weapon",
+        mask:"Primary",
         offset: {
             pos: new mp.Vector3(0, 0, 0.02),
             rot: new mp.Vector3(90, 0, 0)
@@ -75,7 +75,8 @@ var items = {
         offset: {
             pos: new mp.Vector3(0, 0, 0.02),
             rot: new mp.Vector3(90, 0, 0)
-        }
+        },
+        mask:"Primary",
     },
     "9mm Bullets": {
         width: 1,
@@ -107,7 +108,8 @@ var items = {
         offset: {
             pos: new mp.Vector3(0, 0, 0.02),
             rot: new mp.Vector3(90, 0, 0)
-        }
+        },
+        mask:"Primary",
     },
     "5.56m Bullets": {
         width: 1,

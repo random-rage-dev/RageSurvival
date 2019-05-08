@@ -236,6 +236,7 @@ var Storage = new class {
 				max_stack: itemIdentity[object.name].max_stack,
 				image: itemIdentity[object.name].image,
 				thickness: itemIdentity[object.name].thickness,
+				mask: itemIdentity[object.name].mask,
 				offset: itemIdentity[object.name].offset
 			}
 			return Object.assign(object, masked);

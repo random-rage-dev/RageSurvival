@@ -55,6 +55,7 @@ var ItemStorageHandler = new class {
 			items: []
 		}
 	}
+	transferItemBySlot(source, target) {}
 	moveItem(source, target) {
 		console.log("moveItem", source, target)
 		let sInv = this._container[source].source.inventory().map(function(item) {
@@ -233,10 +234,7 @@ var DragHandler = new class {
 		if (self._dragging) {
 			let isInArea = undefined;
 			Object.keys(self._registeredTargets).forEach(function(key) {
-				console.log("key", key);
-				console.log("self._registeredTargets[key].type", self._registeredTargets[key].type);
-				console.log("grid", $("#" + key).find(".grid"));
-				let bounds = $("#" + key).getBoundingClientRect();
+				let bounds = $("#" + key)[0].getBoundingClientRect();
 				if (self._registeredTargets[key].type == "storage") {
 					bounds = $("#" + key).find(".grid")[0].getBoundingClientRect();
 				}
@@ -257,13 +255,13 @@ var DragHandler = new class {
 		var self = this;
 		if (self._dragging) {
 			if (self._lastTarget != undefined) {
-				if (self._lastTarget.type == "storage") {
-					let offset_top = (self._offset.top > cell_size) ? (self._offset.top - (cell_size * 0.75)) : (self._offset.top - cell_size / 2)
-					let offset_left = (self._offset.left > cell_size) ? (self._offset.left - (cell_size * 0.75)) : (self._offset.left - cell_size / 2)
-					let r_pos_top = (event.clientY - offset_top);
-					let r_pos_left = (event.clientX - offset_left);
-					let slot = self._lastTarget.getSlotByAbsolute(r_pos_top, r_pos_left)
-					if (slot != undefined) {
+				let offset_top = (self._offset.top > cell_size) ? (self._offset.top - (cell_size * 0.75)) : (self._offset.top - cell_size / 2)
+				let offset_left = (self._offset.left > cell_size) ? (self._offset.left - (cell_size * 0.75)) : (self._offset.left - cell_size / 2)
+				let r_pos_top = (event.clientY - offset_top);
+				let r_pos_left = (event.clientX - offset_left);
+				let slot = self._lastTarget.getSlotByAbsolute(r_pos_top, r_pos_left)
+				if (slot != undefined) {
+					if (self._lastTarget.type == "storage") {
 						if (self._lastTarget.isFree({
 								cell: $(slot).data("cell"),
 								row: $(slot).data("row"),
@@ -370,10 +368,37 @@ var DragHandler = new class {
 							}
 						}
 					} else {
-						self.returnToOrigin();
+						let frame = $("#" + slot.id);
+						if (frame.length > 0) {
+							let dropable = true;
+							if (self._item_data.item.mask.toUpperCase().indexOf(slot.mask.toUpperCase()) > -1) {
+								dropable = true;
+								if (slot.item != undefined) {
+									dropable = false;
+								}
+							} else {
+								dropable = false;
+							}
+							if (dropable == true) {
+								let tempItemData = {
+									cell: self._item_data.cell,
+									height: self._item_data.height,
+									item: JSON.parse(JSON.stringify(self._item_data.item)),
+									row: self._item_data.row,
+									scale: self._item_data.scale,
+									width: self._item_data.width
+								}
+								self._lastTarget.loadItem(slot.id, tempItemData)
+								self.clear();
+							} else {
+								self.returnToOrigin();
+							}
+						} else {
+							self.returnToOrigin();
+						}
 					}
 				} else {
-					/*NOT STORAGE*/
+					self.returnToOrigin();
 				}
 			} else {
 				self.returnToOrigin();
@@ -497,7 +522,7 @@ var DragHandler = new class {
 				left: (r_pos_left) + 'px',
 				'opacity': 1
 			});
-			let slot = self._lastTarget.getSlotByAbsolute(r_pos_top, r_pos_left)
+			let slot = self._lastTarget.getSlotByAbsolute(r_pos_top, r_pos_left);
 			if (slot != undefined) {
 				if (self._lastTarget.type == "storage") {
 					if (self._lastTarget.isFree({
@@ -567,8 +592,29 @@ var DragHandler = new class {
 						/**/
 					}
 				} else {
-					//Storage Fit check
-					console.log("other storage type",self._lastTarget.type);
+					//Storage Fit check;
+					let frame = $("#" + slot.id);
+					if (frame.length > 0) {
+						let color = "rgba(0,0,0,0.15)";
+						if (self._item_data.item.mask.toUpperCase().indexOf(slot.mask.toUpperCase()) > -1) {
+							color = "rgba(0,150,0,0.15)";
+							if (slot.item != undefined) {
+								color = "rgba(150, 0, 0,0.15)";
+							}
+						} else {
+							color = "rgba(150, 0, 0,0.15)";
+						}
+						let top = frame.offset().top;
+						let left = frame.offset().left;
+						$(self._sampleShadow).css({
+							top: top + 'px',
+							left: left + 'px',
+							"background": color,
+							'opacity': 1,
+							'width': frame.width() + "px",
+							'height': frame.height() + "px"
+						});
+					}
 				}
 			} else {
 				$(self._sampleShadow).css({
@@ -610,7 +656,7 @@ var Storage = class {
 			left: 0
 		}
 		$(selector).on('contextmenu', ".item, img", function(event) {
-			if (isToggledInto == false) return;
+			if (self.isToggled == false) return;
 			event.preventDefault();
 			let cTarget = event.currentTarget;
 			if ($(event.currentTarget).hasClass("item") == false) {
@@ -622,7 +668,7 @@ var Storage = class {
 		});
 		self._wasDown = 0;
 		$(selector).on('mousedown', ".headline", function(event) {
-			if (isToggledInto == false) return;
+			if (self.isToggled == false) return;
 			let cursor = {
 				top: event.clientY,
 				left: event.clientX
@@ -645,7 +691,7 @@ var Storage = class {
 			self.dragStorage();
 		});
 		$(selector).on('mousedown', ".item, img", function(event) {
-			if (isToggledInto == false) return;
+			if (self.isToggled == false) return;
 			event.preventDefault();
 			let cTarget = event.currentTarget;
 			if ($(event.currentTarget).hasClass("item") == false) {
@@ -683,6 +729,9 @@ var Storage = class {
 				$(window).mouseup(uEvent);
 			}
 		});
+	}
+	get isToggled() {
+		return toggledInto.indexOf(this._rawSelector.replace("#", "")) > -1
 	}
 	resize(cells, rows) {
 		this._rows = rows;
@@ -1046,7 +1095,6 @@ var Storage = class {
 					old_height = item.scale.height;
 				}
 			}
-			console.log("ITEM WITH AMOUNT", item.item.amount)
 			$(a).html(`<div class='amount'>${(parseInt(item.item.max_stack) > 1) ? item.item.amount : ``}</div><img class="${class_n}" data-default=${JSON.stringify({width:old_width,height:old_height})} src="${img}"></img>`)
 			a.height(height)
 			a.width(width)
@@ -1082,20 +1130,20 @@ var CustomSlots = class {
 		id: "",
 		mask: ""
 	}]) {
-		console.log("G");
 		let self = this;
 		self._rawSelector = selector;
 		self._selector = $(selector);
 		self._slots = slots;
+		ItemStorageHandler.register(selector.replace("#", ""), self);
 		self._wasDown = 0;
 		self._repos_offset = {
 			top: 0,
 			left: 0
 		}
 		self.type = "slots";
-		DragHandler.registerDropable(self, this._rawSelector)
+		DragHandler.registerDropable(self, this._rawSelector);
 		$(selector).on('mousedown', ".headline", function(event) {
-			//if (isToggledInto == false) return;
+			if (isToggledInto == false) return;
 			let cursor = {
 				top: event.clientY,
 				left: event.clientX
@@ -1118,7 +1166,7 @@ var CustomSlots = class {
 			self.dragStorage();
 		});
 		$(selector).on('mousedown', ".item, img", function(event) {
-			//if (isToggledInto == false) return;
+			if (self.isToggled == false) return;
 			event.preventDefault();
 			let cTarget = event.currentTarget;
 			if ($(event.currentTarget).hasClass("item") == false) {
@@ -1130,7 +1178,7 @@ var CustomSlots = class {
 						if (DragHandler.isDraggable(cTarget) == true) {
 							let data = $(cTarget).data("item");
 							//DragHandler.Handle(event, cTarget, self);
-							alert("Start Drag");
+							alert("Start Drag", JSON.stringify(data));
 							//self.removeItemBySlot(data.cell, data.row);
 							//self.render()
 							$(window).unbind("mousemove", mEvent)
@@ -1146,12 +1194,17 @@ var CustomSlots = class {
 		});
 		self.render();
 	}
+
+	get isToggled() {
+		return toggledInto.indexOf(this._rawSelector.replace("#", "")) > -1
+	}
 	loadItem(place, item) {
-		let slot = self._slots.findIndex(function(slot) {
+		let slot = this._slots.findIndex(function(slot) {
 			return slot.id == place;
 		});
 		if (slot > -1) {
 			this._slots[slot].item = item;
+			this.render();
 		}
 	}
 	getSlotByAbsolute(top, left) {
@@ -1218,24 +1271,24 @@ var CustomSlots = class {
 		self._slots.forEach(function(slot) {
 			$("#" + slot.id).find(".slot_content").html("");
 			if (slot.item != undefined) {
-				let item = slot.item;
-				let a = $(`<div data-item='${JSON.stringify(item)}' class='item big' ></div>`);
-				let width = (item.width) * cell_size;
-				let height = (item.height) * cell_size;
+				let item = slot.item.item;
+				let a = $(`<div data-item='${JSON.stringify(slot.item)}' class='item big' ></div>`);
+				let width = (slot.item.width) * cell_size;
+				let height = (slot.item.height) * cell_size;
 				let img = item.image
 				let old_width = width;
 				let old_height = height;
 				let class_n = "";
-				if (item.scale != undefined) {
-					if (width > item.scale.width) {
+				if (slot.item.scale != undefined) {
+					if (width > slot.item.scale.width) {
 						class_n = "flip";
-						old_width = item.scale.width;
-						old_height = item.scale.height;
+						old_width = slot.item.scale.width;
+						old_height = slot.item.scale.height;
 					}
-					if (height > item.scale.height) {
+					if (height > slot.item.scale.height) {
 						class_n = "flip vert";
-						old_width = item.scale.width;
-						old_height = item.scale.height;
+						old_width = slot.item.scale.width;
+						old_height = slot.item.scale.height;
 					}
 				}
 				$(a).html(`<div class='amount'>${(parseInt(item.max_stack) > 1) ? item.amount : ``}</div><img class="${class_n}" data-default=${JSON.stringify({width:old_width,height:old_height})} src="${img}"></img>`)
@@ -1305,65 +1358,42 @@ var storageContainers = [];
 var equipment = new CustomSlots("#equipment", [
 	{
 		id: "clothes_head",
-		mask: ""
+		mask: "chead"
 	},
 	{
 		id: "helmet",
-		mask: ""
+		mask: "headarmor"
 	},
 	{
 		id: "armor",
-		mask: "",
-		item: {
-			name: "Armour Light",
-			type: "Armour Light",
-			image: "../../source/img/ArmorNormal.png",
-			width: 2,
-			height: 2,
-			type: "Armor"
-		}
+		mask: "bodyarmor"
 	},
 	{
 		id: "clothes_body",
-		mask: ""
+		mask: "cbody"
 	},
 	{
 		id: "clothes_pants",
-		mask: ""
+		mask: "cpants"
 	},
 	{
 		id: "clothes_shoes",
-		mask: ""
+		mask: "cshoes"
 	},
 	{
 		id: "weapon_primary",
-		mask: "",
-		item: {
-			name: "Pump Shotgun",
-			type: "Pump Shotgun",
-			image: "../../source/img/weapon_pumpshotgun.png",
-			width: 4,
-			height: 2,
-			type: "primary"
-		}
+		mask: "primary"
 	},
 	{
 		id: "weapon_secondary",
-		mask: "",
-		item: {
-			name: "Pump Shotgun",
-			type: "Pump Shotgun",
-			image: "../../source/img/weapon_microsmg.png",
-			width: 3,
-			height: 2,
-			type: "primary"
-		}
+		mask: "secondary"
 	},
 	{
 		id: "weapon_meele",
-		mask: ""
+		mask: "meele"
 	}
 		]);
+var toggledInto = [];
 
 function show(interface = "storage_interface") {
 	$("#" + interface).css({
@@ -1371,13 +1401,17 @@ function show(interface = "storage_interface") {
 	});
 	DragHandler.refreshStorages();
 	isToggledInto = true;
+	toggledInto.push(interface);
 }
 
 function hide(interface = "storage_interface") {
 	$("#" + interface).css({
 		"opacity": "0"
 	});
-	isToggledInto = false;
+	toggledInto.splice(toggledInto.indexOf(interface), 1);
+	if (toggledInto.length == 0) {
+		isToggledInto = false;
+	}
 	Object.keys(nonStandartContainer).forEach(function(id) {
 		if (nonStandartContainer[id]) {
 			nonStandartContainer[id].remove();

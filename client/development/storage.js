@@ -41,26 +41,29 @@ mp.events.add("Inventory:Ready", (data) => {
 		left: Inventory_Order.positions["inventory"].left
 	})
 });
+var windowsOpen = [];
 
 function toggleInventory() {
-	console.log("toggle inventory");
-	if (toggleInvState == false) {
-		if (mp.gui.cursor.visible == false) {
+	console.log("toggle inventory", JSON.stringify(windowsOpen));
+	if (windowsOpen.indexOf("inventory") == -1) {
+		if (mp.gui.chat.enabled == false) {
 			CEFInventory.call("setPos", "inventory", Inventory_Order.positions["inventory"].top, Inventory_Order.positions["inventory"].left);
 			CEFInventory.call("show");
 			CEFInventory.cursor(true);
-			toggleInvState = true;
+			windowsOpen.push("inventory");
 			mp.canCrouch = false;
 			mp.gui.chat.activate(false)
 		}
 	} else {
 		mp.rpc.callBrowser(CEFInventory.browser, 'isBusy').then(value => {
 			if (value == false) {
-				mp.gui.chat.activate(true)
 				CEFInventory.call("hide");
-				CEFInventory.cursor(false);
-				toggleInvState = false;
-				mp.canCrouch = true;
+				windowsOpen.splice(windowsOpen.indexOf("inventory"), 1);
+				if (windowsOpen.length == 0) {
+					mp.gui.chat.activate(true)
+					CEFInventory.cursor(false);
+					mp.canCrouch = true;
+				}
 			} else {
 				CEFNotification.call("notify", {
 					title: "Inventory",
@@ -75,14 +78,65 @@ function toggleInventory() {
 		}).catch(err => {
 			console.log("error", err);
 			CEFInventory.call("hide");
-			CEFInventory.cursor(false);
-			toggleInvState = false;
-			mp.canCrouch = true;
-			mp.gui.chat.activate(true)
+			windowsOpen.splice(windowsOpen.indexOf("inventory"), 1);
+			if (windowsOpen.length == 0) {
+				mp.gui.chat.activate(true)
+				CEFInventory.cursor(false);
+				mp.canCrouch = true;
+			}
+		});
+	}
+}
+
+function toggleEquipment() {
+	console.log("toggleEquipment", JSON.stringify(windowsOpen));
+	if (windowsOpen.indexOf("equipment") == -1) {
+		if (mp.gui.chat.enabled == false) {
+			CEFInventory.call("setPos", "equipment", Inventory_Order.positions["equipment"].top, Inventory_Order.positions["equipment"].left);
+			CEFInventory.call("show", "equipment");
+			CEFInventory.cursor(true);
+			toggleInvState = true;
+			mp.canCrouch = false;
+			mp.gui.chat.activate(false)
+			windowsOpen.push("equipment");
+		}
+	} else {
+		mp.rpc.callBrowser(CEFInventory.browser, 'isBusy').then(value => {
+			if (value == false) {
+				CEFInventory.call("hide", "equipment");
+				windowsOpen.splice(windowsOpen.indexOf("equipment"), 1);
+				if (windowsOpen.length == 0) {
+					mp.gui.chat.activate(true)
+					CEFInventory.cursor(false);
+					mp.canCrouch = true;
+				}
+			} else {
+				CEFNotification.call("notify", {
+					title: "Inventory",
+					titleSize: "16px",
+					message: `Please finish your action before closing..`,
+					messageColor: 'rgba(50,50,50,.8)',
+					position: "bottomCenter",
+					backgroundColor: 'rgba(206, 206, 206, 0.9)',
+					close: false
+				})
+			}
+		}).catch(err => {
+			console.log("error", err);
+			CEFInventory.call("hide");
+			windowsOpen.splice(windowsOpen.indexOf("equipment"), 1);
+			if (windowsOpen.length == 0) {
+				mp.gui.chat.activate(true)
+				CEFInventory.cursor(false);
+				mp.canCrouch = true;
+			}
 		});
 	}
 }
 let toggleInvState = false;
+mp.keys.bind(0x55, false, () => {
+	toggleEquipment();
+});
 mp.keys.bind(0x09, false, () => {
 	toggleInventory();
 });
@@ -107,7 +161,7 @@ mp.events.add("Inventory:Update", (inventory) => {
 			scale: tempSettings.scale || {},
 			amount: citem.amount,
 			max_stack: citem.max_stack,
-			mask:citem.mask
+			mask: citem.mask
 		}
 		let width = citem.width;
 		let height = citem.height;

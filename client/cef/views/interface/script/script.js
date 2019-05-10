@@ -1,4 +1,6 @@
-var isToggledInto = false;
+var toggledInto = [];
+var nonStandartContainer = [];
+var storageContainers = [];
 var style = getComputedStyle(document.body);
 const cell_size = parseInt(style.getPropertyValue('--cell_size').replace("px", ""));
 const padding = parseInt(style.getPropertyValue('--padding').replace("px", ""));
@@ -35,7 +37,7 @@ var ContextHandler = new class {
 	constructor() {
 		let self = this;
 		$(window).on('contextmenu', function(event) {
-			if (isToggledInto == true) return;
+			if (toggledInto.length == 0) return;
 			event.preventDefault();
 			console.log("context");
 			self.contextmenu(event);
@@ -125,18 +127,18 @@ var DragHandler = new class {
 		self._originSource = null;
 		self._dragSource = null;
 		$(window).mousemove(function(event) {
-			if (isToggledInto == false) return;
+			if (toggledInto.length == 0) return;
 			window.requestAnimationFrame(function() {
 				self.move(event);
 			});
 		});
 		$(window).mouseup(function(event) {
-			if (isToggledInto == false) return;
+			if (toggledInto.length == 0) return;
 			if (event.which != 1) return;
 			self.mouseup(event)
 		});
 		$(window).on('contextmenu', function(event) {
-			if (isToggledInto == false) return;
+			if (toggledInto.length == 0) return;
 			event.preventDefault();
 			console.log("context");
 			self.flip(event);
@@ -273,7 +275,11 @@ var DragHandler = new class {
 								if (self._lastTarget.addItemBySlot($(slot).data("cell"), $(slot).data("row"), self._item_data.width, self._item_data.height, Object.assign(self._item_data, {
 										scale: self._defaultScale
 									})) == true) {
-									ItemStorageHandler.moveItem(self._originSource._selector.prop("id"), self._lastTarget._selector.prop("id"))
+									if (self._originSource.type == "storage") {
+										ItemStorageHandler.moveItem(self._originSource._selector.prop("id"), self._lastTarget._selector.prop("id"))
+									} else {
+										console.log("TODO DROP FROM SLOT")
+									}
 									self.clear();
 								} else {
 									self.returnToOrigin();
@@ -297,7 +303,11 @@ var DragHandler = new class {
 									})) == true) {
 									self._item_data.item.amount = fullCount - toGive;
 									self.returnToOrigin();
-									ItemStorageHandler.moveItem(self._originSource._selector.prop("id"), self._lastTarget._selector.prop("id"))
+									if (self._originSource.type == "storage") {
+										ItemStorageHandler.moveItem(self._originSource._selector.prop("id"), self._lastTarget._selector.prop("id"))
+									} else {
+										console.log("TODO DROP FROM SLOT")
+									}
 									self.clear();
 								} else {
 									self.returnToOrigin();
@@ -320,7 +330,11 @@ var DragHandler = new class {
 									})) == true) {
 									self._item_data.item.amount = fullCount - toGive;
 									self.returnToOrigin();
-									ItemStorageHandler.moveItem(self._originSource._selector.prop("id"), self._lastTarget._selector.prop("id"))
+									if (self._originSource.type == "storage") {
+										ItemStorageHandler.moveItem(self._originSource._selector.prop("id"), self._lastTarget._selector.prop("id"))
+									} else {
+										console.log("TODO DROP FROM SLOT")
+									}
 									self.clear();
 								} else {
 									self.returnToOrigin();
@@ -344,7 +358,11 @@ var DragHandler = new class {
 												amount: tItem.amount + self._item_data.item.amount
 											})
 											self.clear();
-											ItemStorageHandler.moveItem(self._originSource._selector.prop("id"), self._lastTarget._selector.prop("id"))
+											if (self._originSource.type == "storage") {
+												ItemStorageHandler.moveItem(self._originSource._selector.prop("id"), self._lastTarget._selector.prop("id"))
+											} else {
+												console.log("TODO DROP FROM SLOT")
+											}
 										} else if (tItem.amount + self._item_data.item.amount > tItem.max_stack) {
 											console.log("bigger");
 											let total = tItem.amount + self._item_data.item.amount;
@@ -353,7 +371,11 @@ var DragHandler = new class {
 											})
 											self._item_data.item.amount = (total - tItem.max_stack);
 											self.returnToOrigin();
-											ItemStorageHandler.moveItem(self._originSource._selector.prop("id"), self._lastTarget._selector.prop("id"))
+											if (self._originSource.type == "storage") {
+												ItemStorageHandler.moveItem(self._originSource._selector.prop("id"), self._lastTarget._selector.prop("id"))
+											} else {
+												console.log("TODO DROP FROM SLOT")
+											}
 										} else {
 											self.returnToOrigin();
 										}
@@ -417,10 +439,19 @@ var DragHandler = new class {
 				item: itemBackup,
 				scale: self._item_data.scale
 			}
-			if (self._originSource.addItemBySlot(self._item_data_old.cell, self._item_data_old.row, self._item_data_old.width, self._item_data_old.height, Object.assign(tempItemData, {
-					scale: self._defaultScale
-				})) == true) {
-				self.clear();
+			if (self._originSource.type == "storage") {
+				if (self._originSource.addItemBySlot(self._item_data_old.cell, self._item_data_old.row, self._item_data_old.width, self._item_data_old.height, Object.assign(tempItemData, {
+						scale: self._defaultScale
+					})) == true) {
+					self.clear();
+				}
+			} else {
+				if (self._item_data_old.slot != undefined) {
+					self._originSource.loadItem(self._item_data_old.slot, tempItemData);
+					
+					self.clear();
+				}
+				console.log("returnToOrigin, TODO DROP FROM SLOT")
 			}
 		}
 	}
@@ -731,7 +762,7 @@ var Storage = class {
 		});
 	}
 	get isToggled() {
-		return toggledInto.indexOf(this._rawSelector.replace("#", "")) > -1
+		return toggledInto.indexOf("storage_interface") > -1
 	}
 	resize(cells, rows) {
 		this._rows = rows;
@@ -1134,6 +1165,7 @@ var CustomSlots = class {
 		self._rawSelector = selector;
 		self._selector = $(selector);
 		self._slots = slots;
+		storageContainers["#" + selector] = self;
 		ItemStorageHandler.register(selector.replace("#", ""), self);
 		self._wasDown = 0;
 		self._repos_offset = {
@@ -1143,7 +1175,7 @@ var CustomSlots = class {
 		self.type = "slots";
 		DragHandler.registerDropable(self, this._rawSelector);
 		$(selector).on('mousedown', ".headline", function(event) {
-			if (isToggledInto == false) return;
+			if (self.isToggled == false) return;
 			let cursor = {
 				top: event.clientY,
 				left: event.clientX
@@ -1176,10 +1208,12 @@ var CustomSlots = class {
 				let mEvent = function(event) {
 					if (mouseDown == 1) {
 						if (DragHandler.isDraggable(cTarget) == true) {
+							let id = $(cTarget).parents(".slot").attr("id");
+							console.log("id", id);
 							let data = $(cTarget).data("item");
-							//DragHandler.Handle(event, cTarget, self);
-							alert("Start Drag", JSON.stringify(data));
-							//self.removeItemBySlot(data.cell, data.row);
+							DragHandler.Handle(event, cTarget, self);
+							console.log("Start Drag", JSON.stringify(data));
+							self.removeItem(id);
 							//self.render()
 							$(window).unbind("mousemove", mEvent)
 						} else {
@@ -1194,9 +1228,18 @@ var CustomSlots = class {
 		});
 		self.render();
 	}
-
 	get isToggled() {
 		return toggledInto.indexOf(this._rawSelector.replace("#", "")) > -1
+	}
+	removeItem(place) {
+		let slot = this._slots.findIndex(function(slot) {
+			return slot.id == place;
+		});
+		if (slot > -1) {
+			this._slots[slot].item = undefined;
+			delete this._slots[slot].item;
+			this.render();
+		}
 	}
 	loadItem(place, item) {
 		let slot = this._slots.findIndex(function(slot) {
@@ -1226,53 +1269,13 @@ var CustomSlots = class {
 		})
 		return slot;
 	}
-	isFree(gCell, gRow) {
-		let self = this;
-		if (typeof gCell == "object") {
-			let iData = gCell;
-			let Free = true;
-			for (var row = iData.row; row < (iData.row + iData.height); row++) {
-				for (var cell = iData.cell; cell < (iData.cell + iData.width); cell++) {
-					if (this.isFree(cell, row) == false) {
-						Free = false;
-					}
-					if (cell >= self._cells) {
-						Free = false;
-					}
-				}
-				if (row >= self._rows) {
-					Free = false;
-				}
-			}
-			return Free;
-		} else {
-			let occupied = this._inventory.findIndex(function(cell_data) {
-				for (var row = cell_data.row; row < (cell_data.row + cell_data.height); row++) {
-					for (var cell = cell_data.cell; cell < (cell_data.cell + cell_data.width); cell++) {
-						if ((cell == gCell) && (row == gRow)) {
-							return true;
-						}
-					}
-				}
-				return false;
-			})
-			if (occupied == -1) {
-				return true;
-			} else {
-				return false;
-			}
-		}
-	}
-	canBeDropped(item) {
-		return true;
-	}
 	render() {
 		let self = this;
 		self._slots.forEach(function(slot) {
 			$("#" + slot.id).find(".slot_content").html("");
 			if (slot.item != undefined) {
 				let item = slot.item.item;
-				let a = $(`<div data-item='${JSON.stringify(slot.item)}' class='item big' ></div>`);
+				let a = $(`<div data-item='${JSON.stringify(Object.assign(slot.item,{slot:slot.id}))}' class='item big' ></div>`);
 				let width = (slot.item.width) * cell_size;
 				let height = (slot.item.height) * cell_size;
 				let img = item.image
@@ -1353,8 +1356,6 @@ var CustomSlots = class {
 		$(window).mousemove(lEvent);
 	}
 }
-var nonStandartContainer = [];
-var storageContainers = [];
 var equipment = new CustomSlots("#equipment", [
 	{
 		id: "clothes_head",
@@ -1393,7 +1394,6 @@ var equipment = new CustomSlots("#equipment", [
 		mask: "meele"
 	}
 		]);
-var toggledInto = [];
 
 function show(interface = "storage_interface") {
 	$("#" + interface).css({
@@ -1409,14 +1409,12 @@ function hide(interface = "storage_interface") {
 		"opacity": "0"
 	});
 	toggledInto.splice(toggledInto.indexOf(interface), 1);
-	if (toggledInto.length == 0) {
-		isToggledInto = false;
-	}
 	Object.keys(nonStandartContainer).forEach(function(id) {
 		if (nonStandartContainer[id]) {
 			nonStandartContainer[id].remove();
 			nonStandartContainer[id] = undefined;
 			delete nonStandartContainer[id];
+			if (id == "equipment") return;
 			mp.trigger("Storage:Close", id);
 		}
 	})
@@ -1477,7 +1475,7 @@ function initialize(id, cells, rows, config) {
 	if (storageContainers["#" + id]) {
 		storageContainers["#" + id].remove()
 		storageContainers["#" + id] = undefined;
-		delete storageContainers["#inventory"];
+		delete storageContainers["#" + id];
 	}
 	let container = `<div id="${id}" class="storage" data-cells="${cells}" data-rows="${rows}" style="display: block;">
 						    <div class="headline"><span class="pattern"></span>${id}</div>

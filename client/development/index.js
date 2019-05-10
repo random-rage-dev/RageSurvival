@@ -1,3 +1,4 @@
+
 mp.rpc = require("./libs/rage-rpc.min.js");
 console.log = function(...a) {
     mp.gui.chat.push("DEBUG:" + a.join(" "))
@@ -6,7 +7,7 @@ mp.isValid = function(val) {
     return val != null && val != undefined && val != "";
 }
 mp.gui.execute("const _enableChatInput = enableChatInput;enableChatInput = (enable) => { mp.trigger('chatEnabled', enable); _enableChatInput(enable) };");
-
+mp.gui.chat.enabled = false;
 mp.events.add('chatEnabled', (isEnabled) => {
     mp.gui.chat.enabled = isEnabled;
 });

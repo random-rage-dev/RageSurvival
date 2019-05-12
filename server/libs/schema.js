@@ -30,11 +30,7 @@ var user = mongoose.Schema({
     },
     equipment:{
         type:Object,
-        default:{
-            head:{},
-            body:{},
-            clothes:{}
-        }
+        default:{}
     }
 }, {
     autoIndex: true

@@ -259,7 +259,7 @@ var Pickups = new class {
                 let item_data = self._pickups[id].items[doesExist];
                 self._pickups[id].items[doesExist] = null;
                 /*Add Item to Inventory*/
-                console.log("pick item up", id, item_data.name, item_data.amount);
+                console.log("pick item up", id, item_data);
                 playerInstance.giveItem(item_data).then(() => {
                     /*Add Item to Inventory*/
                     if (self.isEmpty(id) == true) {

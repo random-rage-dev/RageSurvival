@@ -43,6 +43,7 @@ var Player = class {
         self._armor = 100;
         self._storage = {};
         self._characterData = [];
+        self._equipment = {};
         self._position = {
             x: 0,
             y: 0,
@@ -134,6 +135,15 @@ var Player = class {
         var self = this;
         self._player.spawn(mp.vector(self._position));
         self.loadChar(self._characterData);
+        // self._equipment
+        /*self._player.call("Inventory:Resize", [10, 10])
+        self._player.call("Inventory:Update", [self._inventory])
+        console.log(self._inventory);
+        mp.events.call("Player:Inventory", self._player, self._inventory)*/
+        // console.log("TODO: Relaod inventory in spawn");
+        self.loadInventory();
+        self.loadEquipment((fresh == 0) ? false : self._equipment);
+        console.log("TODO: Relaod equipment in spawn");
         self._player.heading = 90;
         self._health = 100;
         self._armor = 25;
@@ -189,9 +199,34 @@ var Player = class {
     getInventory() {
         return this._inventory;
     }
+    getEquipment() {
+        console.log("getEquipment");
+        return this._equipment;
+    }
     reloadInventory() {
         this._inventory = [];
         this.loadInventory();
+    }
+    reloadEquipment() {
+        this._equipment = {};
+        this.loadEquipment();
+    }
+    /* Equipment */
+    async loadEquipment(data = false) {
+        let self = this;
+        var loadData = [];
+        if (data != false) {} else {
+            try {
+                let dbEquipment = await User.find({
+                    name: self._username
+                });
+                console.log("dbEquipment", dbEquipment);
+                loadData = dbEquipment.equipment || {};
+            } catch (err) {
+                console.log("loadEquipment async err", err);
+            }
+        }
+        console.log("loadData", loadData);
     }
     /* Inventory */
     async loadInventory() {
@@ -216,11 +251,14 @@ var Player = class {
                 self._player.call("Inventory:Update", [self._inventory])
                 console.log(self._inventory);
                 mp.events.call("Player:Inventory", self._player, self._inventory)
-                self.spawn();
             } else {
                 self.error("Account:Inventory", "Failed loading player inventory")
             }
         }).lean()
+    }
+    setEquipment(arr) {
+        console.log("setEquipment",arr);
+        
     }
     setInventory(arr) {
         this._inventory = arr.map(function(item, i) {
@@ -233,6 +271,7 @@ var Player = class {
             return itemData;
         });
     }
+
     hasItem(name) {
         let stack = Storage.getMaxStack(name);
         let index = this._inventory.findIndex(function(item) {
@@ -412,6 +451,7 @@ var Player = class {
                 self._userId = cUser.user_id;
                 self._position = cUser.position;
                 self._player.name = self._username;
+                self._equipment = cUser.equipment || {};
                 if ((cUser.character) && (cUser.character.length > 0)) {
                     self._characterData = cUser.character[0];
                     self._player.setVariable("user_id", self._userId)
@@ -422,7 +462,6 @@ var Player = class {
                     self.log("loaded player data for", self._player.name)
                     console.log(self._player)
                     mp.events.call("Player:Loaded", self._player)
-                    self.loadInventory();
                     self.spawn(fresh);
                 } else {
                     self._player.call("Character:Start")

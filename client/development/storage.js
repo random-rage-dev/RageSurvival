@@ -92,6 +92,7 @@ function toggleEquipment() {
 	console.log("toggleEquipment", JSON.stringify(windowsOpen));
 	if (windowsOpen.indexOf("equipment") == -1) {
 		if (mp.gui.chat.enabled == false) {
+			console.log("setPos", "equipment", Inventory_Order.positions["equipment"].top, Inventory_Order.positions["equipment"].left);
 			CEFInventory.call("setPos", "equipment", Inventory_Order.positions["equipment"].top, Inventory_Order.positions["equipment"].left);
 			CEFInventory.call("show", "equipment");
 			CEFInventory.cursor(true);
@@ -184,6 +185,9 @@ mp.events.add("Inventory:Update", (inventory) => {
 		CEFInventory.call("addItem", "inventory", tempSettings.cell || 0, tempSettings.row || 0, citem.width, citem.height, JSON.stringify(gData), tempSettings.flipped || false)
 	})
 });
+mp.events.add("Inventory:EditItem", (citem) => {
+	console.log("Inventory:EditItem item",citem);
+});	
 mp.events.add("Inventory:AddItem", (citem) => {
 	if (!TempStorage["inventory"]) {
 		TempStorage["inventory"] = [];
@@ -195,7 +199,8 @@ mp.events.add("Inventory:AddItem", (citem) => {
 		image: citem.image,
 		scale: tempSettings.scale || {},
 		amount: citem.amount,
-		max_stack: citem.max_stack
+		max_stack: citem.max_stack,
+		mask:citem.mask
 	}
 	let width = citem.width;
 	let height = citem.height;
@@ -269,6 +274,34 @@ mp.events.add("Storage:Transfer", (source, target) => {
 		TempStorage[target.id] = target.items;
 		mp.events.callRemote("Storage:Transfer", JSON.stringify(source), JSON.stringify(target));
 	}
+});
+mp.events.add("Storage:TransferSlots", (storage, slots) => {
+	storage = JSON.parse(storage);
+	slots = JSON.parse(slots);
+	Inventory_Order = {
+		positions: Inventory_Order.positions,
+		items: Inventory_Order.items
+	};
+	storage.items.forEach(function(item) {
+		Inventory_Order.items[item.item.id + "_" + storage.id] = {
+			cell: item.cell,
+			row: item.row,
+			scale: item.scale,
+			flipped: item.flipped
+		}
+	})
+	mp.storage.data.inventory_order = Inventory_Order;
+	mp.storage.flush();
+	/*Manage Server Sync*/
+	console.log(JSON.stringify(storage));
+	console.log(JSON.stringify(slots));
+	storage.items = storage.items.map((item) => StorageSystem.minify(item));
+	slots.items = slots.items.map((item) => Object.assign(StorageSystem.minify(item.item), {
+		slot_id: item.id
+	}));
+
+
+	mp.events.callRemote("Storage:TransferSlots", JSON.stringify(storage), JSON.stringify(slots));
 });
 mp.events.add("Storage:AddContainer", (headline, selector, cells, rows, items) => {
 	console.log("add container");

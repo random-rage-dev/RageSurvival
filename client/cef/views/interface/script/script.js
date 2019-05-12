@@ -57,7 +57,57 @@ var ItemStorageHandler = new class {
 			items: []
 		}
 	}
-	transferItemBySlot(source, target) {}
+	transferItemBySlot(source, target) {
+		console.log(source, target);
+		let storage = (this._container[source].source.type == "storage") ? {
+			items: this._container[source].source.inventory(),
+			id: source
+		} : {
+			items: this._container[target].source.inventory(),
+			id: target
+		};
+		let slot = (this._container[source].source.type != "storage") ? {
+			items: this._container[source].source.inventory(),
+			id: source
+		} : {
+			items: this._container[target].source.inventory(),
+			id: target
+		};
+		let storageItem = {
+			items: storage.items.map(function(item) {
+				let rr = item;
+				let width = (item.width) * cell_size;
+				let height = (item.height) * cell_size;
+				rr.flipped = false;
+				if (item.scale != undefined) {
+					if (width > item.scale.width) {
+						rr.flipped = true;
+					}
+					if (height > item.scale.height) {
+						rr.flipped = true;
+					}
+				}
+				return rr;
+			}),
+			id: storage.id
+		}
+		let slotItem = {
+			items: slot.items.map(function(value) {
+				return {
+					id: value.id,
+					item: value.item
+				}
+			}).filter(function(value) {
+				return value.item != undefined;
+			}),
+			id: slot.id
+		}
+		this._container[storageItem.id].items = storageItem.items;
+		this._container[slotItem.id].items = slotItem.items;
+		console.log("storageItem", storageItem);
+		console.log("slotItem", slotItem);
+		this.update(storageItem.id, slotItem.id, true);
+	}
 	moveItem(source, target) {
 		console.log("moveItem", source, target)
 		let sInv = this._container[source].source.inventory().map(function(item) {
@@ -74,7 +124,7 @@ var ItemStorageHandler = new class {
 				}
 			}
 			return rr;
-		});;
+		});
 		console.log("source Inv", sInv)
 		let tInv = this._container[target].source.inventory().map(function(item) {
 			let rr = item;
@@ -96,14 +146,25 @@ var ItemStorageHandler = new class {
 		this._container[target].items = tInv;
 		this.update(source, target);
 	}
-	update(source, target) {
-		mp.trigger("Storage:Transfer", JSON.stringify({
-			id: source,
-			items: this._container[source].items
-		}), JSON.stringify({
-			id: target,
-			items: this._container[target].items
-		}));
+	update(source, target, slots = false) {
+		if (slots == false) {
+			mp.trigger("Storage:Transfer", JSON.stringify({
+				id: source,
+				items: this._container[source].items
+			}), JSON.stringify({
+				id: target,
+				items: this._container[target].items
+			}));
+		} else {
+			console.log("update target slots");
+			mp.trigger("Storage:TransferSlots", JSON.stringify({
+				id: source,
+				items: this._container[source].items
+			}), JSON.stringify({
+				id: target,
+				items: this._container[target].items
+			}));
+		}
 	}
 }
 var DragHandler = new class {
@@ -279,6 +340,7 @@ var DragHandler = new class {
 										ItemStorageHandler.moveItem(self._originSource._selector.prop("id"), self._lastTarget._selector.prop("id"))
 									} else {
 										console.log("TODO DROP FROM SLOT")
+										ItemStorageHandler.transferItemBySlot(self._originSource._selector.prop("id"), self._lastTarget._selector.prop("id"))
 									}
 									self.clear();
 								} else {
@@ -307,6 +369,7 @@ var DragHandler = new class {
 										ItemStorageHandler.moveItem(self._originSource._selector.prop("id"), self._lastTarget._selector.prop("id"))
 									} else {
 										console.log("TODO DROP FROM SLOT")
+										ItemStorageHandler.transferItemBySlot(self._originSource._selector.prop("id"), self._lastTarget._selector.prop("id"))
 									}
 									self.clear();
 								} else {
@@ -334,6 +397,7 @@ var DragHandler = new class {
 										ItemStorageHandler.moveItem(self._originSource._selector.prop("id"), self._lastTarget._selector.prop("id"))
 									} else {
 										console.log("TODO DROP FROM SLOT")
+										ItemStorageHandler.transferItemBySlot(self._originSource._selector.prop("id"), self._lastTarget._selector.prop("id"))
 									}
 									self.clear();
 								} else {
@@ -375,6 +439,7 @@ var DragHandler = new class {
 												ItemStorageHandler.moveItem(self._originSource._selector.prop("id"), self._lastTarget._selector.prop("id"))
 											} else {
 												console.log("TODO DROP FROM SLOT")
+												ItemStorageHandler.transferItemBySlot(self._originSource._selector.prop("id"), self._lastTarget._selector.prop("id"))
 											}
 										} else {
 											self.returnToOrigin();
@@ -411,6 +476,7 @@ var DragHandler = new class {
 									width: self._item_data.width
 								}
 								self._lastTarget.loadItem(slot.id, tempItemData)
+								ItemStorageHandler.transferItemBySlot(self._originSource._selector.prop("id"), self._lastTarget._selector.prop("id"))
 								self.clear();
 							} else {
 								self.returnToOrigin();
@@ -448,7 +514,6 @@ var DragHandler = new class {
 			} else {
 				if (self._item_data_old.slot != undefined) {
 					self._originSource.loadItem(self._item_data_old.slot, tempItemData);
-					
 					self.clear();
 				}
 				console.log("returnToOrigin, TODO DROP FROM SLOT")
@@ -842,6 +907,18 @@ var Storage = class {
 	inventory() {
 		return this._inventory;
 	}
+	editByID(id, overwrite_data) {
+		let entryIndex = this.inventory().findIndex(function(item) {
+			return (item.item.id == id);
+		})
+		console.log("editbyID entryIndex", entryIndex);
+		if (entryIndex > -1) {
+			this._inventory[entryIndex].item = Object.assign(this._inventory[entryIndex].item, overwrite_data);
+			this.render();
+			return true;
+		}
+		return false;
+	}
 	editID(id, name, amount, overwrite_data) {
 		let entryIndex = this.inventory().findIndex(function(item) {
 			return (item.item.id == id) && (item.item.name == name) && (item.item.amount == amount)
@@ -1082,6 +1159,7 @@ var Storage = class {
 	}
 	render() {
 		let self = this;
+		if (self.isToggled == false) return
 		self._selector.css({
 			'top': self._top,
 			'left': self._left
@@ -1227,6 +1305,14 @@ var CustomSlots = class {
 			}
 		});
 		self.render();
+	}
+	inventory() {
+		return this._slots.map(function(value) {
+			return {
+				id: value.id,
+				item: value.item
+			}
+		})
 	}
 	get isToggled() {
 		return toggledInto.indexOf(this._rawSelector.replace("#", "")) > -1
@@ -1393,15 +1479,16 @@ var equipment = new CustomSlots("#equipment", [
 		id: "weapon_meele",
 		mask: "meele"
 	}
-		]);
+]);
+storageContainers["#equipment"] = equipment;
 
 function show(interface = "storage_interface") {
+	toggledInto.push(interface);
+	isToggledInto = true;
+	DragHandler.refreshStorages();
 	$("#" + interface).css({
 		"opacity": "1"
 	});
-	DragHandler.refreshStorages();
-	isToggledInto = true;
-	toggledInto.push(interface);
 }
 
 function hide(interface = "storage_interface") {
@@ -1435,6 +1522,11 @@ function resize(container, cells, rows) {
 function clear(container) {
 	if (storageContainers["#" + container]) {
 		let Unit = storageContainers["#" + container].clear();
+	}
+}
+function editByID(container,id,data) {
+	if (storageContainers["#" + container]) {
+		let Unit = storageContainers["#" + container].editByID(id,data);
 	}
 }
 

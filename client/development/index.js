@@ -16,6 +16,8 @@ mp.canCrouch = true;
 mp.gameplayCam = mp.cameras.new('gameplay');
 mp.defaultCam = mp.cameras.new('default');
 mp.localPlayer = mp.players.local;
+
+mp.gameplayCam.setAffectsAiming(true);
 require("./vector.js")
 require("./scaleforms/index.js")
 require("./crouch.js")

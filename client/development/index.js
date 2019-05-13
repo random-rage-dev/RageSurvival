@@ -31,6 +31,7 @@ require("./combat.js")
 require("./character_creator.js")
 require("./vehicles.js")
 require("./storage.js")
+require("./weather.js")
 var natives = require("./natives.js")
 var CEFNotification = require("./browser.js").notification;
 mp.events.add("Notifications:New", (notification_data) => {

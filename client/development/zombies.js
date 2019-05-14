@@ -1,236 +1,101 @@
-var tick_rate = 4;
 var Zombie = class {
-    constructor(id, data, skin) {
-        this._setup(id, data, skin);
-    }
-    _setup(id, data, skin) {
-        let self = this;
-        self._id = id;
-        self._skin = "u_m_y_zombie_01";
-        self._pos = mp.vector({
-            x: 0,
-            y: 0,
-            z: 0
-        })
-        self._targetPos = mp.vector({
-            x: 0,
-            y: 0,
-            z: 0
-        })
-        self.updatePackage(data);
-        self._ped = mp.peds.new(mp.game.joaat(self._skin), self._pos, 0, function(ped) {}, 0);
-        self._ped.freezePosition(false);
-        self._target = null;
-        self._currentMove = "walk"; /*Valid Types: "walk", "run", "attack","chase"*/
-        self._health = 100;
-        self._range = 100;
-        self._acceptedErrorPosition = 50;
-        self._maxNoHeartbeat = 1 * 1000;
-        self._leader = "";
-        self._ready = false;
-        self._dead = false;
-        self._syncer = undefined;
-        self._needsUpdate = false;
-        self._lastHeartbeat = Date.now();
-        self._newPackage = {};
-        self._oldPackage = {
-            target: self._target,
-            move: self._currentMove,
-            health: self._health,
-            syncer: self._syncer,
-            pos: self._pos,
-            nextpos: self._tagetPos
-        };
-        self._nextPackage = [];
-        self._updater = setInterval(function() {
-            self._update();
-        }, 1000 / tick_rate);
-    }
-    get id() {
-        return this._id;
-    }
-    get position() {
-        return this._pos;
-    }
-    get ready() {
-        return this._ready;
-    }
-    get syncer() {
-        return this._syncer;
-    }
-    get getHeartbeat() {
-        return this._lastHeartbeat;
-    }
-    dead() {
-    	/*
-        if (this._ped) {
-	        this._ped.destroy();
-	        this._ped = null;
-	    }
-        clearInterval(this._updater);
-        ZombieManager.removeZombie(this, true)
-        */
-    }
-    setHealth(health) {
-        this._health = health;
-    }
-    setTarget(player) {
-        this._target = player;
-    }
-    setMove(move) {
-        this._currentMove = move;
-    }
-    setNextPos(pos) {
-        if(pos === undefined)
-            return;
-        this._targetPos = mp.vector(pos);
-    }
-    setPos(pos) {
-        //console.log("setPos");
-        this._pos = mp.vector(pos);
-        if (this._ped) {
-            if (this._pos.dist(this._ped.getCoords(true)) > this._acceptedErrorPosition) {
-                this._ped.position = this._pos;
-                this._ped.setCoords(this._pos.x, this._pos.y, this._pos.z - 1, true, true, true, false);
-            }
-        }
-        if (!this._ready) {
-            this._ready = true;
-        }
-    }
-    setSyncer(syncer) {
-        //console.log("setSyncer");
-        this._syncer = syncer;
-    }
-    updatePackage(data) {
-        let self = this;
-        self._lastHeartbeat = Date.now();
-        self._newPackage = data;
-        data.forEach(function(task) {
-            if (task.type == "setTarget") {
-                self.setTarget(task.data);
-            }
-            if (task.type == "setMove") {
-                self.setMove(task.data);
-            }
-            if (task.type == "setHealth") {
-                self.setHealth(task.data);
-            }
-            if (task.type == "setPos") {
-                self.setPos(task.data);
-            }
-            if (task.type == "setNextPos") {
-                self.setNextPos(task.data);
-            }
-            if (task.type == "setSyncer") {
-                self.setSyncer(task.data);
-            }
-        })
-    }
-    _update() {
-        let self = this;
-        if ((Date.now() - self._lastHeartbeat) > self._maxNoHeartbeat) {
-            self.dead();
-        }
-        if (self._ped) {
-            if (self.syncer == mp.players.local.name) {
-                // IsSyncer
-                let tasks = Object.keys(self._nextPackage);
-                if (!tasks["setPos"]) {
-                    if (self._pos.dist(self._ped.getCoords(true)) > 0.2) {
-                        self._nextPackage["setPos"] = this._ped.getCoords(true)
-                    }
-                }
-
-                //self._nextPackage["setNextPos"] = mp.players.local.position;
-
-                if (tasks.length > 0) {
-                    let task_block = Object.keys(self._nextPackage).map(function(key) {
-                        return {
-                            type: key,
-                            data: self._nextPackage[key]
-                        }
-                    })
-                    mp.events.callRemote("Zombie:ReSync", self.id, JSON.stringify(task_block));
-                }
-            }
-            self._ped.taskGoToCoordAnyMeans(self._targetPos.x, self._targetPos.y, self._targetPos.z, 1, 0, false, 786603, 0);
-        }
-    }
-}
-var ZombieManager = new class {
     constructor() {
-        this._allZombies = [];
+        this._setup();
     }
-    getAllZombies() {
-        return this._allZombies;
-    }
-    newZombie(id, data, skin) {
-        let zombie = new Zombie(id, data, skin);
-        this._allZombies.push(zombie);
-        console.log("Added Zombie")
-        return zombie;
-    }
-    updateZombie(id, zombieData, skin) {
-        let self = this;
-        let zObject = self.getZombieById(id);
-        if (zObject == -1) {
-            self.newZombie(id, zombieData, skin);
-        } else {
-            zObject.zombie.updatePackage(zombieData)
-        }
-    }
-    removeZombie(zombie, fromSelf) {
-        /*
-        let index = this._allZombies.indexOf(zombie);
-        if (fromSelf == true) {
-            if (index > -1) {
-                this._allZombies[index] = null;
-                this._allZombies.splice(index, 1);
-                delete this._allZombies[index];
-                console.log("Removed Zombie")
-            }
-        } else {
-            this._allZombies[index].dead();
-        }
-        */
-    }
-    getZombieById(id) {
-        let zIndex = this._allZombies.findIndex(function(zombie) {
-            return (zombie != undefined) && (zombie._id == id);
+    _setup() {
+        var self = this;
+        self._pos = {
+            x: mp.players.local.position.x,
+            y: mp.players.local.position.y,
+            z: mp.players.local.position.z
+        };
+        self.movementTimer;
+        self.syncTimer;
+        self._ped = mp.peds.new(mp.game.joaat("ig_abigail"), new mp.Vector3(self._pos.x, self._pos.y, self._pos.z), Math.random(0, 360), function(ped) {}, 0);
+        self.init();
+        self.blip = mp.blips.new(9, new mp.Vector3(self._pos.x, self._pos.y, self._pos.z), {
+            color: 3,
+            scale: 0.2,
+            alpha: 100,
+            drawDistance: 0
         });
-        if (zIndex > -1) {
-            return {
-                zombie: this._allZombies[zIndex],
-                index: zIndex
-            };
-        } else {
-            return -1;
-        }
+        self._task = {};
+        self._target = mp.players.local;
     }
-    render() {}
-}
-mp.events.add("render", () => {
-    ZombieManager.getAllZombies().forEach(function(zombie) {
-        if (zombie != undefined) {
-            if (zombie.ready) {
-                mp.game.graphics.drawText(zombie.id + "\nSyncer " + (zombie.syncer == mp.players.local.name), [zombie.position.x, zombie.position.y, zombie.position.z], {
-                    font: 4,
-                    color: [255, 255, 255, 185],
-                    scale: [0.3, 0.3],
-                    outline: true,
-                    centre: true
-                });
-            }
+    get ped() {
+        return this._ped
+    }
+    get pos() {
+        return this._ped.getCoords(true)
+    }
+    init() {
+        var self = this;
+        let style = "move_heist_lester";
+        self.loadPedAttributes();
+        if (!mp.game.streaming.hasClipSetLoaded(style)) {
+            mp.game.streaming.requestClipSet(style);
+            while (!mp.game.streaming.hasClipSetLoaded(style)) mp.game.wait(0);
         }
+        self._ped.setMovementClipset(style, 0.0);
+        self.syncTimer = setInterval(function() {
+            self.move()
+        }, 5000)
+    }
+    loadPedAttributes() {
+        var self = this;
+        self._ped.freezePosition(false);
+        self._ped.setCanRagdoll(true);
+        self._ped.setRagdollOnCollision(true);
+        self._ped.setCanRagdollFromPlayerImpact(true);
+        self._ped.setCombatAbility(100);
+        self._ped.setCombatMovement(3);
+        for (var i = 1; i < 64; i += 2) {
+            self._ped.setFleeAttributes(i, false);
+        }
+        self._ped.setFleeAttributes(0, false);
+        self._ped.setCombatAttributes(17, true);
+        self._ped.setCombatAttributes(16, true);
+        self._ped.setInvincible(false);
+        self._ped.setCanBeDamaged(true);
+        self._ped.setOnlyDamagedByPlayer(false);
+        self._ped.setBlockingOfNonTemporaryEvents(true);
+    }
+    move() {
+        var self = this;
+        let tPos = self._target.position;
+/*        if (self._syncer != mp.players.local) {
+            if (self._task.cPos.x != 0) {
+                self._ped.setCoords(self._task.cPos.x, self._task.cPos.y, self._task.cPos.z, true, true, true, false);
+            }
+        }*/
+        self._ped.resetRagdollTimer();
+        self.blip.setCoords(self._ped.getCoords(true));
+        self._ped.clearTasksImmediately();
+        self._ped.taskGoToCoordAnyMeans(tPos.x, tPos.y, tPos.z, 5, 0, false, 786603, 0);
+        self._ped.taskPutDirectlyIntoMelee(self._target.handle, 0.0, -1.0, 1.0, false);
+    }
+}
+var Zombies = [];
+/*
+mp.events.add("render", e => {
+    if (mp.game.controls.isControlJustPressed(0, 23)) {
+        Zombies.push(new Zombie());
+    }
+    Zombies.forEach(function(zom) {
+        mp.game.graphics.drawText("Zombie", [zom.pos.x,zom.pos.y,zom.pos.z], {
+            font: 4,
+            color: [255, 255, 255, 200],
+            scale: [0.3, 0.3],
+            outline: true,
+            centre: true
+        });
     })
 });
-mp.events.add("Zombies:Sync", (id, zombieData, skin) => {
-    //console.log("Zombies:Sync")
-    ZombieManager.updateZombie(id, zombieData, skin);
+
+
+*/
+
+/*mp.keys.bind(0x09, false, () => {
+    new Zombie();
 });
-mp.events.add("Zombies:Remove", (id) => {
-    //console.log("Zombies:Remove")
-    let zombie = ZombieManager.getZombieById(id);
-    ZombieManager.removeZombie(zombie, false)
-});
+*/

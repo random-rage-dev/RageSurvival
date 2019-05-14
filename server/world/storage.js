@@ -28,7 +28,9 @@ var Storage = new class {
 	set tempStorage(data) {
 		this._tempStorage = data;
 	}
-	log(...msg) {}
+	log(...msg) {
+		console.log(msg.join(" "))
+	}
 	error(...msg) {}
 	async canInteract(player, data) {
 		console.log("check can interact");
@@ -75,15 +77,13 @@ var Storage = new class {
 
 
 			let sStorage_Type = sStorage.id.indexOf("inventory") > -1 ? 'player' : "storage"
-			let sStorage_ID = sStorage.id.indexOf("inventory") > -1 ? player.class.id : sStorage.id;
-			let tStorage_ID = tSlots.id.indexOf("inventory") > -1 ? player.class.id : sStorage.id;
+			let sStorage_ID = (sStorage.id == "inventory")  ? player.class.id : sStorage.id;
+			let tStorage_ID = (tSlots.id == "equipment") ? player.class.id  : tSlots.id;
 			let TempStorage_sStorage = (sStorage.id == "inventory") ? player.class.getInventory() : (self._tempStorage[sStorage.id] || []);
 			let TempStorage_tSlots = (tSlots.id == "equipment") ? player.class.getEquipment() : (self._tempStorage[tSlots.id] || {});
 			
 			console.log("TempStorage_sStorage",TempStorage_sStorage);
 			console.log("TempStorage_tSlots",TempStorage_tSlots);
-			console.log("sStorage",sStorage);
-			console.log("tSlots",tSlots);
 			let old_Amount = TempStorage_sStorage.length + Object.keys(TempStorage_tSlots).length || 0;
 			let new_Amount = sStorage.items.length + tSlots.items.length;
 			console.log("old_Amount",old_Amount);
@@ -92,69 +92,42 @@ var Storage = new class {
 
 			if (old_Amount == new_Amount) {
 				console.log("Amount Valid");
+				console.log(tSlots.items);
+
 				let all_items_temp = TempStorage_sStorage.concat(TempStorage_tSlots); // merge the two temp arrays;
-				let all_items_new = sStorage.items.concat(tSlots.items); // merge the two temp arrays;
-				console.log("all_items_new",all_items_new)
-				console.log("all_items_temp",all_items_temp)
 
-
-				sStorage.items = sStorage.items.map(function(e) {
-					return Object.assign(e, {
-						origin: sStorage_ID
-					});
-				})
-				tSlots.items = tSlots.items.map(function(e) {
-					return Object.assign(e, {
-						origin: tStorage_ID
-					});
-				})
-
-
-
-
-
-				
-				let removed = all_items_temp.filter(e => {
-					let fItem = all_items_new.findIndex(function(cItem) {
+				let moved_items = all_items_temp.filter(e => {
+					let fItem = tSlots.items.findIndex(function(cItem) {
 						return (cItem.id == e.id);
 					})
-					return (fItem == -1);
-				})
-				let moved = all_items_new.filter(e => {
-					let fItem = all_items_temp.findIndex(function(cItem) {
-						return (cItem.id == e.id) && ((e.origin != cItem.origin) || (e.amount != cItem.amount));
-					})
 					return (fItem != -1);
-				}).map(e => {
-					let t = {};
-					let sDoesExist = sStorage.items.findIndex(x => {
-						return x.id == e.id;
+				}).map(v => {
+					let f = tSlots.items.find(e => {
+						return e.id == v.id;
 					})
-					let tDoesExist = tStorage.items.findIndex(x => {
-						return x.id == e.id;
-					})
-					if (e.origin != sStorage_ID) {
-						t.target = {
-							id: (tDoesExist > -1) ? tStorage_ID : sStorage_ID,
-							type: (tDoesExist > -1) ? tStorage_Type : sStorage_Type
-						};
-					} else if (e.origin != tStorage_ID) {
-						t.target = {
-							id: (tDoesExist > -1) ? tStorage_ID : sStorage_ID,
-							type: (tDoesExist > -1) ? tStorage_Type : sStorage_Type
-						};
-					} else {
-						if (e.origin == tStorage_ID) {
-							t.target = {
-								id: tStorage_ID,
-								type: tStorage_Type
-							};
-						}
-					}
-					return Object.assign(e, t);
+					v.slot_id = f.slot_id;
+					return v;
 				})
-				console.log("removed items",removed);
-				console.log("moved items",moved);
+				console.log("moved_items",moved_items)
+
+				try {
+					moved_items.forEach(async item => {
+						let removed = await Inventory.deleteOne({
+							_id: item.id
+						});
+						if (removed.ok == 1) {
+							self.log("Removed item out of db",item.id)
+						}
+					});
+
+
+
+
+				} catch (err) {
+					console.log("err", err);
+				}
+
+
 
 			}
 

@@ -27,7 +27,7 @@ var Weather = new class {
         let weather = this._areas[key];
         mp.game.gameplay.setWind(weather.wind.speed);
         mp.game.gameplay.setWindDirection(weather.wind.dir);
-        mp.game.gameplay.setWeatherTypeOverTime(weather.name, 1);
+        //mp.game.gameplay.setWeatherTypeOverTime(weather.name, 1);
         mp.game.gameplay.setRainFxIntensity(weather.rain);
         mp.events.callRemote("Weather:TransitionTo", this._inside);
     }

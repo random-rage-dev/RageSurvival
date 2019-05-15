@@ -1,4 +1,6 @@
 var mongoose = require('mongoose');
+var Schema = mongoose.Schema;
+var ObjectId = Schema.ObjectId;
 var user = mongoose.Schema({
     user_id: {
         type: Number,
@@ -8,9 +10,13 @@ var user = mongoose.Schema({
         type: String,
         unique: true
     },
-    position:{
-    	type:Object,
-    	default:{x:0,y:0,z:0}
+    position: {
+        type: Object,
+        default: {
+            x: 0,
+            y: 0,
+            z: 0
+        }
     },
     hwid: String,
     social_club: String,
@@ -25,17 +31,16 @@ var user = mongoose.Schema({
         default: 0
     },
     character: {
-        type:Array,
-        default:[]
+        type: Array,
+        default: []
     },
-    equipment:{
-        type:Object,
-        default:{}
+    equipment: {
+        type: Object,
+        default: {}
     }
 }, {
     autoIndex: true
 });
-
 var vehicles = mongoose.Schema({
     veh_id: {
         type: String,
@@ -44,38 +49,45 @@ var vehicles = mongoose.Schema({
     model: {
         type: String
     },
-    position:{
-    	type:Object,
-    	default:{x:0,y:0,z:0}
+    position: {
+        type: Object,
+        default: {
+            x: 0,
+            y: 0,
+            z: 0
+        }
     },
-    rotation:{
-    	type:Object,
-    	default:{x:0,y:0,z:0}
+    rotation: {
+        type: Object,
+        default: {
+            x: 0,
+            y: 0,
+            z: 0
+        }
     },
-    storage_id:{
-    	type:String,
-    	unique:true
+    storage_id: {
+        type: String,
+        unique: true
     },
-    key:{
-    	type:String,
-    	unqiue:true
+    key: {
+        type: String,
+        unqiue: true
     },
-    health:{
-        type:Number,
-        default:1000
+    health: {
+        type: Number,
+        default: 1000
     },
-    running:{
-        type:Boolean,
-        default:false
+    running: {
+        type: Boolean,
+        default: false
     },
-    components:{
-    	type:Object,
-    	default:{}
+    components: {
+        type: Object,
+        default: {}
     }
 }, {
     autoIndex: true
 });
-
 var inventory = mongoose.Schema({
     owner_type: {
         type: String,
@@ -84,43 +96,41 @@ var inventory = mongoose.Schema({
     owner_id: String,
     name: String,
     amount: Number,
-    data:{
-    	type:Object,
-    	default:{}
+    data: {
+        type: Object,
+        default: {}
     }
 }, {
     autoIndex: true
 });
-
 var buildings = mongoose.Schema({
-    health:{
-        type:Number,
-        default:100
+    health: {
+        type: Number,
+        default: 100
     },
-    model:String,
-    x:Number,
-    y:Number,
-    z:Number,
-    rot_x:Number,
-    rot_y:Number,
-    rot_z:Number,
-    placed:{
-        type:Number,
-        default:Date.now()
+    model: String,
+    x: Number,
+    y: Number,
+    z: Number,
+    rot_x: Number,
+    rot_y: Number,
+    rot_z: Number,
+    placed: {
+        type: Number,
+        default: Date.now()
     },
-    last_repair:{
-        type:Number,
-        default:Date.now()
+    last_repair: {
+        type: Number,
+        default: Date.now()
     },
-    data:{
-        type:Object,
-        default:{}
+    data: {
+        type: Object,
+        default: {}
     },
-    owner_id:Number
+    owner_id: Number
 }, {
     autoIndex: true
 })
-
 buildings.index({
     placed: 1,
     owner_id: 1
@@ -141,5 +151,5 @@ module.exports = {
     user: user,
     inventory: inventory,
     buildings: buildings,
-    vehicles:vehicles
+    vehicles: vehicles
 };

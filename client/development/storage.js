@@ -14,6 +14,10 @@ var Inventory_Order = {
 		"inventory": {
 			top: `calc(50% - ${clientHeight/2}px)`,
 			left: `calc(50% - ${clientWidth/2}px)`
+		},
+		"equipment": {
+			top: `20%`,
+			left: `15%`
 		}
 	},
 	items: {}
@@ -24,6 +28,10 @@ if (mp.storage.data.inventory_order) {
 		"inventory": {
 			top: `calc(50% - ${clientHeight/2}px)`,
 			left: `calc(50% - ${clientWidth/2}px)`
+		},
+		"equipment": {
+			top: `20%`,
+			left: `15%`
 		}
 	};
 	Inventory_Order.items = storageData.items || {};
@@ -92,8 +100,9 @@ function toggleEquipment() {
 	console.log("toggleEquipment", JSON.stringify(windowsOpen));
 	if (windowsOpen.indexOf("equipment") == -1) {
 		if (mp.gui.chat.enabled == false) {
-			console.log("setPos", "equipment", Inventory_Order.positions["equipment"].top, Inventory_Order.positions["equipment"].left);
-			CEFInventory.call("setPos", "equipment", Inventory_Order.positions["equipment"].top, Inventory_Order.positions["equipment"].left);
+			console.log("x");
+			//console.log("setPos", "equipment", Inventory_Order.positions["equipment"].top || 0, Inventory_Order.positions["equipment"].left || 0);
+			CEFInventory.call("setPos", "equipment", Inventory_Order.positions["equipment"].top || 0, Inventory_Order.positions["equipment"].left || 0);
 			CEFInventory.call("show", "equipment");
 			CEFInventory.cursor(true);
 			toggleInvState = true;

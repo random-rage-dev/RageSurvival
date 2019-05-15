@@ -40,7 +40,7 @@ var Storage = new class {
 		return false;
 	}
 	async Interact(player, storData, obj) {
-		console.log("Interact",player, storData, obj);
+		console.log("Interact", player, storData, obj);
 		if (!this._interactionOpen[storData.id]) {
 			this._interactionOpen[storData.id] = obj;
 			try {
@@ -74,28 +74,18 @@ var Storage = new class {
 	async validateSlots(player, sStorage, tSlots) {
 		let self = this;
 		if (self.isOpen(sStorage.id) && self.isOpen(tSlots.id)) {
-
-
-			let sStorage_Type = sStorage.id.indexOf("inventory") > -1 ? 'player' : "storage"
-			let sStorage_ID = (sStorage.id == "inventory")  ? player.class.id : sStorage.id;
-			let tStorage_ID = (tSlots.id == "equipment") ? player.class.id  : tSlots.id;
+			let sStorageID = (sStorage.id == "inventory") ? player.class.id : sStorage.id;
 			let TempStorage_sStorage = (sStorage.id == "inventory") ? player.class.getInventory() : (self._tempStorage[sStorage.id] || []);
 			let TempStorage_tSlots = (tSlots.id == "equipment") ? player.class.getEquipment() : (self._tempStorage[tSlots.id] || {});
-			
-			console.log("TempStorage_sStorage",TempStorage_sStorage);
-			console.log("TempStorage_tSlots",TempStorage_tSlots);
+			console.log("TempStorage_sStorage", TempStorage_sStorage);
+			console.log("TempStorage_tSlots", TempStorage_tSlots);
 			let old_Amount = TempStorage_sStorage.length + Object.keys(TempStorage_tSlots).length || 0;
 			let new_Amount = sStorage.items.length + tSlots.items.length;
-			console.log("old_Amount",old_Amount);
-			console.log("new_Amount",new_Amount);
-
-
+			console.log("old_Amount", old_Amount);
+			console.log("new_Amount", new_Amount);
 			if (old_Amount == new_Amount) {
 				console.log("Amount Valid");
-				console.log(tSlots.items);
-
 				let all_items_temp = TempStorage_sStorage.concat(TempStorage_tSlots); // merge the two temp arrays;
-
 				let moved_items = all_items_temp.filter(e => {
 					let fItem = tSlots.items.findIndex(function(cItem) {
 						return (cItem.id == e.id);
@@ -107,31 +97,119 @@ var Storage = new class {
 					})
 					v.slot_id = f.slot_id;
 					return v;
+				}).filter(e => {
+					let fItem = Object.keys(TempStorage_tSlots).findIndex(function(key) {
+						return (TempStorage_tSlots[key].id == e.id);
+					})
+					return (fItem == -1);
 				})
-				console.log("moved_items",moved_items)
-
+				let new_items_in_storage = sStorage.items.filter(function(e) {
+					let f = TempStorage_sStorage.findIndex(f => {
+						return e.id == f.id;
+					})
+					return f == -1;
+				})
+				tSlots.items = tSlots.items.map(e => {
+					let fItem = TempStorage_sStorage.findIndex(function(cItem) {
+						return (cItem.id == e.id);
+					})
+					let fItem1 = Object.keys(TempStorage_tSlots).findIndex(function(key) {
+						return (TempStorage_tSlots[key].id == e.id);
+					})
+					if ((fItem > -1) || (fItem1 > -1)) {
+						return Object.assign(e, (fItem > -1) ? TempStorage_sStorage[fItem] : TempStorage_tSlots[fItem1])
+					} else {
+						return e;
+					}
+				})
+				sStorage.items = sStorage.items.map(e => {
+					let fItem = TempStorage_sStorage.findIndex(function(cItem) {
+						return (cItem.id == e.id);
+					})
+					let fItem1 = Object.keys(TempStorage_tSlots).findIndex(function(key) {
+						return (TempStorage_tSlots[key].id == e.id);
+					})
+					if ((fItem > -1) || (fItem1 > -1)) {
+						return Object.assign(e, (fItem > -1) ? TempStorage_sStorage[fItem] : TempStorage_tSlots[fItem1])
+					} else {
+						return e;
+					}
+				})
+				console.log("moved_items", moved_items);
+				console.log("new_items_in_storage", new_items_in_storage);
+				console.log("sStorage.items", sStorage.items);
 				try {
-					moved_items.forEach(async item => {
-						let removed = await Inventory.deleteOne({
-							_id: item.id
+					await new Promise(function(resolve, reject) {
+						let p = [];
+						moved_items.forEach(async item => {
+							p.push(new Promise(async function(r1, r2) {
+								let removed = await Inventory.deleteOne({
+									_id: item.id
+								});
+								if (removed.ok == 1) {
+									self.log("Removed item out of db", item.id)
+									return r1();
+								} else {
+									return r2();
+								}
+							}))
 						});
-						if (removed.ok == 1) {
-							self.log("Removed item out of db",item.id)
-						}
-					});
-
-
-
-
+						Promise.all(p).then(() => {
+							return resolve();
+						}).catch(err => {
+							return reject(err);
+						})
+					})
+					await new Promise(function(resolve, reject) {
+						let p = [];
+						new_items_in_storage.forEach(async item => {
+							p.push(new Promise(async function(r1, r2) {
+								let dbItem = await new Inventory({
+									owner_type: (sStorage.id == "inventory") ? "player" : "storage",
+									owner_id: sStorageID,
+									name: item.name,
+									amount: item.amount,
+									data: item.data
+								}).save();
+								rpc.callBrowsers(player, 'editItemID', {
+									selector: sStorage.id,
+									id: item.id,
+									name: dbItem.name,
+									amount: dbItem.amount,
+									overwrite_data: {
+										id: dbItem._id
+									}
+								}).then((success) => {
+									self.log("Editing Item", dbItem._id, "success:", success)
+									let editItem = sStorage.items.findIndex(e => {
+										return e.id == item.id;
+									})
+									if (editItem > -1) {
+										sStorage.items[editItem].id = dbItem._id;
+									}
+									return r1();
+								}).catch((error) => {
+									self.error("Error Edit Item", dbItem._id)
+									return r2(error);
+								})
+							}))
+						});
+						Promise.all(p).then(() => {
+							return resolve();
+						}).catch(err => {
+							return reject(err);
+						})
+					})
+					console.log("saving done",tSlots.items);
+					player.class.setEquipment(tSlots.items);
+					player.class.setInventory(sStorage.items);
 				} catch (err) {
 					console.log("err", err);
 				}
-
-
-
+			} else {
+					console.log("reloadInventory");
+					player.class.reloadInventory();
 			}
-
-
 		}
 	}
 	async validate(player, sStorage, tStorage) {
@@ -227,17 +305,18 @@ var Storage = new class {
 						}
 					}
 					return Object.assign(e, t);
-				})/*
-				console.log("toCreate", toCreate)
-				console.log("moved", moved)
-				console.log("removed", removed)*/
+				})
+				/*
+								console.log("toCreate", toCreate)
+								console.log("moved", moved)
+								console.log("removed", removed)*/
 				try {
 					removed.forEach(async item => {
 						let removed = await Inventory.deleteOne({
 							_id: item.id
 						});
 						if (removed.ok == 1) {
-							self.log("Removed item out of db",item.id)
+							self.log("Removed item out of db", item.id)
 						}
 					});
 					toCreate.forEach(async item => {

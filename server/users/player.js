@@ -215,7 +215,9 @@ var Player = class {
     async loadEquipment(data = false) {
         let self = this;
         var loadData = [];
-        if (data != false) {} else {
+        if (data != false) {
+            loadData = data;
+        } else {
             try {
                 let dbEquipment = await User.find({
                     name: self._username
@@ -256,9 +258,29 @@ var Player = class {
             }
         }).lean()
     }
-    setEquipment(arr) {
-        console.log("setEquipment",arr);
-        
+    async setEquipment(obj) {
+        let eq = {};
+        for (var e in obj) {
+            console.log("e",e);
+            eq[e.slot_id] = {
+                name: e.name,
+                amount: e.amount,
+                data: e.data
+            }
+        }
+        // todo
+        this._equipment = eq;
+        console.log("setEquipment", eq);
+        try {
+            let save = await User.updateOne({
+                user_id: this._userId
+            }, {
+                equipment: eq
+            });
+            this.loadEquipment(eq);
+        } catch (err) {
+            console.log("err setEquipment", err);
+        }
     }
     setInventory(arr) {
         this._inventory = arr.map(function(item, i) {
@@ -271,7 +293,6 @@ var Player = class {
             return itemData;
         });
     }
-
     hasItem(name) {
         let stack = Storage.getMaxStack(name);
         let index = this._inventory.findIndex(function(item) {

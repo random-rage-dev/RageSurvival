@@ -223,6 +223,7 @@ img.flip.vert[src*="weapon_microsmg.png"]:not(.drag) {
     top: 30px;
     width: 100%;
     height: 100%;
+    left:20px;
     opacity: 0.4;
     z-index: -1;
     max-width: calc(7* var(--cell_size));
@@ -260,7 +261,7 @@ img.flip.vert[src*="weapon_microsmg.png"]:not(.drag) {
 }
 #equipment>.slots>.slot.armor {
     top: 155px;
-    left: calc(42% - var(--cell_size));
+    left: calc(45% - var(--cell_size));
     position: absolute;
 }
 #equipment>.slots>.slot.bodyacces {
@@ -270,12 +271,12 @@ img.flip.vert[src*="weapon_microsmg.png"]:not(.drag) {
 }
 #equipment>.slots>.slot.pants {
     top: 270px;
-    left: calc(40% - var(--cell_size));
+    left: calc(45% - var(--cell_size));
     position: absolute;
 }
 #equipment>.slots>.slot.shoes {
     top: 420px;
-    left: calc(38% - var(--cell_size));
+    left: calc(45% - var(--cell_size));
     position: absolute;
 }
 #equipment>.slots>.slot.primary {
@@ -288,9 +289,14 @@ img.flip.vert[src*="weapon_microsmg.png"]:not(.drag) {
     left: calc(80% - var(--cell_size));
     position: absolute;
 }
-#equipment>.slots>.slot.meele {
+#equipment>.slots>.slot.melee {
     top: 300px;
     left: calc(80% - var(--cell_size));
+    position: absolute;
+}
+#equipment>.slots>.slot.bag {
+    top: 235px;
+    left: calc(15% - var(--cell_size));
     position: absolute;
 }
 .targetable {}

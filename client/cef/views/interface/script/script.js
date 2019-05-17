@@ -1476,8 +1476,12 @@ var equipment = new CustomSlots("#equipment", [
 		mask: "secondary"
 	},
 	{
-		id: "weapon_meele",
-		mask: "meele"
+		id: "weapon_melee",
+		mask: "melee"
+	},
+	{
+		id: "bag",
+		mask: "bag"
 	}
 ]);
 storageContainers["#equipment"] = equipment;
@@ -1524,9 +1528,10 @@ function clear(container) {
 		let Unit = storageContainers["#" + container].clear();
 	}
 }
-function editByID(container,id,data) {
+
+function editByID(container, id, data) {
 	if (storageContainers["#" + container]) {
-		let Unit = storageContainers["#" + container].editByID(id,data);
+		let Unit = storageContainers["#" + container].editByID(id, data);
 	}
 }
 
@@ -1542,6 +1547,29 @@ function focus(selector) {
 	$("#" + selector).css({
 		"z-index": 15
 	})
+}
+
+function addItemSlot(target, item) {
+	if (storageContainers["#" + target]) {
+		let Unit = storageContainers["#" + target];
+		console.log(target, item);
+		let tempItemData = {
+			cell: 0,
+			row: 0,
+			item: {
+				id: "-",
+				name: item.name,
+				image: item.image,
+				scale: {},
+				amount: item.amount,
+				max_stack: item.max_stack,
+				mask:item.mask
+			},
+			height: item.height,
+			width: item.width
+		}
+		Unit.loadItem(item.slot_id, tempItemData);
+	}
 }
 
 function addItem(container, gCell, gRow, gWidth, gHeight, gData, flipped = false) {
@@ -1622,7 +1650,7 @@ function addStorageContainer(headline, selector, config, cells, rows, items) {
 		})
 	}
 }
-if (mp !== undefined) {
+if (rpc !== undefined) {
 	rpc.register('isBusy', function() {
 		return mouseDown == 1 || DragHandler.isDragging() == true;
 	});

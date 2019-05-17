@@ -1,6 +1,8 @@
 var rpc = require('rage-rpc');
 require("./libs/vector.js")
 require("./libs/array.js")
+require("./libs/attachments.js")
+require("./libs/weapon_attachments.js")
 var PlayerClass = require("./users/player.js")
 var ItemPickups = require("./world/pickups.js")
 var Zombies = require("./world/zombies.js")

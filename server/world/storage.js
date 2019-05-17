@@ -83,7 +83,7 @@ var Storage = new class {
 			let new_Amount = sStorage.items.length + tSlots.items.length;
 			console.log("old_Amount", old_Amount);
 			console.log("new_Amount", new_Amount);
-			if (old_Amount == new_Amount) {
+			if (old_Amount => new_Amount) {
 				console.log("Amount Valid");
 				let all_items_temp = TempStorage_sStorage.concat(TempStorage_tSlots); // merge the two temp arrays;
 				let moved_items = all_items_temp.filter(e => {

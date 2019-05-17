@@ -18,7 +18,7 @@ var items = {
         model: "prop_w_me_hatchet",
         thickness: 0.15,
         amount: 1,
-        mask:"Meele",
+        mask:"melee",
         offset: {
             pos: new mp.Vector3(0, 0, 0.02),
             rot: new mp.Vector3(90, 0, 0)

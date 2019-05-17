@@ -54,7 +54,7 @@ var windowsOpen = [];
 function toggleInventory() {
 	console.log("toggle inventory", JSON.stringify(windowsOpen));
 	if (windowsOpen.indexOf("inventory") == -1) {
-		if (mp.gui.chat.enabled == false) {
+		if ((mp.gui.chat.enabled == false) && (mp.ui.ready == true)) {
 			CEFInventory.call("setPos", "inventory", Inventory_Order.positions["inventory"].top, Inventory_Order.positions["inventory"].left);
 			CEFInventory.call("show");
 			CEFInventory.cursor(true);
@@ -99,7 +99,7 @@ function toggleInventory() {
 function toggleEquipment() {
 	console.log("toggleEquipment", JSON.stringify(windowsOpen));
 	if (windowsOpen.indexOf("equipment") == -1) {
-		if (mp.gui.chat.enabled == false) {
+		if ((mp.gui.chat.enabled == false) && (mp.ui.ready == true)) {
 			console.log("x");
 			//console.log("setPos", "equipment", Inventory_Order.positions["equipment"].top || 0, Inventory_Order.positions["equipment"].left || 0);
 			CEFInventory.call("setPos", "equipment", Inventory_Order.positions["equipment"].top || 0, Inventory_Order.positions["equipment"].left || 0);
@@ -147,12 +147,10 @@ let toggleInvState = false;
 mp.keys.bind(0x55, false, () => {
 	toggleEquipment();
 });
-mp.keys.bind(0x09, false, () => {
+mp.keys.bind(0x49, false, () => {
 	toggleInventory();
 });
-mp.events.add("render", () => {
-	mp.game.controls.disableControlAction(2, 37, true);
-});
+
 mp.events.add("Inventory:Update", (inventory) => {
 	if (!TempStorage["inventory"]) {
 		TempStorage["inventory"] = [];
@@ -195,8 +193,8 @@ mp.events.add("Inventory:Update", (inventory) => {
 	})
 });
 mp.events.add("Inventory:EditItem", (citem) => {
-	console.log("Inventory:EditItem item",citem);
-});	
+	console.log("Inventory:EditItem item", citem);
+});
 mp.events.add("Inventory:AddItem", (citem) => {
 	if (!TempStorage["inventory"]) {
 		TempStorage["inventory"] = [];
@@ -209,7 +207,7 @@ mp.events.add("Inventory:AddItem", (citem) => {
 		scale: tempSettings.scale || {},
 		amount: citem.amount,
 		max_stack: citem.max_stack,
-		mask:citem.mask
+		mask: citem.mask
 	}
 	let width = citem.width;
 	let height = citem.height;
@@ -227,7 +225,8 @@ mp.events.add("Inventory:AddItem", (citem) => {
 		width: width,
 		height: height,
 		cell: tempSettings.cell || 0,
-		row: tempSettings.row || 0
+		row: tempSettings.row || 0,
+		mask: citem.mask
 	})
 	CEFInventory.call("addItem", "inventory", tempSettings.cell || 0, tempSettings.row || 0, citem.width, citem.height, JSON.stringify(gData), tempSettings.flipped || false)
 });
@@ -308,9 +307,15 @@ mp.events.add("Storage:TransferSlots", (storage, slots) => {
 	slots.items = slots.items.map((item) => Object.assign(StorageSystem.minify(item.item), {
 		slot_id: item.id
 	}));
-
-
 	mp.events.callRemote("Storage:TransferSlots", JSON.stringify(storage), JSON.stringify(slots));
+});
+mp.events.add("Storage:UpdateSlots", (target, items) => {
+	items.forEach(function(item, index) {
+		setTimeout(() => {
+			CEFInventory.call("addItemSlot", target, item);
+		}, 1 * index)
+	})
+	console.log(target, JSON.stringify(items));
 });
 mp.events.add("Storage:AddContainer", (headline, selector, cells, rows, items) => {
 	console.log("add container");
@@ -332,7 +337,8 @@ mp.events.add("Storage:AddContainer", (headline, selector, cells, rows, items) =
 			image: citem.image,
 			scale: tempSettings.scale || {},
 			amount: citem.amount,
-			max_stack: citem.max_stack
+			max_stack: citem.max_stack,
+			mask: citem.mask
 		}
 		let gItem = {
 			width: citem.width,

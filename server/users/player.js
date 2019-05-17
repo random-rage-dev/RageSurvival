@@ -1,3 +1,4 @@
+var Equipment = require("./equipment.js")
 var MongoDB = require("../libs/mongodb.js")
 var Storage = require("../world/storage.js")
 var PlayerSpawns = require("../world/playerspawns.js")
@@ -141,9 +142,13 @@ var Player = class {
         console.log(self._inventory);
         mp.events.call("Player:Inventory", self._player, self._inventory)*/
         // console.log("TODO: Relaod inventory in spawn");
-        self.loadInventory();
-        self.loadEquipment((fresh == 0) ? false : self._equipment);
+        Promise.all([self.loadInventory(), self.loadEquipment((fresh == 0) ? false : self._equipment)]).then(() => {
+            self._player.call("Player:UiReady");
+        }).catch(err => {
+            console.log(err);
+        })
         console.log("TODO: Relaod equipment in spawn");
+        //Player:UiReady
         self._player.heading = 90;
         self._health = 100;
         self._armor = 25;
@@ -211,66 +216,129 @@ var Player = class {
         this._equipment = {};
         this.loadEquipment();
     }
+    /*Apply Equiment*/
+    applyEquiment() {
+        let self = this;
+        let ammoByType = {};
+        let allTypes = self._inventory.filter(e => {
+            return e.mask == "Ammo"
+        }).map(v => {
+            return v.name;
+        }).filter(function(value, index, self) {
+            return self.indexOf(value) === index;
+        });
+        allTypes.forEach(function(name) {
+            let ammo = self._inventory.filter(function(k) {
+                return k.name == name;
+            })
+            ammoByType[name] = ammo.reduce(function(acc, c) {
+                return acc + c.amount;
+            }, 0);
+        })
+        self._player.removeAllWeapons();
+        if (self._equipment["weapon_primary"] != undefined) {
+            console.log("has weapon_primary");
+            let e = Equipment[self._equipment["weapon_primary"].name]
+            self._player.giveWeapon(e.hash, ammoByType[e.ammo]);
+        }
+        if (self._equipment["weapon_secondary"] != undefined) {
+            console.log("has weapon_secondary");
+            let e = Equipment[self._equipment["weapon_secondary"].name]
+            self._player.giveWeapon(e.hash, ammoByType[e.ammo]);
+        }
+        if (self._equipment["weapon_melee"] != undefined) {
+            console.log("has weapon_melee");
+            let e = Equipment[self._equipment["weapon_melee"].name]
+            self._player.giveWeapon(e.hash, 1);
+        }
+        console.log("self._equipment", self._equipment)
+        console.log("all unqiues", allTypes)
+        console.log("ammoByType", ammoByType)
+    }
     /* Equipment */
     async loadEquipment(data = false) {
         let self = this;
-        var loadData = [];
-        if (data != false) {
-            loadData = data;
-        } else {
-            try {
-                let dbEquipment = await User.find({
-                    name: self._username
-                });
-                console.log("dbEquipment", dbEquipment);
-                loadData = dbEquipment.equipment || {};
-            } catch (err) {
-                console.log("loadEquipment async err", err);
+        return new Promise(async (resolve, reject) => {
+            let loadData = [];
+            let update = false;
+            if (data != false) {
+                loadData = data;
+            } else {
+                try {
+                    let dbEquipment = await User.find({
+                        name: self._username
+                    });
+                    console.log("dbEquipment", dbEquipment[0]);
+                    loadData = dbEquipment[0].equipment;
+                    update = true;
+                } catch (err) {
+                    console.log("loadEquipment async err", err);
+                    return reject(err);
+                }
             }
-        }
-        console.log("loadData", loadData);
+            console.log("loadData", loadData);
+            if (update == true) {
+                let items = [];
+                Object.keys(loadData).forEach(function(key, value) {
+                    let item = loadData[key];
+                    let itemData = Storage.map({
+                        name: item.name,
+                        amount: item.amount,
+                        data: item.data,
+                        slot_id: key
+                    });
+                    items.push(itemData);
+                });
+                console.log(items);
+                self._player.call("Storage:UpdateSlots", ["equipment", items])
+            }
+            self._equipment = loadData;
+            self.applyEquiment();
+            return resolve();
+        })
     }
     /* Inventory */
     async loadInventory() {
         let self = this;
-        Inventory.find({
-            owner_type: "player",
-            owner_id: self._userId
-        }, async function(err, arr) {
-            if (err) return console.log(err);
-            if (arr != undefined) {
-                let cInventory = arr;
-                self._inventory = cInventory.map(function(item, i) {
-                    let itemData = Storage.map({
-                        id: item._id,
-                        name: item.name,
-                        amount: item.amount,
-                        data: item.data
+        return new Promise(async (resolve, reject) => {
+            Inventory.find({
+                owner_type: "player",
+                owner_id: self._userId
+            }, async function(err, arr) {
+                if (err) return reject(err);
+                if (arr != undefined) {
+                    let cInventory = arr;
+                    self._inventory = cInventory.map(function(item, i) {
+                        let itemData = Storage.map({
+                            id: item._id,
+                            name: item.name,
+                            amount: item.amount,
+                            data: item.data
+                        });
+                        return itemData;
                     });
-                    return itemData;
-                });
-                self._player.call("Inventory:Resize", [10, 10])
-                self._player.call("Inventory:Update", [self._inventory])
-                console.log(self._inventory);
-                mp.events.call("Player:Inventory", self._player, self._inventory)
-            } else {
-                self.error("Account:Inventory", "Failed loading player inventory")
-            }
-        }).lean()
+                    self._player.call("Inventory:Resize", [10, 10])
+                    self._player.call("Inventory:Update", [self._inventory])
+                    console.log(self._inventory);
+                    mp.events.call("Player:Inventory", self._player, self._inventory)
+                    return resolve();
+                } else {
+                    self.error("Account:Inventory", "Failed loading player inventory")
+                    return reject("Failed loading player inventory");
+                }
+            }).lean()
+        });
     }
     async setEquipment(obj) {
         let eq = {};
-        for (var e in obj) {
-            console.log("e",e);
-            eq[e.slot_id] = {
-                name: e.name,
-                amount: e.amount,
-                data: e.data
+        obj.forEach(function(item) {
+            console.log(item);
+            eq[item.slot_id] = {
+                name: item.name,
+                amount: item.amount,
+                data: item.data || {}
             }
-        }
-        // todo
-        this._equipment = eq;
-        console.log("setEquipment", eq);
+        })
         try {
             let save = await User.updateOne({
                 user_id: this._userId
@@ -367,7 +435,7 @@ var Player = class {
             self._player.setClothes(6, 34, 0, 2);
             self._player.setClothes(8, 15, 0, 2);
             self._player.setClothes(11, 34, 0, 2);
-            self._player.setClothes(5, 40, 0, 2);
+            //self._player.setClothes(5, 40, 0, 2);
         } else {
             self._player.model = mp.joaat('mp_f_freemode_01');
             self._player.setClothes(3, 14, 0, 2);
@@ -375,7 +443,7 @@ var Player = class {
             self._player.setClothes(6, 35, 0, 2);
             self._player.setClothes(8, 15, 0, 2);
             self._player.setClothes(11, 49, 0, 2);
-            self._player.setClothes(5, 40, 0, 2);
+            //self._player.setClothes(5, 40, 0, 2);
         }
         /*appearanceIndex*/
         if (data.makeup) {

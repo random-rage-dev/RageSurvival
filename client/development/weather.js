@@ -27,7 +27,7 @@ var Weather = new class {
         let weather = this._areas[key];
         mp.game.gameplay.setWind(weather.wind.speed);
         mp.game.gameplay.setWindDirection(weather.wind.dir);
-        //mp.game.gameplay.setWeatherTypeOverTime(weather.name, 1);
+        mp.game.gameplay.setWeatherTypeOverTime(weather.name, 1);
         mp.game.gameplay.setRainFxIntensity(weather.rain);
         mp.events.callRemote("Weather:TransitionTo", this._inside);
     }
@@ -41,16 +41,13 @@ var Weather = new class {
         mp.game.gameplay.setRainFxIntensity(0);
     }
     _check() {
-        console.log("check");
         let self = this;
         if (self._areas.length > 0) {
             let lp = mp.vector(mp.players.local.position);
             let inside = self._areas.findIndex(function(area, key) {
                 let inside1 = lp.insidePolygon(area.polygon);
-                console.log("check is inside", inside1);
                 return (inside1 == true)
             })
-            console.log("inside", inside);
             if (self._inside != inside) {
                 if (inside > -1) {
                     self.enter(inside);

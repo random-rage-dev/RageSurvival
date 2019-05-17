@@ -16,8 +16,10 @@ mp.canCrouch = true;
 mp.gameplayCam = mp.cameras.new('gameplay');
 mp.defaultCam = mp.cameras.new('default');
 mp.localPlayer = mp.players.local;
-
+mp.ui = {};
+mp.ui.ready = false;
 mp.gameplayCam.setAffectsAiming(true);
+require("./libs/attachments.js")
 require("./vector.js")
 require("./scaleforms/index.js")
 require("./crouch.js")
@@ -37,18 +39,12 @@ var CEFNotification = require("./browser.js").notification;
 mp.events.add("Notifications:New", (notification_data) => {
     CEFNotification.call("notify", notification_data)
 })
-/*CEFNotification.call("notify", {
-                    title: "Buyable",
-                    titleSize: "16px",
-                    message: `${name} just got unlocked`,
-                    messageColor: 'rgba(0,50,0,.8)',
-                    position: "topCenter",
-                    backgroundColor: 'rgba(86, 206, 86, 0.9)',
-                    close: false
-                })*/
-/*mp.events.add("Player:UpdateEXP", (currentRankLimit, nextRankLimit, lastRankEXP, currentXP, currentLvl) => {
-    exp.showEXPBar(currentRankLimit, nextRankLimit, lastRankEXP, currentXP, currentLvl)
-});*/
+
+mp.events.add("registerWeaponAttachments", (json) => {
+    let data = JSON.parse(json);
+    for (let weapon in data) mp.attachmentMngr.register(data[weapon].AttachName, data[weapon].AttachModel, data[weapon].AttachBone, data[weapon].AttachPosition, data[weapon].AttachRotation);
+});
+
 mp.events.add("Player:WanderDuration", (ms) => {
     console.log("GO WANDER");
     let p = mp.players.local.position;
@@ -56,6 +52,9 @@ mp.events.add("Player:WanderDuration", (ms) => {
     setTimeout(function() {
         mp.players.local.clearTasksImmediately();
     }, ms)
+});
+mp.events.add('Player:UiReady', () => {
+    mp.ui.ready = true;
 });
 mp.events.add('Player:Collision', (enable) => {
     if (enable == true) {

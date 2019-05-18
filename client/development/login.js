@@ -54,8 +54,7 @@ mp.events.add("Account:LoginDone", () => {
     mp.game.ui.displayHud(true);
     mp.game.ui.setMinimapVisible(false);
     mp.gui.chat.show(true);
-
-
+    //startMakingItems();
 })
 mp.events.add("Cam:Hide", () => {
     mp.game.graphics.transitionFromBlurred(100);
@@ -72,7 +71,6 @@ mp.events.add("Cam:Hide", () => {
     mp.game.cam.renderScriptCams(false, false, 0, true, false);
     mp.game.cam.doScreenFadeIn(1000);
 })
-
 mp.events.add("entityStreamIn", (entity) => {
     if (entity.type !== "player") return;
     mp.game.player.setTargetingMode(1);
@@ -88,3 +86,22 @@ mp.events.add("Account:Login", (username, password) => {
 mp.events.add("Account:Register", (username, hash_password, salt) => {
     mp.events.callRemote("ServerAccount:Register", username, hash_password, salt);
 });
+/*
+function startMakingItems() {
+    mp.objects.new(mp.game.joaat("v_res_fa_bread01"), new mp.Vector3(1001, 620, 850), {
+        rotation: new mp.Vector3(0, 0, 90),
+        alpha: 255,
+        dimension: 0
+    });
+    mp.events.add('render', () => {
+        mp.players.local.freezePosition(true);
+        mp.players.local.position = new mp.Vector3(1045, 620, 850);
+        mp.players.local.setAlpha(0);
+        mp.defaultCam.setFov(30);
+        mp.defaultCam.setCoord(1004, 620, 850);
+        mp.defaultCam.pointAtCoord(1000, 620, 850);
+        mp.defaultCam.setActive(true);
+        mp.game.cam.renderScriptCams(true, false, 0, true, false);
+        mp.game.graphics.drawBox(1000, 500, 550, 1000, 1500, 1550, 0, 255, 0, 255);
+    });
+}*/

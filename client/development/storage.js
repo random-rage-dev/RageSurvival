@@ -53,6 +53,8 @@ var windowsOpen = [];
 
 function toggleInventory() {
 	console.log("toggle inventory", JSON.stringify(windowsOpen));
+	console.log("mp.gui.chat.enabled", mp.gui.chat.enabled);
+	console.log("mp.ui.ready", mp.ui.ready);
 	if (windowsOpen.indexOf("inventory") == -1) {
 		if ((mp.gui.chat.enabled == false) && (mp.ui.ready == true)) {
 			CEFInventory.call("setPos", "inventory", Inventory_Order.positions["inventory"].top, Inventory_Order.positions["inventory"].left);
@@ -97,7 +99,9 @@ function toggleInventory() {
 }
 
 function toggleEquipment() {
-	console.log("toggleEquipment", JSON.stringify(windowsOpen));
+	console.log("toggle inventory", JSON.stringify(windowsOpen));
+	console.log("mp.gui.chat.enabled", mp.gui.chat.enabled);
+	console.log("mp.ui.ready", mp.ui.ready);
 	if (windowsOpen.indexOf("equipment") == -1) {
 		if ((mp.gui.chat.enabled == false) && (mp.ui.ready == true)) {
 			console.log("x");

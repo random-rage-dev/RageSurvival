@@ -77,3 +77,5 @@ mp.events.add('Player:Collision', (enable) => {
         });
     }
 });
+
+

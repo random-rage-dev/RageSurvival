@@ -4,6 +4,7 @@ var Inventory = MongoDB.getInventoryModel();
 var Vehicle = class {
     constructor(data) {
         let self = this;
+        console.log("new veh class");
         this._data = data;
         this._id = data.veh_id;
         this._model = data.model;
@@ -84,6 +85,7 @@ var Vehicle = class {
         this._veh.setVariable("running", this._running);
     }
     create() {
+        console.log("create veh1");
         this._veh = mp.vehicles.new(this._model, mp.vector(this._position), {
             heading: mp.vector(this._rotation),
             numberPlate: "I3Ass",
@@ -93,6 +95,7 @@ var Vehicle = class {
             engine: true,
             dimension: 0
         });
+        console.log("create veh2");
         this._veh.setVariable("id", this._id);
         this._veh.setVariable("running", this._running);
         this._veh.setVariable("components", this.components);
@@ -204,6 +207,7 @@ var VehicleManager = new class {
         dbVehicle.save(function(err) {
             if (err) return console.log(err);
             // saved!
+            console.log("trigger","Vehicles:createVehicle")
             mp.events.call("Vehicles:createVehicle", dbVehicle);
             self._allVehicles[id] = new Vehicle(dbVehicle);
         });

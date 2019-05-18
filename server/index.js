@@ -60,9 +60,7 @@ mp.events.add("Character:Save", function(player, data) {
 });
 mp.events.add('playerChat', (player, message) => {
     if (players[player.id]) {
-        let color = player.getVariable("team_rgb_color");
-        color = "!{" + color[0] + ", " + color[1] + ", " + color[2] + ", 1}";
-        mp.players.broadcast(`${color}${player.name}!{#FFF}: ${message}`);
+        mp.players.broadcast(`${player.name}!{#FFF}: ${message}`);
     }
 });
 mp.events.add("Player:Crouch", (player) => {
@@ -124,3 +122,13 @@ mp.events.addCommand("savepos", (player, name = "No name") => {
 mp.events.addCommand("c", (player, full, index, drawable, texture) => {
     player.setClothes(parseInt(index), parseInt(drawable), parseInt(texture), 2);
 });
+
+
+/*
+
+[SERVER]: CarloGambino SC:CarloGambin0 HWID:D8903A045BEE1530F710ABB8CCE085B075E2D2945D9CB2B057F018C8DD22A360C6DEB8A4226870B8E312E388CD5EB6A072AE08A056B6E958AB5CC5609DAC67C0 joined
+[SERVER]: RiiVu SC:RiiVu385 HWID:DECCAF8442F8B7B88B0A3404E130A3B0414EA2007114AA78F9245CDC5B7A1F808BEA78543746297000E24A88416E06C001FE6934CC12F3C005BE4B043EBA5700 joined
+[SERVER]: Vequtex SC:Vequtex HWID:D8903A045B9A2308F760C174CC3449B0750657D42FDE84A8DAF018C8DD22F1A041DED0EC3B685A18E31239BC9D2A434057B408A056B6E9481D7AC540171A6340 joined
+[SERVER]: Z8pn SC:zero0two HWID:D8903A045B1277887AAA8FC4D9B6B3B0EC8415882F0A6DA80CF018C8DD225D20519453D4478EFB88E3386674322AA110571808A056B6E9A8C91AAEFC194E1880 joined
+
+*/

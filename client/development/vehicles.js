@@ -105,29 +105,31 @@ mp.events.add("render", () => {
                     }
                 }
                 drivenOldPos = mp.localPlayer.vehicle.position;
-                mp.game.graphics.drawText("Engine:" + (veh.getVariable("running") ? "~g~On" : "~r~Off"), [0.4, 0.8], {
-                    font: 4,
-                    color: [255, 255, 255, 185],
-                    scale: [0.4, 0.4],
-                    outline: true,
-                    centre: true
-                });
-                let v = Math.ceil(veh.getSpeed() * (veh.getSpeed() / 20) * 2);
-                mp.game.graphics.drawText(v + " KM/H", [0.6, 0.8], {
-                    font: 4,
-                    color: [255, 255, 255, 185],
-                    scale: [0.4, 0.4],
-                    outline: true,
-                    centre: true
-                });
-                if (veh.getVariable("components").fuel) {
-                    mp.game.graphics.drawText("Fuel:" + (veh.getVariable("components").fuel > 0 ? (veh.getVariable("components").fuel.toFixed(2)) : "0") + "L", [0.5, 0.8], {
+                if (veh.getVariable("running")) {
+                    mp.game.graphics.drawText("Engine:" + (veh.getVariable("running") ? "~g~On" : "~r~Off"), [0.4, 0.8], {
                         font: 4,
                         color: [255, 255, 255, 185],
                         scale: [0.4, 0.4],
                         outline: true,
                         centre: true
                     });
+                    let v = Math.ceil(veh.getSpeed() * (veh.getSpeed() / 20) * 2);
+                    mp.game.graphics.drawText(v + " KM/H", [0.6, 0.8], {
+                        font: 4,
+                        color: [255, 255, 255, 185],
+                        scale: [0.4, 0.4],
+                        outline: true,
+                        centre: true
+                    });
+                    if (veh.getVariable("components").fuel) {
+                        mp.game.graphics.drawText("Fuel:" + (veh.getVariable("components").fuel > 0 ? (veh.getVariable("components").fuel.toFixed(2)) : "0") + "L", [0.5, 0.8], {
+                            font: 4,
+                            color: [255, 255, 255, 185],
+                            scale: [0.4, 0.4],
+                            outline: true,
+                            centre: true
+                        });
+                    }
                 }
             }
         }

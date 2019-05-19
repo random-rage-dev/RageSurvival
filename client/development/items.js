@@ -104,7 +104,8 @@ class LootPool {
 }
 mp.events.add("Loot:Load", (id, poolData) => {
     if (!streamedPools[id]) {
-        streamedPools[id] = new LootPool(poolData);
+        console.log("CHECK STREAM IN");
+        //streamedPools[id] = new LootPool(poolData);
     }
 });
 mp.events.add("Loot:Unload", (id) => {

@@ -89,7 +89,6 @@ var Pickups = new class {
     pickupStreamIn(player, colshape) {
         let self = this;
         let pickup_id = colshape.getVariable("item_colshape_id");
-        console.log("stream in");
         if (self._pickups[pickup_id]) {
             player.call("Loot:Load", [pickup_id, self._pickups[pickup_id]])
         }

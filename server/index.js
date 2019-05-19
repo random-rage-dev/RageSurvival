@@ -2,7 +2,6 @@ var rpc = require('rage-rpc');
 require("./libs/vector.js")
 require("./libs/array.js")
 require("./libs/attachments.js")
-require("./libs/weapon_attachments.js")
 var PlayerClass = require("./users/player.js")
 var ItemPickups = require("./world/pickups.js")
 var Zombies = require("./world/zombies.js")
@@ -19,6 +18,11 @@ mp.events.add("ServerAccount:Ready", function(player) {
     player.position.x = 9000;
     player.position.y = 9000;
 });
+
+mp.events.add("playerWeaponChange", (player, oldWeapon, newWeapon) => {
+console.log("weaponChange",oldWeapon,newWeapon)
+});
+
 mp.events.add("playerQuit", function(player, exitType, reason) {
     console.log("disconnect")
     if (players[player.id]) {
@@ -82,6 +86,12 @@ mp.events.add("playerDeath", function(player, reason, killer) {
     player.data.isCrouched = false;
     if (players[player.id]) {
         players[player.id].death(false);
+    }
+});
+mp.events.add("Player:Gather", function(player, resource) {
+    console.log("resource",resource);
+    if (players[player.id]) {
+        players[player.id].gather(resource);
     }
 });
 mp.events.addCommand("suicide", (player, f) => {

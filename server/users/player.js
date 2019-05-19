@@ -1,9 +1,11 @@
 var Equipment = require("./equipment.js")
 var MongoDB = require("../libs/mongodb.js")
+var animations = require("../libs/animations.js")
 var Storage = require("../world/storage.js")
 var PlayerSpawns = require("../world/playerspawns.js")
 var Building = require("../world/building.js")
 var WeatherManager = require("../world/weather.js")
+var Materials = require("../world/materials.js")
 var User = MongoDB.getUserModel();
 var Inventory = MongoDB.getInventoryModel();
 var md5 = require("md5");
@@ -158,12 +160,14 @@ var Player = class {
         self._death = 0;
         self._player.setVariable("spawned", true)
         self._player.setVariable("invincible", true)
+        self._player.setVariable("canGather", true)
         self._player.alpha = 255;
         self._player.call("Cam:Hide")
         self._player.call("Player:Spawn");
         if (fresh == 1) {
             self._player.call("Player:WanderDuration", [1000]);
         }
+        //self._player.addAttachment("mining", false);
         self._spawnedTimestamp = Date.now();
     }
     hit(hitter, weapon, bone) {
@@ -197,6 +201,37 @@ var Player = class {
                 //self._player.removeWeapon(Number(id));
             }
         }
+    }
+    gather(material) {
+        var self = this;
+        self._player.setVariable("canGather", false);
+        console.log("gather material", material, Materials[material]);
+        let temp_weapon = self._player.weapon;
+        let temp_weaponAmmo = self._player.weaponAmmo;
+        if (temp_weapon) {
+            self._player.removeWeapon(temp_weapon);
+        }
+        let attachments = ""
+        if (Materials[material] == "Tree") {
+            self._player.playAnimation(animations.gather.wood.dict, animations.gather.wood.anim, 2.0, (1))
+            attachments = "lumberjack"
+        }
+        if ((Materials[material] == "Stone") || (Materials[material] == "Mineral Stone")) {
+            self._player.playAnimation(animations.gather.stone.dict, animations.gather.stone.anim, 2.0, (1))
+            attachments = "mining"
+        }
+        if (attachments != "") {
+            self._player.addAttachment(attachments, false);
+        }
+        setTimeout(function() {
+            self._player.stopAnimation();
+            self._player.setVariable("canGather", true);
+            self._player.addAttachment(attachments, true);
+            if (temp_weapon) {
+                self._player.giveWeapon(temp_weapon, temp_weaponAmmo);
+            }
+            console.log("TODO Give Item after Gather!!!");
+        }, 4000)
     }
     getInventoryItemByIndex(index = 0) {
         return this._inventory[index];
@@ -237,22 +272,33 @@ var Player = class {
         })
         self._player.removeAllWeapons();
         if (self._equipment["weapon_primary"] != undefined) {
-            console.log("has weapon_primary");
             let e = Equipment[self._equipment["weapon_primary"].name]
             self._player.giveWeapon(e.hash, ammoByType[e.ammo]);
         }
         if (self._equipment["weapon_secondary"] != undefined) {
-            console.log("has weapon_secondary");
             let e = Equipment[self._equipment["weapon_secondary"].name]
             self._player.giveWeapon(e.hash, ammoByType[e.ammo]);
         }
         if (self._equipment["weapon_melee"] != undefined) {
-            console.log("has weapon_melee");
             let e = Equipment[self._equipment["weapon_melee"].name]
-            self._player.giveWeapon(e.hash, 1);
+            if (e) {
+                self._player.giveWeapon(e.hash, 1);
+            }
+            if (self._equipment["weapon_melee"].name == "Hatchet") {
+                self._player.setVariable("hasHatchet", true);
+            } else {
+                self._player.setVariable("hasHatchet", false);
+            }
+            if (self._equipment["weapon_melee"].name == "Pickaxe") {
+                self._player.setVariable("hasPickaxe", true);
+            } else {
+                self._player.setVariable("hasPickaxe", false);
+            }
+        } else {
+            self._player.setVariable("hasPickaxe", false);
+            self._player.setVariable("hasHatchet", false);
         }
         console.log("self._equipment", self._equipment)
-        console.log("all unqiues", allTypes)
         console.log("ammoByType", ammoByType)
     }
     /* Equipment */
@@ -268,7 +314,6 @@ var Player = class {
                     let dbEquipment = await User.find({
                         name: self._username
                     });
-                    console.log("dbEquipment", dbEquipment[0]);
                     loadData = dbEquipment[0].equipment;
                     update = true;
                 } catch (err) {
@@ -289,7 +334,6 @@ var Player = class {
                     });
                     items.push(itemData);
                 });
-                console.log(items);
                 self._player.call("Storage:UpdateSlots", ["equipment", items])
             }
             self._equipment = loadData;
@@ -319,7 +363,6 @@ var Player = class {
                     });
                     self._player.call("Inventory:Resize", [10, 10])
                     self._player.call("Inventory:Update", [self._inventory])
-                    console.log(self._inventory);
                     mp.events.call("Player:Inventory", self._player, self._inventory)
                     return resolve();
                 } else {

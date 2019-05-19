@@ -5,6 +5,7 @@ var Notifications = require("./notifications.js");
 var streamedPools = [];
 class LootPool {
     constructor(data) {
+        console.log("LootPool create");
         this._setup(data);
     }
     _setup(data) {
@@ -49,42 +50,46 @@ class LootPool {
     }
     load() {
         let self = this;
-        let center = new mp.Vector3(self._lootData.pos.x, self._lootData.pos.y, self._lootData.pos.z);
-        let Angle_Item = 360 / 8;
-        self._lootData.items.forEach(function(item, index) {
-            if (item != null) {
-                item.index = index;
-                let offset_pos = center.findRot(0, 0.5, Angle_Item * index);
-                let base_rot = (Angle_Item * index) + (offset_pos.rotPoint(center) + Math.floor(Math.random() * (360 - 0)));
-                if (base_rot > 360) base_rot -= 360;
-                if (item.rot == undefined) {
-                    item.rot = base_rot
+        try {
+            let center = new mp.Vector3(self._lootData.pos.x, self._lootData.pos.y, self._lootData.pos.z);
+            let Angle_Item = 360 / 8;
+            self._lootData.items.forEach(function(item, index) {
+                if (item != null) {
+                    item.index = index;
+                    let offset_pos = center.findRot(0, 0.5, Angle_Item * index);
+                    let base_rot = (Angle_Item * index) + (offset_pos.rotPoint(center) + Math.floor(Math.random() * (360 - 0)));
+                    if (base_rot > 360) base_rot -= 360;
+                    if (item.rot == undefined) {
+                        item.rot = base_rot
+                    }
+                    let pos = offset_pos;
+                    pos.z += 1;
+                    let obj = mp.objects.new(mp.game.joaat(item.model), pos, {
+                        rotation: new mp.Vector3(0, 0, item.rot),
+                        alpha: 255,
+                        dimension: 0
+                    });
+                    obj.placeOnGroundProperly();
+                    let rotobj = obj.getRotation(0);
+                    let posobj = obj.getCoords(false);
+                    obj.setCollision(false, true);
+                    obj.freezePosition(true);
+                    obj.setPhysicsParams(9000000, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+                    if ((item.offset.rot.x > 0) || (item.offset.rot.y > 0)) {
+                        obj.setCoords(posobj.x + item.offset.pos.x, posobj.y + item.offset.pos.y, (posobj.z - obj.getHeightAboveGround()) + item.offset.pos.z, false, false, false, false);
+                    } else {
+                        obj.setCoords(posobj.x + item.offset.pos.x, posobj.y + item.offset.pos.y, posobj.z + item.offset.pos.z, false, false, false, false);
+                    }
+                    obj.setRotation(rotobj.x + item.offset.rot.x, rotobj.y + item.offset.rot.y, rotobj.z, 0, true);
+                    self._pickupObjects.push({
+                        id: self._lootData.id,
+                        obj: obj
+                    })
                 }
-                let pos = offset_pos;
-                pos.z += 1;
-                let obj = mp.objects.new(mp.game.joaat(item.model), pos, {
-                    rotation: new mp.Vector3(0, 0, item.rot),
-                    alpha: 255,
-                    dimension: 0
-                });
-                obj.placeOnGroundProperly();
-                let rotobj = obj.getRotation(0);
-                let posobj = obj.getCoords(false);
-                obj.setCollision(false, true);
-                obj.freezePosition(true);
-                obj.setPhysicsParams(9000000, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
-                if ((item.offset.rot.x > 0) || (item.offset.rot.y > 0)) {
-                    obj.setCoords(posobj.x + item.offset.pos.x, posobj.y + item.offset.pos.y, (posobj.z - obj.getHeightAboveGround()) + item.offset.pos.z, false, false, false, false);
-                } else {
-                    obj.setCoords(posobj.x + item.offset.pos.x, posobj.y + item.offset.pos.y, posobj.z + item.offset.pos.z, false, false, false, false);
-                }
-                obj.setRotation(rotobj.x + item.offset.rot.x, rotobj.y + item.offset.rot.y, rotobj.z, 0, true);
-                self._pickupObjects.push({
-                    id: self._lootData.id,
-                    obj: obj
-                })
-            }
-        })
+            })
+        } catch (err) {
+            console.log("err", err);
+        }
     }
     unload(id) {
         let self = this;
@@ -113,7 +118,7 @@ mp.events.add("Loot:Reload", (id, new_data) => {
         streamedPools[id].reload(new_data);
     }
 });
- 
+
 function pointingAt() {
     let ray_dist = 25;
     direction = mp.gameplayCam.getDirection();
@@ -143,8 +148,8 @@ mp.events.add("render", () => {
             pool.getLootPool().forEach(function(item, index) {
                 if (item != null) {
                     let offset_pos = pos.findRot(0, 0.5, Angle_Item * index).ground();
-                    let thickness = item.thickness//(mp.players.local.isRunning() == true) ? item.thickness * 2 : item.thickness;
-                    mp.game.graphics.drawMarker(28, offset_pos.x, offset_pos.y, offset_pos.z, 0, 0, 0, 0, 0, 0, thickness, thickness, thickness, 255, 255, 255, 150, false, false, 2, false, "", "", false);
+                    let thickness = item.thickness //(mp.players.local.isRunning() == true) ? item.thickness * 2 : item.thickness;
+                    //mp.game.graphics.drawMarker(28, offset_pos.x, offset_pos.y, offset_pos.z, 0, 0, 0, 0, 0, 0, thickness, thickness, thickness, 255, 255, 255, 150, false, false, 2, false, "", "", false);
                     let player_pos = mp.vector(mp.localPlayer.position).ground();
                     let near_dist = thickness * 2.5;
                     let pointAtPos;
@@ -244,7 +249,7 @@ mp.events.add("render", () => {
                             if (mp.game.controls.isDisabledControlJustPressed(0, 51)) { // 51 == "E"
                                 console.log("E Pressed");
                                 let id = pointAt.entity.getVariable("id");
-                                console.log("entity id",id);
+                                console.log("entity id", id);
                                 mp.events.callRemote("Building:Interact", id);
                             }
                         }

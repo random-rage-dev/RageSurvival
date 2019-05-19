@@ -201,8 +201,15 @@ var Storage = new class {
 						})
 					})
 					console.log("saving done",tSlots.items);
-					player.class.setEquipment(tSlots.items);
 					player.class.setInventory(sStorage.items);
+
+
+
+					if (tSlots.id == "equipment") {
+						player.class.setEquipment(tSlots.items);
+					} else if (tSlots.id == "vehicle") {	
+						console.log("Storage data on veh");
+					}	
 				} catch (err) {
 					console.log("err", err);
 				}

@@ -1,13 +1,21 @@
-
-mp.rpc = require("./libs/rage-rpc.min.js");
 console.log = function(...a) {
     mp.gui.chat.push("DEBUG:" + a.join(" "))
 };
+require("./libs/attachments.js")
+require("./libs/weapon_attachments.js")
+
+require("./libs/animations.js")
+/*Register Attachments for Player Animatiuons etc TODO*/
+mp.attachmentMngr.register("mining", "prop_tool_pickaxe", 57005, new mp.Vector3(0.085, -0.3, 0), new mp.Vector3(-90, 0, 0));
+mp.attachmentMngr.register("lumberjack", "w_me_hatchet", 57005, new mp.Vector3(0.085, -0.05, 0), new mp.Vector3(-90, 0, 0));
+
+mp.rpc = require("./libs/rage-rpc.min.js");
+
 mp.isValid = function(val) {
     return val != null && val != undefined && val != "";
 }
-mp.gui.execute("const _enableChatInput = enableChatInput;enableChatInput = (enable) => { mp.trigger('chatEnabled', enable); _enableChatInput(enable) };");
 mp.gui.chat.enabled = false;
+mp.gui.execute("const _enableChatInput = enableChatInput;enableChatInput = (enable) => { mp.trigger('chatEnabled', enable); _enableChatInput(enable) };");
 mp.events.add('chatEnabled', (isEnabled) => {
     mp.gui.chat.enabled = isEnabled;
 });
@@ -19,7 +27,6 @@ mp.localPlayer = mp.players.local;
 mp.ui = {};
 mp.ui.ready = false;
 mp.gameplayCam.setAffectsAiming(true);
-require("./libs/attachments.js")
 require("./vector.js")
 require("./scaleforms/index.js")
 require("./crouch.js")
@@ -39,11 +46,6 @@ var CEFNotification = require("./browser.js").notification;
 mp.events.add("Notifications:New", (notification_data) => {
     CEFNotification.call("notify", notification_data)
 })
-
-mp.events.add("registerWeaponAttachments", (json) => {
-    let data = JSON.parse(json);
-    for (let weapon in data) mp.attachmentMngr.register(data[weapon].AttachName, data[weapon].AttachModel, data[weapon].AttachBone, data[weapon].AttachPosition, data[weapon].AttachRotation);
-});
 
 mp.events.add("Player:WanderDuration", (ms) => {
     console.log("GO WANDER");

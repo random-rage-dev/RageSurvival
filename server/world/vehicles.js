@@ -101,6 +101,7 @@ var Vehicle = class {
         this._veh.setVariable("components", this.components);
         this._veh.setVariable("key", this._key);
         this._veh.setVariable("health", this._health);
+        this._veh.setVariable("vehicle", true);
     }
 }
 mp.events.add("Vehicles:createVehicle", function(vehicle) {});

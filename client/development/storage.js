@@ -234,7 +234,9 @@ mp.events.add("Inventory:AddItem", (citem) => {
 	})
 	CEFInventory.call("addItem", "inventory", tempSettings.cell || 0, tempSettings.row || 0, citem.width, citem.height, JSON.stringify(gData), tempSettings.flipped || false)
 });
-mp.events.add("Storage:Use", (item) => {});
+mp.events.add("Storage:Interact", (item) => {
+	console.log("Item use",item);
+});
 mp.events.add("Storage:Drag", (positions) => {
 	positions = JSON.parse(positions);
 	if (!Inventory_Order.positions[positions.id]) {
@@ -305,8 +307,6 @@ mp.events.add("Storage:TransferSlots", (storage, slots) => {
 	mp.storage.data.inventory_order = Inventory_Order;
 	mp.storage.flush();
 	/*Manage Server Sync*/
-	console.log(JSON.stringify(storage));
-	console.log(JSON.stringify(slots));
 	storage.items = storage.items.map((item) => StorageSystem.minify(item));
 	slots.items = slots.items.map((item) => Object.assign(StorageSystem.minify(item.item), {
 		slot_id: item.id
@@ -319,7 +319,7 @@ mp.events.add("Storage:UpdateSlots", (target, items) => {
 			CEFInventory.call("addItemSlot", target, item);
 		}, 1 * index)
 	})
-	console.log(target, JSON.stringify(items));
+	//console.log(target, JSON.stringify(items));
 });
 mp.events.add("Storage:AddContainer", (headline, selector, cells, rows, items) => {
 	console.log("add container");

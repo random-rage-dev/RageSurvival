@@ -18,7 +18,7 @@ function _addAttachment(entity, attachmentHash, remove)
 	{
 		entity._attachments.splice(idx, 1);
 	}
-	
+	console.log("addAttachment",serializeAttachments(entity._attachments))
 	entity.setVariable("attachmentsData", serializeAttachments(entity._attachments));
 }
 

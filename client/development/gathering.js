@@ -1,6 +1,7 @@
 require("./vector.js")
 var natives = require("./natives.js")
 var materials = require("./materials.js")
+var StorageSystem = require("./storage.js");
 
 function checkResourceInFront(max_dist) {
     let nearest = {
@@ -18,22 +19,62 @@ function checkResourceInFront(max_dist) {
             exit_ps = new mp.Vector3(hitData.position.x, hitData.position.y, hitData.position.z)
             let dist = pos.dist(exit_ps);
             if (dist < nearest.dist) {
-                if (materials[hitData.material] != undefined) {
+                if (materials[hitData.material] == true) {
                     nearest.dist = dist;
                     nearest.pos = exit_ps;
-                    nearest.resource = materials[hitData.material];
+                    nearest.resource = hitData.material;
                 }
             }
         }
     }
     return nearest.resource != "" ? nearest.resource : false;
 }
-
-mp.rpc.register('getMaterialInFront', async (id) => {
-    let data = checkResourceInFront(2);
-    return data;
+let addText = "";
+mp.events.add("render", () => {
+    if (mp.ui.ready == true) {
+        if ((mp.localPlayer.getVariable('hasHatchet') == true) || (mp.localPlayer.getVariable('hasPickaxe') == true)) {
+            if ((mp.localPlayer.getVariable('canGather') == true)) {
+                let material = checkResourceInFront(0.5);
+                if (material) {
+                    if (((mp.localPlayer.getVariable('hasHatchet') == true) && (materials[material] == 1)) || ((mp.localPlayer.getVariable('hasPickaxe') == true) && (materials[material] == 2))) {
+                        mp.game.controls.disableControlAction(0, 51, true);
+                        mp.game.ui.showHudComponentThisFrame(14);
+                        mp.game.graphics.drawText("[E] Gather Material", [0.5, 0.55], {
+                            font: 4,
+                            color: [255, 255, 255, 200],
+                            scale: [0.3, 0.3],
+                            outline: true,
+                            centre: true
+                        });
+                        if ((addText != "")) {
+                            mp.game.graphics.drawText("\n[" + addText + "]", [0.5, 0.55], {
+                                font: 4,
+                                color: [255, 150, 150, 200],
+                                scale: [0.3, 0.3],
+                                outline: true,
+                                centre: true
+                            });
+                        }
+                        if (mp.game.controls.isDisabledControlJustPressed(0, 51)) { // 51 == "E"
+                            let doesFit = StorageSystem.checkFit("inventory", 2, 2)
+                            doesFit.then(function(fit) {
+                                if (fit != undefined) {
+                                    mp.events.callRemote("Player:Gather", material.toString());
+                                } else {
+                                    addText = "Not enough Space"
+                                }
+                            });
+                        }
+                    } else {
+                        addText = "";
+                    }
+                }
+            } else {
+                addText = "";
+            }
+        }
+    }
 });
-
 /*mp.keys.bind(0x09, false, () => {
     console.log(JSON.stringify(checkResourceInFront(2)));
 });*/

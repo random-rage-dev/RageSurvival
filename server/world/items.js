@@ -25,7 +25,34 @@ var items = {
         },
         modifiers:{
             spread:function() {
-                return Math.random()
+                return getRandomInt(1, 3)
+            },
+            durability:function() {
+                return 100
+            }
+        }
+    },
+    "Pickaxe": {
+        width: 3,
+        height: 3,
+        max_stack: 1,
+        name: 'Pickaxe',
+        image: '../../source/img/equipment/pickaxe.png',
+        type: "Residential",
+        model: "prop_tool_pickaxe",
+        thickness: 0.15,
+        amount: 1,
+        mask:"melee",
+        offset: {
+            pos: new mp.Vector3(0, 0, 0.02),
+            rot: new mp.Vector3(0, 0, 0)
+        },
+        modifiers:{
+            reward:function() {
+                return getRandomInt(1, 3)
+            },
+            durability:function() {
+                return 100
             }
         }
     },
@@ -155,7 +182,7 @@ var items = {
         height: 2,
         max_stack: 15, 
         name: 'Beer',
-        image: 'https://via.placeholder.com/40x80',
+        image: 'https://via.placeholder.com/40x80?text=' + this.name,
         type: "Food",
         mask:"Food",
         model: "prop_cs_beer_bot_03",
@@ -173,7 +200,7 @@ var items = {
         height: 2,
         max_stack: 14,
         name: 'Drank Fresh',
-        image: 'https://via.placeholder.com/40x80',
+        image: 'https://via.placeholder.com/40x80?text=' + this.name,
         type: "Food",
         model: "ng_proc_ojbot_01a",
         mask:"Food",
@@ -191,7 +218,7 @@ var items = {
         height: 1,
         max_stack: 24,
         name: 'Banana',
-        image: 'https://via.placeholder.com/80x40',
+        image: 'https://via.placeholder.com/80x40?text=' + this.name,
         type: "Food",
         model: "ng_proc_food_nana1a",
         mask:"Food",
@@ -209,7 +236,7 @@ var items = {
         height: 1,
         max_stack: 24,
         name: 'Orange',
-        image: 'https://via.placeholder.com/40x40',
+        image: 'https://via.placeholder.com/40x40?text=' + this.name,
         type: "Food",
         model: "ng_proc_food_ornge1a",
         mask:"Food",
@@ -227,7 +254,7 @@ var items = {
         height: 2,
         max_stack: 24,
         name: "Crackles O`Dawn",
-        image: 'https://via.placeholder.com/40x80',
+        image: 'https://via.placeholder.com/40x80?text=' + this.name,
         type: "Food",
         model: "v_res_tt_cereal02",
         mask:"Food",
@@ -263,7 +290,7 @@ var items = {
         height: 2,
         max_stack: 24,
         name: "Chicken Noodles",
-        image: 'https://via.placeholder.com/40x80',
+        image: 'https://via.placeholder.com/40x80?text=' + this.name,
         type: "Food",
         mask:"Food",
         model: "v_res_fa_potnoodle",
@@ -281,7 +308,7 @@ var items = {
         height: 2,
         max_stack: 24,
         name: "Bread",
-        image: 'https://via.placeholder.com/40x80',
+        image: 'https://via.placeholder.com/40x80?text=' + this.name,
         type: "Food",
         mask:"Food",
         model: "v_res_fa_bread01",
@@ -312,14 +339,51 @@ var items = {
             rot: new mp.Vector3(0, 0, 0)
         }
     },
+    /*Resources*/
     "Wood": {
-        width: 3,
-        height: 3,
+        width: 2,
+        height: 2,
         max_stack: 128,
         name: 'Wood',
         image: '../../source/img/resource/wood.png',
         type: "Craftable",
         model: "prop_fncwood_13c",
+        mask:"Material",
+        thickness: 0.35,
+        amount: function() {
+            return 1;
+        },
+        offset: {
+            pos: new mp.Vector3(0, 0, 0),
+            rot: new mp.Vector3(0, 0, 90)
+        }
+    },
+    "Stone": {
+        width: 2,
+        height: 2,
+        max_stack: 128,
+        name: 'Stone',
+        image: '../../source/img/resource/stone.png',
+        type: "Craftable",
+        model: "proc_sml_stones01",
+        mask:"Material",
+        thickness: 0.35,
+        amount: function() {
+            return 1;
+        },
+        offset: {
+            pos: new mp.Vector3(0, 0, 0),
+            rot: new mp.Vector3(0, 0, 0)
+        }
+    },
+    "Leaf": {
+        width: 2,
+        height: 1,
+        max_stack: 128,
+        name: 'Leaf',
+        image: 'https://via.placeholder.com/80x40?text=Leaf',
+        type: "Craftable",
+        model: "ng_proc_leaves05",
         mask:"Material",
         thickness: 0.35,
         amount: function() {
@@ -335,7 +399,7 @@ var items = {
         height: 4,
         max_stack: 1,
         name: 'Tire',
-        image: 'https://via.placeholder.com/160x160',
+        image: 'https://via.placeholder.com/160x160?text=' + this.name,
         type: "Industrial",
         model: "ng_proc_tyre_01",
         mask:"Wheels",
@@ -353,10 +417,28 @@ var items = {
         height: 1,
         max_stack: 4,
         name: 'Wood',
-        image: 'https://via.placeholder.com/40x80',
+        image: 'https://via.placeholder.com/40x80?text=' + this.name,
         type: "Hospital",
         model: "ng_proc_syrnige01a",
         mask:"Heal",
+        thickness: 0.15,
+        amount: function() {
+            return 1;
+        },
+        offset: {
+            pos: new mp.Vector3(0, 0, 0),
+            rot: new mp.Vector3(0, 0, 0)
+        }
+    },
+    "Furnace": {
+        width: 2,
+        height: 2,
+        max_stack: 1,
+        name: 'Furnace',
+        image: 'https://via.placeholder.com/40x80?text=' + this.name,
+        type: "Craftable",
+        model: "prop_paper_bag_01",
+        mask:"Building",
         thickness: 0.15,
         amount: function() {
             return 1;

@@ -63,7 +63,7 @@ mp.attachmentMngr =
 		{
 			id = mp.game.joaat(id);
 		}
-		
+		console.log("register attachment id",id);
 		if(typeof(model) === 'string')
 		{
 			model = mp.game.joaat(model);
@@ -161,7 +161,7 @@ mp.events.add("entityStreamOut", (entity) =>
 mp.events.addDataHandler("attachmentsData", (entity, data) =>
 {
 	let newAttachments = (data.length > 0) ? data.split('|').map(att => parseInt(att, 36)) : [];
-	
+	console.log(JSON.stringify(newAttachments));
 	if(entity.handle !== 0)
 	{
 		let oldAttachments = entity.__attachments;	

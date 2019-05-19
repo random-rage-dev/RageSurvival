@@ -63,7 +63,7 @@ const weaponAttachmentData = {
 
 // Update weaponAttachmentData with attachment name and model
 for (let weapon in weaponAttachmentData) {
-    let hash = mp.joaat(weapon);
+    let hash = mp.game.joaat(weapon);
 
     if (weaponData[hash]) {
         weaponAttachmentData[weapon].AttachName = `WDSP_${weaponData[hash].HashKey}`;
@@ -73,45 +73,8 @@ for (let weapon in weaponAttachmentData) {
     }
 }
 
-mp.events.add("playerReady", (player) => {
-    player._bodyWeapons = {};
-    player.call("registerWeaponAttachments", [ JSON.stringify(weaponAttachmentData) ]);
-});
+for (let weapon in weaponAttachmentData) {
+    console.log(weaponAttachmentData[weapon].AttachName, weaponAttachmentData[weapon].AttachModel);
+    mp.attachmentMngr.register(weaponAttachmentData[weapon].AttachName, weaponAttachmentData[weapon].AttachModel, weaponAttachmentData[weapon].AttachBone, weaponAttachmentData[weapon].AttachPosition, weaponAttachmentData[weapon].AttachRotation);
+}
 
-mp.events.add("playerWeaponChange", (player, oldWeapon, newWeapon) => {
-    if (weaponData[oldWeapon]) {
-        let oldWeaponKey = weaponData[oldWeapon].HashKey;
-        if (weaponAttachmentData[oldWeaponKey]) {
-            // Remove the attached weapon that is occupying the slot
-            let slot = weaponAttachmentData[oldWeaponKey].Slot;
-            if (player._bodyWeapons[slot] && player.hasAttachment(player._bodyWeapons[slot])) player.addAttachment(player._bodyWeapons[slot], true);
-
-            // Attach the updated old weapon
-            let attachName = weaponAttachmentData[oldWeaponKey].AttachName;
-            player.addAttachment(attachName, false);
-            player._bodyWeapons[slot] = attachName;
-        }
-    }
-
-    if (weaponData[newWeapon]) {
-        let newWeaponKey = weaponData[newWeapon].HashKey;
-        if (weaponAttachmentData[newWeaponKey]) {
-            // De-attach the new/current weapon (if attached)
-            let slot = weaponAttachmentData[newWeaponKey].Slot;
-            let attachName = weaponAttachmentData[newWeaponKey].AttachName;
-
-            if (player._bodyWeapons[slot] === attachName) {
-                if (player.hasAttachment(attachName)) player.addAttachment(attachName, true);
-                delete player._bodyWeapons[slot];
-            }
-        }
-    }
-});
-
-// De-attach all weapons on death
-mp.events.add("playerDeath", (player) => {
-    for (let name in player._bodyWeapons) {
-        player.addAttachment(player._bodyWeapons[name], true);
-        delete player._bodyWeapons[name];
-    }
-});

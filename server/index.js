@@ -1,3 +1,4 @@
+"use strict";
 var rpc = require('rage-rpc');
 require("./libs/vector.js")
 require("./libs/array.js")
@@ -18,11 +19,18 @@ mp.events.add("ServerAccount:Ready", function(player) {
     player.position.x = 9000;
     player.position.y = 9000;
 });
-
 mp.events.add("playerWeaponChange", (player, oldWeapon, newWeapon) => {
-console.log("weaponChange",oldWeapon,newWeapon)
+    console.log("weaponChange", oldWeapon, newWeapon)
+    if (players[player.id]) {
+        player.class.manageAttachments(oldWeapon,newWeapon);
+    }
 });
-
+mp.events.add("Combat:FireWeapon", (player, weapon, ammo) => {
+    console.log("Combat:FireWeapon", weapon, ammo)
+    if (players[player.id]) {
+        player.class.fireWeapon(weapon, ammo);
+    }
+});
 mp.events.add("playerQuit", function(player, exitType, reason) {
     console.log("disconnect")
     if (players[player.id]) {
@@ -89,7 +97,7 @@ mp.events.add("playerDeath", function(player, reason, killer) {
     }
 });
 mp.events.add("Player:Gather", function(player, resource) {
-    console.log("resource",resource);
+    console.log("resource", resource);
     if (players[player.id]) {
         players[player.id].gather(resource);
     }
@@ -132,8 +140,6 @@ mp.events.addCommand("savepos", (player, name = "No name") => {
 mp.events.addCommand("c", (player, full, index, drawable, texture) => {
     player.setClothes(parseInt(index), parseInt(drawable), parseInt(texture), 2);
 });
-
-
 /*
 
 [SERVER]: CarloGambino SC:CarloGambin0 HWID:D8903A045BEE1530F710ABB8CCE085B075E2D2945D9CB2B057F018C8DD22A360C6DEB8A4226870B8E312E388CD5EB6A072AE08A056B6E958AB5CC5609DAC67C0 joined

@@ -1,39 +1,1424 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
-const absolute_path="package://RageZombies/cef/views/";class CEFBrowser{constructor(e){this._setup(e)}_setup(e){this.browser=mp.browsers.new(absolute_path+e),this.cursorState=!1,console.log("new instance")}call(){let e=Array.prototype.slice.call(arguments),t=e[0],s="(";for(let t=1;t<e.length;t++){switch(typeof e[t]){case"string":s+="'"+e[t]+"'";break;case"number":case"boolean":s+=e[t];break;case"object":s+=JSON.stringify(e[t])}t<e.length-1&&(s+=",")}t+=s+=");",this.browser.execute(t)}active(e){this.browser.active=e}get isActive(){return this.browser.active}cursor(e){this.cursorState=e,mp.gui.cursor.visible=e}clear(){this.load("empty.html")}load(e){this.browser.url=absolute_path+e}}module.exports={interface:new CEFBrowser("empty.html"),inventory:new CEFBrowser("empty.html"),hud:new CEFBrowser("empty.html"),notification:new CEFBrowser("notifications/index.html"),class:CEFBrowser};
+const absolute_path = "package://RageZombies/cef/views/";
+class CEFBrowser {
+    constructor(url) {
+        this._setup(url);
+    }
+    _setup(url) {
+        let self = this;
+        self.browser = mp.browsers.new(absolute_path + url);
+        self.cursorState = false;
+        console.log("new instance");
 
+    }
+    call() {
+        let args = Array.prototype.slice.call(arguments);
+        let full = args[0];
+        let callArgs = "(";
+        for (let i = 1; i < args.length; i++) {
+            switch (typeof args[i]) {
+                case 'string':
+                    {  
+                        callArgs += "\'" + args[i] + "\'";
+                        break;
+                    }
+                case 'number':
+                case 'boolean':
+                    {
+                        callArgs += args[i];
+                        break;
+                    }
+                case 'object':
+                    {
+                        callArgs += JSON.stringify(args[i]);
+                        break;
+                    }
+            }
+            if (i < (args.length - 1)) {
+                callArgs += ",";
+            }
+        }
+        callArgs += ");";
+        full += callArgs;
+        this.browser.execute(full);
+    }
+    active(toggle) {
+        this.browser.active = toggle;
+    }
+    get isActive() {
+        return this.browser.active;
+    }
+    cursor(state) {
+        this.cursorState = state;
+        mp.gui.cursor.visible = state;
+    }
+    clear() {
+        this.load("empty.html")
+    }
+    load(path) {
+        let self = this;
+        self.browser.url = absolute_path + path;
+    }
+}
+module.exports = {
+    interface:new CEFBrowser("empty.html"),
+    inventory:new CEFBrowser("empty.html"),
+    hud:new CEFBrowser("empty.html"),
+    notification:new CEFBrowser("notifications/index.html"),
+    class:CEFBrowser
+};
 },{}],2:[function(require,module,exports){
-var Offsets=require("./object_offsets.js"),Building=new class{constructor(){this._setup()}_setup(){let e=this;e._cObj=null,e._maxDist=10,e._state=!1,mp.events.add("render",t=>e._render(t))}get busy(){return this._state}cancel(){1==this.busy&&(this._cObj.destroy(),this._cObj=null,mp.events.callRemote("Building:Canceled"),this._state=!1,mp.canCrouch=!0)}loadObject(e){this._tempModel=e;let t=mp.objects.new(mp.game.joaat(e),mp.vector(mp.players.local.position).sub(0,0,10),{alpha:255,dimension:0});t.gameObject=!0,this._cObj=t,this._state=!0}_getPlaceCoords(){let e=mp.gameplayCam.getDirection(),t=mp.gameplayCam.getCoord(),o=(mp.gameplayCam.getRot(0),new mp.Vector3(e.x*this._maxDist+t.x,e.y*this._maxDist+t.y,e.z*this._maxDist+t.z)),s=mp.raycasting.testPointToPoint(t,o,this._cObj.handle,17),l=o;return void 0!==s&&(l=mp.vector(s.position)),l}_render(){let e=this;if(e._state&&e._cObj){mp.game.controls.disableControlAction(0,22,!0),mp.game.controls.disableControlAction(0,16,!0),mp.game.controls.disableControlAction(0,17,!0),mp.game.controls.disableControlAction(0,24,!0),e._cObj.setCollision(!1,!1),e._cObj.setAlpha(150);let t=e._cObj.getRotation(0),o=e._getPlaceCoords(),s=mp.vector(o).ground2(e._cObj);mp.game.controls.isDisabledControlPressed(0,22)&&(o=s),mp.game.controls.isDisabledControlPressed(0,16)?t.z-=8:mp.game.controls.isDisabledControlPressed(0,17)&&(t.z+=8),e._cObj.setRotation(t.x,t.y,t.z,0,!0),e._cObj.setCoords(o.x,o.y,o.z,!1,!1,!1,!1),mp.game.graphics.drawText(s.dist(o)>.001?"[NOT PLACEABLE]":"[PLACEABLE]",[o.x,o.y,o.z],{font:4,color:[255,255,255,185],scale:[.25,.25],outline:!0,centre:!0}),e._renderHelp(),mp.canCrouch=!1;let l=!(s.dist(o)>.001);mp.game.controls.isDisabledControlPressed(0,24)?1==l&&e._place():mp.game.controls.isDisabledControlPressed(0,25)&&e.cancel()}}_place(){let e=this;if(e._cObj){let t=e._cObj.getRotation(0),o=e._cObj.getCoords(!1);e._cObj.destroy(),e._cObj=null;let s={model:e._tempModel,pos:{x:o.x,y:o.y,z:o.z},rot:{x:t.x,y:t.y,z:t.z}};mp.events.callRemote("Building:Place",JSON.stringify(s)),mp.canCrouch=!0}e._state=!1}_renderHelp(){mp.game.graphics.drawText("[MW DOWN] Rotate Left",[.4,.7],{font:4,color:1==mp.game.controls.isDisabledControlPressed(0,16)?[255,150,150,200]:[255,255,255,200],scale:[.3,.3],outline:!0,centre:!0}),mp.game.graphics.drawText("[MW UP] Rotate Right",[.6,.7],{font:4,color:1==mp.game.controls.isDisabledControlPressed(0,17)?[255,150,150,200]:[255,255,255,200],scale:[.3,.3],outline:!0,centre:!0}),mp.game.graphics.drawText("[LMB] Place Object",[.5,.65],{font:4,color:[255,255,255,200],scale:[.3,.3],outline:!0,centre:!0}),mp.game.graphics.drawText("[RMB] Cancel Placement",[.5,.67],{font:4,color:[255,255,255,200],scale:[.3,.3],outline:!0,centre:!0}),mp.game.graphics.drawText("[MOUSE] Change Position",[.5,.7],{font:4,color:[255,255,255,200],scale:[.3,.3],outline:!0,centre:!0}),mp.game.graphics.drawText("[SPACE] Snap to Ground",[.5,.73],{font:4,color:1==mp.game.controls.isDisabledControlPressed(0,22)?[255,150,150,200]:[255,255,255,200],scale:[.3,.3],outline:!0,centre:!0})}};mp.events.add("Building:Start",e=>{0==Building.busy&&(console.log("loading building object",e),Building.loadObject(e))}),mp.events.add("Building:Cancel",()=>{1==Building.busy&&Building.cancel()}),module.exports=Building;
-
+var Offsets = require("./object_offsets.js")
+var Building = new class {
+    constructor() {
+        this._setup();
+    }
+    _setup() {
+        let self = this;
+        self._cObj = null;
+        self._maxDist = 10;
+        self._state = false;
+        mp.events.add("render", e => self._render(e));
+    }
+    get busy() {
+        return this._state;
+    }
+    cancel() {
+        if (this.busy == true) {
+            this._cObj.destroy();
+            this._cObj = null;
+            mp.events.callRemote("Building:Canceled");
+            this._state = false;
+            mp.canCrouch = true;
+        }
+    }
+    loadObject(model) {
+        let self = this;
+        self._tempModel = model
+        let temp_obj = mp.objects.new(mp.game.joaat(model), mp.vector(mp.players.local.position).sub(0, 0, 10), {
+            alpha: 255,
+            dimension: 0
+        });
+        temp_obj.gameObject = true;
+        self._cObj = temp_obj;
+        self._state = true;
+    }
+    _getPlaceCoords() {
+        let self = this;
+        let direction = mp.gameplayCam.getDirection();
+        let coords = mp.gameplayCam.getCoord();
+        let cam_rot = mp.gameplayCam.getRot(0);
+        let farAway = new mp.Vector3((direction.x * self._maxDist) + (coords.x), (direction.y * self._maxDist) + (coords.y), (direction.z * self._maxDist) + (coords.z));
+        let result = mp.raycasting.testPointToPoint(coords, farAway, self._cObj.handle, (1 | 16));
+        let targetPos = farAway;
+        if (result !== undefined) {
+            targetPos = mp.vector(result.position);
+        }
+        return targetPos;
+    }
+    _render() {
+        let self = this;
+        if ((self._state) && (self._cObj)) {
+            mp.game.controls.disableControlAction(0, 22, true); // SPACE
+            mp.game.controls.disableControlAction(0, 16, true); //MWHEEL
+            mp.game.controls.disableControlAction(0, 17, true); //MWHEEL
+            mp.game.controls.disableControlAction(0, 24, true); //Left Mouse Button
+            self._cObj.setCollision(false, false);
+            self._cObj.setAlpha(150);
+            let rot = self._cObj.getRotation(0);
+            let targetPos = self._getPlaceCoords();
+            let ground = mp.vector(targetPos).ground2(self._cObj);
+            let space_key = mp.game.controls.isDisabledControlPressed(0, 22);
+            if (space_key) {
+                targetPos = ground;
+            }
+            if (mp.game.controls.isDisabledControlPressed(0, 16)) {
+                rot.z -= 8;
+            } else if (mp.game.controls.isDisabledControlPressed(0, 17)) {
+                rot.z += 8;
+            }
+            self._cObj.setRotation(rot.x, rot.y, rot.z, 0, true);
+            self._cObj.setCoords(targetPos.x, targetPos.y, targetPos.z, false, false, false, false);
+            mp.game.graphics.drawText((ground.dist(targetPos) > 0.001) ? "[NOT PLACEABLE]" : "[PLACEABLE]", [targetPos.x, targetPos.y, targetPos.z], {
+                font: 4,
+                color: [255, 255, 255, 185],
+                scale: [0.25, 0.25],
+                outline: true,
+                centre: true
+            });
+            self._renderHelp();
+            mp.canCrouch = false;
+            let can_place = (ground.dist(targetPos) > 0.001) ? false : true;
+            if (mp.game.controls.isDisabledControlPressed(0, 24)) {
+                if (can_place == true) {
+                    self._place();
+                }
+            } else if (mp.game.controls.isDisabledControlPressed(0, 25)) {
+                self.cancel();
+            }
+        }
+    }
+    _place() {
+        let self = this;
+        if (self._cObj) {
+            let rot = self._cObj.getRotation(0);
+            let pos = self._cObj.getCoords(false);
+            self._cObj.destroy();
+            self._cObj = null;
+            let obj_data = {
+                model: self._tempModel,
+                pos: {
+                    x: pos.x,
+                    y: pos.y,
+                    z: pos.z
+                },
+                rot: {
+                    x: rot.x,
+                    y: rot.y,
+                    z: rot.z
+                }
+            }
+            mp.events.callRemote("Building:Place", JSON.stringify(obj_data));
+            mp.canCrouch = true;
+        }
+        self._state = false;
+    }
+    _renderHelp() {
+        let self = this;
+        mp.game.graphics.drawText("[MW DOWN] Rotate Left", [0.4, 0.7], {
+            font: 4,
+            color: (mp.game.controls.isDisabledControlPressed(0, 16) == true) ? [255, 150, 150, 200] : [255, 255, 255, 200],
+            scale: [0.3, 0.3],
+            outline: true,
+            centre: true
+        });
+        mp.game.graphics.drawText("[MW UP] Rotate Right", [0.6, 0.7], {
+            font: 4,
+            color: (mp.game.controls.isDisabledControlPressed(0, 17) == true) ? [255, 150, 150, 200] : [255, 255, 255, 200],
+            scale: [0.3, 0.3],
+            outline: true,
+            centre: true
+        });
+        mp.game.graphics.drawText("[LMB] Place Object", [0.5, 0.65], {
+            font: 4,
+            color: [255, 255, 255, 200],
+            scale: [0.3, 0.3],
+            outline: true,
+            centre: true
+        });
+        mp.game.graphics.drawText("[RMB] Cancel Placement", [0.5, 0.67], {
+            font: 4,
+            color: [255, 255, 255, 200],
+            scale: [0.3, 0.3],
+            outline: true,
+            centre: true
+        });
+        mp.game.graphics.drawText("[MOUSE] Change Position", [0.5, 0.7], {
+            font: 4,
+            color: [255, 255, 255, 200],
+            scale: [0.3, 0.3],
+            outline: true,
+            centre: true
+        });
+        mp.game.graphics.drawText("[SPACE] Snap to Ground", [0.5, 0.73], {
+            font: 4,
+            color: (mp.game.controls.isDisabledControlPressed(0, 22) == true) ? [255, 150, 150, 200] : [255, 255, 255, 200],
+            scale: [0.3, 0.3],
+            outline: true,
+            centre: true
+        });
+    }
+}
+mp.events.add("Building:Start", (model) => {
+    if (Building.busy == false) {
+        console.log("loading building object", model);
+        Building.loadObject(model);
+    }
+});
+mp.events.add("Building:Cancel", () => {
+    if (Building.busy == true) {
+        Building.cancel();
+    }
+});
+module.exports = Building;
 },{"./object_offsets.js":19}],3:[function(require,module,exports){
-var values=[];values.father=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,42,43,44],values.mother=[21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,45];const appearanceIndex={blemishes:0,facial_hair:1,eyebrows:2,ageing:3,makeup:4,blush:5,complexion:6,sundamage:7,lipstick:8,freckles:9,chesthair:10};var CEFInterface=require("./browser.js").interface,CEFNotification=require("./browser.js").notification;mp.events.add("Character:Start",(e,a,l)=>{console.log("CHARACERT"),mp.localPlayer.position=new mp.Vector3(1868.5804443359375,3710.160888671875,113.74533081054688),mp.localPlayer.setAlpha(255),mp.localPlayer.freezePosition(!0),mp.localPlayer.setHeading(140),mp.defaultCam.setActive(!0),NewCam=mp.cameras.new("default",new mp.Vector3(1867.5804443359375,3708.160888671875,114.14533081054688),new mp.Vector3,40),NewCam.pointAtCoord(1868.5804443359375,3710.160888671875,113.74533081054688),NewCam.setActive(!0),mp.game.cam.renderScriptCams(!0,!1,0,!0,!1),NewCam.setActiveWithInterp(mp.defaultCam.handle,2e3,0,0),mp.defaultCam=NewCam,mp.game.ui.displayHud(!1),mp.game.ui.displayRadar(!1),setTimeout(function(){CEFInterface.load("character_creator/index.html"),CEFInterface.cursor(!0),BeginCharacterCreator()},2e3)}),mp.events.add("Character:Update",e=>{let a=mp.localPlayer.model==mp.game.joaat("mp_m_freemode_01")?"Male":"Female";if((e=JSON.parse(e)).gender!=a&&("Male"==e.gender?(mp.localPlayer.model=mp.game.joaat("mp_m_freemode_01"),mp.localPlayer.setComponentVariation(3,0,0,2),mp.localPlayer.setComponentVariation(4,102,0,2),mp.localPlayer.setComponentVariation(6,34,0,2),mp.localPlayer.setComponentVariation(8,15,0,2),mp.localPlayer.setComponentVariation(11,34,0,2),mp.localPlayer.setComponentVariation(5,40,0,2)):(mp.localPlayer.model=mp.game.joaat("mp_f_freemode_01"),mp.localPlayer.setComponentVariation(3,14,0,2),mp.localPlayer.setComponentVariation(4,110,0,2),mp.localPlayer.setComponentVariation(6,35,0,2),mp.localPlayer.setComponentVariation(8,15,0,2),mp.localPlayer.setComponentVariation(11,49,0,2),mp.localPlayer.setComponentVariation(5,40,0,2))),e.makeup){let a=appearanceIndex.makeup,l=0==e.makeup?255:e.makeup-1;mp.localPlayer.setHeadOverlay(a,l,.01*e.makeup_opacity,0,0)}if(e.ageing){let a=appearanceIndex.ageing,l=0==e.ageing?255:e.ageing-1;mp.localPlayer.setHeadOverlay(a,l,.01*e.ageing_opacity,0,0)}if(e.blemishes){let a=appearanceIndex.blemishes,l=0==e.blemishes?255:e.blemishes-1;mp.localPlayer.setHeadOverlay(a,l,.01*e.blemishes_opacity,0,0)}if(e.facial_hair){let a=appearanceIndex.facial_hair,l=0==e.facial_hair?255:e.facial_hair-1;mp.localPlayer.setHeadOverlay(a,l,.01*e.facial_hair_opacity,e.facial_hair_color,0)}if(e.eyebrows){let a=appearanceIndex.eyebrows,l=0==e.eyebrows?255:e.eyebrows-1;mp.localPlayer.setHeadOverlay(a,l,.01*e.eyebrows_opacity,e.eyebrows_color,0)}if(e.blush){let a=appearanceIndex.blush,l=0==e.blush?255:e.blush-1;mp.localPlayer.setHeadOverlay(a,l,.01*e.blush_opacity,e.blush_color,0)}if(e.complexion){let a=appearanceIndex.complexion,l=0==e.complexion?255:e.complexion-1;mp.localPlayer.setHeadOverlay(a,l,.01*e.complexion_opacity,0,0)}if(e.lipstick){let a=appearanceIndex.lipstick,l=0==e.lipstick?255:e.lipstick-1;mp.localPlayer.setHeadOverlay(a,l,.01*e.lipstick_opacity,0,0)}if(e.freckles){let a=appearanceIndex.freckles,l=0==e.freckles?255:e.freckles-1;mp.localPlayer.setHeadOverlay(a,l,.01*e.freckles_opacity,0,0)}if(e.chesthair){let a=appearanceIndex.chesthair,l=0==e.chesthair?255:e.chesthair-1;mp.localPlayer.setHeadOverlay(a,l,.01*e.chesthair_opacity,e.chesthair_color,0)}if(e.sundamage){let a=appearanceIndex.sundamage,l=0==e.sundamage?255:e.sundamage-1;mp.localPlayer.setHeadOverlay(a,l,.01*e.sundamage_opacity,0,0)}e.facial.forEach(function(e,a){mp.localPlayer.setFaceFeature(parseInt(e.index),.01*parseFloat(e.val))}),null!=e.hair&&(mp.localPlayer.setComponentVariation(2,e.hair,0,2),mp.localPlayer.setHairColor(e.hair_color,e.hair_highlight_color),mp.localPlayer.setEyeColor(e.eyeColor),mp.localPlayer.setHeadOverlayColor(1,1,e.facial_hair_color,0),mp.localPlayer.setHeadOverlayColor(2,1,e.eyebrows_color,0),mp.localPlayer.setHeadOverlayColor(5,2,e.blush_color,0),mp.localPlayer.setHeadOverlayColor(8,2,e.lipstick,0),mp.localPlayer.setHeadOverlayColor(10,1,e.chesthair_color,0)),null!=e.fatherIndex&&null!=e.motherIndex&&null!=e.tone&&null!=e.resemblance&&mp.localPlayer.setHeadBlendData(values.mother[e.motherIndex],values.father[e.fatherIndex],0,values.mother[e.motherIndex],values.father[e.fatherIndex],0,.01*e.resemblance,.01*e.tone,0,!1)}),mp.events.add("Character:Save",e=>{console.log("SAVE CHAR"),CEFInterface.clear(),CEFInterface.cursor(!1),CEFInterface.active(!1),clearTasksRender=!1,mp.defaultCam.setActive(!1),mp.localPlayer.freezePosition(!1),mp.game.cam.doScreenFadeOut(500),setTimeout(function(){mp.events.callRemote("Character:Save",e)},1e3)});var clearTasksRender=!1;function BeginCharacterCreator(){mp.localPlayer.model=mp.game.joaat("mp_m_freemode_01"),mp.localPlayer.setDefaultComponentVariation(),mp.localPlayer.setComponentVariation(3,0,0,2),mp.localPlayer.setComponentVariation(4,102,0,2),mp.localPlayer.setComponentVariation(6,34,0,2),mp.localPlayer.setComponentVariation(8,15,0,2),mp.localPlayer.setComponentVariation(11,34,0,2),mp.localPlayer.setComponentVariation(5,40,0,2),mp.localPlayer.setHeadBlendData(values.mother[0],values.father[0],0,values.mother[0],values.father[0],0,.5,.5,0,!1),clearTasksRender=!0}mp.events.add("render",function(){if(1==clearTasksRender){mp.localPlayer.setHeading(140),mp.localPlayer.taskLookAt(0,0,0);let e=mp.localPlayer.getBoneCoords(12844,0,0,0);mp.defaultCam.pointAtCoord(e.x,e.y,e.z),mp.defaultCam.setActive(!0)}});
+var values = [];
+values["father"] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 42, 43, 44];
+values["mother"] = [21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 45];
+const appearanceIndex = {
+    "blemishes": 0,
+    "facial_hair": 1,
+    "eyebrows": 2,
+    "ageing": 3,
+    "makeup": 4,
+    "blush": 5,
+    "complexion": 6,
+    "sundamage": 7,
+    "lipstick": 8,
+    "freckles": 9,
+    "chesthair": 10
+}
+var CEFInterface = require("./browser.js").interface;
+var CEFNotification = require("./browser.js").notification;
+mp.events.add("Character:Start", (username, hash_password, salt) => {
+    console.log("CHARACERT")
+    mp.localPlayer.position = new mp.Vector3(1868.5804443359375, 3710.160888671875, 113.74533081054688);
+    mp.localPlayer.setAlpha(255);
+    mp.localPlayer.freezePosition(true);
+    mp.localPlayer.setHeading(140);
+    mp.defaultCam.setActive(true);
+    NewCam = mp.cameras.new('default', new mp.Vector3(1867.5804443359375, 3708.160888671875, 114.14533081054688), new mp.Vector3(), 40);
+    NewCam.pointAtCoord(1868.5804443359375, 3710.160888671875, 113.74533081054688);
+    NewCam.setActive(true);
+    mp.game.cam.renderScriptCams(true, false, 0, true, false);
+    NewCam.setActiveWithInterp(mp.defaultCam.handle, 2000, 0, 0); // 2000ms = 2secs, 0, 0 - idk
+    mp.defaultCam = NewCam;
+    mp.game.ui.displayHud(false);
+    mp.game.ui.displayRadar(false);
+    //mp.gui.chat.show(false);
+    setTimeout(function() {
+        CEFInterface.load("character_creator/index.html");
+        CEFInterface.cursor(true);
+        BeginCharacterCreator();
+    }, 2000)
+    //mp.events.callRemote("ServerAccount:Register", username, hash_password, salt);
+});
+mp.events.add("Character:Update", (data) => {
+    let cModel = mp.localPlayer.model == mp.game.joaat('mp_m_freemode_01') ? "Male" : "Female"
+    data = JSON.parse(data);
+    if (data.gender != cModel) {
+        if (data.gender == "Male") {
+            mp.localPlayer.model = mp.game.joaat('mp_m_freemode_01');
+            mp.localPlayer.setComponentVariation(3, 0, 0, 2);
+            mp.localPlayer.setComponentVariation(4, 102, 0, 2);
+            mp.localPlayer.setComponentVariation(6, 34, 0, 2);
+            mp.localPlayer.setComponentVariation(8, 15, 0, 2);
+            mp.localPlayer.setComponentVariation(11, 34, 0, 2);
+            mp.localPlayer.setComponentVariation(5, 40, 0, 2);
+        } else {
+            mp.localPlayer.model = mp.game.joaat('mp_f_freemode_01');
+            mp.localPlayer.setComponentVariation(3, 14, 0, 2);
+            mp.localPlayer.setComponentVariation(4, 110, 0, 2);
+            mp.localPlayer.setComponentVariation(6, 35, 0, 2);
+            mp.localPlayer.setComponentVariation(8, 15, 0, 2);
+            mp.localPlayer.setComponentVariation(11, 49, 0, 2);
+            mp.localPlayer.setComponentVariation(5, 40, 0, 2);
+        }
+    }
+    /*appearanceIndex*/
+    if (data.makeup) {
+        let index = appearanceIndex["makeup"];
+        let overlayID = (data.makeup == 0) ? 255 : data.makeup - 1;
+        mp.localPlayer.setHeadOverlay(index, overlayID, /*Opacity*/ data.makeup_opacity * 0.01, 0 /*ColorOverlay*/ , 0);
+    }
+    if (data.ageing) {
+        let index = appearanceIndex["ageing"];
+        let overlayID = (data.ageing == 0) ? 255 : data.ageing - 1;
+        mp.localPlayer.setHeadOverlay(index, overlayID, /*Opacity*/ data.ageing_opacity * 0.01, 0 /*ColorOverlay*/ , 0);
+    }
+    if (data.blemishes) {
+        let index = appearanceIndex["blemishes"];
+        let overlayID = (data.blemishes == 0) ? 255 : data.blemishes - 1;
+        mp.localPlayer.setHeadOverlay(index, overlayID, /*Opacity*/ data.blemishes_opacity * 0.01, 0 /*ColorOverlay*/ , 0);
+    }
+    if (data.facial_hair) {
+        let index = appearanceIndex["facial_hair"];
+        let overlayID = (data.facial_hair == 0) ? 255 : data.facial_hair - 1;
+        mp.localPlayer.setHeadOverlay(index, overlayID, /*Opacity*/ data.facial_hair_opacity * 0.01, data.facial_hair_color /*ColorOverlay*/ , 0);
+    }
+    if (data.eyebrows) {
+        let index = appearanceIndex["eyebrows"];
+        let overlayID = (data.eyebrows == 0) ? 255 : data.eyebrows - 1;
+        mp.localPlayer.setHeadOverlay(index, overlayID, /*Opacity*/ data.eyebrows_opacity * 0.01, data.eyebrows_color /*ColorOverlay*/ , 0);
+    }
+    if (data.blush) {
+        let index = appearanceIndex["blush"];
+        let overlayID = (data.blush == 0) ? 255 : data.blush - 1;
+        mp.localPlayer.setHeadOverlay(index, overlayID, /*Opacity*/ data.blush_opacity * 0.01, data.blush_color /*ColorOverlay*/ , 0);
+    }
+    if (data.complexion) {
+        let index = appearanceIndex["complexion"];
+        let overlayID = (data.complexion == 0) ? 255 : data.complexion - 1;
+        mp.localPlayer.setHeadOverlay(index, overlayID, /*Opacity*/ data.complexion_opacity * 0.01, 0 /*ColorOverlay*/ , 0);
+    }
+    if (data.lipstick) {
+        let index = appearanceIndex["lipstick"];
+        let overlayID = (data.lipstick == 0) ? 255 : data.lipstick - 1;
+        mp.localPlayer.setHeadOverlay(index, overlayID, /*Opacity*/ data.lipstick_opacity * 0.01, 0 /*ColorOverlay*/ , 0);
+    }
+    if (data.freckles) {
+        let index = appearanceIndex["freckles"];
+        let overlayID = (data.freckles == 0) ? 255 : data.freckles - 1;
+        mp.localPlayer.setHeadOverlay(index, overlayID, /*Opacity*/ data.freckles_opacity * 0.01, 0 /*ColorOverlay*/ , 0);
+    }
+    if (data.chesthair) {
+        let index = appearanceIndex["chesthair"];
+        let overlayID = (data.chesthair == 0) ? 255 : data.chesthair - 1;
+        mp.localPlayer.setHeadOverlay(index, overlayID, /*Opacity*/ data.chesthair_opacity * 0.01, data.chesthair_color /*ColorOverlay*/ , 0);
+    }
+    if (data.sundamage) {
+        let index = appearanceIndex["sundamage"];
+        let overlayID = (data.sundamage == 0) ? 255 : data.sundamage - 1;
+        mp.localPlayer.setHeadOverlay(index, overlayID, /*Opacity*/ data.sundamage_opacity * 0.01, 0 /*ColorOverlay*/ , 0);
+    }
+    data.facial.forEach(function(feature, i) {
+        mp.localPlayer.setFaceFeature(parseInt(feature.index), parseFloat(feature.val) * 0.01);
+    })
+    if (data.hair != undefined) {
+        mp.localPlayer.setComponentVariation(2, data.hair, 0, 2);
+        mp.localPlayer.setHairColor(data.hair_color, data.hair_highlight_color);
+        mp.localPlayer.setEyeColor(data.eyeColor);
+        mp.localPlayer.setHeadOverlayColor(1, 1, data.facial_hair_color, 0);
+        mp.localPlayer.setHeadOverlayColor(2, 1, data.eyebrows_color, 0);
+        mp.localPlayer.setHeadOverlayColor(5, 2, data.blush_color, 0);
+        mp.localPlayer.setHeadOverlayColor(8, 2, data.lipstick, 0);
+        mp.localPlayer.setHeadOverlayColor(10, 1, data.chesthair_color, 0);
+    }
+    if ((data.fatherIndex != undefined) && (data.motherIndex != undefined) && (data.tone != undefined) && (data.resemblance != undefined)) {
+        mp.localPlayer.setHeadBlendData(
+            // shape
+            values["mother"][data.motherIndex], values["father"][data.fatherIndex], 0,
+            // skin
+            values["mother"][data.motherIndex], values["father"][data.fatherIndex], 0,
+            // mixes
+            data.resemblance * 0.01, data.tone * 0.01, 0.0, false);
+    }
+});
+mp.events.add("Character:Save", (data) => {
+    console.log("SAVE CHAR");
+    CEFInterface.clear();
+    CEFInterface.cursor(false);
+    CEFInterface.active(false);
+    clearTasksRender = false;
+    mp.defaultCam.setActive(false);
+    mp.localPlayer.freezePosition(false);
+    mp.game.cam.doScreenFadeOut(500);
+    setTimeout(function() {
+        mp.events.callRemote("Character:Save", data);
+    }, 1000)
+});
+var clearTasksRender = false;
+mp.events.add("render", function() {
+    if (clearTasksRender == true) {
+        mp.localPlayer.setHeading(140);
+        mp.localPlayer.taskLookAt(0, 0, 0);
+        let hpos = mp.localPlayer.getBoneCoords(12844, 0, 0, 0)
+        mp.defaultCam.pointAtCoord(hpos.x, hpos.y, hpos.z);
+        mp.defaultCam.setActive(true);
+    }
+});
 
+function BeginCharacterCreator() {
+    // Set To Male ( Male : mp_m_freemode_01, female : mp_f_freemode_01)
+    mp.localPlayer.model = mp.game.joaat('mp_m_freemode_01');
+    mp.localPlayer.setDefaultComponentVariation();
+    mp.localPlayer.setComponentVariation(3, 0, 0, 2);
+    mp.localPlayer.setComponentVariation(4, 102, 0, 2);
+    mp.localPlayer.setComponentVariation(6, 34, 0, 2);
+    mp.localPlayer.setComponentVariation(8, 15, 0, 2);
+    mp.localPlayer.setComponentVariation(11, 34, 0, 2);
+    mp.localPlayer.setComponentVariation(5, 40, 0, 2);
+    mp.localPlayer.setHeadBlendData(
+        // shape
+        values["mother"][0], values["father"][0], 0,
+        // skin
+        values["mother"][0], values["father"][0], 0,
+        // mixes
+        0.5, 0.5, 0.0, false);
+    clearTasksRender = true;
+}
 },{"./browser.js":1}],4:[function(require,module,exports){
-require("./vector.js");var player_bones={SKEL_L_UpperArm:{bone_id:45509,threshold:.08},SKEL_R_UpperArm:{bone_id:40269,threshold:.08},SKEL_L_Forearm:{bone_id:61163,threshold:.08},SKEL_R_Forearm:{bone_id:28252,threshold:.08},SKEL_Head:{bone_id:31086,threshold:.15},SKEL_R_Hand:{bone_id:57005,threshold:.06},SKEL_L_Hand:{bone_id:18905,threshold:.06},SKEL_R_Clavicle:{bone_id:10706,threshold:.1},SKEL_L_Clavicle:{bone_id:64729,threshold:.1},SKEL_Spine0:{bone_id:23553,threshold:.15},SKEL_Spine1:{bone_id:24816,threshold:.15},SKEL_Spine2:{bone_id:24817,threshold:.15},SKEL_Spine3:{bone_id:24818,threshold:.15},SKEL_R_Calf:{bone_id:36864,threshold:.08},SKEL_L_Calf:{bone_id:63931,threshold:.08},SKEL_L_Thigh:{bone_id:58271,threshold:.08},SKEL_R_Thigh:{bone_id:51826,threshold:.08},SKEL_R_Foot:{bone_id:52301,threshold:.08},SKEL_L_Foot:{bone_id:14201,threshold:.08}};function getVehiclePassangerEntityFromPosition(e,t){let o=[];mp.players.forEachInStreamRange(e=>{e.vehicle==t&&o.push(e)});let a={dist:9999,target:null};return o.forEach(function(t){let o=t.position,i=mp.game.system.vdist2(e.x,e.y,e.z,o.x,o.y,o.z);i<a.dist&&(a.dist=i,a.target=t)}),a}function getIsHitOnBone(e,t){let o="",a=99;if(null!=t)for(let i in player_bones){let l=player_bones[i].bone_id,r=player_bones[i].threshold,s=mp.players.local.getBoneCoords(12844,0,0,0),n=t.getBoneCoords(l,0,0,0);mp.raycasting.testPointToPoint(e,n,mp.players.local,2);if(mp.game.system.vdist(e.x,e.y,e.z,n.x,n.y,n.z)<1.6){let t=new mp.Vector3(e.x-s.x,e.y-s.y,e.z-s.z),l=mp.game.system.vdist(e.x,e.y,e.z,s.x,s.y,s.z),m=t.normalize(l),p=mp.game.system.vdist(n.x,n.y,n.z,s.x,s.y,s.z),y=m.multiply(p),d=mp.game.system.vdist(n.x,n.y,n.z,s.x+y.x,s.y+y.y,s.z+y.z);a>d&&d<=r&&(o=i,a=d)}}return{hit:""!=o,bone:o,dist:a}}var shotgunSpreadData={487013001:{spray:1.5,max_dist:30}};function getWeaponDetails(e){return shotgunSpreadData[e]?shotgunSpreadData[e]:{spray:1.5,max_dist:30}}function isWallbugging(e){let t=mp.players.local.getBoneCoords(40269,0,0,0),o=e,a=mp.raycasting.testPointToPoint(o,t,mp.players.local,19);if(a){let e=a.position,o=new mp.Vector3(e.x-t.x,e.y-t.y,e.z-t.z),i=mp.game.system.vdist(e.x,e.y,e.z,t.x,t.y,t.z),l=o.normalize(i/2).multiply(i/2),r=new mp.Vector3(e.x+l.x,e.y+l.y,e.z+l.z),s=new mp.Vector3(e.x-l.x,e.y-l.y,e.z-l.z),n=mp.raycasting.testPointToPoint(r,s,mp.players.local,19),m=mp.raycasting.testPointToPoint(s,r,mp.players.local,19);if(n&&m){return!(mp.game.system.vdist(n.position.x,n.position.y,n.position.z,m.position.x,m.position.y,m.position.z)<.45)}return!0}return!1}function calculateShotgunPelletsOnPlayers(){let e=null;var t=mp.players.local.getBoneCoords(40269,0,0,0);let o=mp.players.local.aimingAt;return mp.raycasting.testPointToPoint(o,t,mp.players.local,-1)||mp.players.forEachInStreamRange(a=>{if(mp.players.local!=a){let i=a.getWorldPositionOfBone(a.getBoneIndexByName("IK_Head"));if(!mp.raycasting.testPointToPoint(t,i,mp.players.local,-1)){let l=mp.players.local.getBoneCoords(12844,0,0,0),r=new mp.Vector3(o.x-l.x,o.y-l.y,o.z-l.z),s=mp.game.system.vdist(o.x,o.y,o.z,l.x,l.y,l.z),n=r.normalize(s),m=mp.game.system.vdist(i.x,i.y,i.z,l.x,l.y,l.z),p=n.multiply(m),y=(new mp.Vector3(l.x+p.x,l.y+p.y,l.z+p.z),mp.game.system.vdist(i.x,i.y,i.z,l.x+p.x,l.y+p.y,l.z+p.z)),d=mp.game.system.vdist(i.x,i.y,i.z,t.x,t.y,t.z),h=getWeaponDetails(Number(mp.players.local.weapon));if(h){let t=lerp(.5,h.spray,1/h.max_dist*d);t>h.spray&&(t=h.spray);let o=!1;t>y&&(o=!0),1==o&&(e=a)}}}}),e}mp.events.add("playerWeaponShot",(e,t)=>{let o=mp.players.local.weapon,a=mp.players.local.getAmmoInClip(o);if(mp.events.callRemote("Combat:FireWeapon",o.toString(),a),0==isWallbugging(e))if(t)if(t.isInAnyVehicle(!1)){let a=t.vehicle,i=getVehiclePassangerEntityFromPosition(e,a);1==getIsHitOnBone(e,i.target).hit?mp.events.callRemote("Combat:HitEntity",i.target,o):mp.events.callRemote("Combat:HitVehicle",a,o)}else mp.events.callRemote("Combat:HitEntity",t,o);else if(860033945==mp.game.weapon.getWeapontypeGroup(o)){let e=calculateShotgunPelletsOnPlayers();null!=e&&mp.events.callRemote("Combat:HitEntity",e,o)}});var timerHitmarker=0;mp.events.add("render",()=>{mp.game.player.resetStamina(),mp.game.graphics.hasStreamedTextureDictLoaded("hud_reticle")||mp.game.graphics.requestStreamedTextureDict("hud_reticle",!0),mp.game.graphics.hasStreamedTextureDictLoaded("hud_reticle")&&Date.now()/1e3-timerHitmarker<=.1&&mp.game.graphics.drawSprite("hud_reticle","reticle_ar",.5,.5,.025,.04,45,255,255,255,150)}),mp.events.add("Combat:HitEntity",()=>{timerHitmarker=Date.now()/1e3}),mp.events.add("Combat:Hitted",e=>{});
+require("./vector.js")
+var player_bones = {
+	"SKEL_L_UpperArm": {
+		bone_id: 45509,
+		threshold: 0.08
+	},
+	"SKEL_R_UpperArm": {
+		bone_id: 40269,
+		threshold: 0.08
+	},
+	"SKEL_L_Forearm": {
+		bone_id: 61163,
+		threshold: 0.08
+	},
+	"SKEL_R_Forearm": {
+		bone_id: 28252,
+		threshold: 0.08
+	},
+	"SKEL_Head": {
+		bone_id: 31086,
+		threshold: 0.15
+	},
+	"SKEL_R_Hand": {
+		bone_id: 57005,
+		threshold: 0.06
+	},
+	"SKEL_L_Hand": {
+		bone_id: 18905,
+		threshold: 0.06
+	},
+	"SKEL_R_Clavicle": {
+		bone_id: 10706,
+		threshold: 0.1
+	},
+	"SKEL_L_Clavicle": {
+		bone_id: 64729,
+		threshold: 0.1
+	},
+	"SKEL_Spine0": {
+		bone_id: 23553,
+		threshold: 0.15
+	},
+	"SKEL_Spine1": {
+		bone_id: 24816,
+		threshold: 0.15
+	},
+	"SKEL_Spine2": {
+		bone_id: 24817,
+		threshold: 0.15
+	},
+	"SKEL_Spine3": {
+		bone_id: 24818,
+		threshold: 0.15
+	},
+	"SKEL_R_Calf": {
+		bone_id: 36864,
+		threshold: 0.08
+	},
+	"SKEL_L_Calf": {
+		bone_id: 63931,
+		threshold: 0.08
+	},
+	"SKEL_L_Thigh": {
+		bone_id: 58271,
+		threshold: 0.08
+	},
+	"SKEL_R_Thigh": {
+		bone_id: 51826,
+		threshold: 0.08
+	},
+	"SKEL_R_Foot": {
+		bone_id: 52301,
+		threshold: 0.08
+	},
+	"SKEL_L_Foot": {
+		bone_id: 14201,
+		threshold: 0.08
+	}
+}
 
+function getVehiclePassangerEntityFromPosition(hPos, veh) {
+	let inVehPlayers = [];
+	mp.players.forEachInStreamRange((player) => {
+		if (player.vehicle == veh) {
+			inVehPlayers.push(player);
+		}
+	});
+	let targetEntity = {
+		dist: 9999,
+		target: null
+	}
+	inVehPlayers.forEach(function(player) {
+		let pPos = player.position;
+		let dist = mp.game.system.vdist2(hPos.x, hPos.y, hPos.z, pPos.x, pPos.y, pPos.z);
+		if (dist < targetEntity.dist) {
+			targetEntity.dist = dist;
+			targetEntity.target = player;
+		}
+	})
+	return targetEntity
+}
+
+function getIsHitOnBone(hitPosition, target) {
+	let nearest_bone = "";
+	let nearest_bone_dist = 99;
+	if (target != null) {
+		for (let bone in player_bones) {
+			let bone_id = player_bones[bone].bone_id;
+			let threshold = player_bones[bone].threshold;
+			let headPos = mp.players.local.getBoneCoords(12844, 0, 0, 0);
+			let pos = target.getBoneCoords(bone_id, 0, 0, 0);
+			let raycast = mp.raycasting.testPointToPoint(hitPosition, pos, mp.players.local, (2));
+			let hit_dist = mp.game.system.vdist(hitPosition.x, hitPosition.y, hitPosition.z, pos.x, pos.y, pos.z);
+			if (hit_dist < 1.6) {
+				let vector = new mp.Vector3(hitPosition.x - headPos.x, hitPosition.y - headPos.y, hitPosition.z - headPos.z);
+				let dist_aim = mp.game.system.vdist(hitPosition.x, hitPosition.y, hitPosition.z, headPos.x, headPos.y, headPos.z);
+				let vectorNear = vector.normalize(dist_aim);
+				//....
+				let dist = mp.game.system.vdist(pos.x, pos.y, pos.z, headPos.x, headPos.y, headPos.z);
+				let vectorAtPos = vectorNear.multiply(dist);
+				let aimdist = mp.game.system.vdist(pos.x, pos.y, pos.z, headPos.x + vectorAtPos.x, headPos.y + vectorAtPos.y, headPos.z + vectorAtPos.z)
+				if (nearest_bone_dist > aimdist) {
+					if (aimdist <= threshold) {
+						nearest_bone = bone;
+						nearest_bone_dist = aimdist;
+					}
+				}
+			}
+		}
+	}
+	return {
+		hit: (nearest_bone != "" ? true : false),
+		bone: nearest_bone,
+		dist: nearest_bone_dist
+	};
+}
+var shotgunSpreadData = {
+	487013001: {
+		spray: 1.5,
+		max_dist: 30
+	}
+}
+
+function getWeaponDetails(weapon) {
+	if (shotgunSpreadData[weapon]) return shotgunSpreadData[weapon]
+	else return {
+		spray: 1.5,
+		max_dist: 30
+	};
+}
+
+function isWallbugging(target_position) {
+	let gun_pos = mp.players.local.getBoneCoords(40269, 0, 0, 0);
+	let aim_point = target_position;
+	let raycast = mp.raycasting.testPointToPoint(aim_point, gun_pos, mp.players.local, (1 | 2 | 16));
+	if (raycast) {
+		let hit_pos = raycast.position;
+		let entry_point = new mp.Vector3(hit_pos.x - gun_pos.x, hit_pos.y - gun_pos.y, hit_pos.z - gun_pos.z);
+		let entry_dist = mp.game.system.vdist(hit_pos.x, hit_pos.y, hit_pos.z, gun_pos.x, gun_pos.y, gun_pos.z);
+		let entry_normalize = entry_point.normalize(entry_dist / 2);
+		let entry_final_point = entry_normalize.multiply(entry_dist / 2);
+		let entry_point_vector = new mp.Vector3(hit_pos.x + entry_final_point.x, hit_pos.y + entry_final_point.y, hit_pos.z + entry_final_point.z)
+		let exit_point_vector = new mp.Vector3(hit_pos.x - entry_final_point.x, hit_pos.y - entry_final_point.y, hit_pos.z - entry_final_point.z)
+		let entry_point_pos = mp.raycasting.testPointToPoint(entry_point_vector, exit_point_vector, mp.players.local, (1 | 2 | 16));
+		let exit_point_pos = mp.raycasting.testPointToPoint(exit_point_vector, entry_point_vector, mp.players.local, (1 | 2 | 16));
+		if ((entry_point_pos) && (exit_point_pos)) {
+			let dist = mp.game.system.vdist(entry_point_pos.position.x, entry_point_pos.position.y, entry_point_pos.position.z, exit_point_pos.position.x, exit_point_pos.position.y, exit_point_pos.position.z)
+			if (dist < 0.45) {
+				return false;
+			} else {
+				return true;
+			}
+		} else {
+			return true;
+		}
+	} else {
+		return false;
+	}
+}
+
+function calculateShotgunPelletsOnPlayers() {
+	let hitted_entity = null;
+	var gun_pos = mp.players.local.getBoneCoords(40269, 0, 0, 0);
+	let aim_point = mp.players.local.aimingAt;
+	let raycast = mp.raycasting.testPointToPoint(aim_point, gun_pos, mp.players.local, -1);
+	if (!raycast) {
+		mp.players.forEachInStreamRange((ped) => {
+			if (mp.players.local != ped) {
+				let pos = ped.getWorldPositionOfBone(ped.getBoneIndexByName("IK_Head"));
+				let raycast1 = mp.raycasting.testPointToPoint(gun_pos, pos, mp.players.local, -1);
+				if (!raycast1) {
+					let headPos = mp.players.local.getBoneCoords(12844, 0, 0, 0);
+					let vector = new mp.Vector3(aim_point.x - headPos.x, aim_point.y - headPos.y, aim_point.z - headPos.z);
+					let dist_aim = mp.game.system.vdist(aim_point.x, aim_point.y, aim_point.z, headPos.x, headPos.y, headPos.z);
+					let vectorNear = vector.normalize(dist_aim);
+					//....
+					let dist = mp.game.system.vdist(pos.x, pos.y, pos.z, headPos.x, headPos.y, headPos.z);
+					let vectorAtPos = vectorNear.multiply(dist);
+					let aim_vector = new mp.Vector3(headPos.x + vectorAtPos.x, headPos.y + vectorAtPos.y, headPos.z + vectorAtPos.z);
+					let spray_dist = mp.game.system.vdist(pos.x, pos.y, pos.z, headPos.x + vectorAtPos.x, headPos.y + vectorAtPos.y, headPos.z + vectorAtPos.z)
+					let ped_dist = mp.game.system.vdist(pos.x, pos.y, pos.z, gun_pos.x, gun_pos.y, gun_pos.z)
+					let w_data = getWeaponDetails(Number(mp.players.local.weapon));
+					if (w_data) {
+						let spray_size = lerp(0.5, w_data.spray, 1 / w_data.max_dist * ped_dist)
+						if (spray_size > w_data.spray) spray_size = w_data.spray;
+						let would_hit = false;
+						if (spray_size > spray_dist) would_hit = true;
+						if (would_hit == true) {
+							hitted_entity = ped;
+						}
+					}
+				}
+			}
+		});
+	}
+	return hitted_entity;
+}
+mp.events.add('playerWeaponShot', (targetPosition, targetEntity) => {
+	let weapon_hash = mp.players.local.weapon;
+	//
+	let ammo = mp.players.local.getAmmoInClip(weapon_hash);
+	mp.events.callRemote("Combat:FireWeapon", weapon_hash.toString(), ammo);
+	if (isWallbugging(targetPosition) == false) {
+		if (targetEntity) {
+			if (targetEntity.isInAnyVehicle(false)) {
+				let vehicle = targetEntity.vehicle;
+				let result = getVehiclePassangerEntityFromPosition(targetPosition, vehicle)
+				let entityHit = getIsHitOnBone(targetPosition, result.target)
+				if (entityHit.hit == true) {
+					mp.events.callRemote("Combat:HitEntity", result.target, weapon_hash);
+				} else {
+					mp.events.callRemote("Combat:HitVehicle", vehicle, weapon_hash);
+				}
+			} else {
+				mp.events.callRemote("Combat:HitEntity", targetEntity, weapon_hash);
+			}
+		} else {
+			if (mp.game.weapon.getWeapontypeGroup(weapon_hash) == 860033945) {
+				let e = calculateShotgunPelletsOnPlayers();
+				if (e != null) {
+					mp.events.callRemote("Combat:HitEntity", e, weapon_hash);
+				}
+			}
+		}
+	}
+});
+var timerHitmarker = 0;
+mp.events.add("render", () => {
+	mp.game.player.resetStamina();
+	if (!mp.game.graphics.hasStreamedTextureDictLoaded("hud_reticle")) {
+		mp.game.graphics.requestStreamedTextureDict("hud_reticle", true);
+	}
+	if (mp.game.graphics.hasStreamedTextureDictLoaded("hud_reticle")) {
+		if ((Date.now() / 1000 - timerHitmarker) <= 0.1) {
+			mp.game.graphics.drawSprite("hud_reticle", "reticle_ar", 0.5, 0.5, 0.025, 0.040, 45, 255, 255, 255, 150);
+		}
+	}
+});
+mp.events.add("Combat:HitEntity", () => {
+	timerHitmarker = Date.now() / 1000;
+});
+mp.events.add("Combat:Hitted", (dmg) => {});
 },{"./vector.js":26}],5:[function(require,module,exports){
-var Status=["Crafted successfully!","Crafting failed!","Recipe not found...","Invalid Amount!"];mp.events.add("Crafting:Reply",t=>{console.log(Status[t])});
+var Status = [
+    "Crafted successfully!",
+    "Crafting failed!",
+    "Recipe not found...",
+    "Invalid Amount!"
+];
 
+mp.events.add('Crafting:Reply', (status) => {
+    console.log(Status[status]);
+});
 },{}],6:[function(require,module,exports){
-const movementClipSet="move_ped_crouched",strafeClipSet="move_ped_crouched_strafing",clipSetSwitchTime=.25,loadClipSet=e=>{for(mp.game.streaming.requestClipSet(e);!mp.game.streaming.hasClipSetLoaded(e);)mp.game.wait(0)};loadClipSet(movementClipSet),loadClipSet(strafeClipSet),mp.events.add("entityStreamIn",e=>{"player"===e.type&&e.getVariable("isCrouched")&&(e.setMovementClipset(movementClipSet,.25),e.setStrafeClipset(strafeClipSet))}),mp.events.addDataHandler("isCrouched",(e,t)=>{"player"===e.type&&(t?(e.setMovementClipset(movementClipSet,.25),e.setStrafeClipset(strafeClipSet)):(e.resetMovementClipset(.25),e.resetStrafeClipset()))}),mp.keys.bind(17,!1,()=>{1==mp.canCrouch&&0==mp.gui.chat.enabled&&1==mp.ui.ready&&mp.events.callRemote("Player:Crouch")});
-
+const movementClipSet = "move_ped_crouched";
+const strafeClipSet = "move_ped_crouched_strafing";
+const clipSetSwitchTime = 0.25;
+const loadClipSet = (clipSetName) => {
+    mp.game.streaming.requestClipSet(clipSetName);
+    while (!mp.game.streaming.hasClipSetLoaded(clipSetName)) mp.game.wait(0);
+};
+loadClipSet(movementClipSet);
+loadClipSet(strafeClipSet);
+mp.events.add("entityStreamIn", (entity) => {
+    if (entity.type === "player" && entity.getVariable("isCrouched")) {
+        entity.setMovementClipset(movementClipSet, clipSetSwitchTime);
+        entity.setStrafeClipset(strafeClipSet);
+    }
+});
+mp.events.addDataHandler("isCrouched", (entity, value) => {
+    if (entity.type !== "player") return;
+    if (value) {
+        entity.setMovementClipset(movementClipSet, clipSetSwitchTime);
+        entity.setStrafeClipset(strafeClipSet);
+    } else {
+        entity.resetMovementClipset(clipSetSwitchTime);
+        entity.resetStrafeClipset();
+    }
+});
+mp.keys.bind(0x11, false, () => {
+    if ((mp.canCrouch == true) && (mp.gui.chat.enabled == false) && (mp.ui.ready == true)) {
+        mp.events.callRemote("Player:Crouch");
+    }
+});
 },{}],7:[function(require,module,exports){
-require("./vector.js");var natives=require("./natives.js"),materials=require("./materials.js"),StorageSystem=require("./storage.js");function checkResourceInFront(e){let a={dist:e,pos:null,resource:""},t=new mp.Vector3(mp.players.local.position.x,mp.players.local.position.y,mp.players.local.position.z),r=mp.players.local.getHeading();t=t.findRot(r,.5,90);for(var l=0;l<180;l+=10){let e=t.findRot(r,5,l),o=mp.raycasting.testCapsule(t,e,.1,mp.players.local.handle,-1);if(o){e=new mp.Vector3(o.position.x,o.position.y,o.position.z);let r=t.dist(e);r<a.dist&&1==materials[o.material]&&(a.dist=r,a.pos=e,a.resource=o.material)}}return""!=a.resource&&a.resource}let addText="";mp.events.add("render",()=>{if(1==mp.ui.ready&&(1==mp.localPlayer.getVariable("hasHatchet")||1==mp.localPlayer.getVariable("hasPickaxe")))if(1==mp.localPlayer.getVariable("canGather")){let e=checkResourceInFront(.5);if(e)if(1==mp.localPlayer.getVariable("hasHatchet")&&1==materials[e]||1==mp.localPlayer.getVariable("hasPickaxe")&&2==materials[e]){if(mp.game.controls.disableControlAction(0,51,!0),mp.game.ui.showHudComponentThisFrame(14),mp.game.graphics.drawText("[E] Gather Material",[.5,.55],{font:4,color:[255,255,255,200],scale:[.3,.3],outline:!0,centre:!0}),""!=addText&&mp.game.graphics.drawText("\n["+addText+"]",[.5,.55],{font:4,color:[255,150,150,200],scale:[.3,.3],outline:!0,centre:!0}),mp.game.controls.isDisabledControlJustPressed(0,51)){StorageSystem.checkFit("inventory",2,2).then(function(a){null!=a?mp.events.callRemote("Player:Gather",e.toString()):addText="Not enough Space"})}}else addText=""}else addText=""}),module.exports=checkResourceInFront;
+require("./vector.js")
+var natives = require("./natives.js")
+var materials = require("./materials.js")
+var StorageSystem = require("./storage.js");
 
+function checkResourceInFront(max_dist) {
+    let nearest = {
+        dist: max_dist,
+        pos: null,
+        resource: ""
+    }
+    let pos = new mp.Vector3(mp.players.local.position.x, mp.players.local.position.y, mp.players.local.position.z);
+    let heading = mp.players.local.getHeading();
+    pos = pos.findRot(heading, 0.5, 90);
+    for (var i = 0; i < 180; i += 10) {
+        let exit_ps = pos.findRot(heading, 5, i);
+        let hitData = mp.raycasting.testCapsule(pos, exit_ps, 0.1, mp.players.local.handle, -1);
+        if (hitData) {
+            exit_ps = new mp.Vector3(hitData.position.x, hitData.position.y, hitData.position.z)
+            let dist = pos.dist(exit_ps);
+            if (dist < nearest.dist) {
+                if (materials[hitData.material] == true) {
+                    nearest.dist = dist;
+                    nearest.pos = exit_ps;
+                    nearest.resource = hitData.material;
+                }
+            }
+        }
+    }
+    return nearest.resource != "" ? nearest.resource : false;
+}
+let addText = "";
+mp.events.add("render", () => {
+    if (mp.ui.ready == true) {
+        if ((mp.localPlayer.getVariable('hasHatchet') == true) || (mp.localPlayer.getVariable('hasPickaxe') == true)) {
+            if ((mp.localPlayer.getVariable('canGather') == true)) {
+                let material = checkResourceInFront(0.5);
+                if (material) {
+                    if (((mp.localPlayer.getVariable('hasHatchet') == true) && (materials[material] == 1)) || ((mp.localPlayer.getVariable('hasPickaxe') == true) && (materials[material] == 2))) {
+                        mp.game.controls.disableControlAction(0, 51, true);
+                        mp.game.ui.showHudComponentThisFrame(14);
+                        mp.game.graphics.drawText("[E] Gather Material", [0.5, 0.55], {
+                            font: 4,
+                            color: [255, 255, 255, 200],
+                            scale: [0.3, 0.3],
+                            outline: true,
+                            centre: true
+                        });
+                        if ((addText != "")) {
+                            mp.game.graphics.drawText("\n[" + addText + "]", [0.5, 0.55], {
+                                font: 4,
+                                color: [255, 150, 150, 200],
+                                scale: [0.3, 0.3],
+                                outline: true,
+                                centre: true
+                            });
+                        }
+                        if (mp.game.controls.isDisabledControlJustPressed(0, 51)) { // 51 == "E"
+                            let doesFit = StorageSystem.checkFit("inventory", 2, 2)
+                            doesFit.then(function(fit) {
+                                if (fit != undefined) {
+                                    mp.events.callRemote("Player:Gather", material.toString());
+                                } else {
+                                    addText = "Not enough Space"
+                                }
+                            });
+                        }
+                    } else {
+                        addText = "";
+                    }
+                }
+            } else {
+                addText = "";
+            }
+        }
+    }
+});
+/*mp.keys.bind(0x09, false, () => {
+    console.log(JSON.stringify(checkResourceInFront(2)));
+});*/
+module.exports = checkResourceInFront;
 },{"./materials.js":16,"./natives.js":17,"./storage.js":25,"./vector.js":26}],8:[function(require,module,exports){
-console.log=function(...e){mp.gui.chat.push("DEBUG:"+e.join(" "))},require("./libs/attachments.js"),require("./libs/weapon_attachments.js"),require("./libs/animations.js"),mp.attachmentMngr.register("mining","prop_tool_pickaxe",57005,new mp.Vector3(.085,-.3,0),new mp.Vector3(-90,0,0)),mp.attachmentMngr.register("lumberjack","w_me_hatchet",57005,new mp.Vector3(.085,-.05,0),new mp.Vector3(-90,0,0)),mp.rpc=require("./libs/rage-rpc.min.js"),mp.isValid=function(e){return null!=e&&null!=e&&""!=e},mp.gui.chat.enabled=!1,mp.gui.execute("const _enableChatInput = enableChatInput;enableChatInput = (enable) => { mp.trigger('chatEnabled', enable); _enableChatInput(enable) };"),mp.events.add("chatEnabled",e=>{mp.gui.chat.enabled=e}),mp.game.graphics.setBlackout(!0),mp.canCrouch=!0,mp.gameplayCam=mp.cameras.new("gameplay"),mp.defaultCam=mp.cameras.new("default"),mp.localPlayer=mp.players.local,mp.ui={},mp.ui.ready=!1,mp.gameplayCam.setAffectsAiming(!0),require("./vector.js"),require("./scaleforms/index.js"),require("./crouch.js"),require("./items.js"),require("./crafting.js"),require("./zombies.js"),require("./gathering.js"),require("./building.js"),require("./login.js"),require("./combat.js"),require("./character_creator.js"),require("./vehicles.js"),require("./storage.js"),require("./weather.js");var natives=require("./natives.js"),CEFNotification=require("./browser.js").notification;mp.events.add("Notifications:New",e=>{CEFNotification.call("notify",e)}),mp.events.add("Player:WanderDuration",e=>{console.log("GO WANDER");mp.players.local.position;mp.players.local.taskWanderStandard(10,10),setTimeout(function(){mp.players.local.clearTasksImmediately()},e)}),mp.events.add("Player:UiReady",()=>{mp.ui.ready=!0}),mp.events.add("Player:Collision",e=>{1==e?mp.vehicles.forEach(e=>{mp.players.local.vehicle&&(mp.players.local.vehicle.setNoCollision(e.handle,!0),natives.SET_ENTITY_NO_COLLISION_ENTITY(mp.players.local.vehicle,e,!0),natives.SET_ENTITY_NO_COLLISION_ENTITY(e,mp.players.local.vehicle,!0)),e.setAlpha(255)}):mp.vehicles.forEach(e=>{mp.players.local.vehicle&&(mp.players.local.vehicle.setNoCollision(e.handle,!1),natives.SET_ENTITY_NO_COLLISION_ENTITY(e,mp.players.local.vehicle,!1),natives.SET_ENTITY_NO_COLLISION_ENTITY(mp.players.local.vehicle,e,!1)),e.setAlpha(150)})});
+"use strict";
+console.log = function(...a) {
+    mp.gui.chat.push("DEBUG:" + a.join(" "))
+};
+require("./libs/attachments.js")
+require("./libs/weapon_attachments.js")
+
+require("./libs/animations.js")
+require("./vector.js")
+/*Register Attachments for Player Animatiuons etc TODO*/
+mp.attachmentMngr.register("mining", "prop_tool_pickaxe", 57005, new mp.Vector3(0.085, -0.3, 0), new mp.Vector3(-90, 0, 0));
+mp.attachmentMngr.register("lumberjack", "w_me_hatchet", 57005, new mp.Vector3(0.085, -0.05, 0), new mp.Vector3(-90, 0, 0));
+
+mp.rpc = require("./libs/rage-rpc.min.js");
+
+mp.isValid = function(val) {
+    return val != null && val != undefined && val != "";
+}
+mp.gui.chat.enabled = false;
+mp.gui.execute("const _enableChatInput = enableChatInput;enableChatInput = (enable) => { mp.trigger('chatEnabled', enable); _enableChatInput(enable) };");
+mp.events.add('chatEnabled', (isEnabled) => {
+    mp.gui.chat.enabled = isEnabled;
+});
+mp.game.graphics.setBlackout(true);
+mp.canCrouch = true;
+mp.gameplayCam = mp.cameras.new('gameplay');
+mp.defaultCam = mp.cameras.new('default');
+mp.localPlayer = mp.players.local;
+mp.localPlayer.getPos = function() {
+    return mp.vector(this.position);
+}
+mp.ui = {};
+mp.ui.ready = false;
+mp.gameplayCam.setAffectsAiming(true);
+require("./scaleforms/index.js")
+require("./crouch.js")
+require("./items.js")
+require("./crafting.js")
+require("./zombies.js")
+require("./gathering.js")
+require("./building.js")
+require("./login.js")
+require("./combat.js")
+require("./character_creator.js")
+require("./vehicles.js")
+require("./storage.js")
+require("./weather.js")
+var natives = require("./natives.js")
+var CEFNotification = require("./browser.js").notification;
+mp.events.add("Notifications:New", (notification_data) => {
+    CEFNotification.call("notify", notification_data)
+})
+
+mp.events.add("Player:WanderDuration", (ms) => {
+    console.log("GO WANDER");
+    let p = mp.players.local.position;
+    mp.players.local.taskWanderStandard(10, 10);
+    setTimeout(function() {
+        mp.players.local.clearTasksImmediately();
+    }, ms)
+});
+mp.events.add('Player:UiReady', () => {
+    mp.ui.ready = true;
+});
+mp.events.add('Player:Collision', (enable) => {
+    if (enable == true) {
+        mp.vehicles.forEach(vehicle => {
+            if (mp.players.local.vehicle) {
+                mp.players.local.vehicle.setNoCollision(vehicle.handle, true);
+                natives.SET_ENTITY_NO_COLLISION_ENTITY(mp.players.local.vehicle, vehicle, true)
+                natives.SET_ENTITY_NO_COLLISION_ENTITY(vehicle, mp.players.local.vehicle, true)
+            }
+            vehicle.setAlpha(255);
+        });
+    } else {
+        mp.vehicles.forEach(vehicle => {
+            if (mp.players.local.vehicle) {
+                mp.players.local.vehicle.setNoCollision(vehicle.handle, false);
+                natives.SET_ENTITY_NO_COLLISION_ENTITY(vehicle, mp.players.local.vehicle, false)
+                natives.SET_ENTITY_NO_COLLISION_ENTITY(mp.players.local.vehicle, vehicle, false)
+            }
+            vehicle.setAlpha(150);
+        });
+    }
+});
+
+
 
 },{"./browser.js":1,"./building.js":2,"./character_creator.js":3,"./combat.js":4,"./crafting.js":5,"./crouch.js":6,"./gathering.js":7,"./items.js":9,"./libs/animations.js":10,"./libs/attachments.js":11,"./libs/rage-rpc.min.js":12,"./libs/weapon_attachments.js":14,"./login.js":15,"./natives.js":17,"./scaleforms/index.js":24,"./storage.js":25,"./vector.js":26,"./vehicles.js":27,"./weather.js":28,"./zombies.js":29}],9:[function(require,module,exports){
-var CEFNotification=require("./browser.js").notification,CEFInventory=require("./browser.js").inventory,StorageSystem=require("./storage.js"),Notifications=require("./notifications.js"),streamedPools=[];class LootPool{constructor(o){console.log("LootPool create"),this._setup(o)}_setup(o){this._lootData=o,this._pickupObjects=[],this.load()}get position(){return new mp.Vector3(this._lootData.pos.x,this._lootData.pos.y,this._lootData.pos.z)}get id(){return this._lootData.id}getLootPool(){return this._lootData.items}isInRange(){return new mp.Vector3(this._lootData.pos.x,this._lootData.pos.y,this._lootData.pos.z).dist(mp.players.local.position)<(1==mp.players.local.isRunning()?7:5)}reload(o){this.unload(this.id);let t=[];this._lootData.items.forEach(function(o,e){null!=o&&null==t[o.index]&&(t[o.index]=o.rot)}),this._lootData=o,this._lootData.items=this._lootData.items.map(function(o,e,i){let a=o;return null!=a&&(a.rot=t[e]||void 0),a}),this.load()}load(){let o=new mp.Vector3(this._lootData.pos.x,this._lootData.pos.y,this._lootData.pos.z);console.log("load"),this._lootData.items.forEach(function(t,e){if(null!=t){t.index=e;let i=o.findRot(0,.5,45*e),a=45*e+(i.rotPoint(o)+Math.floor(360*Math.random()));a>360&&(a-=360),null==t.rot&&(t.rot=a);let n=i;n.z+=1,console.log("item.model",t.name,t.model,mp.game.joaat(t.model));mp.objects.new(mp.game.joaat(t.model),n,{rotation:new mp.Vector3(0,0,t.rot),alpha:255,dimension:0})}})}unload(o){let t=this;t._pickupObjects.forEach(function(e,i){e.id==o&&(e.obj.markForDeletion(),e.obj.destroy(),delete t._pickupObjects[i])})}}function pointingAt(){direction=mp.gameplayCam.getDirection(),coords=mp.gameplayCam.getCoord();const o=new mp.Vector3(25*direction.x+coords.x,25*direction.y+coords.y,25*direction.z+coords.z),t=mp.raycasting.testPointToPoint(coords,o,mp.players.local,-1);if(void 0!==t)return t}mp.events.add("Loot:Load",(o,t)=>{streamedPools[o]||(console.log("CHECK STREAM IN"),streamedPools[o]=new LootPool(t))}),mp.events.add("Loot:Unload",o=>{streamedPools[o]&&(streamedPools[o].unload(o),delete streamedPools[o])}),mp.events.add("Loot:Reload",(o,t)=>{streamedPools[o]&&streamedPools[o].reload(t)});let timer_anim,cStatus="",cItem=0;mp.events.add("render",()=>{let o=!1,t=999,e=null,i=pointingAt();if(Object.keys(streamedPools).forEach(function(a){let n=streamedPools[a];if(1==n.isInRange()){let s=n.position;s.z+=1,n.getLootPool().forEach(function(n,l){if(null!=n){let r,m,c=s.findRot(0,.5,45*l).ground(),p=n.thickness,d=mp.vector(mp.localPlayer.position).ground(),u=2.5*p;i&&i.position&&d.dist2d(i.position)<2&&(r=i.position),(null!=r&&c.dist(r)<=p||c.dist(d)<=u)&&(m=null!=r&&c.dist(r)<=p?c.dist(r):c.dist(d)),m&&0==o&&m<t&&(n.position=c,o=n,t=m,e=a)}})}}),o&&e){if(mp.game.controls.disableControlAction(0,51,!0),mp.game.ui.showHudComponentThisFrame(14),mp.game.graphics.drawText("[E] "+o.name,[.5,.55],{font:4,color:[255,255,255,200],scale:[.3,.3],outline:!0,centre:!0}),cItem==o&&""!=cStatus?mp.game.graphics.drawText("\n["+cStatus+"]",[.5,.55],{font:4,color:[255,150,150,200],scale:[.3,.3],outline:!0,centre:!0}):(cStatus="",cItem=o),mp.game.controls.isDisabledControlJustPressed(0,51)&&e){o.name;if(o.amount>0){StorageSystem.checkFit("inventory",o.width,o.height).then(function(t){if(null!=t){mp.events.callRemote("Loot:Pickup",e,o.index,o.name,o.amount);let t=o.position;Notifications.notify3D(t.x,t.y,t.z,t.x,t.y,t.z+.5,`+ ${o.name}`,[255,255,255]),CEFNotification.call("notify",{title:"Notification",titleSize:"16px",message:`${o.name} just got picked up`,messageColor:"rgba(50,50,50,.8)",position:"topCenter",backgroundColor:"rgba(206, 206, 206, 0.9)",close:!1}),timer_anim&&(clearTimeout(timer_anim),mp.players.local.stopAnimTask("mp_take_money_mg","stand_cash_in_bag_loop",1)),mp.players.local.taskPlayAnim("mp_take_money_mg","stand_cash_in_bag_loop",16,8,-1,49,0,!1,!1,!1),timer_anim=setTimeout(function(){mp.players.local.stopAnimTask("mp_take_money_mg","stand_cash_in_bag_loop",1)},250)}else cStatus="Not enough Space"})}}}else if(cStatus="",i&&i.entity&&"object"==typeof i.entity&&mp.vector(mp.localPlayer.position).dist(i.entity.getCoords(!0))<3&&1==i.entity.getVariable("container")&&0==i.entity.getVariable("opened")&&(mp.game.ui.showHudComponentThisFrame(14),mp.game.graphics.drawText("[E] Open Container",[.5,.55],{font:4,color:[255,255,255,200],scale:[.3,.3],outline:!0,centre:!0}),mp.game.controls.isDisabledControlJustPressed(0,51))){console.log("E Pressed");let o=i.entity.getVariable("id");console.log("entity id",o),mp.events.callRemote("Building:Interact",o)}});
+"use strict";
+var natives = require("./natives.js")
+var CEFNotification = require("./browser.js").notification;
+var CEFInventory = require("./browser.js").inventory;
+var StorageSystem = require("./storage.js");
+var Notifications = require("./notifications.js");
+var streamedPools = [];
+class LootPool {
+    constructor(data) {
+        this._setup(data);
+    }
+    _setup(data) {
+        let self = this;
+        self._lootData = data;
+        self._pickupObjects = [];
+        //let dist = mp.localPlayer.getPos().dist2d(new mp.Vector3(this._lootData.pos.x, this._lootData.pos.y, this._lootData.pos.z));
+        //setTimeout(function() {
+        self.load();
+        // }, 50*dist );
+    }
+    get position() {
+        return new mp.Vector3(this._lootData.pos.x, this._lootData.pos.y, this._lootData.pos.z);
+    }
+    get id() {
+        return this._lootData.id;
+    }
+    getLootPool() {
+        return this._lootData.items;
+    }
+    isInRange() {
+        let self = this;
+        return new mp.Vector3(self._lootData.pos.x, self._lootData.pos.y, self._lootData.pos.z).dist(mp.players.local.position) < ((mp.players.local.isRunning() == true) ? 7 : 5);
+    }
+    reload(data) {
+        let self = this;
+        self.unload(self.id)
+        let rot_data = [];
+        self._lootData.items.forEach(function(item, index) {
+            if (item != null) {
+                if (rot_data[item.index] == undefined) {
+                    rot_data[item.index] = item.rot;
+                }
+            }
+        });
+        self._lootData = data;
+        self._lootData.items = self._lootData.items.map(function(item, index, theArray) {
+            let sArr = item;
+            if (sArr != null) {
+                sArr.rot = rot_data[index] || undefined
+            }
+            return sArr;
+        });
+        self.load();
+    }
+    load() {
+        let self = this;
+        let center = new mp.Vector3(self._lootData.pos.x, self._lootData.pos.y, self._lootData.pos.z);
+        console.log("mp.objects", mp.objects.length);
+        let Angle_Item = 360 / 8;
+        self._lootData.items.forEach(function(item, index) {
+            if (item != null) {
+                item.index = index;
+                console.log("index", index)
+                if (mp.game.streaming.isModelInCdimage(mp.game.joaat(item.model))) {
+                    console.log("isModelInCdimage", true)
+                    let offset_pos = center.findRot(0, 0.5, Angle_Item * index);
+                    console.log("offset_pos")
+                    let base_rot = (Angle_Item * index) + (offset_pos.rotPoint(center) + Math.floor(Math.random() * (360 - 0)));
+                    if (base_rot > 360) base_rot -= 360;
+                    console.log("base_rot", base_rot)
+                    if (item.rot == undefined) {
+                        item.rot = base_rot
+                    }
+                    let pos = offset_pos;
+                    pos.z += 1;
+                    console.log("item.rot", item.rot)
+                    console.log("pos", JSON.stringify(pos));
+                    console.log("item.model", item.model)
+                    // let obj = mp.game.object.createObject(mp.game.joaat(item.model), pos.x, pos.y, pos.z, false, true, false);
+                    let obj = mp.objects.new(mp.game.joaat(item.model), pos, { //item.model
+                        rotation: new mp.Vector3(0, 0, item.rot),
+                        alpha: 255,
+                        dimension: 0
+                    });
+                    console.log("created")
+                    //obj.placeOnGroundProperly();
+                    let rotobj = obj.getRotation(0);
+                    let posobj = obj.getCoords(false);
+                    obj.setCollision(false, true);
+                    obj.freezePosition(true);
+                    if ((item.offset.rot.x > 0) || (item.offset.rot.y > 0)) {
+                        obj.setCoords(posobj.x + item.offset.pos.x, posobj.y + item.offset.pos.y, (posobj.z - obj.getHeightAboveGround()) + item.offset.pos.z, false, false, false, false);
+                    } else {
+                        obj.setCoords(posobj.x + item.offset.pos.x, posobj.y + item.offset.pos.y, posobj.z + item.offset.pos.z, false, false, false, false);
+                    }
+                    obj.setRotation(rotobj.x + item.offset.rot.x, rotobj.y + item.offset.rot.y, rotobj.z, 0, true);
+                    self._pickupObjects.push({
+                        id: self._lootData.id,
+                        obj: obj
+                    })
+                }
+            }
+        })
+        console.log("mp.objects 1", mp.objects.length);
+    }
+    unload(id) {
+        let self = this;
+        console.log("unload mp.objects 2", mp.objects.length);
+        self._pickupObjects.forEach(function(item, i) {
+            if (item.id == id) {
+                if (mp.objects.atHandle(item.obj)) {
+                    console.log("exists");
+                }
+                //if(mp.objects.exists(objList[i]) objList[i].destroy();
+                //item.obj.markForDeletion();
+                //item.obj.destroy();
+                mp.game.object.deleteObject(item.obj);
+                delete self._pickupObjects[i];
+                console.log("removed");
+            }
+        })
+        console.log("unload mp.objects 3", mp.objects.length);
+    }
+}
+mp.events.add("Loot:Load", (id, poolData) => {
+    if (!streamedPools[id]) {
+        streamedPools[id] = new LootPool(poolData);
+    }
+});
+mp.events.add("Loot:Unload", (id) => {
+    if (streamedPools[id]) {
+        streamedPools[id].unload(id)
+        delete streamedPools[id];
+    }
+});
+mp.events.add("Loot:Reload", (id, new_data) => {
+    if (streamedPools[id]) {
+        streamedPools[id].reload(new_data);
+    }
+});
 
-},{"./browser.js":1,"./notifications.js":18,"./storage.js":25}],10:[function(require,module,exports){
-var toLoad=["mp_defend_base"],loadPromises=[];toLoad.forEach(function(e){mp.game.streaming.requestAnimDict(e),loadPromises.push(new Promise((a,o)=>{let s=setInterval(()=>{mp.game.streaming.hasAnimDictLoaded(e)&&(clearInterval(s),a())},100)}))}),Promise.all(loadPromises).then(()=>{console.log("all dicts loaded")}).catch(e=>{console.log("all dicts err",e)});
-
+function pointingAt() {
+    let ray_dist = 25;
+    let direction = mp.gameplayCam.getDirection();
+    let coords = mp.gameplayCam.getCoord();
+    let farAway = new mp.Vector3((direction.x * ray_dist) + (coords.x), (direction.y * ray_dist) + (coords.y), (direction.z * ray_dist) + (coords.z));
+    let result = mp.raycasting.testPointToPoint(coords, farAway, mp.players.local, -1);
+    if (result === undefined) {
+        return undefined;
+    }
+    return result;
+}
+let cStatus = "";
+let cItem = 0;
+let timer_anim;
+mp.events.add("render", () => {
+    /*Display Items*/
+    let cur_selected = false;
+    let cur_dist = 999;
+    let pool_data = null;
+    let pointAt = pointingAt();
+    let Angle_Item = 360 / 8;
+    Object.keys(streamedPools).forEach(function(key) {
+        let pool = streamedPools[key]
+        if (pool.isInRange() == true) {
+            let pos = pool.position;
+            pos.z += 1;
+            pool.getLootPool().forEach(function(item, index) {
+                if (item != null) {
+                    let offset_pos = pos.findRot(0, 0.5, Angle_Item * index).ground();
+                    let thickness = item.thickness //(mp.players.local.isRunning() == true) ? item.thickness * 2 : item.thickness;
+                    mp.game.graphics.drawMarker(28, offset_pos.x, offset_pos.y, offset_pos.z, 0, 0, 0, 0, 0, 0, thickness, thickness, thickness, 255, 255, 255, 150, false, false, 2, false, "", "", false);
+                    let player_pos = mp.vector(mp.localPlayer.position).ground();
+                    let near_dist = thickness * 2.5;
+                    let pointAtPos;
+                    if ((pointAt) && (pointAt.position)) {
+                        if (player_pos.dist2d(pointAt.position) < 2) {
+                            pointAtPos = pointAt.position;
+                        }
+                    }
+                    let dist;
+                    if (((pointAtPos != undefined) && (offset_pos.dist(pointAtPos) <= thickness)) || (offset_pos.dist(player_pos) <= near_dist)) {
+                        dist = ((pointAtPos != undefined) && (offset_pos.dist(pointAtPos) <= thickness)) ? offset_pos.dist(pointAtPos) : offset_pos.dist(player_pos);
+                    }
+                    if ((dist) && (cur_selected == false) && (dist < cur_dist)) {
+                        item.position = offset_pos;
+                        cur_selected = item;
+                        cur_dist = dist //((pointAtPos != undefined) && (offset_pos.dist(pointAtPos) <= thickness)) ? offset_pos.dist(pointAtPos) : offset_pos.dist(player_pos);
+                        pool_data = key;
+                    }
+                }
+            })
+        }
+    });
+    if ((cur_selected) && (pool_data)) {
+        mp.game.controls.disableControlAction(0, 51, true);
+        mp.game.ui.showHudComponentThisFrame(14);
+        mp.game.graphics.drawText("[E] " + cur_selected.name, [0.5, 0.55], {
+            font: 4,
+            color: [255, 255, 255, 200],
+            scale: [0.3, 0.3],
+            outline: true,
+            centre: true
+        });
+        if ((cItem == cur_selected) && (cStatus != "")) {
+            mp.game.graphics.drawText("\n[" + cStatus + "]", [0.5, 0.55], {
+                font: 4,
+                color: [255, 150, 150, 200],
+                scale: [0.3, 0.3],
+                outline: true,
+                centre: true
+            });
+        } else {
+            cStatus = "";
+            cItem = cur_selected
+        }
+        if (mp.game.controls.isDisabledControlJustPressed(0, 51)) { // 51 == "E"
+            //Loot:Pickup
+            if (pool_data) {
+                let name = cur_selected.name;
+                let amount = cur_selected.amount;
+                if (amount > 0) {
+                    let doesFit = StorageSystem.checkFit("inventory", cur_selected.width, cur_selected.height)
+                    doesFit.then(function(fit) {
+                        if (fit != undefined) {
+                            mp.events.callRemote("Loot:Pickup", pool_data, cur_selected.index, cur_selected.name, cur_selected.amount);
+                            /*3d Notify*/
+                            let pos = cur_selected.position;
+                            Notifications.notify3D(pos.x, pos.y, pos.z, pos.x, pos.y, pos.z + 0.5, `+ ${cur_selected.name}`, [255, 255, 255]);
+                            CEFNotification.call("notify", {
+                                title: "Notification",
+                                titleSize: "16px",
+                                message: `${cur_selected.name} just got picked up`,
+                                messageColor: 'rgba(50,50,50,.8)',
+                                position: "topCenter",
+                                backgroundColor: 'rgba(206, 206, 206, 0.9)',
+                                close: false
+                            })
+                            if (timer_anim) {
+                                clearTimeout(timer_anim);
+                                mp.players.local.stopAnimTask("mp_take_money_mg", "stand_cash_in_bag_loop", 1.0);
+                            }
+                            mp.players.local.taskPlayAnim("mp_take_money_mg", "stand_cash_in_bag_loop", 16, 8.0, -1, 49, 0, false, false, false);
+                            timer_anim = setTimeout(function() {
+                                mp.players.local.stopAnimTask("mp_take_money_mg", "stand_cash_in_bag_loop", 1.0);
+                            }, 250);
+                        } else {
+                            cStatus = "Not enough Space";
+                        }
+                    })
+                }
+            }
+        }
+    } else {
+        cStatus = "";
+        if ((pointAt) && (pointAt.entity)) {
+            if (typeof pointAt.entity == "object") {
+                if (mp.vector(mp.localPlayer.position).dist(pointAt.entity.getCoords(true)) < 3) {
+                    if (pointAt.entity.getVariable("container") == true) {
+                        if (pointAt.entity.getVariable("opened") == false) {
+                            mp.game.ui.showHudComponentThisFrame(14);
+                            mp.game.graphics.drawText("[E] Open Container", [0.5, 0.55], {
+                                font: 4,
+                                color: [255, 255, 255, 200],
+                                scale: [0.3, 0.3],
+                                outline: true,
+                                centre: true
+                            });
+                            if (mp.game.controls.isDisabledControlJustPressed(0, 51)) { // 51 == "E"
+                                console.log("E Pressed");
+                                let id = pointAt.entity.getVariable("id");
+                                console.log("entity id", id);
+                                mp.events.callRemote("Building:Interact", id);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+});
+},{"./browser.js":1,"./natives.js":17,"./notifications.js":18,"./storage.js":25}],10:[function(require,module,exports){
+var toLoad = ["mp_defend_base"]
+var loadPromises = [];
+toLoad.forEach(function(dict) {
+	mp.game.streaming.requestAnimDict(dict);
+	loadPromises.push(new Promise((resolve, reject) => {
+		let timer = setInterval(() => {
+			if (mp.game.streaming.hasAnimDictLoaded(dict)) {
+				clearInterval(timer);
+				resolve();
+			}
+		}, 100);
+	}));
+})
+Promise.all(loadPromises).then(() => {
+	console.log("all dicts loaded")
+}).catch(err => {
+	console.log("all dicts err", err)
+})
 },{}],11:[function(require,module,exports){
-function InitAttachmentsOnJoin(){mp.players.forEach(t=>{let e=t.getVariable("attachmentsData");if(e&&e.length>0){let a=e.split("|").map(t=>parseInt(t,36));t.__attachments=a,t.__attachmentObjects={}}})}mp.attachmentMngr={attachments:{},addFor:function(t,e){if(this.attachments.hasOwnProperty(e)){if(!t.__attachmentObjects.hasOwnProperty(e)){let a=this.attachments[e],n=mp.objects.new(a.model,t.position);n.attachTo(t.handle,"string"==typeof a.boneName?t.getBoneIndexByName(a.boneName):t.getBoneIndex(a.boneName),a.offset.x,a.offset.y,a.offset.z,a.rotation.x,a.rotation.y,a.rotation.z,!1,!1,!1,!1,2,!0),t.__attachmentObjects[e]=n}}else mp.game.graphics.notify(`Static Attachments Error: ~r~Unknown Attachment Used: ~w~0x${e.toString(16)}`)},removeFor:function(t,e){if(t.__attachmentObjects.hasOwnProperty(e)){let a=t.__attachmentObjects[e];delete t.__attachmentObjects[e],mp.objects.exists(a)&&a.destroy()}},initFor:function(t){for(let e of t.__attachments)mp.attachmentMngr.addFor(t,e)},shutdownFor:function(t){for(let e in t.__attachmentObjects)mp.attachmentMngr.removeFor(t,e)},register:function(t,e,a,n,o){"string"==typeof t&&(t=mp.game.joaat(t)),console.log("register attachment id",t),"string"==typeof e&&(e=mp.game.joaat(e)),this.attachments.hasOwnProperty(t)?mp.game.graphics.notify("Static Attachments Error: ~r~Duplicate Entry"):mp.game.streaming.isModelInCdimage(e)?this.attachments[t]={id:t,model:e,offset:n,rotation:o,boneName:a}:mp.game.graphics.notify(`Static Attachments Error: ~r~Invalid Model (0x${e.toString(16)})`)},unregister:function(t){"string"==typeof t&&(t=mp.game.joaat(t)),this.attachments.hasOwnProperty(t)&&(this.attachments[t]=void 0)},addLocal:function(t){"string"==typeof t&&(t=mp.game.joaat(t));let e=mp.players.local;e.__attachments&&-1!==e.__attachments.indexOf(t)||mp.events.callRemote("staticAttachments.Add",t.toString(36))},removeLocal:function(t){"string"==typeof t&&(t=mp.game.joaat(t));let e=mp.players.local;e.__attachments&&-1!==e.__attachments.indexOf(t)&&mp.events.callRemote("staticAttachments.Remove",t.toString(36))},getAttachments:function(){return Object.assign({},this.attachments)}},mp.events.add("entityStreamIn",t=>{t.__attachments&&mp.attachmentMngr.initFor(t)}),mp.events.add("entityStreamOut",t=>{t.__attachmentObjects&&mp.attachmentMngr.shutdownFor(t)}),mp.events.addDataHandler("attachmentsData",(t,e)=>{let a=e.length>0?e.split("|").map(t=>parseInt(t,36)):[];if(console.log(JSON.stringify(a)),0!==t.handle){let e=t.__attachments;e||(e=[],t.__attachmentObjects={});for(let n of e)-1===a.indexOf(n)&&mp.attachmentMngr.removeFor(t,n);for(let n of a)-1===e.indexOf(n)&&mp.attachmentMngr.addFor(t,n)}t.__attachments=a}),InitAttachmentsOnJoin();
+mp.attachmentMngr = 
+{
+	attachments: {},
+	
+	addFor: function(entity, id)
+	{
+		if(this.attachments.hasOwnProperty(id))
+		{
+			if(!entity.__attachmentObjects.hasOwnProperty(id))
+			{
+				let attInfo = this.attachments[id];
+				
+				let object = mp.objects.new(attInfo.model, entity.position);
+				
+				object.attachTo(entity.handle,
+					(typeof(attInfo.boneName) === 'string') ? entity.getBoneIndexByName(attInfo.boneName) : entity.getBoneIndex(attInfo.boneName),
+					attInfo.offset.x, attInfo.offset.y, attInfo.offset.z, 
+					attInfo.rotation.x, attInfo.rotation.y, attInfo.rotation.z, 
+					false, false, false, false, 2, true);
+					
+				entity.__attachmentObjects[id] = object;
+			}
+		}
+		else
+		{
+			mp.game.graphics.notify(`Static Attachments Error: ~r~Unknown Attachment Used: ~w~0x${id.toString(16)}`);
+		}
+	},
+	
+	removeFor: function(entity, id)
+	{
+		if(entity.__attachmentObjects.hasOwnProperty(id))
+		{
+			let obj = entity.__attachmentObjects[id];
+			delete entity.__attachmentObjects[id];
+			
+			if(mp.objects.exists(obj))
+			{
+				obj.destroy();
+			}
+		}
+	},
+	
+	initFor: function(entity)
+	{
+		for(let attachment of entity.__attachments)
+		{
+			mp.attachmentMngr.addFor(entity, attachment);
+		}
+	},
+	
+	shutdownFor: function(entity)
+	{
+		for(let attachment in entity.__attachmentObjects)
+		{
+			mp.attachmentMngr.removeFor(entity, attachment);
+		}
+	},
+	
+	register: function(id, model, boneName, offset, rotation)
+	{
+		if(typeof(id) === 'string')
+		{
+			id = mp.game.joaat(id);
+		}
+		console.log("register attachment id",id);
+		if(typeof(model) === 'string')
+		{
+			model = mp.game.joaat(model);
+		}
+		
+		if(!this.attachments.hasOwnProperty(id))
+		{
+			if(mp.game.streaming.isModelInCdimage(model))
+			{
+				this.attachments[id] =
+				{
+					id: id,
+					model: model,
+					offset: offset,
+					rotation: rotation,
+					boneName: boneName
+				};
+			}
+			else
+			{
+				mp.game.graphics.notify(`Static Attachments Error: ~r~Invalid Model (0x${model.toString(16)})`);
+			}
+		}
+		else
+		{
+			mp.game.graphics.notify("Static Attachments Error: ~r~Duplicate Entry");
+		}
+	},
+	
+	unregister: function(id) 
+	{
+		if(typeof(id) === 'string')
+		{
+			id = mp.game.joaat(id);
+		}
+		
+		if(this.attachments.hasOwnProperty(id))
+		{
+			this.attachments[id] = undefined;
+		}
+	},
+	
+	addLocal: function(attachmentName)
+	{
+		if(typeof(attachmentName) === 'string')
+		{
+			attachmentName = mp.game.joaat(attachmentName);
+		}
+		
+		let entity = mp.players.local;
+		
+		if(!entity.__attachments || entity.__attachments.indexOf(attachmentName) === -1)
+		{
+			mp.events.callRemote("staticAttachments.Add", attachmentName.toString(36));
+		}
+	},
+	
+	removeLocal: function(attachmentName)
+	{
+		if(typeof(attachmentName) === 'string')
+		{
+			attachmentName = mp.game.joaat(attachmentName);
+		}
+		
+		let entity = mp.players.local;
+		
+		if(entity.__attachments && entity.__attachments.indexOf(attachmentName) !== -1)
+		{
+			mp.events.callRemote("staticAttachments.Remove", attachmentName.toString(36));
+		}
+	},
+	
+	getAttachments: function()
+	{
+		return Object.assign({}, this.attachments);
+	}
+};
 
+mp.events.add("entityStreamIn", (entity) =>
+{
+	if(entity.__attachments)
+	{
+		mp.attachmentMngr.initFor(entity);
+	}
+});
+
+mp.events.add("entityStreamOut", (entity) =>
+{
+	if(entity.__attachmentObjects)
+	{
+		mp.attachmentMngr.shutdownFor(entity);
+	}
+});
+
+mp.events.addDataHandler("attachmentsData", (entity, data) =>
+{
+	let newAttachments = (data.length > 0) ? data.split('|').map(att => parseInt(att, 36)) : [];
+	console.log(JSON.stringify(newAttachments));
+	if(entity.handle !== 0)
+	{
+		let oldAttachments = entity.__attachments;	
+		
+		if(!oldAttachments)
+		{
+			oldAttachments = [];
+			entity.__attachmentObjects = {};
+		}
+		
+		// process outdated first
+		for(let attachment of oldAttachments)
+		{
+			if(newAttachments.indexOf(attachment) === -1)
+			{
+				mp.attachmentMngr.removeFor(entity, attachment);
+			}
+		}
+		
+		// then new attachments
+		for(let attachment of newAttachments)
+		{
+			if(oldAttachments.indexOf(attachment) === -1)
+			{
+				mp.attachmentMngr.addFor(entity, attachment);
+			}
+		}
+	}
+	
+	entity.__attachments = newAttachments;
+});
+
+function InitAttachmentsOnJoin()
+{
+	mp.players.forEach(_player =>
+	{
+		let data = _player.getVariable("attachmentsData");
+		
+		if(data && data.length > 0)
+		{
+			let atts = data.split('|').map(att => parseInt(att, 36));
+			_player.__attachments = atts;
+			_player.__attachmentObjects = {};
+		}
+	});
+}
+
+InitAttachmentsOnJoin();
 },{}],12:[function(require,module,exports){
-!function(e,r){"object"==typeof exports&&"object"==typeof module?module.exports=r():"function"==typeof define&&define.amd?define([],r):"object"==typeof exports?exports=r():e.rpc=r()}("undefined"!=typeof self?self:this,function(){return function(e){var r={};function n(t){if(r[t])return r[t].exports;var c=r[t]={i:t,l:!1,exports:{}};return e[t].call(c.exports,c,c.exports,n),c.l=!0,c.exports}return n.m=e,n.c=r,n.d=function(e,r,t){n.o(e,r)||Object.defineProperty(e,r,{enumerable:!0,get:t})},n.r=function(e){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(e,"__esModule",{value:!0})},n.t=function(e,r){if(1&r&&(e=n(e)),8&r)return e;if(4&r&&"object"==typeof e&&e&&e.__esModule)return e;var t=Object.create(null);if(n.r(t),Object.defineProperty(t,"default",{enumerable:!0,value:e}),2&r&&"string"!=typeof e)for(var c in e)n.d(t,c,function(r){return e[r]}.bind(null,c));return t},n.n=function(e){var r=e&&e.__esModule?function(){return e.default}:function(){return e};return n.d(r,"a",r),r},n.o=function(e,r){return Object.prototype.hasOwnProperty.call(e,r)},n.p="",n(n.s=1)}([function(e,r,n){"use strict";var t;function c(e,r){const n="client"===o();if(e&&"object"==typeof e&&void 0!==e.id){const c=(r,t,c)=>n?e.type===r&&t.at(e.id)===e:e instanceof c;switch(r){case t.Blip:return c("blip",mp.blips,mp.Blip);case t.Checkpoint:return c("checkpoint",mp.checkpoints,mp.Checkpoint);case t.Colshape:return c("colshape",mp.colshapes,mp.Colshape);case t.Label:return c("textlabel",mp.labels,mp.TextLabel);case t.Marker:return c("marker",mp.markers,mp.Marker);case t.Object:return c("object",mp.objects,mp.Object);case t.Pickup:return c("pickup",mp.pickups,mp.Pickup);case t.Player:return c("player",mp.players,mp.Player);case t.Vehicle:return c("vehicle",mp.vehicles,mp.Vehicle)}}return!1}function s(){const e=46656*Math.random()|0,r=46656*Math.random()|0;return("000"+e.toString(36)).slice(-3)+("000"+r.toString(36)).slice(-3)}function o(){return mp.joaat?"server":mp.game&&mp.game.joaat?"client":mp.trigger?"cef":void 0}function i(e){const r=o();return JSON.stringify(e,(e,n)=>{if("client"===r||"server"===r&&n&&"object"==typeof n){let e;if(c(n,t.Blip)?e=t.Blip:c(n,t.Checkpoint)?e=t.Checkpoint:c(n,t.Colshape)?e=t.Colshape:c(n,t.Marker)?e=t.Marker:c(n,t.Object)?e=t.Object:c(n,t.Pickup)?e=t.Pickup:c(n,t.Player)?e=t.Player:c(n,t.Vehicle)&&(e=t.Vehicle),e)return{__t:e,i:n.remoteId||n.id}}return n})}function a(e){const r=o();return JSON.parse(e,(e,n)=>{if(("client"===r||"server"===r)&&n&&"object"==typeof n&&"string"==typeof n.__t&&"number"==typeof n.i&&2===Object.keys(n).length){const e=n.i;let c;switch(n.__t){case t.Blip:c=mp.blips;break;case t.Checkpoint:c=mp.checkpoints;break;case t.Colshape:c=mp.colshapes;break;case t.Label:c=mp.labels;break;case t.Marker:c=mp.markers;break;case t.Object:c=mp.objects;break;case t.Pickup:c=mp.pickups;break;case t.Player:c=mp.players;break;case t.Vehicle:c=mp.vehicles}if(c)return c["client"===r?"atRemoteId":"at"](e)}return n})}function l(e){return new Promise(r=>setTimeout(()=>r(e),0))}function p(e){return new Promise((r,n)=>setTimeout(()=>n(e),0))}function u(e){try{e.url}catch(e){return!1}return!0}n.d(r,"g",function(){return s}),n.d(r,"a",function(){return o}),n.d(r,"f",function(){return i}),n.d(r,"c",function(){return a}),n.d(r,"e",function(){return l}),n.d(r,"d",function(){return p}),n.d(r,"b",function(){return u}),function(e){e.Blip="b",e.Checkpoint="cp",e.Colshape="c",e.Label="l",e.Marker="m",e.Object="o",e.Pickup="p",e.Player="pl",e.Vehicle="v"}(t||(t={}))},function(e,r,n){"use strict";n.r(r),function(e){n.d(r,"register",function(){return d}),n.d(r,"unregister",function(){return m}),n.d(r,"call",function(){return g}),n.d(r,"callServer",function(){return _}),n.d(r,"callClient",function(){return b}),n.d(r,"callBrowsers",function(){return y}),n.d(r,"callBrowser",function(){return k});var t=n(0);const c=t.a();if(!c)throw"Unknown RAGE environment";const s="PROCEDURE_NOT_FOUND",o="__rpc:id",i="__rpc:process",a="__rpc:browserRegister",l="__rpc:browserUnregister",p="cef"===c?window:e;if(!p[i])if(p.__rpcListeners={},p.__rpcPending={},p[i]=((e,r)=>{"server"!==c&&(r=e);const n=t.c(r);if(n.req){const r={id:n.id,environment:n.fenv||n.env};"server"===c&&(r.player=e);const s={ret:1,id:n.id,env:c};let o;switch(c){case"server":o=(e=>r.player.call(i,[t.f(e)]));break;case"client":if("server"===n.env)o=(e=>mp.events.callRemote(i,t.f(e)));else if("cef"===n.env){const e=n.b&&p.__rpcBrowsers[n.b];r.browser=e,o=(r=>e&&t.b(e)&&u(e,r,!0))}break;case"cef":o=(e=>mp.trigger(i,t.f(e)))}o&&f(n.name,n.args,r).then(e=>o({...s,res:e})).catch(e=>o({...s,err:e}))}else if(n.ret){const r=p.__rpcPending[n.id];if("server"===c&&r.player!==e)return;r&&(r.resolve(n.err?t.d(n.err):t.e(n.res)),delete p.__rpcPending[n.id])}}),"cef"!==c){if(mp.events.add(i,p[i]),"client"===c){d("__rpc:callServer",([e,r],n)=>h(e,r,{fenv:n.environment})),d("__rpc:callBrowsers",([e,r],n)=>w(null,e,r,{fenv:n.environment})),p.__rpcBrowsers={};const e=e=>{const r=t.g();Object.keys(p.__rpcBrowsers).forEach(r=>{const n=p.__rpcBrowsers[r];n&&t.b(n)&&n!==e||delete p.__rpcBrowsers[r]}),p.__rpcBrowsers[r]=e,e.execute(`if(typeof window['${o}'] === 'undefined'){ window['${o}'] = Promise.resolve('${r}'); }else{ window['${o}:resolve']('${r}'); }`)};mp.browsers.forEach(e),mp.events.add("browserCreated",e),p.__rpcBrowserProcedures={},mp.events.add(a,e=>{const[r,n]=JSON.parse(e);p.__rpcBrowserProcedures[n]=r}),mp.events.add(l,e=>{const[r,n]=JSON.parse(e);p.__rpcBrowserProcedures[n]===r&&delete p.__rpcBrowserProcedures[n]})}}else void 0===p[o]&&(p[o]=new Promise(e=>{p[o+":resolve"]=e}));function u(e,r,n){const c=t.f(r);e.execute(`var process = window["${i}"]; if(process){ process(${JSON.stringify(c)}); }else{ ${n?"":`mp.trigger("${i}", '{"ret":1,"id":"${r.id}","err":"${s}","env":"cef"}');`} }`)}function f(e,r,n){const c=p.__rpcListeners[e];return c?t.e(c(r,n)):t.d(s)}function d(e,r){if(2!==arguments.length)throw'register expects 2 arguments: "name" and "cb"';"cef"===c&&p[o].then(r=>mp.trigger(a,JSON.stringify([r,e]))),p.__rpcListeners[e]=r}function m(e){if(1!==arguments.length)throw'unregister expects 1 argument: "name"';"cef"===c&&p[o].then(r=>mp.trigger(l,JSON.stringify([r,e]))),p.__rpcListeners[e]=void 0}function g(e,r){return 1!==arguments.length&&2!==arguments.length?t.d('call expects 1 or 2 arguments: "name" and optional "args"'):f(e,r,{environment:c})}function h(e,r,n={}){switch(c){case"server":return g(e,r);case"client":{const s=t.g();return new Promise(o=>{p.__rpcPending[s]={resolve:o};const a={req:1,id:s,name:e,env:c,args:r,...n};mp.events.callRemote(i,t.f(a))})}case"cef":return b("__rpc:callServer",[e,r])}}function _(e,r){return 1!==arguments.length&&2!==arguments.length?t.d('callServer expects 1 or 2 arguments: "name" and optional "args"'):h(e,r,{})}function b(e,r,n){switch(c){case"client":return n=r,r=e,1!==arguments.length&&2!==arguments.length||"string"!=typeof r?t.d('callClient from the client expects 1 or 2 arguments: "name" and optional "args"'):g(r,n);case"server":{if(2!==arguments.length&&3!==arguments.length||"object"!=typeof e)return t.d('callClient from the server expects 2 or 3 arguments: "player", "name", and optional "args"');const s=t.g();return new Promise(o=>{p.__rpcPending[s]={resolve:o,player:e};const a={req:1,id:s,name:r,env:c,args:n};e.call(i,[t.f(a)])})}case"cef":{if(n=r,r=e,1!==arguments.length&&2!==arguments.length||"string"!=typeof r)return t.d('callClient from the browser expects 1 or 2 arguments: "name" and optional "args"');const s=t.g();return p[o].then(e=>new Promise(o=>{p.__rpcPending[s]={resolve:o};const a={b:e,req:1,id:s,name:r,env:c,args:n};mp.trigger(i,t.f(a))}))}}}function v(e,r,n,t,s={}){return new Promise(o=>{p.__rpcPending[e]={resolve:o},u(r,{req:1,id:e,name:n,env:c,args:t,...s},!1)})}function w(e,r,n,o={}){switch(c){case"client":const i=t.g(),a=p.__rpcBrowserProcedures[r];if(!a)return t.d(s);const l=p.__rpcBrowsers[a];return l&&t.b(l)?v(i,l,r,n,o):t.d(s);case"server":return b(e,"__rpc:callBrowsers",[r,n]);case"cef":return b("__rpc:callBrowsers",[r,n])}}function y(e,r,n){switch(c){case"client":case"cef":return 1!==arguments.length&&2!==arguments.length?t.d('callBrowsers from the client or browser expects 1 or 2 arguments: "name" and optional "args"'):w(null,e,r,{});case"server":return 2!==arguments.length&&3!==arguments.length?t.d('callBrowsers from the server expects 2 or 3 arguments: "player", "name", and optional "args"'):w(e,r,n,{})}}function k(e,r,n){return"client"!==c?t.d("callBrowser can only be used in the client environment"):2!==arguments.length&&3!==arguments.length?t.d('callBrowser expects 2 or 3 arguments: "browser", "name", and optional "args"'):v(t.g(),e,r,n,{})}}.call(this,n(2))},function(e,r){var n;n=function(){return this}();try{n=n||new Function("return this")()}catch(e){"object"==typeof window&&(n=window)}e.exports=n}])});
-
+!function(e,r){"object"==typeof exports&&"object"==typeof module?module.exports=r():"function"==typeof define&&define.amd?define([],r):"object"==typeof exports?exports=r():e.rpc=r()}("undefined"!=typeof self?self:this,function(){return function(e){var r={};function n(t){if(r[t])return r[t].exports;var c=r[t]={i:t,l:!1,exports:{}};return e[t].call(c.exports,c,c.exports,n),c.l=!0,c.exports}return n.m=e,n.c=r,n.d=function(e,r,t){n.o(e,r)||Object.defineProperty(e,r,{enumerable:!0,get:t})},n.r=function(e){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(e,"__esModule",{value:!0})},n.t=function(e,r){if(1&r&&(e=n(e)),8&r)return e;if(4&r&&"object"==typeof e&&e&&e.__esModule)return e;var t=Object.create(null);if(n.r(t),Object.defineProperty(t,"default",{enumerable:!0,value:e}),2&r&&"string"!=typeof e)for(var c in e)n.d(t,c,function(r){return e[r]}.bind(null,c));return t},n.n=function(e){var r=e&&e.__esModule?function(){return e.default}:function(){return e};return n.d(r,"a",r),r},n.o=function(e,r){return Object.prototype.hasOwnProperty.call(e,r)},n.p="",n(n.s=1)}([function(e,r,n){"use strict";var t;function c(e,r){const n="client"===o();if(e&&"object"==typeof e&&void 0!==e.id){const c=(r,t,c)=>n?e.type===r&&t.at(e.id)===e:e instanceof c;switch(r){case t.Blip:return c("blip",mp.blips,mp.Blip);case t.Checkpoint:return c("checkpoint",mp.checkpoints,mp.Checkpoint);case t.Colshape:return c("colshape",mp.colshapes,mp.Colshape);case t.Label:return c("textlabel",mp.labels,mp.TextLabel);case t.Marker:return c("marker",mp.markers,mp.Marker);case t.Object:return c("object",mp.objects,mp.Object);case t.Pickup:return c("pickup",mp.pickups,mp.Pickup);case t.Player:return c("player",mp.players,mp.Player);case t.Vehicle:return c("vehicle",mp.vehicles,mp.Vehicle)}}return!1}function s(){const e=46656*Math.random()|0,r=46656*Math.random()|0;return("000"+e.toString(36)).slice(-3)+("000"+r.toString(36)).slice(-3)}function o(){return mp.joaat?"server":mp.game&&mp.game.joaat?"client":mp.trigger?"cef":void 0}function i(e){const r=o();return JSON.stringify(e,(e,n)=>{if("client"===r||"server"===r&&n&&"object"==typeof n){let e;if(c(n,t.Blip)?e=t.Blip:c(n,t.Checkpoint)?e=t.Checkpoint:c(n,t.Colshape)?e=t.Colshape:c(n,t.Marker)?e=t.Marker:c(n,t.Object)?e=t.Object:c(n,t.Pickup)?e=t.Pickup:c(n,t.Player)?e=t.Player:c(n,t.Vehicle)&&(e=t.Vehicle),e)return{__t:e,i:n.remoteId||n.id}}return n})}function a(e){const r=o();return JSON.parse(e,(e,n)=>{if(("client"===r||"server"===r)&&n&&"object"==typeof n&&"string"==typeof n.__t&&"number"==typeof n.i&&2===Object.keys(n).length){const e=n.i;let c;switch(n.__t){case t.Blip:c=mp.blips;break;case t.Checkpoint:c=mp.checkpoints;break;case t.Colshape:c=mp.colshapes;break;case t.Label:c=mp.labels;break;case t.Marker:c=mp.markers;break;case t.Object:c=mp.objects;break;case t.Pickup:c=mp.pickups;break;case t.Player:c=mp.players;break;case t.Vehicle:c=mp.vehicles}if(c)return c["client"===r?"atRemoteId":"at"](e)}return n})}function l(e){return new Promise(r=>setTimeout(()=>r(e),0))}function p(e){return new Promise((r,n)=>setTimeout(()=>n(e),0))}function u(e){try{e.url}catch(e){return!1}return!0}n.d(r,"g",function(){return s}),n.d(r,"a",function(){return o}),n.d(r,"f",function(){return i}),n.d(r,"c",function(){return a}),n.d(r,"e",function(){return l}),n.d(r,"d",function(){return p}),n.d(r,"b",function(){return u}),function(e){e.Blip="b",e.Checkpoint="cp",e.Colshape="c",e.Label="l",e.Marker="m",e.Object="o",e.Pickup="p",e.Player="pl",e.Vehicle="v"}(t||(t={}))},function(e,r,n){"use strict";n.r(r),function(e){n.d(r,"register",function(){return d}),n.d(r,"unregister",function(){return m}),n.d(r,"call",function(){return g}),n.d(r,"callServer",function(){return _}),n.d(r,"callClient",function(){return b}),n.d(r,"callBrowsers",function(){return y}),n.d(r,"callBrowser",function(){return k});var t=n(0);const c=t.a();if(!c)throw"Unknown RAGE environment";const s="PROCEDURE_NOT_FOUND",o="__rpc:id",i="__rpc:process",a="__rpc:browserRegister",l="__rpc:browserUnregister",p="cef"===c?window:e;if(!p[i])if(p.__rpcListeners={},p.__rpcPending={},p[i]=((e,r)=>{"server"!==c&&(r=e);const n=t.c(r);if(n.req){const r={id:n.id,environment:n.fenv||n.env};"server"===c&&(r.player=e);const s={ret:1,id:n.id,env:c};let o;switch(c){case"server":o=(e=>r.player.call(i,[t.f(e)]));break;case"client":if("server"===n.env)o=(e=>mp.events.callRemote(i,t.f(e)));else if("cef"===n.env){const e=n.b&&p.__rpcBrowsers[n.b];r.browser=e,o=(r=>e&&t.b(e)&&u(e,r,!0))}break;case"cef":o=(e=>mp.trigger(i,t.f(e)))}o&&f(n.name,n.args,r).then(e=>o({...s,res:e})).catch(e=>o({...s,err:e}))}else if(n.ret){const r=p.__rpcPending[n.id];if("server"===c&&r.player!==e)return;r&&(r.resolve(n.err?t.d(n.err):t.e(n.res)),delete p.__rpcPending[n.id])}}),"cef"!==c){if(mp.events.add(i,p[i]),"client"===c){d("__rpc:callServer",([e,r],n)=>h(e,r,{fenv:n.environment})),d("__rpc:callBrowsers",([e,r],n)=>w(null,e,r,{fenv:n.environment})),p.__rpcBrowsers={};const e=e=>{const r=t.g();Object.keys(p.__rpcBrowsers).forEach(r=>{const n=p.__rpcBrowsers[r];n&&t.b(n)&&n!==e||delete p.__rpcBrowsers[r]}),p.__rpcBrowsers[r]=e,e.execute(`if(typeof window['${o}'] === 'undefined'){ window['${o}'] = Promise.resolve('${r}'); }else{ window['${o}:resolve']('${r}'); }`)};mp.browsers.forEach(e),mp.events.add("browserCreated",e),p.__rpcBrowserProcedures={},mp.events.add(a,e=>{const[r,n]=JSON.parse(e);p.__rpcBrowserProcedures[n]=r}),mp.events.add(l,e=>{const[r,n]=JSON.parse(e);p.__rpcBrowserProcedures[n]===r&&delete p.__rpcBrowserProcedures[n]})}}else void 0===p[o]&&(p[o]=new Promise(e=>{p[o+":resolve"]=e}));function u(e,r,n){const c=t.f(r);e.execute(`var process = window["${i}"]; if(process){ process(${JSON.stringify(c)}); }else{ ${n?"":`mp.trigger("${i}", '{"ret":1,"id":"${r.id}","err":"${s}","env":"cef"}');`} }`)}function f(e,r,n){const c=p.__rpcListeners[e];return c?t.e(c(r,n)):t.d(s)}function d(e,r){if(2!==arguments.length)throw'register expects 2 arguments: "name" and "cb"';"cef"===c&&p[o].then(r=>mp.trigger(a,JSON.stringify([r,e]))),p.__rpcListeners[e]=r}function m(e){if(1!==arguments.length)throw'unregister expects 1 argument: "name"';"cef"===c&&p[o].then(r=>mp.trigger(l,JSON.stringify([r,e]))),p.__rpcListeners[e]=void 0}function g(e,r){return 1!==arguments.length&&2!==arguments.length?t.d('call expects 1 or 2 arguments: "name" and optional "args"'):f(e,r,{environment:c})}function h(e,r,n={}){switch(c){case"server":return g(e,r);case"client":{const s=t.g();return new Promise(o=>{p.__rpcPending[s]={resolve:o};const a={req:1,id:s,name:e,env:c,args:r,...n};mp.events.callRemote(i,t.f(a))})}case"cef":return b("__rpc:callServer",[e,r])}}function _(e,r){return 1!==arguments.length&&2!==arguments.length?t.d('callServer expects 1 or 2 arguments: "name" and optional "args"'):h(e,r,{})}function b(e,r,n){switch(c){case"client":return n=r,r=e,1!==arguments.length&&2!==arguments.length||"string"!=typeof r?t.d('callClient from the client expects 1 or 2 arguments: "name" and optional "args"'):g(r,n);case"server":{if(2!==arguments.length&&3!==arguments.length||"object"!=typeof e)return t.d('callClient from the server expects 2 or 3 arguments: "player", "name", and optional "args"');const s=t.g();return new Promise(o=>{p.__rpcPending[s]={resolve:o,player:e};const a={req:1,id:s,name:r,env:c,args:n};e.call(i,[t.f(a)])})}case"cef":{if(n=r,r=e,1!==arguments.length&&2!==arguments.length||"string"!=typeof r)return t.d('callClient from the browser expects 1 or 2 arguments: "name" and optional "args"');const s=t.g();return p[o].then(e=>new Promise(o=>{p.__rpcPending[s]={resolve:o};const a={b:e,req:1,id:s,name:r,env:c,args:n};mp.trigger(i,t.f(a))}))}}}function v(e,r,n,t,s={}){return new Promise(o=>{p.__rpcPending[e]={resolve:o},u(r,{req:1,id:e,name:n,env:c,args:t,...s},!1)})}function w(e,r,n,o={}){switch(c){case"client":const i=t.g(),a=p.__rpcBrowserProcedures[r];if(!a)return t.d(s);const l=p.__rpcBrowsers[a];return l&&t.b(l)?v(i,l,r,n,o):t.d(s);case"server":return b(e,"__rpc:callBrowsers",[r,n]);case"cef":return b("__rpc:callBrowsers",[r,n])}}function y(e,r,n){switch(c){case"client":case"cef":return 1!==arguments.length&&2!==arguments.length?t.d('callBrowsers from the client or browser expects 1 or 2 arguments: "name" and optional "args"'):w(null,e,r,{});case"server":return 2!==arguments.length&&3!==arguments.length?t.d('callBrowsers from the server expects 2 or 3 arguments: "player", "name", and optional "args"'):w(e,r,n,{})}}function k(e,r,n){if("client"!==c)return t.d("callBrowser can only be used in the client environment");if(2!==arguments.length&&3!==arguments.length)return t.d('callBrowser expects 2 or 3 arguments: "browser", "name", and optional "args"');return v(t.g(),e,r,n,{})}}.call(this,n(2))},function(e,r){var n;n=function(){return this}();try{n=n||new Function("return this")()}catch(e){"object"==typeof window&&(n=window)}e.exports=n}])});
 },{}],13:[function(require,module,exports){
 module.exports={
   "2725352035": {
@@ -9264,54 +10649,2007 @@ module.exports={
   }
 }
 },{}],14:[function(require,module,exports){
-const weaponData=require("./weaponData"),PistolAttachmentPos=new mp.Vector3(.02,.06,.1),PistolAttachmentRot=new mp.Vector3(-100,0,0),SMGAttachmentPos=new mp.Vector3(.08,.03,-.1),SMGAttachmentRot=new mp.Vector3(-80.77,0,0),ShotgunAttachmentPos=new mp.Vector3(-.1,-.15,.11),ShotgunAttachmentRot=new mp.Vector3(-180,0,0),RifleAttachmentPos=new mp.Vector3(-.1,-.15,-.13),RifleAttachmentRot=new mp.Vector3(0,0,3.5),weaponAttachmentData={WEAPON_PISTOL:{Slot:"RIGHT_THIGH",AttachBone:51826,AttachPosition:PistolAttachmentPos,AttachRotation:PistolAttachmentRot},WEAPON_PISTOL_MK2:{Slot:"RIGHT_THIGH",AttachBone:51826,AttachPosition:PistolAttachmentPos,AttachRotation:PistolAttachmentRot},WEAPON_COMBATPISTOL:{Slot:"RIGHT_THIGH",AttachBone:51826,AttachPosition:PistolAttachmentPos,AttachRotation:PistolAttachmentRot},WEAPON_APPISTOL:{Slot:"RIGHT_THIGH",AttachBone:51826,AttachPosition:PistolAttachmentPos,AttachRotation:PistolAttachmentRot},WEAPON_STUNGUN:{Slot:"RIGHT_THIGH",AttachBone:51826,AttachPosition:PistolAttachmentPos,AttachRotation:PistolAttachmentRot},WEAPON_PISTOL50:{Slot:"RIGHT_THIGH",AttachBone:51826,AttachPosition:PistolAttachmentPos,AttachRotation:PistolAttachmentRot},WEAPON_SNSPISTOL:{Slot:"RIGHT_THIGH",AttachBone:51826,AttachPosition:PistolAttachmentPos,AttachRotation:PistolAttachmentRot},WEAPON_SNSPISTOL_MK2:{Slot:"RIGHT_THIGH",AttachBone:51826,AttachPosition:PistolAttachmentPos,AttachRotation:PistolAttachmentRot},WEAPON_HEAVYPISTOL:{Slot:"RIGHT_THIGH",AttachBone:51826,AttachPosition:PistolAttachmentPos,AttachRotation:PistolAttachmentRot},WEAPON_VINTAGEPISTOL:{Slot:"RIGHT_THIGH",AttachBone:51826,AttachPosition:PistolAttachmentPos,AttachRotation:PistolAttachmentRot},WEAPON_REVOLVER:{Slot:"RIGHT_THIGH",AttachBone:51826,AttachPosition:PistolAttachmentPos,AttachRotation:PistolAttachmentRot},WEAPON_REVOLVER_MK2:{Slot:"RIGHT_THIGH",AttachBone:51826,AttachPosition:PistolAttachmentPos,AttachRotation:PistolAttachmentRot},WEAPON_DOUBLEACTION:{Slot:"RIGHT_THIGH",AttachBone:51826,AttachPosition:PistolAttachmentPos,AttachRotation:PistolAttachmentRot},WEAPON_RAYPISTOL:{Slot:"RIGHT_THIGH",AttachBone:51826,AttachPosition:PistolAttachmentPos,AttachRotation:PistolAttachmentRot},WEAPON_MICROSMG:{Slot:"LEFT_THIGH",AttachBone:58271,AttachPosition:SMGAttachmentPos,AttachRotation:SMGAttachmentRot},WEAPON_SMG:{Slot:"LEFT_THIGH",AttachBone:58271,AttachPosition:SMGAttachmentPos,AttachRotation:SMGAttachmentRot},WEAPON_SMG_MK2:{Slot:"LEFT_THIGH",AttachBone:58271,AttachPosition:SMGAttachmentPos,AttachRotation:SMGAttachmentRot},WEAPON_ASSAULTSMG:{Slot:"LEFT_THIGH",AttachBone:58271,AttachPosition:SMGAttachmentPos,AttachRotation:SMGAttachmentRot},WEAPON_COMBATPDW:{Slot:"LEFT_THIGH",AttachBone:58271,AttachPosition:SMGAttachmentPos,AttachRotation:SMGAttachmentRot},WEAPON_MACHINEPISTOL:{Slot:"LEFT_THIGH",AttachBone:58271,AttachPosition:SMGAttachmentPos,AttachRotation:SMGAttachmentRot},WEAPON_MINISMG:{Slot:"LEFT_THIGH",AttachBone:58271,AttachPosition:SMGAttachmentPos,AttachRotation:SMGAttachmentRot},WEAPON_PUMPSHOTGUN:{Slot:"LEFT_BACK",AttachBone:24818,AttachPosition:ShotgunAttachmentPos,AttachRotation:ShotgunAttachmentRot},WEAPON_PUMPSHOTGUN_MK2:{Slot:"LEFT_BACK",AttachBone:24818,AttachPosition:ShotgunAttachmentPos,AttachRotation:ShotgunAttachmentRot},WEAPON_SAWNOFFSHOTGUN:{Slot:"LEFT_BACK",AttachBone:24818,AttachPosition:ShotgunAttachmentPos,AttachRotation:ShotgunAttachmentRot},WEAPON_ASSAULTSHOTGUN:{Slot:"LEFT_BACK",AttachBone:24818,AttachPosition:ShotgunAttachmentPos,AttachRotation:ShotgunAttachmentRot},WEAPON_BULLPUPSHOTGUN:{Slot:"LEFT_BACK",AttachBone:24818,AttachPosition:ShotgunAttachmentPos,AttachRotation:ShotgunAttachmentRot},WEAPON_HEAVYSHOTGUN:{Slot:"LEFT_BACK",AttachBone:24818,AttachPosition:ShotgunAttachmentPos,AttachRotation:ShotgunAttachmentRot},WEAPON_ASSAULTRIFLE:{Slot:"RIGHT_BACK",AttachBone:24818,AttachPosition:RifleAttachmentPos,AttachRotation:RifleAttachmentRot},WEAPON_ASSAULTRIFLE_MK2:{Slot:"RIGHT_BACK",AttachBone:24818,AttachPosition:RifleAttachmentPos,AttachRotation:RifleAttachmentRot},WEAPON_CARBINERIFLE:{Slot:"RIGHT_BACK",AttachBone:24818,AttachPosition:RifleAttachmentPos,AttachRotation:RifleAttachmentRot},WEAPON_CARBINERIFLE_MK2:{Slot:"RIGHT_BACK",AttachBone:24818,AttachPosition:RifleAttachmentPos,AttachRotation:RifleAttachmentRot},WEAPON_SPECIALCARBINE:{Slot:"RIGHT_BACK",AttachBone:24818,AttachPosition:RifleAttachmentPos,AttachRotation:RifleAttachmentRot},WEAPON_SPECIALCARBINE_MK2:{Slot:"RIGHT_BACK",AttachBone:24818,AttachPosition:RifleAttachmentPos,AttachRotation:RifleAttachmentRot},WEAPON_MARKSMANRIFLE:{Slot:"RIGHT_BACK",AttachBone:24818,AttachPosition:RifleAttachmentPos,AttachRotation:RifleAttachmentRot},WEAPON_MARKSMANRIFLE_MK2:{Slot:"RIGHT_BACK",AttachBone:24818,AttachPosition:RifleAttachmentPos,AttachRotation:RifleAttachmentRot}};for(let t in weaponAttachmentData){let o=mp.game.joaat(t);weaponData[o]?(weaponAttachmentData[t].AttachName=`WDSP_${weaponData[o].HashKey}`,weaponAttachmentData[t].AttachModel=weaponData[o].ModelHashKey):console.log(`[!] ${t} not found in weapon data file and will cause issues, remove it from weaponAttachmentData.`)}for(let t in weaponAttachmentData)console.log(weaponAttachmentData[t].AttachName,weaponAttachmentData[t].AttachModel),mp.attachmentMngr.register(weaponAttachmentData[t].AttachName,weaponAttachmentData[t].AttachModel,weaponAttachmentData[t].AttachBone,weaponAttachmentData[t].AttachPosition,weaponAttachmentData[t].AttachRotation);
+const weaponData = require("./weaponData");
+
+const PistolAttachmentPos = new mp.Vector3(0.02, 0.06, 0.1);
+const PistolAttachmentRot = new mp.Vector3(-100.0, 0.0, 0.0);
+
+const SMGAttachmentPos = new mp.Vector3(0.08, 0.03, -0.1);
+const SMGAttachmentRot = new mp.Vector3(-80.77, 0.0, 0.0);
+
+const ShotgunAttachmentPos = new mp.Vector3(-0.1, -0.12, 0.11);
+const ShotgunAttachmentRot = new mp.Vector3(-180.0, 0.0, 0.0);
+
+const RifleAttachmentPos = new mp.Vector3(-0.1, -0.15, -0.13);
+const RifleAttachmentRot = new mp.Vector3(0.0, 0.0, 3.5);
+
+/*
+    Weapon names have to be uppercase!
+    You can get attachment bone IDs from https://wiki.rage.mp/index.php?title=Bones
+ */
+const weaponAttachmentData = {
+    // Pistols
+    "weapon_hatchet": { Slot: "RIGHT_THIGH", AttachBone: 51826, AttachPosition: PistolAttachmentPos, AttachRotation: new mp.Vector3(-100.0, 110.0, 0.0) },
+
+    "WEAPON_PISTOL": { Slot: "RIGHT_THIGH", AttachBone: 51826, AttachPosition: PistolAttachmentPos, AttachRotation: PistolAttachmentRot },
+    "WEAPON_PISTOL_MK2": { Slot: "RIGHT_THIGH", AttachBone: 51826, AttachPosition: PistolAttachmentPos, AttachRotation: PistolAttachmentRot },
+    "WEAPON_COMBATPISTOL": { Slot: "RIGHT_THIGH", AttachBone: 51826, AttachPosition: PistolAttachmentPos, AttachRotation: PistolAttachmentRot },
+    "WEAPON_APPISTOL": { Slot: "RIGHT_THIGH", AttachBone: 51826, AttachPosition: PistolAttachmentPos, AttachRotation: PistolAttachmentRot },
+    "WEAPON_STUNGUN": { Slot: "RIGHT_THIGH", AttachBone: 51826, AttachPosition: PistolAttachmentPos, AttachRotation: PistolAttachmentRot },
+    "WEAPON_PISTOL50": { Slot: "RIGHT_THIGH", AttachBone: 51826, AttachPosition: PistolAttachmentPos, AttachRotation: PistolAttachmentRot },
+    "WEAPON_SNSPISTOL": { Slot: "RIGHT_THIGH", AttachBone: 51826, AttachPosition: PistolAttachmentPos, AttachRotation: PistolAttachmentRot },
+    "WEAPON_SNSPISTOL_MK2": { Slot: "RIGHT_THIGH", AttachBone: 51826, AttachPosition: PistolAttachmentPos, AttachRotation: PistolAttachmentRot },
+    "WEAPON_HEAVYPISTOL": { Slot: "RIGHT_THIGH", AttachBone: 51826, AttachPosition: PistolAttachmentPos, AttachRotation: PistolAttachmentRot },
+    "WEAPON_VINTAGEPISTOL": { Slot: "RIGHT_THIGH", AttachBone: 51826, AttachPosition: PistolAttachmentPos, AttachRotation: PistolAttachmentRot },
+    "WEAPON_REVOLVER": { Slot: "RIGHT_THIGH", AttachBone: 51826, AttachPosition: PistolAttachmentPos, AttachRotation: PistolAttachmentRot },
+    "WEAPON_REVOLVER_MK2": { Slot: "RIGHT_THIGH", AttachBone: 51826, AttachPosition: PistolAttachmentPos, AttachRotation: PistolAttachmentRot },
+    "WEAPON_DOUBLEACTION": { Slot: "RIGHT_THIGH", AttachBone: 51826, AttachPosition: PistolAttachmentPos, AttachRotation: PistolAttachmentRot },
+    "WEAPON_RAYPISTOL": { Slot: "RIGHT_THIGH", AttachBone: 51826, AttachPosition: PistolAttachmentPos, AttachRotation: PistolAttachmentRot },
+
+    // Submachine Guns
+    "WEAPON_MICROSMG": { Slot: "LEFT_THIGH", AttachBone: 58271, AttachPosition: SMGAttachmentPos, AttachRotation: SMGAttachmentRot },
+    "WEAPON_SMG": { Slot: "LEFT_THIGH", AttachBone: 58271, AttachPosition: SMGAttachmentPos, AttachRotation: SMGAttachmentRot },
+    "WEAPON_SMG_MK2": { Slot: "LEFT_THIGH", AttachBone: 58271, AttachPosition: SMGAttachmentPos, AttachRotation: SMGAttachmentRot },
+    "WEAPON_ASSAULTSMG": { Slot: "LEFT_THIGH", AttachBone: 58271, AttachPosition: SMGAttachmentPos, AttachRotation: SMGAttachmentRot },
+    "WEAPON_COMBATPDW": { Slot: "LEFT_THIGH", AttachBone: 58271, AttachPosition: SMGAttachmentPos, AttachRotation: SMGAttachmentRot },
+    "WEAPON_MACHINEPISTOL": { Slot: "LEFT_THIGH", AttachBone: 58271, AttachPosition: SMGAttachmentPos, AttachRotation: SMGAttachmentRot },
+    "WEAPON_MINISMG": { Slot: "LEFT_THIGH", AttachBone: 58271, AttachPosition: SMGAttachmentPos, AttachRotation: SMGAttachmentRot },
+
+    // Shotguns
+    "WEAPON_PUMPSHOTGUN": { Slot: "LEFT_BACK", AttachBone: 24818, AttachPosition: ShotgunAttachmentPos, AttachRotation: ShotgunAttachmentRot },
+    "WEAPON_PUMPSHOTGUN_MK2": { Slot: "LEFT_BACK", AttachBone: 24818, AttachPosition: ShotgunAttachmentPos, AttachRotation: ShotgunAttachmentRot },
+    "WEAPON_SAWNOFFSHOTGUN": { Slot: "LEFT_BACK", AttachBone: 24818, AttachPosition: ShotgunAttachmentPos, AttachRotation: ShotgunAttachmentRot },
+    "WEAPON_ASSAULTSHOTGUN": { Slot: "LEFT_BACK", AttachBone: 24818, AttachPosition: ShotgunAttachmentPos, AttachRotation: ShotgunAttachmentRot },
+    "WEAPON_BULLPUPSHOTGUN": { Slot: "LEFT_BACK", AttachBone: 24818, AttachPosition: ShotgunAttachmentPos, AttachRotation: ShotgunAttachmentRot },
+    "WEAPON_HEAVYSHOTGUN": { Slot: "LEFT_BACK", AttachBone: 24818, AttachPosition: ShotgunAttachmentPos, AttachRotation: ShotgunAttachmentRot },
+
+    // Rifles
+    "WEAPON_ASSAULTRIFLE": { Slot: "RIGHT_BACK", AttachBone: 24818, AttachPosition: RifleAttachmentPos, AttachRotation: RifleAttachmentRot },
+    "WEAPON_ASSAULTRIFLE_MK2": { Slot: "RIGHT_BACK", AttachBone: 24818, AttachPosition: RifleAttachmentPos, AttachRotation: RifleAttachmentRot },
+    "WEAPON_CARBINERIFLE": { Slot: "RIGHT_BACK", AttachBone: 24818, AttachPosition: RifleAttachmentPos, AttachRotation: RifleAttachmentRot },
+    "WEAPON_CARBINERIFLE_MK2": { Slot: "RIGHT_BACK", AttachBone: 24818, AttachPosition: RifleAttachmentPos, AttachRotation: RifleAttachmentRot },
+    "WEAPON_SPECIALCARBINE": { Slot: "RIGHT_BACK", AttachBone: 24818, AttachPosition: RifleAttachmentPos, AttachRotation: RifleAttachmentRot },
+    "WEAPON_SPECIALCARBINE_MK2": { Slot: "RIGHT_BACK", AttachBone: 24818, AttachPosition: RifleAttachmentPos, AttachRotation: RifleAttachmentRot },
+    "WEAPON_MARKSMANRIFLE": { Slot: "RIGHT_BACK", AttachBone: 24818, AttachPosition: RifleAttachmentPos, AttachRotation: RifleAttachmentRot },
+    "WEAPON_MARKSMANRIFLE_MK2": { Slot: "RIGHT_BACK", AttachBone: 24818, AttachPosition: RifleAttachmentPos, AttachRotation: RifleAttachmentRot }
+};
+
+// Update weaponAttachmentData with attachment name and model
+for (let weapon in weaponAttachmentData) {
+    let hash = mp.game.joaat(weapon);
+
+    if (weaponData[hash]) {
+        weaponAttachmentData[weapon].AttachName = weaponData[hash].HashKey;
+        weaponAttachmentData[weapon].AttachModel = weaponData[hash].ModelHashKey;
+    } else {
+        console.log(`[!] ${weapon} not found in weapon data file and will cause issues, remove it from weaponAttachmentData.`);
+    }
+}
+
+
+
+for (let weapon in weaponAttachmentData) {
+    mp.attachmentMngr.register(weaponAttachmentData[weapon].AttachName, weaponAttachmentData[weapon].AttachModel, weaponAttachmentData[weapon].AttachBone, weaponAttachmentData[weapon].AttachPosition, weaponAttachmentData[weapon].AttachRotation);
+}
+
 
 },{"./weaponData":13}],15:[function(require,module,exports){
-var LastCam,natives=require("./natives.js"),CEFInterface=require("./browser.js").interface,CEFInventory=require("./browser.js").inventory,CEFNotification=require("./browser.js").notification;function clearBlips(){natives.SET_THIS_SCRIPT_CAN_REMOVE_BLIPS_CREATED_BY_ANY_SCRIPT(!0);let e=natives.GET_FIRST_BLIP_INFO_ID(5);for(;natives.DOES_BLIP_EXIST(e);)mp.game.ui.removeBlip(e),e=natives.GET_NEXT_BLIP_INFO_ID(5);mp.game.wait(50)}CEFInterface.load("login/index.html"),mp.gui.chat.show(!1),mp.events.callRemote("ServerAccount:Ready"),mp.game.graphics.transitionToBlurred(1),mp.events.add("Server:RequestLogin",()=>{clearBlips(),mp.players.local.position=new mp.Vector3(2927.993408203125,5618.33544921875,244.45285034179688),mp.players.local.setAlpha(0),mp.defaultCam=mp.cameras.new("default",new mp.Vector3(2927.993408203125,5618.33544921875,244.45285034179688),new mp.Vector3,70),mp.defaultCam.pointAtCoord(2906.989501953125,5563.49267578125,245.226806640625),mp.defaultCam.setActive(!0),mp.game.cam.renderScriptCams(!0,!1,0,!0,!1),mp.game.ui.displayHud(!1),mp.game.ui.displayRadar(!1),mp.game.graphics.transitionToBlurred(1),CEFInterface.cursor(!0),setTimeout(function(){CEFInterface.call("cef_loadlogin",mp.players.local.name)},100)}),mp.events.add("Account:Alert",function(...e){CEFInterface.call("alert_login",e[0])}),mp.events.add("Account:HideLogin",()=>{mp.game.graphics.transitionFromBlurred(500),CEFInterface.cursor(!1),CEFInterface.call("cef_hidelogin")}),mp.events.add("Account:LoginDone",()=>{mp.game.player.setTargetingMode(1),mp.game.player.setLockon(!1),mp.game.player.setLockonRangeOverride(0),mp.players.local.setOnlyDamagedByPlayer(!1),mp.players.local.setProofs(!0,!1,!1,!1,!1,!1,!1,!1),mp.game.player.setHealthRechargeMultiplier(0),mp.game.ui.displayRadar(!0),mp.game.ui.displayHud(!0),mp.game.ui.setMinimapVisible(!1),mp.gui.chat.show(!0)}),mp.events.add("Cam:Hide",()=>{mp.game.graphics.transitionFromBlurred(100),mp.game.ui.displayRadar(!0),mp.game.ui.displayHud(!0),mp.game.ui.setMinimapVisible(!1),mp.game.player.setTargetingMode(1),mp.game.player.setLockon(!1),mp.game.player.setLockonRangeOverride(0),mp.players.local.setOnlyDamagedByPlayer(!1),mp.players.local.setProofs(!0,!1,!1,!1,!1,!1,!1,!1),mp.game.player.setHealthRechargeMultiplier(0),mp.players.local.freezePosition(!1),mp.game.cam.renderScriptCams(!1,!1,0,!0,!1),mp.game.cam.doScreenFadeIn(1e3)}),mp.events.add("entityStreamIn",e=>{"player"===e.type&&(mp.game.player.setTargetingMode(1),mp.game.player.setLockon(!1),mp.game.player.setLockonRangeOverride(0),mp.players.local.setOnlyDamagedByPlayer(!1),mp.players.local.setProofs(!0,!1,!1,!1,!1,!1,!1,!1),mp.game.player.setLockonRangeOverride(0))}),mp.events.add("Account:Login",(e,a)=>{mp.events.callRemote("ServerAccount:Login",e,a)}),mp.events.add("Account:Register",(e,a,r)=>{mp.events.callRemote("ServerAccount:Register",e,a,r)});
+//1868.765869140625, 3710.90283203125, 113.74462127685547
+var natives = require("./natives.js")
+var CEFInterface = require("./browser.js").interface;
+var CEFInventory = require("./browser.js").inventory;
+var CEFNotification = require("./browser.js").notification;
+CEFInterface.load("login/index.html");
 
+function clearBlips() {
+    natives.SET_THIS_SCRIPT_CAN_REMOVE_BLIPS_CREATED_BY_ANY_SCRIPT(true);
+    let last_blip = natives.GET_FIRST_BLIP_INFO_ID(5);
+    while (natives.DOES_BLIP_EXIST(last_blip)) {
+        mp.game.ui.removeBlip(last_blip);
+        last_blip = natives.GET_NEXT_BLIP_INFO_ID(5);
+    }
+    mp.game.wait(50);
+}
+// Account Stuff
+mp.gui.chat.show(false);
+mp.events.callRemote("ServerAccount:Ready");
+mp.game.graphics.transitionToBlurred(1);
+var LastCam;
+mp.events.add("Server:RequestLogin", () => {
+    clearBlips();
+    mp.players.local.position = new mp.Vector3(2927.993408203125, 5618.33544921875, 244.45285034179688);
+    mp.players.local.setAlpha(0);
+    mp.defaultCam = mp.cameras.new('default', new mp.Vector3(2927.993408203125, 5618.33544921875, 244.45285034179688), new mp.Vector3(), 70);
+    mp.defaultCam.pointAtCoord(2906.989501953125, 5563.49267578125, 245.226806640625);
+    mp.defaultCam.setActive(true);
+    mp.game.cam.renderScriptCams(true, false, 0, true, false);
+    mp.game.ui.displayHud(false);
+    mp.game.ui.displayRadar(false);
+    mp.game.graphics.transitionToBlurred(1);
+    CEFInterface.cursor(true);
+    setTimeout(function() {
+        CEFInterface.call("cef_loadlogin", mp.players.local.name)
+    }, 100);
+});
+mp.events.add("Account:Alert", function(...args) {
+    CEFInterface.call("alert_login", args[0])
+});
+mp.events.add("Account:HideLogin", () => {
+    mp.game.graphics.transitionFromBlurred(500);
+    CEFInterface.cursor(false);
+    CEFInterface.call("cef_hidelogin")
+});
+mp.events.add("Account:LoginDone", () => {
+    mp.game.player.setTargetingMode(1);
+    mp.game.player.setLockon(false);
+    mp.game.player.setLockonRangeOverride(0.0);
+    mp.players.local.setOnlyDamagedByPlayer(false);
+    mp.players.local.setProofs(true, false, false, false, false, false, false, false);
+    mp.game.player.setHealthRechargeMultiplier(0.0);
+    mp.game.ui.displayRadar(true);
+    mp.game.ui.displayHud(true);
+    mp.game.ui.setMinimapVisible(false);
+    mp.gui.chat.show(true);
+    //startMakingItems();
+})
+mp.events.add("Cam:Hide", () => {
+    mp.game.graphics.transitionFromBlurred(100);
+    mp.game.ui.displayRadar(true);
+    mp.game.ui.displayHud(true);
+    mp.game.ui.setMinimapVisible(false)
+    mp.game.player.setTargetingMode(1);
+    mp.game.player.setLockon(false);
+    mp.game.player.setLockonRangeOverride(0.0);
+    mp.players.local.setOnlyDamagedByPlayer(false);
+    mp.players.local.setProofs(true, false, false, false, false, false, false, false);
+    mp.game.player.setHealthRechargeMultiplier(0.0);
+    mp.players.local.freezePosition(false);
+    mp.game.cam.renderScriptCams(false, false, 0, true, false);
+    mp.game.cam.doScreenFadeIn(1000);
+})
+mp.events.add("entityStreamIn", (entity) => {
+    if (entity.type !== "player") return;
+    mp.game.player.setTargetingMode(1);
+    mp.game.player.setLockon(false);
+    mp.game.player.setLockonRangeOverride(0.0);
+    mp.players.local.setOnlyDamagedByPlayer(false);
+    mp.players.local.setProofs(true, false, false, false, false, false, false, false);
+    mp.game.player.setLockonRangeOverride(0.0);
+});
+mp.events.add("Account:Login", (username, password) => {
+    mp.events.callRemote("ServerAccount:Login", username, password);
+});
+mp.events.add("Account:Register", (username, hash_password, salt) => {
+    mp.events.callRemote("ServerAccount:Register", username, hash_password, salt);
+});
+/*
+function startMakingItems() {
+    mp.objects.new(mp.game.joaat("v_res_fa_bread01"), new mp.Vector3(1001, 620, 850), {
+        rotation: new mp.Vector3(0, 0, 90),
+        alpha: 255,
+        dimension: 0
+    });
+    mp.events.add('render', () => {
+        mp.players.local.freezePosition(true);
+        mp.players.local.position = new mp.Vector3(1045, 620, 850);
+        mp.players.local.setAlpha(0);
+        mp.defaultCam.setFov(30);
+        mp.defaultCam.setCoord(1004, 620, 850);
+        mp.defaultCam.pointAtCoord(1000, 620, 850);
+        mp.defaultCam.setActive(true);
+        mp.game.cam.renderScriptCams(true, false, 0, true, false);
+        mp.game.graphics.drawBox(1000, 500, 550, 1000, 1500, 1550, 0, 255, 0, 255);
+    });
+}*/
 },{"./browser.js":1,"./natives.js":17}],16:[function(require,module,exports){
-var materials={2379541433:1,127813971:2,3454750755:2};module.exports=materials;
+var materials = {};
 
+materials[2379541433] = 1;
+materials[127813971] = 2;
+materials[3454750755] = 2;
+//materials[581794674] = true;
+
+module.exports = materials;
 },{}],17:[function(require,module,exports){
-var natives={};mp.game.vehicle.getVehicleSeats=(e=>mp.game.invoke("0xA7C4F2C6E744A550",e.handle)),mp.game.graphics.clearDrawOrigin=(()=>mp.game.invoke("0xFF0B610F6BE0D7AF")),natives.START_PLAYER_TELEPORT=((e,E,_,a,i,m,n,v)=>mp.game.invoke("0xAD15F075A4DA0FDE",e,E,_,a,i,m,n,v)),natives.CHANGE_PLAYER_PED=((e,E,_)=>mp.game.invoke("0x048189FAC643DEEE",e,E,_)),natives.SET_PED_CURRENT_WEAPON_VISIBLE=((e,E,_,a,i)=>mp.game.invoke("0x0725A4CCFDED9A70",e,E,_,a,i)),natives.SET_BLIP_SPRITE=((e,E)=>mp.game.invoke("0xDF735600A4696DAF",e,E)),natives.SET_BLIP_ALPHA=((e,E)=>mp.game.invoke("0x45FF974EEE1C8734",e,E)),natives.SET_BLIP_COLOUR=((e,E)=>mp.game.invoke("0x03D7FB09E75D6B7E",e,E)),natives.SET_BLIP_ROTATION=((e,E)=>mp.game.invoke("0xF87683CDF73C3F6E",e,E)),natives.SET_BLIP_FLASHES=((e,E)=>mp.game.invoke("0xB14552383D39CE3E",e,E)),natives.SET_BLIP_FLASH_TIMER=((e,E)=>mp.game.invoke("0xD3CD6FD297AE87CC",e,E)),natives.SET_BLIP_COORDS=((e,E,_,a)=>mp.game.invoke("0xAE2AF67E9D9AF65D",e,E,_,a)),natives.SET_CURSOR_LOCATION=((e,E)=>mp.game.invoke("0xFC695459D4D0E219",e,E)),natives.SET_THIS_SCRIPT_CAN_REMOVE_BLIPS_CREATED_BY_ANY_SCRIPT=(e=>mp.game.invoke("0xB98236CAAECEF897",e)),natives.GET_FIRST_BLIP_INFO_ID=(e=>mp.game.invoke("0x1BEDE233E6CD2A1F",e)),natives.GET_NEXT_BLIP_INFO_ID=(e=>mp.game.invoke("0x14F96AA50D6FBEA7",e)),natives.DOES_BLIP_EXIST=(e=>mp.game.invoke("0xA6DB27D19ECBB7DA",e)),natives.GET_NUMBER_OF_ACTIVE_BLIPS=(()=>mp.game.invoke("0x9A3FF3DE163034E8")),natives.SET_BLIP_SCALE=((e,E)=>mp.game.invoke("0xD38744167B2FA257",e,E)),natives.SET_ENTITY_NO_COLLISION_ENTITY=((e,E,_)=>mp.game.invoke("0xA53ED5520C07654A",e.handle,E.handle,_)),natives.GET_CLOSEST_OBJECT_OF_TYPE=((e,E,_,a,i,m,n,v)=>mp.game.invoke("0xE143FA2249364369",e,E,_,a,i,m,n,v)),natives.DOES_OBJECT_OF_TYPE_EXIST_AT_COORDS=((e,E,_,a,i,m)=>mp.game.invoke("0xBFA48E2FF417213F",e,E,_,a,i,m)),module.exports=natives;
-
+var natives = {};
+mp.game.vehicle.getVehicleSeats = (veh) => mp.game.invoke("0xA7C4F2C6E744A550", veh.handle);
+mp.game.graphics.clearDrawOrigin = () => mp.game.invoke('0xFF0B610F6BE0D7AF'); // 26.07.2018 // GTA 1.44 
+natives.START_PLAYER_TELEPORT = (player, x, y, z, heading, p5, p6, p7) => mp.game.invoke("0xAD15F075A4DA0FDE", player, x, y, z, heading, p5, p6, p7);
+natives.CHANGE_PLAYER_PED = (ped, p1, p2) => mp.game.invoke("0x048189FAC643DEEE", ped, p1, p2);
+natives.SET_PED_CURRENT_WEAPON_VISIBLE = (ped, visible, deselectWeapon, p3, p4) => mp.game.invoke("0x0725A4CCFDED9A70", ped, visible, deselectWeapon, p3, p4);
+natives.SET_BLIP_SPRITE = (blip, sprite) => mp.game.invoke("0xDF735600A4696DAF", blip, sprite); // SET_BLIP_SPRITE
+natives.SET_BLIP_ALPHA = (blip, a) => mp.game.invoke("0x45FF974EEE1C8734", blip, a); // SET_BLIP_ALPHA
+natives.SET_BLIP_COLOUR = (blip, c) => mp.game.invoke("0x03D7FB09E75D6B7E", blip, c); // SET_BLIP_COLOUR
+natives.SET_BLIP_ROTATION = (blip, r) => mp.game.invoke("0xF87683CDF73C3F6E", blip, r); // SET_BLIP_ROTATION
+natives.SET_BLIP_FLASHES = (blip, f) => mp.game.invoke("0xB14552383D39CE3E", blip, f); // SET_BLIP_FLASHES
+natives.SET_BLIP_FLASH_TIMER = (blip, t) => mp.game.invoke("0xD3CD6FD297AE87CC", blip, t); // SET_BLIP_FLASH_TIMER
+natives.SET_BLIP_COORDS = (blip, x, y, z) => mp.game.invoke("0xAE2AF67E9D9AF65D", blip, x, y, z); // SET_BLIP_COORDS
+natives.SET_CURSOR_LOCATION = (x, y) => mp.game.invoke("0xFC695459D4D0E219", x, y); // SET_CURSOR_LOCATION 
+natives.SET_THIS_SCRIPT_CAN_REMOVE_BLIPS_CREATED_BY_ANY_SCRIPT = (toggle) => mp.game.invoke("0xB98236CAAECEF897", toggle); // SET_THIS_SCRIPT_CAN_REMOVE_BLIPS_CREATED_BY_ANY_SCRIPT
+natives.GET_FIRST_BLIP_INFO_ID = (i) => mp.game.invoke("0x1BEDE233E6CD2A1F", i); // GET_FIRST_BLIP_INFO_ID
+natives.GET_NEXT_BLIP_INFO_ID = (i) => mp.game.invoke("0x14F96AA50D6FBEA7", i); // GET_NEXT_BLIP_INFO_ID
+natives.DOES_BLIP_EXIST = (blip) => mp.game.invoke("0xA6DB27D19ECBB7DA", blip); // DOES_BLIP_EXIST
+natives.GET_NUMBER_OF_ACTIVE_BLIPS = () => mp.game.invoke("0x9A3FF3DE163034E8"); // GET_NUMBER_OF_ACTIVE_BLIPS
+natives.SET_BLIP_SCALE = (blip, scale) => mp.game.invoke("0xD38744167B2FA257", blip, scale); // SET_BLIP_SCALE
+natives.SET_ENTITY_NO_COLLISION_ENTITY = (entity1, entity2, collision) => mp.game.invoke("0xA53ED5520C07654A", entity1.handle, entity2.handle, collision); // SET_ENTITY_NO_COLLISION_ENTITY
+natives.GET_CLOSEST_OBJECT_OF_TYPE = (x, y, z, radius, modelHash, isMission, p6, p7) => mp.game.invoke("0xE143FA2249364369", x, y, z, radius, modelHash, isMission, p6, p7); // GET_CLOSEST_OBJECT_OF_TYPE
+natives.DOES_OBJECT_OF_TYPE_EXIST_AT_COORDS = (x, y, z, radius, hash, p5) => mp.game.invoke("0xBFA48E2FF417213F", x, y, z, radius, hash, p5); // DOES_OBJECT_OF_TYPE_EXIST_AT_COORDS
+natives.PLACE_OBJECT_ON_GROUND_PROPERLY = (obj) => mp.game.invoke("0x58A850EAEE20FAA3", obj); // PLACE_OBJECT_ON_GROUND_PROPERLY
+natives.GET_ENTITY_ROTATION = (ent,order) => mp.game.invoke("0xAFBD61CC738D9EB9", ent,order); // GET_ENTITY_ROTATION
+natives.GET_ENTITY_COORDS = (ent,alive) => mp.game.invoke("0x3FEF770D40960D5A", ent,alive); // GET_ENTITY_COORDS
+natives.SET_ENTITY_COLLISION = (ent,toggle,physics) => mp.game.invoke("0x1A9205C1B9EE827F", ent,toggle,physics); // SET_ENTITY_COLLISION
+natives.FREEZE_ENTITY_POSITION = (ent,toggle) => mp.game.invoke("0x428CA6DBD1094446", ent,toggle); // FREEZE_ENTITY_POSITION
+natives.SET_ENTITY_COORDS = ( entity,  xPos,  yPos,  zPos,  xAxis,  yAxis,  zAxis,  clearArea) => mp.game.invoke("0x06843DA7060A026B",entity,  xPos,  yPos,  zPos,  xAxis,  yAxis,  zAxis,  clearArea); // SET_ENTITY_COORDS
+natives.SET_ENTITY_ROTATION = (  entity,  pitch,  roll,  yaw,  rotationOrder,  p5) => mp.game.invoke("0x8524A8B0171D5E07", entity,  pitch,  roll,  yaw,  rotationOrder,  p5); // SET_ENTITY_ROTATION
+natives.GET_ENTITY_HEIGHT_ABOVE_GROUND = (  entity) => mp.game.invoke("0x1DD55701034110E5", entity); // GET_ENTITY_HEIGHT_ABOVE_GROUND
+module.exports = natives;
 },{}],18:[function(require,module,exports){
-var Notifications=new class{constructor(){let t=this;this._renderObjects=[],this._smoothing=1/120,mp.events.add("render",()=>{t.render()})}render(){let t=this;t._renderObjects.forEach(function(e,r){let o=mp.vector(e.start),c=mp.vector(e.end),n=o.lerp(c,e.t);e.color[3]=200*(1-e.t/1.4),mp.game.graphics.drawText(e.text,[n.x,n.y,n.z],{font:4,color:e.color,scale:[.3,.3],outline:!0,centre:!0}),e.t+=t._smoothing,(e.t>=1||e.color[3]<0)&&t._renderObjects.splice(r,1)})}notify3D(t,e,r,o,c,n,s="NO",i=[255,255,255]){this._renderObjects.push({start:new mp.Vector3(t,e,r),end:new mp.Vector3(o,c,n),t:0,text:s,color:i})}};module.exports=Notifications;
+var Notifications = new class {
+    constructor() {
+        let self = this;
+        this._renderObjects = [];
+        this._smoothing = 1 / 120;
+        mp.events.add("render", () => {
+            self.render();
+        });
+    }
+    render() {
+        let self = this;
+        self._renderObjects.forEach(function(frame, i) {
+            let sVector = mp.vector(frame.start);
+            let eVector = mp.vector(frame.end);
+            let new_TargetPos = sVector.lerp(eVector, frame.t);
+
+
+            frame.color[3] = 200 * (1 - (frame.t/1.4))
+
+            mp.game.graphics.drawText(frame.text, [new_TargetPos.x, new_TargetPos.y, new_TargetPos.z], {
+                font: 4,
+                color: frame.color,
+                scale: [0.3, 0.3],
+                outline: true,
+                centre: true
+            });
+            frame.t += self._smoothing;
+            if ((frame.t >= 1) || (frame.color[3] < 0)){
+                self._renderObjects.splice(i, 1);
+            }
+        })
+    }
+    notify3D(x,y,z,tx,ty,tz, text = "NO", color = [255, 255, 255]) {
+        this._renderObjects.push({
+            start:new mp.Vector3(x,y,z),
+            end:new mp.Vector3(tx,ty,tz),
+            t:0,
+            text:text,
+            color:color
+        })
+    }
+}
+module.exports = Notifications;
 
 },{}],19:[function(require,module,exports){
-var offsets={sr_prop_sr_boxwood_01:{pos:new mp.Vector3(0,0,0),rot:new mp.Vector3(0,0,0)},prop_box_wood04a:{pos:new mp.Vector3(0,0,0),rot:new mp.Vector3(0,0,0)}};module.exports=offsets;
-
+var offsets = {
+	"sr_prop_sr_boxwood_01": {
+		pos: new mp.Vector3(0, 0, 0),
+		rot: new mp.Vector3(0, 0, 0)
+	},
+	"prop_box_wood04a": {
+		pos: new mp.Vector3(0, 0, 0),
+		rot: new mp.Vector3(0, 0, 0)
+	}
+}
+module.exports = offsets;
 },{}],20:[function(require,module,exports){
-var messageScaleform=require("./Scaleform.js");let bigMessageScaleform=null,bigMsgInit=0,bigMsgDuration=5e3,bigMsgAnimatedOut=!1;mp.events.add("ShowWeaponPurchasedMessage",(e,g,s,a=5e3)=>{null==bigMessageScaleform&&(bigMessageScaleform=new messageScaleform("mp_big_message_freemode")),bigMessageScaleform.callFunction("SHOW_WEAPON_PURCHASED",e,g,s),bigMsgInit=Date.now(),bigMsgDuration=a,bigMsgAnimatedOut=!1}),mp.events.add("ShowPlaneMessage",(e,g,s,a=5e3)=>{null==bigMessageScaleform&&(bigMessageScaleform=new messageScaleform("mp_big_message_freemode")),bigMessageScaleform.callFunction("SHOW_PLANE_MESSAGE",e,g,s),bigMsgInit=Date.now(),bigMsgDuration=a,bigMsgAnimatedOut=!1}),mp.events.add("ShowShardMessage",(e,g,s,a,i=5e3)=>{null==bigMessageScaleform&&(bigMessageScaleform=new messageScaleform("mp_big_message_freemode")),bigMessageScaleform.callFunction("SHOW_SHARD_CENTERED_MP_MESSAGE",e,g,s,a),bigMsgInit=Date.now(),bigMsgDuration=i,bigMsgAnimatedOut=!1}),mp.events.add("render",()=>{null!=bigMessageScaleform&&(bigMessageScaleform.renderFullscreen(),bigMsgInit>0&&Date.now()-bigMsgInit>bigMsgDuration&&(bigMsgAnimatedOut?(bigMsgInit=0,bigMessageScaleform.dispose(),bigMessageScaleform=null):(bigMessageScaleform.callFunction("TRANSITION_OUT"),bigMsgAnimatedOut=!0,bigMsgDuration+=750)))});
+var messageScaleform = require("./Scaleform.js");
+let bigMessageScaleform = null;
+let bigMsgInit = 0;
+let bigMsgDuration = 5000;
+let bigMsgAnimatedOut = false;
+ 
+mp.events.add("ShowWeaponPurchasedMessage", (title, weaponName, weaponHash, time = 5000) => {
+    if (bigMessageScaleform == null) bigMessageScaleform = new messageScaleform("mp_big_message_freemode");
+    bigMessageScaleform.callFunction("SHOW_WEAPON_PURCHASED", title, weaponName, weaponHash);
 
+    bigMsgInit = Date.now();
+    bigMsgDuration = time;
+    bigMsgAnimatedOut = false;
+});
+
+mp.events.add("ShowPlaneMessage", (title, planeName, planeHash, time = 5000) => {
+    if (bigMessageScaleform == null) bigMessageScaleform = new messageScaleform("mp_big_message_freemode");
+    bigMessageScaleform.callFunction("SHOW_PLANE_MESSAGE", title, planeName, planeHash);
+
+    bigMsgInit = Date.now();
+    bigMsgDuration = time;
+    bigMsgAnimatedOut = false;
+});
+
+mp.events.add("ShowShardMessage", (title, message, titleColor, bgColor, time = 5000) => {
+    if (bigMessageScaleform == null) bigMessageScaleform = new messageScaleform("mp_big_message_freemode");
+    bigMessageScaleform.callFunction("SHOW_SHARD_CENTERED_MP_MESSAGE", title, message, titleColor, bgColor);
+
+    bigMsgInit = Date.now();
+    bigMsgDuration = time;
+    bigMsgAnimatedOut = false;
+});
+
+mp.events.add("render", () => {
+    if (bigMessageScaleform != null) {
+        bigMessageScaleform.renderFullscreen();
+
+        if (bigMsgInit > 0 && Date.now() - bigMsgInit > bigMsgDuration) {
+            if (!bigMsgAnimatedOut) {
+                bigMessageScaleform.callFunction("TRANSITION_OUT");
+                bigMsgAnimatedOut = true;
+                bigMsgDuration += 750;
+            } else {
+                bigMsgInit = 0;
+                bigMessageScaleform.dispose();
+                bigMessageScaleform = null;
+            }
+        }
+    }
+});
 },{"./Scaleform.js":23}],21:[function(require,module,exports){
-class InstructionButtons{constructor(){for(this.handle=mp.game.graphics.requestScaleformMovie("instructional_buttons"),this.ScIndex=0;!mp.game.graphics.hasScaleformMovieLoaded(this.handle);)mp.game.wait(0)}InitButtons(e,a,i){this.ScIndex=0,mp.game.graphics.drawScaleformMovieFullscreen(this.handle,255,255,255,0,!1),mp.game.graphics.pushScaleformMovieFunction(this.handle,"CLEAR_ALL"),mp.game.graphics.popScaleformMovieFunctionVoid(),mp.game.graphics.pushScaleformMovieFunction(this.handle,"SET_CLEAR_SPACE"),mp.game.graphics.pushScaleformMovieFunctionParameterInt(200),mp.game.graphics.popScaleformMovieFunctionVoid()}AddButton(e,a){"number"==typeof a?(mp.game.graphics.pushScaleformMovieFunction(this.handle,"SET_DATA_SLOT"),mp.game.graphics.pushScaleformMovieFunctionParameterInt(this.ScIndex),mp.game.graphics.pushScaleformMovieFunctionParameterInt(a),mp.game.graphics.pushScaleformMovieFunctionParameterString(e),mp.game.graphics.popScaleformMovieFunctionVoid(),this.ScIndex++):(mp.game.graphics.pushScaleformMovieFunction(this.handle,"SET_DATA_SLOT"),mp.game.graphics.pushScaleformMovieFunctionParameterInt(this.ScIndex),mp.game.graphics.pushScaleformMovieFunctionParameterString(a),mp.game.graphics.pushScaleformMovieFunctionParameterString(e),mp.game.graphics.popScaleformMovieFunctionVoid(),this.ScIndex++)}finalizeButtons(e=1,a,i,o,m){mp.game.graphics.pushScaleformMovieFunction(this.handle,"DRAW_INSTRUCTIONAL_BUTTONS"),mp.game.graphics.pushScaleformMovieFunctionParameterInt(e),mp.game.graphics.popScaleformMovieFunctionVoid(),mp.game.graphics.pushScaleformMovieFunction(this.handle,"SET_BACKGROUND_COLOUR"),mp.game.graphics.pushScaleformMovieFunctionParameterInt(a),mp.game.graphics.pushScaleformMovieFunctionParameterInt(i),mp.game.graphics.pushScaleformMovieFunctionParameterInt(o),mp.game.graphics.pushScaleformMovieFunctionParameterInt(m),mp.game.graphics.popScaleformMovieFunctionVoid()}}module.exports=new InstructionButtons;
-
+class InstructionButtons {
+    constructor() {
+        this.handle = mp.game.graphics.requestScaleformMovie("instructional_buttons");
+        this.ScIndex = 0;
+        while (!mp.game.graphics.hasScaleformMovieLoaded(this.handle)) mp.game.wait(0);
+    }
+    InitButtons(x,y,z) {
+        this.ScIndex = 0;
+        mp.game.graphics.drawScaleformMovieFullscreen(this.handle, 255, 255, 255, 0, false);
+        mp.game.graphics.pushScaleformMovieFunction(this.handle, "CLEAR_ALL");
+        mp.game.graphics.popScaleformMovieFunctionVoid();
+        mp.game.graphics.pushScaleformMovieFunction(this.handle, "SET_CLEAR_SPACE");
+        mp.game.graphics.pushScaleformMovieFunctionParameterInt(200);
+        mp.game.graphics.popScaleformMovieFunctionVoid();
+    }
+    AddButton(text, button) {
+        if (typeof button == "number") {
+            mp.game.graphics.pushScaleformMovieFunction(this.handle, "SET_DATA_SLOT");
+            mp.game.graphics.pushScaleformMovieFunctionParameterInt(this.ScIndex);
+            mp.game.graphics.pushScaleformMovieFunctionParameterInt(button);
+            mp.game.graphics.pushScaleformMovieFunctionParameterString(text);
+            mp.game.graphics.popScaleformMovieFunctionVoid();
+            this.ScIndex++;
+        } else {
+            mp.game.graphics.pushScaleformMovieFunction(this.handle, "SET_DATA_SLOT");
+            mp.game.graphics.pushScaleformMovieFunctionParameterInt(this.ScIndex);
+            mp.game.graphics.pushScaleformMovieFunctionParameterString(button);
+            mp.game.graphics.pushScaleformMovieFunctionParameterString(text);
+            mp.game.graphics.popScaleformMovieFunctionVoid();
+            this.ScIndex++;
+        }
+    }
+    finalizeButtons(type = 1,r,g,b,a) {
+        mp.game.graphics.pushScaleformMovieFunction(this.handle, "DRAW_INSTRUCTIONAL_BUTTONS");
+        mp.game.graphics.pushScaleformMovieFunctionParameterInt(type);
+        mp.game.graphics.popScaleformMovieFunctionVoid();
+        mp.game.graphics.pushScaleformMovieFunction(this.handle, "SET_BACKGROUND_COLOUR");
+        mp.game.graphics.pushScaleformMovieFunctionParameterInt(r);
+        mp.game.graphics.pushScaleformMovieFunctionParameterInt(g);
+        mp.game.graphics.pushScaleformMovieFunctionParameterInt(b);
+        mp.game.graphics.pushScaleformMovieFunctionParameterInt(a);
+        mp.game.graphics.popScaleformMovieFunctionVoid();
+    }
+}
+module.exports = new InstructionButtons();
 },{}],22:[function(require,module,exports){
-var messageScaleform=require("./Scaleform.js");let midsizedMessageScaleform=null,msgInit=0,msgDuration=5e3,msgAnimatedOut=!1,msgBgColor=0;mp.events.add("ShowMidsizedMessage",(e,s,m=5e3)=>{null==midsizedMessageScaleform&&(midsizedMessageScaleform=new messageScaleform("midsized_message")),midsizedMessageScaleform.callFunction("SHOW_MIDSIZED_MESSAGE",e,s),msgInit=Date.now(),msgDuration=m,msgAnimatedOut=!1}),mp.events.add("ShowMidsizedShardMessage",(e,s,m,a,i,d=5e3)=>{null==midsizedMessageScaleform&&(midsizedMessageScaleform=new messageScaleform("midsized_message")),midsizedMessageScaleform.callFunction("SHOW_SHARD_MIDSIZED_MESSAGE",e,s,m,a,i),msgInit=Date.now(),msgDuration=d,msgAnimatedOut=!1,msgBgColor=m}),mp.events.add("render",()=>{null!=midsizedMessageScaleform&&(midsizedMessageScaleform.renderFullscreen(),msgInit>0&&Date.now()-msgInit>msgDuration&&(msgAnimatedOut?(msgInit=0,midsizedMessageScaleform.dispose(),midsizedMessageScaleform=null):(midsizedMessageScaleform.callFunction("SHARD_ANIM_OUT",msgBgColor),msgAnimatedOut=!0,msgDuration+=750)))});
+var messageScaleform = require("./Scaleform.js");
+let midsizedMessageScaleform = null;
+let msgInit = 0;
+let msgDuration = 5000;
+let msgAnimatedOut = false;
+let msgBgColor = 0;
 
+mp.events.add("ShowMidsizedMessage", (title, message, time = 5000) => {
+    if (midsizedMessageScaleform == null) midsizedMessageScaleform = new messageScaleform("midsized_message");
+    midsizedMessageScaleform.callFunction("SHOW_MIDSIZED_MESSAGE", title, message);
+
+    msgInit = Date.now();
+    msgDuration = time;
+    msgAnimatedOut = false;
+});
+
+mp.events.add("ShowMidsizedShardMessage", (title, message, bgColor, useDarkerShard, condensed, time = 5000) => {
+    if (midsizedMessageScaleform == null) midsizedMessageScaleform = new messageScaleform("midsized_message");
+    midsizedMessageScaleform.callFunction("SHOW_SHARD_MIDSIZED_MESSAGE", title, message, bgColor, useDarkerShard, condensed);
+
+    msgInit = Date.now();
+    msgDuration = time;
+    msgAnimatedOut = false;
+    msgBgColor = bgColor;
+});
+
+mp.events.add("render", () => {
+    if (midsizedMessageScaleform != null) {
+        midsizedMessageScaleform.renderFullscreen();
+
+        if (msgInit > 0 && Date.now() - msgInit > msgDuration) {
+            if (!msgAnimatedOut) {
+                midsizedMessageScaleform.callFunction("SHARD_ANIM_OUT", msgBgColor);
+                msgAnimatedOut = true;
+                msgDuration += 750;
+            } else {
+                msgInit = 0;
+                midsizedMessageScaleform.dispose();
+                midsizedMessageScaleform = null;
+            }
+        }
+    }
+});
 },{"./Scaleform.js":23}],23:[function(require,module,exports){
-class BasicScaleform{constructor(e){for(this.handle=mp.game.graphics.requestScaleformMovie(e);!mp.game.graphics.hasScaleformMovieLoaded(this.handle);)mp.game.wait(0)}callFunction(e,...a){mp.game.graphics.pushScaleformMovieFunction(this.handle,e),a.forEach(e=>{switch(typeof e){case"string":mp.game.graphics.pushScaleformMovieFunctionParameterString(e);break;case"boolean":mp.game.graphics.pushScaleformMovieFunctionParameterBool(e);break;case"number":Number(e)===e&&e%1!=0?mp.game.graphics.pushScaleformMovieFunctionParameterFloat(e):mp.game.graphics.pushScaleformMovieFunctionParameterInt(e)}}),mp.game.graphics.popScaleformMovieFunctionVoid()}renderFullscreen(){mp.game.graphics.drawScaleformMovieFullscreen(this.handle,255,255,255,255,!1)}dispose(){mp.game.graphics.setScaleformMovieAsNoLongerNeeded(this.handle)}}module.exports=BasicScaleform;
+class BasicScaleform {
+    constructor(scaleformName) {
+        this.handle = mp.game.graphics.requestScaleformMovie(scaleformName);
+        while (!mp.game.graphics.hasScaleformMovieLoaded(this.handle)) mp.game.wait(0);
+    }
 
+    // thanks kemperrr
+    callFunction(functionName, ...args) {
+        mp.game.graphics.pushScaleformMovieFunction(this.handle, functionName);
+
+        args.forEach(arg => {
+            switch(typeof arg) {
+                case "string": {
+                    mp.game.graphics.pushScaleformMovieFunctionParameterString(arg);
+                    break;
+                }
+
+                case "boolean": {
+                    mp.game.graphics.pushScaleformMovieFunctionParameterBool(arg);
+                    break;
+                }
+
+                case "number": {
+                    if(Number(arg) === arg && arg % 1 !== 0) {
+                        mp.game.graphics.pushScaleformMovieFunctionParameterFloat(arg);
+                    } else {
+                        mp.game.graphics.pushScaleformMovieFunctionParameterInt(arg);
+                    }
+                }
+            }
+        });
+
+        mp.game.graphics.popScaleformMovieFunctionVoid();
+    }
+
+    renderFullscreen() {
+        mp.game.graphics.drawScaleformMovieFullscreen(this.handle, 255, 255, 255, 255, false);
+    }
+
+    dispose() {
+        mp.game.graphics.setScaleformMovieAsNoLongerNeeded(this.handle);
+    }
+}
+
+module.exports = BasicScaleform;
 },{}],24:[function(require,module,exports){
-var messageScaleform=require("./Scaleform.js");require("./BigMessage.js"),require("./MidsizedMessage.js"),mp.game.ui.instructionalButtons=require("./InstructionButtons.js"),mp.game.ui.messages={showShard:(e,s,a,i,r=5e3)=>mp.events.call("ShowShardMessage",e,s,a,i,r),showWeaponPurchased:(e,s,a,i=5e3)=>mp.events.call("ShowWeaponPurchasedMessage",e,s,a,i),showPlane:(e,s,a,i=5e3)=>mp.events.call("ShowPlaneMessage",e,s,a,i),showMidsized:(e,s,a=5e3)=>mp.events.call("ShowMidsizedMessage",e,s,a),showMidsizedShard:(e,s,a,i,r,o=5e3)=>mp.events.call("ShowMidsizedShardMessage",e,s,a,i,r,o)};
+var messageScaleform = require("./Scaleform.js");
+require("./BigMessage.js");
+require("./MidsizedMessage.js");
+
+mp.game.ui.instructionalButtons = require("./InstructionButtons.js");
+mp.game.ui.messages = {
+    showShard: (title, message, titleColor, bgColor, time = 5000) => mp.events.call("ShowShardMessage", title, message, titleColor, bgColor, time),
+    showWeaponPurchased: (title, weaponName, weaponHash, time = 5000) => mp.events.call("ShowWeaponPurchasedMessage", title, weaponName, weaponHash, time),
+    showPlane: (title, planeName, planeHash, time = 5000) => mp.events.call("ShowPlaneMessage", title, planeName, planeHash, time),
+    showMidsized: (title, message, time = 5000) => mp.events.call("ShowMidsizedMessage", title, message, time),
+    showMidsizedShard: (title, message, bgColor, useDarkerShard, condensed, time = 5000) => mp.events.call("ShowMidsizedShardMessage", title, message, bgColor, useDarkerShard, condensed, time),
+};
+
 
 },{"./BigMessage.js":20,"./InstructionButtons.js":21,"./MidsizedMessage.js":22,"./Scaleform.js":23}],25:[function(require,module,exports){
-var cell_size=40,padding=5,inv_cells=6,inv_rows=5,TempStorage=[],CEFInventory=require("./browser.js").inventory,CEFNotification=require("./browser.js").notification,ScreenResolution=mp.game.graphics.getScreenActiveResolution(0,0);CEFInventory.load("interface/index.html");let clientWidth=cell_size*inv_cells+2*padding,clientHeight=cell_size*inv_rows+37+2*padding;var Inventory_Order={positions:{inventory:{top:`calc(50% - ${clientHeight/2}px)`,left:`calc(50% - ${clientWidth/2}px)`},equipment:{top:"20%",left:"15%"}},items:{}};if(mp.storage.data.inventory_order){let e=mp.storage.data.inventory_order;Inventory_Order.positions=e.positions||{inventory:{top:`calc(50% - ${clientHeight/2}px)`,left:`calc(50% - ${clientWidth/2}px)`},equipment:{top:"20%",left:"15%"}},Inventory_Order.items=e.items||{}}else mp.storage.data.inventory_order=Inventory_Order;mp.events.add("Inventory:Resize",(e,t)=>{inv_cells=e,inv_rows=t,CEFInventory.call("resize","inventory",inv_cells,inv_rows)}),mp.events.add("Inventory:Ready",e=>{CEFInventory.call("initialize","inventory",inv_cells,inv_rows,{top:Inventory_Order.positions.inventory.top,left:Inventory_Order.positions.inventory.left})});var windowsOpen=[];function toggleInventory(){console.log("toggle inventory",JSON.stringify(windowsOpen)),console.log("mp.gui.chat.enabled",mp.gui.chat.enabled),console.log("mp.ui.ready",mp.ui.ready),-1==windowsOpen.indexOf("inventory")?0==mp.gui.chat.enabled&&1==mp.ui.ready&&(CEFInventory.call("setPos","inventory",Inventory_Order.positions.inventory.top,Inventory_Order.positions.inventory.left),CEFInventory.call("show"),CEFInventory.cursor(!0),windowsOpen.push("inventory"),mp.canCrouch=!1,mp.gui.chat.activate(!1)):mp.rpc.callBrowser(CEFInventory.browser,"isBusy").then(e=>{0==e?(CEFInventory.call("hide"),windowsOpen.splice(windowsOpen.indexOf("inventory"),1),0==windowsOpen.length&&(mp.gui.chat.activate(!0),CEFInventory.cursor(!1),mp.canCrouch=!0)):CEFNotification.call("notify",{title:"Inventory",titleSize:"16px",message:"Please finish your action before closing..",messageColor:"rgba(50,50,50,.8)",position:"bottomCenter",backgroundColor:"rgba(206, 206, 206, 0.9)",close:!1})}).catch(e=>{console.log("error",e),CEFInventory.call("hide"),windowsOpen.splice(windowsOpen.indexOf("inventory"),1),0==windowsOpen.length&&(mp.gui.chat.activate(!0),CEFInventory.cursor(!1),mp.canCrouch=!0)})}function toggleEquipment(){console.log("toggle inventory",JSON.stringify(windowsOpen)),console.log("mp.gui.chat.enabled",mp.gui.chat.enabled),console.log("mp.ui.ready",mp.ui.ready),-1==windowsOpen.indexOf("equipment")?0==mp.gui.chat.enabled&&1==mp.ui.ready&&(console.log("x"),CEFInventory.call("setPos","equipment",Inventory_Order.positions.equipment.top||0,Inventory_Order.positions.equipment.left||0),CEFInventory.call("show","equipment"),CEFInventory.cursor(!0),toggleInvState=!0,mp.canCrouch=!1,mp.gui.chat.activate(!1),windowsOpen.push("equipment")):mp.rpc.callBrowser(CEFInventory.browser,"isBusy").then(e=>{0==e?(CEFInventory.call("hide","equipment"),windowsOpen.splice(windowsOpen.indexOf("equipment"),1),0==windowsOpen.length&&(mp.gui.chat.activate(!0),CEFInventory.cursor(!1),mp.canCrouch=!0)):CEFNotification.call("notify",{title:"Inventory",titleSize:"16px",message:"Please finish your action before closing..",messageColor:"rgba(50,50,50,.8)",position:"bottomCenter",backgroundColor:"rgba(206, 206, 206, 0.9)",close:!1})}).catch(e=>{console.log("error",e),CEFInventory.call("hide"),windowsOpen.splice(windowsOpen.indexOf("equipment"),1),0==windowsOpen.length&&(mp.gui.chat.activate(!0),CEFInventory.cursor(!1),mp.canCrouch=!0)})}let toggleInvState=!1;mp.keys.bind(85,!1,()=>{toggleEquipment()}),mp.keys.bind(73,!1,()=>{toggleInventory()}),mp.events.add("Inventory:Update",e=>{TempStorage.inventory||(TempStorage.inventory=[]),CEFInventory.call("clear","inventory"),TempStorage.inventory=[],(e=e.sort(function(e,t){return t.height-e.height||t.width-e.width})).forEach(function(e){let t=StorageSystem.getTempSettings(e.id,"inventory"),n={id:e.id,name:e.name,image:e.image,scale:t.scale||{},amount:e.amount,max_stack:e.max_stack,mask:e.mask},i=e.width,o=e.height;1==t.flipped&&(e.width=o,e.height=i),TempStorage.inventory.push({id:n.id,name:n.name,image:n.image,scale:n.scale,amount:n.amount,max_stack:n.max_stack,width:i,height:o,cell:t.cell||0,row:t.row||0}),CEFInventory.call("addItem","inventory",t.cell||0,t.row||0,e.width,e.height,JSON.stringify(n),t.flipped||!1)})}),mp.events.add("Inventory:EditItem",e=>{console.log("Inventory:EditItem item",e)}),mp.events.add("Inventory:AddItem",e=>{TempStorage.inventory||(TempStorage.inventory=[]);let t=StorageSystem.getTempSettings(e.id,"inventory"),n={id:e.id,name:e.name,image:e.image,scale:t.scale||{},amount:e.amount,max_stack:e.max_stack,mask:e.mask},i=e.width,o=e.height;1==t.flipped&&(e.width=o,e.height=i),TempStorage.inventory.push({id:n.id,name:n.name,image:n.image,scale:n.scale,amount:n.amount,max_stack:n.max_stack,width:i,height:o,cell:t.cell||0,row:t.row||0,mask:e.mask}),CEFInventory.call("addItem","inventory",t.cell||0,t.row||0,e.width,e.height,JSON.stringify(n),t.flipped||!1)}),mp.events.add("Storage:Interact",e=>{console.log("Item use",e)}),mp.events.add("Storage:Drag",e=>{e=JSON.parse(e),Inventory_Order.positions[e.id]||(Inventory_Order.positions[e.id]={top:"40%",left:"25%"}),Inventory_Order.positions[e.id]={top:e.top+"px",left:e.left+"px"},mp.storage.data.inventory_order=Inventory_Order,mp.storage.flush()}),mp.events.add("Storage:Close",e=>{mp.events.callRemote("Storage:Close",e.replace("#",""))}),mp.events.add("Storage:Transfer",(e,t)=>{e=JSON.parse(e),t=JSON.parse(t),Inventory_Order={positions:Inventory_Order.positions,items:Inventory_Order.items},t.items.forEach(function(e){Inventory_Order.items[e.item.id+"_"+t.id]={cell:e.cell,row:e.row,scale:e.scale,flipped:e.flipped}}),e.items.forEach(function(t){Inventory_Order.items[t.item.id+"_"+e.id]={cell:t.cell,row:t.row,scale:t.scale,flipped:t.flipped}}),mp.storage.data.inventory_order=Inventory_Order,mp.storage.flush(),e.items=e.items.map(e=>StorageSystem.minify(e)),t.items=t.items.map(e=>StorageSystem.minify(e)),1==StorageSystem.needsUpdate(e,t)&&(TempStorage[e.id]=e.items,TempStorage[t.id]=t.items,mp.events.callRemote("Storage:Transfer",JSON.stringify(e),JSON.stringify(t)))}),mp.events.add("Storage:TransferSlots",(e,t)=>{e=JSON.parse(e),t=JSON.parse(t),Inventory_Order={positions:Inventory_Order.positions,items:Inventory_Order.items},e.items.forEach(function(t){Inventory_Order.items[t.item.id+"_"+e.id]={cell:t.cell,row:t.row,scale:t.scale,flipped:t.flipped}}),mp.storage.data.inventory_order=Inventory_Order,mp.storage.flush(),e.items=e.items.map(e=>StorageSystem.minify(e)),t.items=t.items.map(e=>Object.assign(StorageSystem.minify(e.item),{slot_id:e.id})),mp.events.callRemote("Storage:TransferSlots",JSON.stringify(e),JSON.stringify(t))}),mp.events.add("Storage:UpdateSlots",(e,t)=>{t.forEach(function(t,n){setTimeout(()=>{CEFInventory.call("addItemSlot",e,t)},1*n)})}),mp.events.add("Storage:AddContainer",(e,t,n,i,o)=>{console.log("add container"),o=JSON.parse(o),TempStorage[t]||(TempStorage[t]=[]);let r=o.map(function(e){let n=StorageSystem.getTempSettings(e.id,t),i=e.width,o=e.height;1==n.flipped&&(e.width=o,e.height=i);let r={id:e.id,name:e.name,image:e.image,scale:n.scale||{},amount:e.amount,max_stack:e.max_stack,mask:e.mask};return{width:e.width,height:e.height,cell:n.cell||0,row:n.row||0,item:r}});CEFInventory.call("show"),CEFInventory.call("setPos","inventory",Inventory_Order.positions.inventory.top,Inventory_Order.positions.inventory.left);let a=cell_size*n+2*padding,s=cell_size*i+37+2*padding,l={top:Inventory_Order.positions[t]?Inventory_Order.positions[t].top:`calc(50% - ${s/2}px)`,left:Inventory_Order.positions[t]?Inventory_Order.positions[t].left:`calc(50% - ${a/2}px)`};CEFInventory.call("addStorageContainer",e,t,l,n,i,r),TempStorage[t]=r.map(e=>e.item),CEFInventory.call("focus",t),CEFInventory.cursor(!0),toggleInvState=!0});var itemIdentity=require("../../server/world/items.js"),StorageSystem=new class{constructor(){this._openContainer=[]}closeOpenContainer(){}minify(e){return{id:e.item.id,name:e.item.name,amount:e.item.amount,max_stack:e.item.max_stack,data:e.item.data}}needsUpdate(e,t){let n=[],i=[];TempStorage[e.id]&&(n=TempStorage[e.id]),n=n.map(function(t){return Object.assign(t,{origin:e.id})}),TempStorage[t.id]&&(i=TempStorage[t.id]),i=i.map(function(e){return Object.assign(e,{origin:t.id})}),e.items=e.items.map(function(t){return Object.assign(t,{origin:e.id})}),t.items=t.items.map(function(e){return Object.assign(e,{origin:t.id})});let o=e.id==t.id?n:n.concat(i),r=e.id==t.id?e.items:e.items.concat(t.items);o=o.map(function(e){return{id:e.id,name:e.name,amount:e.amount,origin:e.origin}}),r=r.map(function(e){return{id:e.id,name:e.name,amount:e.amount,origin:e.origin}});var a=!1;let s=o.reduce(function(e,t){return e+parseInt(t.amount)},0),l=r.reduce(function(e,t){return e+parseInt(t.amount)},0);r.filter(e=>"NEW"==e.id).length>0&&(a=!0);let d=r.filter(e=>{return-1!=o.findIndex(function(t){return t.id==e.id&&(e.origin!=t.origin||e.amount!=t.amount)})&&"NEW"!=e.id});return o.filter(e=>{return-1==r.findIndex(function(t){return t.id==e.id})&&"NEW"!=e.id}).length>0&&(a=!0),d.forEach(n=>{console.log(n.id);let i=e.items.findIndex(e=>e.id==n.id),o=t.items.findIndex(e=>e.id==n.id);n.origin!=e.id?-1==i&&(a=!0):n.origin!=t.id&&-1==o&&(a=!0)}),console.log("Items Changed target ?",s,l),parseInt(s)!=parseInt(l)&&(a=!0),console.log("toUpdate",a),a}checkFit(e,t,n){return new Promise(function(i,o){mp.rpc.callBrowser(CEFInventory.browser,"doesFitInto",{what:e,w:t,h:n}).then(e=>(console.log("checkFit",e),i(e))).catch(e=>(console.log("error",e),o(e)))})}getTempSettings(e,t){return null!=Inventory_Order.items&&null!=Inventory_Order.items[e+"_"+t]&&{cell:Inventory_Order.items[e+"_"+t].cell,row:Inventory_Order.items[e+"_"+t].row,scale:Inventory_Order.items[e+"_"+t].scale,flipped:Inventory_Order.items[e+"_"+t].flipped}}};module.exports=StorageSystem;
+var cell_size = 40;
+var padding = 5;
+var inv_cells = 6;
+var inv_rows = 5;
+var TempStorage = [];
+var CEFInventory = require("./browser.js").inventory;
+var CEFNotification = require("./browser.js").notification;
+var ScreenResolution = mp.game.graphics.getScreenActiveResolution(0, 0);
+CEFInventory.load("interface/index.html");
+let clientWidth = cell_size * inv_cells + (padding * 2)
+let clientHeight = cell_size * inv_rows + 37 + (padding * 2)
+var Inventory_Order = {
+	positions: {
+		"inventory": {
+			top: `calc(50% - ${clientHeight/2}px)`,
+			left: `calc(50% - ${clientWidth/2}px)`
+		},
+		"equipment": {
+			top: `20%`,
+			left: `15%`
+		}
+	},
+	items: {}
+};
+if (mp.storage.data.inventory_order) {
+	let storageData = mp.storage.data.inventory_order;
+	Inventory_Order.positions = storageData.positions || {
+		"inventory": {
+			top: `calc(50% - ${clientHeight/2}px)`,
+			left: `calc(50% - ${clientWidth/2}px)`
+		},
+		"equipment": {
+			top: `20%`,
+			left: `15%`
+		}
+	};
+	Inventory_Order.items = storageData.items || {};
+} else {
+	mp.storage.data.inventory_order = Inventory_Order;
+}
+mp.events.add("Inventory:Resize", (cell_count, row_count) => {
+	inv_cells = cell_count;
+	inv_rows = row_count;
+	CEFInventory.call("resize", "inventory", inv_cells, inv_rows);
+});
+mp.events.add("Inventory:Ready", (data) => {
+	CEFInventory.call("initialize", "inventory", inv_cells, inv_rows, {
+		top: Inventory_Order.positions["inventory"].top,
+		left: Inventory_Order.positions["inventory"].left
+	})
+});
+var windowsOpen = [];
 
+function toggleInventory() {
+	console.log("toggle inventory", JSON.stringify(windowsOpen));
+	console.log("mp.gui.chat.enabled", mp.gui.chat.enabled);
+	console.log("mp.ui.ready", mp.ui.ready);
+	if (windowsOpen.indexOf("inventory") == -1) {
+		if ((mp.gui.chat.enabled == false) && (mp.ui.ready == true)) {
+			CEFInventory.call("setPos", "inventory", Inventory_Order.positions["inventory"].top, Inventory_Order.positions["inventory"].left);
+			CEFInventory.call("show");
+			CEFInventory.cursor(true);
+			windowsOpen.push("inventory");
+			mp.canCrouch = false;
+			mp.gui.chat.activate(false)
+		}
+	} else {
+		mp.rpc.callBrowser(CEFInventory.browser, 'isBusy').then(value => {
+			if (value == false) {
+				CEFInventory.call("hide");
+				windowsOpen.splice(windowsOpen.indexOf("inventory"), 1);
+				if (windowsOpen.length == 0) {
+					mp.gui.chat.activate(true)
+					CEFInventory.cursor(false);
+					mp.canCrouch = true;
+				}
+			} else {
+				CEFNotification.call("notify", {
+					title: "Inventory",
+					titleSize: "16px",
+					message: `Please finish your action before closing..`,
+					messageColor: 'rgba(50,50,50,.8)',
+					position: "bottomCenter",
+					backgroundColor: 'rgba(206, 206, 206, 0.9)',
+					close: false
+				})
+			}
+		}).catch(err => {
+			console.log("error", err);
+			CEFInventory.call("hide");
+			windowsOpen.splice(windowsOpen.indexOf("inventory"), 1);
+			if (windowsOpen.length == 0) {
+				mp.gui.chat.activate(true)
+				CEFInventory.cursor(false);
+				mp.canCrouch = true;
+			}
+		});
+	}
+}
+
+function toggleEquipment() {
+	console.log("toggle inventory", JSON.stringify(windowsOpen));
+	console.log("mp.gui.chat.enabled", mp.gui.chat.enabled);
+	console.log("mp.ui.ready", mp.ui.ready);
+	if (windowsOpen.indexOf("equipment") == -1) {
+		if ((mp.gui.chat.enabled == false) && (mp.ui.ready == true)) {
+			console.log("x");
+			//console.log("setPos", "equipment", Inventory_Order.positions["equipment"].top || 0, Inventory_Order.positions["equipment"].left || 0);
+			CEFInventory.call("setPos", "equipment", Inventory_Order.positions["equipment"].top || 0, Inventory_Order.positions["equipment"].left || 0);
+			CEFInventory.call("show", "equipment");
+			CEFInventory.cursor(true);
+			toggleInvState = true;
+			mp.canCrouch = false;
+			mp.gui.chat.activate(false)
+			windowsOpen.push("equipment");
+		}
+	} else {
+		mp.rpc.callBrowser(CEFInventory.browser, 'isBusy').then(value => {
+			if (value == false) {
+				CEFInventory.call("hide", "equipment");
+				windowsOpen.splice(windowsOpen.indexOf("equipment"), 1);
+				if (windowsOpen.length == 0) {
+					mp.gui.chat.activate(true)
+					CEFInventory.cursor(false);
+					mp.canCrouch = true;
+				}
+			} else {
+				CEFNotification.call("notify", {
+					title: "Inventory",
+					titleSize: "16px",
+					message: `Please finish your action before closing..`,
+					messageColor: 'rgba(50,50,50,.8)',
+					position: "bottomCenter",
+					backgroundColor: 'rgba(206, 206, 206, 0.9)',
+					close: false
+				})
+			}
+		}).catch(err => {
+			console.log("error", err);
+			CEFInventory.call("hide");
+			windowsOpen.splice(windowsOpen.indexOf("equipment"), 1);
+			if (windowsOpen.length == 0) {
+				mp.gui.chat.activate(true)
+				CEFInventory.cursor(false);
+				mp.canCrouch = true;
+			}
+		});
+	}
+}
+let toggleInvState = false;
+mp.keys.bind(0x55, false, () => {
+	toggleEquipment();
+});
+mp.keys.bind(0x49, false, () => {
+	toggleInventory();
+});
+
+mp.events.add("Inventory:Update", (inventory) => {
+	if (!TempStorage["inventory"]) {
+		TempStorage["inventory"] = [];
+	}
+	CEFInventory.call("clear", "inventory");
+	TempStorage["inventory"] = [];
+	inventory = inventory.sort(function(a, b) {
+		return b.height - a.height || b.width - a.width;
+	})
+	inventory.forEach(function(citem) {
+		let tempSettings = StorageSystem.getTempSettings(citem.id, "inventory");
+		let gData = {
+			id: citem.id,
+			name: citem.name,
+			image: citem.image,
+			scale: tempSettings.scale || {},
+			amount: citem.amount,
+			max_stack: citem.max_stack,
+			mask: citem.mask
+		}
+		let width = citem.width;
+		let height = citem.height;
+		if (tempSettings.flipped == true) {
+			citem.width = height;
+			citem.height = width;
+		}
+		TempStorage["inventory"].push({
+			id: gData.id,
+			name: gData.name,
+			image: gData.image,
+			scale: gData.scale,
+			amount: gData.amount,
+			max_stack: gData.max_stack,
+			width: width,
+			height: height,
+			cell: tempSettings.cell || 0,
+			row: tempSettings.row || 0
+		})
+		CEFInventory.call("addItem", "inventory", tempSettings.cell || 0, tempSettings.row || 0, citem.width, citem.height, JSON.stringify(gData), tempSettings.flipped || false)
+	})
+});
+mp.events.add("Inventory:EditItem", (citem) => {
+	console.log("Inventory:EditItem item", citem);
+});
+mp.events.add("Inventory:AddItem", (citem) => {
+	if (!TempStorage["inventory"]) {
+		TempStorage["inventory"] = [];
+	}
+	let tempSettings = StorageSystem.getTempSettings(citem.id, "inventory");
+	let gData = {
+		id: citem.id,
+		name: citem.name,
+		image: citem.image,
+		scale: tempSettings.scale || {},
+		amount: citem.amount,
+		max_stack: citem.max_stack,
+		mask: citem.mask
+	}
+	let width = citem.width;
+	let height = citem.height;
+	if (tempSettings.flipped == true) {
+		citem.width = height;
+		citem.height = width;
+	}
+	TempStorage["inventory"].push({
+		id: gData.id,
+		name: gData.name,
+		image: gData.image,
+		scale: gData.scale,
+		amount: gData.amount,
+		max_stack: gData.max_stack,
+		width: width,
+		height: height,
+		cell: tempSettings.cell || 0,
+		row: tempSettings.row || 0,
+		mask: citem.mask
+	})
+	CEFInventory.call("addItem", "inventory", tempSettings.cell || 0, tempSettings.row || 0, citem.width, citem.height, JSON.stringify(gData), tempSettings.flipped || false)
+});
+mp.events.add("Storage:Interact", (item) => {
+	console.log("Item use",item);
+});
+mp.events.add("Storage:Drag", (positions) => {
+	positions = JSON.parse(positions);
+	if (!Inventory_Order.positions[positions.id]) {
+		Inventory_Order.positions[positions.id] = {
+			top: "40%",
+			left: "25%"
+		}
+	}
+	Inventory_Order.positions[positions.id] = {
+		top: positions.top + "px",
+		left: positions.left + "px"
+	};
+	mp.storage.data.inventory_order = Inventory_Order;
+	mp.storage.flush();
+});
+mp.events.add("Storage:Close", (id) => {
+	mp.events.callRemote("Storage:Close", id.replace("#", ""));
+});
+mp.events.add("Storage:Transfer", (source, target) => {
+	source = JSON.parse(source);
+	target = JSON.parse(target);
+	Inventory_Order = {
+		positions: Inventory_Order.positions,
+		items: Inventory_Order.items
+	};
+	target.items.forEach(function(item) {
+		Inventory_Order.items[item.item.id + "_" + target.id] = {
+			cell: item.cell,
+			row: item.row,
+			scale: item.scale,
+			flipped: item.flipped
+		}
+	})
+	source.items.forEach(function(item) {
+		Inventory_Order.items[item.item.id + "_" + source.id] = {
+			cell: item.cell,
+			row: item.row,
+			scale: item.scale,
+			flipped: item.flipped
+		}
+	})
+	mp.storage.data.inventory_order = Inventory_Order;
+	mp.storage.flush();
+	/*Manage Server Sync*/
+	source.items = source.items.map((item) => StorageSystem.minify(item));
+	target.items = target.items.map((item) => StorageSystem.minify(item));
+	if (StorageSystem.needsUpdate(source, target) == true) {
+		TempStorage[source.id] = source.items;
+		TempStorage[target.id] = target.items;
+		mp.events.callRemote("Storage:Transfer", JSON.stringify(source), JSON.stringify(target));
+	}
+});
+mp.events.add("Storage:TransferSlots", (storage, slots) => {
+	storage = JSON.parse(storage);
+	slots = JSON.parse(slots);
+	Inventory_Order = {
+		positions: Inventory_Order.positions,
+		items: Inventory_Order.items
+	};
+	storage.items.forEach(function(item) {
+		Inventory_Order.items[item.item.id + "_" + storage.id] = {
+			cell: item.cell,
+			row: item.row,
+			scale: item.scale,
+			flipped: item.flipped
+		}
+	})
+	mp.storage.data.inventory_order = Inventory_Order;
+	mp.storage.flush();
+	/*Manage Server Sync*/
+	storage.items = storage.items.map((item) => StorageSystem.minify(item));
+	slots.items = slots.items.map((item) => Object.assign(StorageSystem.minify(item.item), {
+		slot_id: item.id
+	}));
+	mp.events.callRemote("Storage:TransferSlots", JSON.stringify(storage), JSON.stringify(slots));
+});
+mp.events.add("Storage:UpdateSlots", (target, items) => {
+	items.forEach(function(item, index) {
+		setTimeout(() => {
+			CEFInventory.call("addItemSlot", target, item);
+		}, 1 * index)
+	})
+	//console.log(target, JSON.stringify(items));
+});
+mp.events.add("Storage:AddContainer", (headline, selector, cells, rows, items) => {
+	console.log("add container");
+	items = JSON.parse(items);
+	if (!TempStorage[selector]) {
+		TempStorage[selector] = [];
+	}
+	let gItems = items.map(function(citem) {
+		let tempSettings = StorageSystem.getTempSettings(citem.id, selector);
+		let width = citem.width;
+		let height = citem.height;
+		if (tempSettings.flipped == true) {
+			citem.width = height;
+			citem.height = width;
+		}
+		let gData = {
+			id: citem.id,
+			name: citem.name,
+			image: citem.image,
+			scale: tempSettings.scale || {},
+			amount: citem.amount,
+			max_stack: citem.max_stack,
+			mask: citem.mask
+		}
+		let gItem = {
+			width: citem.width,
+			height: citem.height,
+			cell: tempSettings.cell || 0,
+			row: tempSettings.row || 0,
+			item: gData
+		}
+		return gItem;
+	})
+	CEFInventory.call("show");
+	CEFInventory.call("setPos", "inventory", Inventory_Order.positions["inventory"].top, Inventory_Order.positions["inventory"].left);
+	let clientWidth = cell_size * cells + (padding * 2)
+	let clientHeight = cell_size * rows + 37 + (padding * 2)
+	let config = {
+		top: Inventory_Order.positions[selector] ? Inventory_Order.positions[selector].top : `calc(50% - ${clientHeight/2}px)`,
+		left: Inventory_Order.positions[selector] ? Inventory_Order.positions[selector].left : `calc(50% - ${clientWidth/2}px)`
+	};
+	CEFInventory.call("addStorageContainer", headline, selector, config, cells, rows, gItems);
+	TempStorage[selector] = gItems.map(e => e.item);
+	CEFInventory.call("focus", selector);
+	CEFInventory.cursor(true);
+	toggleInvState = true;
+});
+var itemIdentity = require("../../server/world/items.js");
+var StorageSystem = new class {
+	constructor() {
+		this._openContainer = [];
+	}
+	closeOpenContainer() {}
+	minify(item) {
+		return {
+			id: item.item.id,
+			name: item.item.name,
+			amount: item.item.amount,
+			max_stack: item.item.max_stack,
+			data: item.item.data
+		}
+	}
+	needsUpdate(source, target) {
+		let sourceTempOld = [];
+		let targetTempOld = [];
+		if (TempStorage[source.id]) {
+			sourceTempOld = TempStorage[source.id]
+		}
+		sourceTempOld = sourceTempOld.map(function(e) {
+			return Object.assign(e, {
+				origin: source.id
+			});
+		})
+		if (TempStorage[target.id]) {
+			targetTempOld = TempStorage[target.id]
+		}
+		targetTempOld = targetTempOld.map(function(e) {
+			return Object.assign(e, {
+				origin: target.id
+			});
+		})
+		source.items = source.items.map(function(e) {
+			return Object.assign(e, {
+				origin: source.id
+			});
+		})
+		target.items = target.items.map(function(e) {
+			return Object.assign(e, {
+				origin: target.id
+			});
+		})
+		let all_items_temp = (source.id == target.id) ? sourceTempOld : sourceTempOld.concat(targetTempOld); // merge the two temp arrays;
+		let all_items_new = (source.id == target.id) ? source.items : source.items.concat(target.items); // merge the two temp arrays;
+		all_items_temp = all_items_temp.map(function(e) {
+			return {
+				id: e.id,
+				name: e.name,
+				amount: e.amount,
+				origin: e.origin
+			}
+		})
+		all_items_new = all_items_new.map(function(e) {
+			return {
+				id: e.id,
+				name: e.name,
+				amount: e.amount,
+				origin: e.origin
+			}
+		})
+		var toUpdate = false;
+		let temp_Amount = all_items_temp.reduce(function(total, current) {
+			return total + parseInt(current.amount);
+		}, 0);
+		let new_Amount = all_items_new.reduce(function(total, current) {
+			return total + parseInt(current.amount);
+		}, 0);
+		let toCreate = all_items_new.filter(e => {
+			return e.id == "NEW"
+		});
+		if (toCreate.length > 0) {
+			toUpdate = true;
+		}
+		let moved = all_items_new.filter(e => {
+			let fItem = all_items_temp.findIndex(function(cItem) {
+				return (cItem.id == e.id) && ((e.origin != cItem.origin) || (e.amount != cItem.amount));
+			})
+			return (fItem != -1) && (e.id != "NEW");
+		})
+		let removed = all_items_temp.filter(e => {
+			let fItem = all_items_new.findIndex(function(cItem) {
+				return (cItem.id == e.id);
+			})
+			return (fItem == -1) && (e.id != "NEW");
+		})
+		if (removed.length > 0) {
+			toUpdate = true;
+		}
+		moved.forEach(e => {
+			console.log(e.id)
+			let sDoesExist = source.items.findIndex(x => {
+				return x.id == e.id;
+			})
+			let tDoesExist = target.items.findIndex(x => {
+				return x.id == e.id;
+			})
+			if (e.origin != source.id) {
+				if (sDoesExist == -1) {
+					toUpdate = true;
+				}
+			} else if (e.origin != target.id) {
+				if (tDoesExist == -1) {
+					toUpdate = true;
+				}
+			}
+		})
+		console.log("Items Changed target ?", temp_Amount, new_Amount);
+		if (parseInt(temp_Amount) != parseInt(new_Amount)) {
+			toUpdate = true;
+		}
+		console.log("toUpdate", toUpdate);
+		/*TODO LOOK OVER needsUpdate*/
+		return toUpdate;
+	}
+	checkFit(where, w, h) {
+		return new Promise(function(fulfill, reject) {
+			mp.rpc.callBrowser(CEFInventory.browser, 'doesFitInto', {
+				what: where,
+				w: w,
+				h: h
+			}).then(value => {
+				console.log("checkFit", value);
+				return fulfill(value);
+			}).catch(err => {
+				console.log("error", err);
+				return reject(err);
+			});
+		});
+	}
+	getTempSettings(id, container) {
+		if (Inventory_Order.items != undefined) {
+			if (Inventory_Order.items[id + "_" + container] != undefined) {
+				/*FIX´ITEM FLIPPING*/
+				return {
+					cell: Inventory_Order.items[id + "_" + container].cell,
+					row: Inventory_Order.items[id + "_" + container].row,
+					scale: Inventory_Order.items[id + "_" + container].scale,
+					flipped: Inventory_Order.items[id + "_" + container].flipped,
+				}
+			}
+		}
+		return false;
+	}
+}
+module.exports = StorageSystem;
 },{"../../server/world/items.js":30,"./browser.js":1}],26:[function(require,module,exports){
-mp.Vector3.prototype.findRot=function(t,o,r){let e=new mp.Vector3(this.x,this.y,this.z);var i=(t+r)*(Math.PI/180);return e.x=this.x+o*Math.cos(i),e.y=this.y+o*Math.sin(i),e},mp.Vector3.prototype.rotPoint=function(t){var o=new mp.Vector3(this.x,this.y,this.z),r=new mp.Vector3(t.x,t.y,t.z),e=r.z-o.z,i=o.x-r.x,s=o.y-r.y,n=Math.sqrt(i*i+s*s);return 180*Math.atan2(e,n)/Math.PI},mp.Vector3.prototype.lerp=function(t,o){let r=new mp.Vector3(this.x,this.y,this.z);return r.x=this.x+(t.x-this.x)*o,r.y=this.y+(t.y-this.y)*o,r.z=this.z+(t.z-this.z)*o,r},mp.Vector3.prototype.multiply=function(t){let o=new mp.Vector3(this.x,this.y,this.z);return o.x=this.x*t,o.y=this.y*t,o.z=this.z*t,o},mp.Vector3.prototype.dist=function(t){let o=this.x-t.x,r=this.y-t.y,e=this.z-t.z;return Math.sqrt(o*o+r*r+e*e)},mp.Vector3.prototype.dist2d=function(t){let o=this.x-t.x,r=this.y-t.y;return Math.sqrt(o*o+r*r)},mp.Vector3.prototype.getOffset=function(t){let o=this.x-t.x,r=this.y-t.y,e=this.z-t.z;return new mp.Vector3(o,r,e)},mp.Vector3.prototype.cross=function(t){let o=new mp.Vector3(0,0,0);return o.x=this.y*t.z-this.z*t.y,o.y=this.z*t.x-this.x*t.z,o.z=this.x*t.y-this.y*t.x,o},mp.Vector3.prototype.normalize=function(){let t=new mp.Vector3(0,0,0),o=Math.sqrt(this.x*this.x+this.y*this.y+this.z*this.z);return t.x=this.x/o,t.y=this.y/o,t.z=this.z/o,t},mp.Vector3.prototype.dot=function(t){return this.x*t.x+this.y*t.y+this.z*t.z},mp.Vector3.prototype.length=function(){return Math.sqrt(this.x*this.x+this.y*this.y+this.z*this.z)},mp.Vector3.prototype.angle=function(t){return Math.acos(this.normalize().dot(t.normalize()))},mp.Vector3.prototype.ground=function(){let t=new mp.Vector3(this.x,this.y,this.z),o=mp.game.gameplay.getGroundZFor3dCoord(t.x,t.y,t.z,0,!1),r=mp.game.gameplay.getGroundZFor3dCoord(t.x+.01,t.y+.01,t.z,0,!1),e=mp.game.gameplay.getGroundZFor3dCoord(t.x-.01,t.y-.01,t.z,0,!1);return t.z=o,(o+.1<r||o+.1<e)&&(t.z=r<e?e:r),t},mp.Vector3.prototype.ground2=function(t){let o=new mp.Vector3(this.x,this.y,this.z),r=mp.raycasting.testPointToPoint(o.add(0,0,1),o.sub(0,0,100),t.handle,17);return r&&r.position&&(o=mp.vector(r.position)),o},mp.Vector3.prototype.sub=function(t,o,r){return new mp.Vector3(this.x-t,this.y-o,this.z-r)},mp.Vector3.prototype.add=function(t,o,r){return new mp.Vector3(this.x+t,this.y+-o,this.z+r)},mp.vector=function(t){return new mp.Vector3(t.x,t.y,t.z)},mp.Vector3.prototype.insidePolygon=function(t){for(var o=this.x,r=this.y,e=!1,i=0,s=t.length-1;i<t.length;s=i++){var n=t[i][0],h=t[i][1],p=t[s][0],y=t[s][1];h>r!=y>r&&o<(p-n)*(r-h)/(y-h)+n&&(e=!e)}return e},Array.prototype.shuffle=function(){for(var t=this.length;t;){var o=Math.floor(Math.random()*t),r=this[--t];this[t]=this[o],this[o]=r}return this};
+mp.Vector3.prototype.findRot = function(rz, dist, rot) {
+    let nVector = new mp.Vector3(this.x, this.y, this.z);
+    var degrees = (rz + rot) * (Math.PI / 180);
+    nVector.x = this.x + dist * Math.cos(degrees);
+    nVector.y = this.y + dist * Math.sin(degrees);
+    return nVector;
+}
+mp.Vector3.prototype.rotPoint = function(pos) {
+    var temp = new mp.Vector3(this.x, this.y, this.z);
+    var temp1 = new mp.Vector3(pos.x, pos.y, pos.z);
+    var gegenkathete = temp1.z - temp.z
+    var a = temp.x - temp1.x;
+    var b = temp.y - temp1.y;
+    var ankathete = Math.sqrt(a * a + b * b);
+    var winkel = Math.atan2(gegenkathete, ankathete) * 180 / Math.PI
+    return winkel;
+}
+/*mp.Vector3.prototype.normalize = function(n) {
+    let nVector = new mp.Vector3(this.x, this.y, this.z);
+    nVector.x = this.x / n;
+    nVector.y = this.y / n;
+    nVector.z = this.z / n;
+    return this;
+}*/
+mp.Vector3.prototype.lerp = function(vector2,deltaTime) {
+    let nVector = new mp.Vector3(this.x, this.y, this.z);
+    nVector.x = this.x + (vector2.x - this.x) * deltaTime
+    nVector.y = this.y + (vector2.y - this.y) * deltaTime
+    nVector.z = this.z + (vector2.z - this.z) * deltaTime
+    return nVector;
+}
+mp.Vector3.prototype.multiply = function(n) {
+    let nVector = new mp.Vector3(this.x, this.y, this.z);
+    nVector.x = this.x * n;
+    nVector.y = this.y * n;
+    nVector.z = this.z * n;
+    return nVector;
+}
+mp.Vector3.prototype.dist = function(to) {
+    let a = this.x - to.x;
+    let b = this.y - to.y;
+    let c = this.z - to.z;
+    return Math.sqrt(a * a + b * b + c * c);;
+}
+mp.Vector3.prototype.dist2d = function(to) {
+    let a = this.x - to.x;
+    let b = this.y - to.y;
+    return Math.sqrt(a * a + b * b);
+}
+mp.Vector3.prototype.getOffset = function(to) {
+    let x = this.x - to.x;
+    let y = this.y - to.y;
+    let z = this.z - to.z;
+    return new mp.Vector3(x, y, z);
+}
+mp.Vector3.prototype.cross = function(to) {
+    let vector = new mp.Vector3(0, 0, 0);
+    vector.x = this.y * to.z - this.z * to.y;
+    vector.y = this.z * to.x - this.x * to.z;
+    vector.z = this.x * to.y - this.y * to.x;
+    return vector;
+}
+mp.Vector3.prototype.normalize = function() {
+    let vector = new mp.Vector3(0, 0, 0);
+    let mag = Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
+    vector.x = this.x / mag;
+    vector.y = this.y / mag;
+    vector.z = this.z / mag;
+    return vector;
+}
+mp.Vector3.prototype.dot = function(to) {
+    return this.x * to.x + this.y * to.y + this.z * to.z;
+}
+mp.Vector3.prototype.length = function() {
+    return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
+}
+mp.Vector3.prototype.angle = function(to) {
+    return Math.acos(this.normalize().dot(to.normalize()));
+}
+mp.Vector3.prototype.ground = function() {
+    let nVector = new mp.Vector3(this.x, this.y, this.z);
+    let z = mp.game.gameplay.getGroundZFor3dCoord(nVector.x, nVector.y, nVector.z, 0, false)
+    let z1 = mp.game.gameplay.getGroundZFor3dCoord(nVector.x + 0.01, nVector.y + 0.01, nVector.z, 0, false)
+    let z2 = mp.game.gameplay.getGroundZFor3dCoord(nVector.x - 0.01, nVector.y - 0.01, nVector.z, 0, false)
+    nVector.z = z;
+    if ((z + 0.1 < z1) || (z + 0.1 < z2)) {
+        if (z1 < z2) {
+            nVector.z = z2;
+        } else {
+            nVector.z = z1;
+        }
+    }
+    return nVector;
+}
+mp.Vector3.prototype.ground2 = function(ignore) {
+    let nVector = new mp.Vector3(this.x, this.y, this.z);
+    let r = mp.raycasting.testPointToPoint(nVector.add(0,0,1), nVector.sub(0, 0, 100), ignore.handle, (1 | 16));
+    if ((r) && (r.position)) {
+        nVector = mp.vector(r.position);
+    }
+    return nVector;
+}
+mp.Vector3.prototype.sub = function(x, y, z) {
+    return new mp.Vector3(this.x - x, this.y - y, this.z - z);
+};
+mp.Vector3.prototype.add = function(x, y, z) {
+    return new mp.Vector3(this.x + x, this.y + -y, this.z + z);
+};
+mp.vector = function(vec) {
+    return new mp.Vector3(vec.x, vec.y, vec.z);
+}
 
+mp.Vector3.prototype.insidePolygon = function(polygon) {
+    var x = this.x,
+        y = this.y;
+    var inside = false;
+    for (var i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+        var xi = polygon[i][0],
+            yi = polygon[i][1];
+        var xj = polygon[j][0],
+            yj = polygon[j][1];
+        var intersect = ((yi > y) != (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+        if (intersect) inside = !inside;
+    }
+    return inside;
+};
+
+Array.prototype.shuffle = function() {
+    var i = this.length;
+    while (i) {
+        var j = Math.floor(Math.random() * i);
+        var t = this[--i];
+        this[i] = this[j];
+        this[j] = t;
+    }
+    return this;
+}
 },{}],27:[function(require,module,exports){
-const toSync=["health","running","engine","wheel_fl","wheel_fr","wheel_rl","wheel_rr","fuel","spark_plugs","battery"];function syncVehicle(e,l,t){"running"==e&&(console.log("Set Engine to",t),l.setEngineOn(t,!0,!0)),"health"==e&&(l.setPetrolTankHealth(t),l.setBodyHealth(t)),"engine"==e&&l.setEngineHealth(1==t||1==t?1e3:0);let n=0;"wheel_fl"==e&&(0==t?(l.setTyreBurst(0,!0,1e3),n+=1):l.setTyreFixed(0)),"wheel_fr"==e&&(0==t?(l.setTyreBurst(1,!0,1e3),n+=1):l.setTyreFixed(1)),"wheel_rl"==e&&(0==t?(l.setTyreBurst(4,!0,1e3),n+=1):l.setTyreFixed(4)),"wheel_rr"==e&&(0==t?(l.setTyreBurst(5,!0,1e3),n+=1):l.setTyreFixed(5)),n>=3?l.setReduceGrip(!0):l.setReduceGrip(!1)}toSync.forEach(function(e){mp.events.addDataHandler(e,(l,t)=>{"vehicle"===l.type&&(syncVehicle(e,l,t),console.log(`${e} changed to ${t} on entity ${l.handle}.`))})}),mp.events.add("entityStreamIn",e=>{if("vehicle"===e.type){let l=e.getVariable("components");null!=l&&Object.keys(l).forEach(function(t,n){syncVehicle(t,e,l[t])})}});var drivenDist=0,drivenOldPos=null;mp.events.add("playerEnterVehicle",(e,l)=>{if(null!=e){let l=e.getVariable("running");null!=l&&(e.freezePosition(!1),drivenDist=0,1==l?e.setEngineOn(!0,!0,!0):e.setEngineOn(!1,!0,!0))}}),mp.events.add("render",()=>{mp.localPlayer.position;if(mp.localPlayer.vehicle&&mp.localPlayer.isInAnyVehicle(!1)){let e=mp.localPlayer.vehicle;if(e.getPedInSeat(-1)==mp.localPlayer.handle){if(null!=drivenOldPos){let e=mp.localPlayer.vehicle.position,l=mp.game.system.vdist(drivenOldPos.x,drivenOldPos.y,drivenOldPos.z,e.x,e.y,e.z);l<7500&&l>0&&(drivenDist+=l)>100&&(mp.events.callRemote("Vehicles:UpdateFuel",drivenDist),drivenDist=0)}if(drivenOldPos=mp.localPlayer.vehicle.position,e.getVariable("running")){mp.game.graphics.drawText("Engine:"+(e.getVariable("running")?"~g~On":"~r~Off"),[.4,.8],{font:4,color:[255,255,255,185],scale:[.4,.4],outline:!0,centre:!0});let l=Math.ceil(e.getSpeed()*(e.getSpeed()/20)*2);mp.game.graphics.drawText(l+" KM/H",[.6,.8],{font:4,color:[255,255,255,185],scale:[.4,.4],outline:!0,centre:!0}),e.getVariable("components").fuel&&mp.game.graphics.drawText("Fuel:"+(e.getVariable("components").fuel>0?e.getVariable("components").fuel.toFixed(2):"0")+"L",[.5,.8],{font:4,color:[255,255,255,185],scale:[.4,.4],outline:!0,centre:!0})}}}mp.players.local.isInAnyVehicle(!1)&&null!=mp.players.local.vehicle&&1!=mp.players.local.vehicle.getVariable("running")&&(mp.game.controls.disableControlAction(0,278,!0),mp.game.controls.disableControlAction(0,279,!0),mp.game.controls.disableControlAction(0,280,!0),mp.game.controls.disableControlAction(0,281,!0),mp.game.controls.disableControlAction(2,278,!0),mp.game.controls.disableControlAction(2,279,!0),mp.game.controls.disableControlAction(2,280,!0),mp.game.controls.disableControlAction(2,281,!0),mp.players.local.vehicle.setEngineOn(!1,!0,!0))}),mp.keys.bind(88,!0,function(){mp.events.callRemote("Vehicles:ToggleEngine"),mp.events.callRemote("Vehicles:RequestInventory")});var seats={0:"seat_pside_f",1:"seat_dside_r",2:"seat_pside_r",3:"seat_dside_r1",4:"seat_pside_r1",5:"seat_dside_r2",6:"seat_pside_r2",7:"seat_dside_r3",8:"seat_pside_r3",9:"seat_dside_r4",10:"seat_pside_r4",11:"seat_dside_r5",12:"seat_pside_r5",13:"seat_dside_r6",14:"seat_pside_r6",15:"seat_dside_r7",16:"seat_pside_r7"};mp.game.controls.useDefaultVehicleEntering=!1,mp.keys.bind(71,!1,()=>{if(console.log("G"),null===mp.players.local.vehicle){if(mp.gui.cursor.visible)return;let l=mp.players.local.position,t={veh:null,dist:900};mp.vehicles.forEachInStreamRange(e=>{let n=e.position,s=mp.game.system.vdist2(l.x,l.y,l.z,n.x,n.y,n.z);s<t.dist&&(t.dist=s,t.veh=e)});let n=t.veh;if(null!==n&&n.isAnySeatEmpty()){let t={seat:0,dist:99999,pos:new mp.Vector3(0,0,0)},s=!1,i=mp.game.vehicle.getVehicleSeats(n);for(var e=0;e<=i;e++)if(n.isSeatFree(e)){e<=2&&(s=!0);let i=seats[e],a=n.getWorldPositionOfBone(n.getBoneIndexByName(i)),o=(mp.game.gameplay.getGroundZFor3dCoord(a.x,a.y,a.z,0,!1),mp.game.system.vdist2(l.x,l.y,l.z,a.x,a.y,a.z));e>2&&1==s||(1917016601==n.model&&e>0&&t.dist>30&&(t.dist=30,t.seat=e),o<t.dist&&(t.dist=o,t.seat=e))}1475773103==n.model&&t.seat>0?mp.players.local.taskEnterVehicle(n.handle,5e3,t.seat,2,16,0):mp.players.local.taskEnterVehicle(n.handle,5e3,t.seat,2,1,0)}}});
+const toSync = ["health", "running", "engine", "wheel_fl", "wheel_fr", "wheel_rl", "wheel_rr", "fuel", "spark_plugs", "battery"]
 
+function syncVehicle(type, vehicle, value) {
+    if (type == "running") {
+        console.log("Set Engine to", value);
+        vehicle.setEngineOn(value, true, true);
+    }
+    if (type == "health") {
+        vehicle.setPetrolTankHealth(value);
+        vehicle.setBodyHealth(value);
+        //vehicle.setEngineHealth(value);
+    }
+    if (type == "engine") {
+        vehicle.setEngineHealth((value == 1 || value == true) ? 1000 : 0);
+    }
+    let tyres_burst = 0;
+    if (type == "wheel_fl") {
+        if (value == false) {
+            vehicle.setTyreBurst(0, true, 1000);
+            tyres_burst += 1;
+        } else {
+            vehicle.setTyreFixed(0);
+        }
+    }
+    if (type == "wheel_fr") {
+        if (value == false) {
+            vehicle.setTyreBurst(1, true, 1000);
+            tyres_burst += 1;
+        } else {
+            vehicle.setTyreFixed(1);
+        }
+    }
+    if (type == "wheel_rl") {
+        if (value == false) {
+            vehicle.setTyreBurst(4, true, 1000);
+            tyres_burst += 1;
+        } else {
+            vehicle.setTyreFixed(4);
+        }
+    }
+    if (type == "wheel_rr") {
+        if (value == false) {
+            vehicle.setTyreBurst(5, true, 1000);
+            tyres_burst += 1;
+        } else {
+            vehicle.setTyreFixed(5);
+        }
+    }
+    if (tyres_burst >= 3) {
+        vehicle.setReduceGrip(true);
+    } else {
+        vehicle.setReduceGrip(false);
+    }
+}
+toSync.forEach(function(data) {
+    mp.events.addDataHandler(data, (entity, value) => {
+        if (entity.type === "vehicle") {
+            syncVehicle(data, entity, value);
+            console.log(`${data} changed to ${value} on entity ${entity.handle}.`);
+        }
+    });
+})
+mp.events.add('entityStreamIn', (entity) => {
+    if (entity.type === "vehicle") {
+        let components = entity.getVariable("components");
+        if (components != undefined) {
+            Object.keys(components).forEach(function(key, i) {
+                syncVehicle(key, entity, components[key]);
+            })
+        }
+    }
+});
+var drivenDist = 0;
+var drivenOldPos = null;
+mp.events.add('playerEnterVehicle', (vehicle, seat) => {
+    if (vehicle != null) {
+        let running = vehicle.getVariable("running");
+        if (running != null) {
+            vehicle.freezePosition(false);
+            drivenDist = 0;
+            if (running == true) {
+                vehicle.setEngineOn(true, true, true);
+            } else {
+                vehicle.setEngineOn(false, true, true);
+            }
+        }
+    }
+});
+mp.events.add("render", () => {
+    let pPos = mp.localPlayer.position;
+    /*Draw Vehicle Details*/
+    if (mp.localPlayer.vehicle) {
+        if (mp.localPlayer.isInAnyVehicle(false)) {
+            let veh = mp.localPlayer.vehicle;
+            if (veh.getPedInSeat(-1) == mp.localPlayer.handle) {
+                if (drivenOldPos != null) {
+                    let cPos = mp.localPlayer.vehicle.position;
+                    let dist = mp.game.system.vdist(drivenOldPos.x, drivenOldPos.y, drivenOldPos.z, cPos.x, cPos.y, cPos.z);
+                    if (dist < 7500 && dist > 0) {
+                        drivenDist += dist;
+                        if (drivenDist > 100) {
+                            mp.events.callRemote("Vehicles:UpdateFuel",drivenDist);
+                            drivenDist = 0;
+                        }
+                    }
+                }
+                drivenOldPos = mp.localPlayer.vehicle.position;
+                if (veh.getVariable("running")) {
+                    mp.game.graphics.drawText("Engine:" + (veh.getVariable("running") ? "~g~On" : "~r~Off"), [0.4, 0.8], {
+                        font: 4,
+                        color: [255, 255, 255, 185],
+                        scale: [0.4, 0.4],
+                        outline: true,
+                        centre: true
+                    });
+                    let v = Math.ceil(veh.getSpeed() * (veh.getSpeed() / 20) * 2);
+                    mp.game.graphics.drawText(v + " KM/H", [0.6, 0.8], {
+                        font: 4,
+                        color: [255, 255, 255, 185],
+                        scale: [0.4, 0.4],
+                        outline: true,
+                        centre: true
+                    });
+                    if (veh.getVariable("components").fuel) {
+                        mp.game.graphics.drawText("Fuel:" + (veh.getVariable("components").fuel > 0 ? (veh.getVariable("components").fuel.toFixed(2)) : "0") + "L", [0.5, 0.8], {
+                            font: 4,
+                            color: [255, 255, 255, 185],
+                            scale: [0.4, 0.4],
+                            outline: true,
+                            centre: true
+                        });
+                    }
+                }
+            }
+        }
+    }
+    if (mp.players.local.isInAnyVehicle(false)) {
+        if (mp.players.local.vehicle != null) {
+            if (mp.players.local.vehicle.getVariable("running") != true) {
+                mp.game.controls.disableControlAction(0, 278, true);
+                mp.game.controls.disableControlAction(0, 279, true);
+                mp.game.controls.disableControlAction(0, 280, true);
+                mp.game.controls.disableControlAction(0, 281, true);
+                mp.game.controls.disableControlAction(2, 278, true);
+                mp.game.controls.disableControlAction(2, 279, true);
+                mp.game.controls.disableControlAction(2, 280, true);
+                mp.game.controls.disableControlAction(2, 281, true);
+                mp.players.local.vehicle.setEngineOn(false, true, true);
+            }
+        }
+    }
+});
+mp.keys.bind(0x58, true, function() {
+    mp.events.callRemote("Vehicles:ToggleEngine");
+    mp.events.callRemote("Vehicles:RequestInventory");
+});
+var seats = {
+    0: "seat_pside_f", // passanger side front
+    1: "seat_dside_r", // driver side rear
+    2: "seat_pside_r", // passanger side rear
+    3: "seat_dside_r1", // driver side rear1
+    4: "seat_pside_r1", // passanger side rear1
+    5: "seat_dside_r2", // driver side rear2
+    6: "seat_pside_r2", // passanger side rear2
+    7: "seat_dside_r3", // driver side rear3
+    8: "seat_pside_r3", // passanger side rear3
+    9: "seat_dside_r4", // driver side rear4
+    10: "seat_pside_r4", // passanger side rear4
+    11: "seat_dside_r5", // driver side rear5
+    12: "seat_pside_r5", // passanger side rear5
+    13: "seat_dside_r6", // driver side rear6
+    14: "seat_pside_r6", // passanger side rear6
+    15: "seat_dside_r7", // driver side rear7
+    16: "seat_pside_r7", // passanger side rear7
+}
+mp.game.controls.useDefaultVehicleEntering = false;
+mp.keys.bind(0x47, false, () => {
+    console.log("G");
+    if (mp.players.local.vehicle === null) {
+        if (mp.gui.cursor.visible) return;
+        let pos = mp.players.local.position;
+        let targetVeh = {
+            veh: null,
+            dist: 900
+        }
+        // get closest veh + police cars
+        mp.vehicles.forEachInStreamRange((veh) => {
+            let vp = veh.position;
+            let dist = mp.game.system.vdist2(pos.x, pos.y, pos.z, vp.x, vp.y, vp.z);
+            if (dist < targetVeh.dist) {
+                targetVeh.dist = dist;
+                targetVeh.veh = veh;
+            }
+        });
+        let veh = targetVeh.veh;
+        if (veh !== null) {
+            if (veh.isAnySeatEmpty()) {
+                let toEnter = {
+                    seat: 0,
+                    dist: 99999,
+                    pos: new mp.Vector3(0, 0, 0)
+                }
+                let insideSeatsFree = false;
+                let ground;
+                let seats_count = mp.game.vehicle.getVehicleSeats(veh);
+                for (var i = 0; i <= seats_count; i++) {
+                    if (veh.isSeatFree(i)) {
+                        if (i <= 2) {
+                            insideSeatsFree = true;
+                        }
+                        let seat = seats[i];
+                        let seat_pos = veh.getWorldPositionOfBone(veh.getBoneIndexByName(seat))
+                        let ground_pos = mp.game.gameplay.getGroundZFor3dCoord(seat_pos.x, seat_pos.y, seat_pos.z, 0, false);
+                        let seat_dist = mp.game.system.vdist2(pos.x, pos.y, pos.z, seat_pos.x, seat_pos.y, seat_pos.z);
+                        if ((i > 2) && (insideSeatsFree == true)) {} else {
+                            if (veh.model == 1917016601 && i > 0) {
+                                if ((toEnter.dist > 30)) {
+                                    toEnter.dist = 30;
+                                    toEnter.seat = i;
+                                }
+                            }
+                            if ((seat_dist < toEnter.dist)) {
+                                toEnter.dist = seat_dist;
+                                toEnter.seat = i;
+                            }
+                        }
+                    }
+                }
+                if ((veh.model == 1475773103) && (toEnter.seat > 0)) { // if rumpo3
+                    mp.players.local.taskEnterVehicle(veh.handle, 5000, toEnter.seat, 2.0, 16, 0);
+                } else {
+                    mp.players.local.taskEnterVehicle(veh.handle, 5000, toEnter.seat, 2.0, 1, 0);
+                }
+            }
+        }
+    }
+});
 },{}],28:[function(require,module,exports){
-require("./vector.js"),mp.game.audio.startAudioScene("FBI_HEIST_H5_MUTE_AMBIENCE_SCENE"),mp.game.audio.startAudioScene("MIC1_RADIO_DISABLE");var Weather=new class{constructor(){let e=this;e._areas=[],e._inside=void 0,mp.events.add("Weather:LoadAreas",a=>{e.loadWeather(JSON.parse(a))}),setInterval(function(){e._check()},1e3)}loadWeather(e){let a=this;a._areas=e,a._areas.forEach(function(e,t){e.polygon.forEach(function(e,i){a._areas[t].polygon[i]=[e.x,e.y]})})}enter(e){this._inside=e;let a=this._areas[e];mp.game.gameplay.setWind(a.wind.speed),mp.game.gameplay.setWindDirection(a.wind.dir),mp.game.gameplay.setWeatherTypeOverTime(a.name,1),mp.game.gameplay.setRainFxIntensity(a.rain),mp.events.callRemote("Weather:TransitionTo",this._inside)}exit(){this._inside=void 0,mp.events.callRemote("Weather:Exit"),mp.game.gameplay.setWeatherTypeOverTime("CLEAR",1),mp.game.gameplay.setWind(0),mp.game.gameplay.setWindDirection(0),mp.game.gameplay.setRainFxIntensity(0)}_check(){let e=this;if(e._areas.length>0){let a=mp.vector(mp.players.local.position),t=e._areas.findIndex(function(e,t){return 1==a.insidePolygon(e.polygon)});e._inside!=t&&(t>-1?e.enter(t):e.exit())}}};module.exports=Weather;
+require("./vector.js");
+mp.game.audio.startAudioScene("FBI_HEIST_H5_MUTE_AMBIENCE_SCENE");
+mp.game.audio.startAudioScene("MIC1_RADIO_DISABLE");
+var Weather = new class {
+    constructor() {
+        let self = this;
+        self._areas = [];
+        self._inside = undefined;
+        mp.events.add("Weather:LoadAreas", (weathers) => {
+            self.loadWeather(JSON.parse(weathers));
+        });
+        setInterval(function() {
+            self._check();
+        }, 1000);
+    }
+    loadWeather(arr) {
+        let self = this;
+        self._areas = arr;
+        self._areas.forEach(function(area, index) {
+            area.polygon.forEach(function(coords, index1) {
+                self._areas[index].polygon[index1] = [coords.x, coords.y];
+            })
+        });
+    }
+    enter(key) {
+        this._inside = key;
+        let weather = this._areas[key];
+        mp.game.gameplay.setWind(weather.wind.speed);
+        mp.game.gameplay.setWindDirection(weather.wind.dir);
+        mp.game.gameplay.setWeatherTypeOverTime(weather.name, 1);
+        mp.game.gameplay.setRainFxIntensity(weather.rain);
+        mp.events.callRemote("Weather:TransitionTo", this._inside);
+    }
+    exit() {
 
+        this._inside = undefined;
+        mp.events.callRemote("Weather:Exit");
+        mp.game.gameplay.setWeatherTypeOverTime("CLEAR", 1);
+        mp.game.gameplay.setWind(0);
+        mp.game.gameplay.setWindDirection(0);
+        mp.game.gameplay.setRainFxIntensity(0);
+    }
+    _check() {
+        let self = this;
+        if (self._areas.length > 0) {
+            let lp = mp.vector(mp.players.local.position);
+            let inside = self._areas.findIndex(function(area, key) {
+                let inside1 = lp.insidePolygon(area.polygon);
+                return (inside1 == true)
+            })
+            if (self._inside != inside) {
+                if (inside > -1) {
+                    self.enter(inside);
+                } else {
+                    self.exit();
+                }
+            }
+        }
+    }
+}
+module.exports = Weather;
 },{"./vector.js":26}],29:[function(require,module,exports){
-var Zombie=class{constructor(){this._setup()}_setup(){this._pos={x:mp.players.local.position.x,y:mp.players.local.position.y,z:mp.players.local.position.z},this.movementTimer,this.syncTimer,this._ped=mp.peds.new(mp.game.joaat("ig_abigail"),new mp.Vector3(this._pos.x,this._pos.y,this._pos.z),Math.random(0,360),function(e){},0),this.init(),this.blip=mp.blips.new(9,new mp.Vector3(this._pos.x,this._pos.y,this._pos.z),{color:3,scale:.2,alpha:100,drawDistance:0}),this._task={},this._target=mp.players.local}get ped(){return this._ped}get pos(){return this._ped.getCoords(!0)}init(){var e=this;let t="move_heist_lester";if(e.loadPedAttributes(),!mp.game.streaming.hasClipSetLoaded(t))for(mp.game.streaming.requestClipSet(t);!mp.game.streaming.hasClipSetLoaded(t);)mp.game.wait(0);e._ped.setMovementClipset(t,0),e.syncTimer=setInterval(function(){e.move()},5e3)}loadPedAttributes(){this._ped.freezePosition(!1),this._ped.setCanRagdoll(!0),this._ped.setRagdollOnCollision(!0),this._ped.setCanRagdollFromPlayerImpact(!0),this._ped.setCombatAbility(100),this._ped.setCombatMovement(3);for(var e=1;e<64;e+=2)this._ped.setFleeAttributes(e,!1);this._ped.setFleeAttributes(0,!1),this._ped.setCombatAttributes(17,!0),this._ped.setCombatAttributes(16,!0),this._ped.setInvincible(!1),this._ped.setCanBeDamaged(!0),this._ped.setOnlyDamagedByPlayer(!1),this._ped.setBlockingOfNonTemporaryEvents(!0)}move(){let e=this._target.position;this._ped.resetRagdollTimer(),this.blip.setCoords(this._ped.getCoords(!0)),this._ped.clearTasksImmediately(),this._ped.taskGoToCoordAnyMeans(e.x,e.y,e.z,5,0,!1,786603,0),this._ped.taskPutDirectlyIntoMelee(this._target.handle,0,-1,1,!1)}},Zombies=[];
+var Zombie = class {
+    constructor() {
+        this._setup();
+    }
+    _setup() {
+        var self = this;
+        self._pos = {
+            x: mp.players.local.position.x,
+            y: mp.players.local.position.y,
+            z: mp.players.local.position.z
+        };
+        self.movementTimer;
+        self.syncTimer;
+        self._ped = mp.peds.new(mp.game.joaat("ig_abigail"), new mp.Vector3(self._pos.x, self._pos.y, self._pos.z), Math.random(0, 360), function(ped) {}, 0);
+        self.init();
+        self.blip = mp.blips.new(9, new mp.Vector3(self._pos.x, self._pos.y, self._pos.z), {
+            color: 3,
+            scale: 0.2,
+            alpha: 100,
+            drawDistance: 0
+        });
+        self._task = {};
+        self._target = mp.players.local;
+    }
+    get ped() {
+        return this._ped
+    }
+    get pos() {
+        return this._ped.getCoords(true)
+    }
+    init() {
+        var self = this;
+        let style = "move_heist_lester";
+        self.loadPedAttributes();
+        if (!mp.game.streaming.hasClipSetLoaded(style)) {
+            mp.game.streaming.requestClipSet(style);
+            while (!mp.game.streaming.hasClipSetLoaded(style)) mp.game.wait(0);
+        }
+        self._ped.setMovementClipset(style, 0.0);
+        self.syncTimer = setInterval(function() {
+            self.move()
+        }, 5000)
+    }
+    loadPedAttributes() {
+        var self = this;
+        self._ped.freezePosition(false);
+        self._ped.setCanRagdoll(true);
+        self._ped.setRagdollOnCollision(true);
+        self._ped.setCanRagdollFromPlayerImpact(true);
+        self._ped.setCombatAbility(100);
+        self._ped.setCombatMovement(3);
+        for (var i = 1; i < 64; i += 2) {
+            self._ped.setFleeAttributes(i, false);
+        }
+        self._ped.setFleeAttributes(0, false);
+        self._ped.setCombatAttributes(17, true);
+        self._ped.setCombatAttributes(16, true);
+        self._ped.setInvincible(false);
+        self._ped.setCanBeDamaged(true);
+        self._ped.setOnlyDamagedByPlayer(false);
+        self._ped.setBlockingOfNonTemporaryEvents(true);
+    }
+    move() {
+        var self = this;
+        let tPos = self._target.position;
+/*        if (self._syncer != mp.players.local) {
+            if (self._task.cPos.x != 0) {
+                self._ped.setCoords(self._task.cPos.x, self._task.cPos.y, self._task.cPos.z, true, true, true, false);
+            }
+        }*/
+        self._ped.resetRagdollTimer();
+        self.blip.setCoords(self._ped.getCoords(true));
+        self._ped.clearTasksImmediately();
+        self._ped.taskGoToCoordAnyMeans(tPos.x, tPos.y, tPos.z, 5, 0, false, 786603, 0);
+        self._ped.taskPutDirectlyIntoMelee(self._target.handle, 0.0, -1.0, 1.0, false);
+    }
+}
+var Zombies = [];
+/*
+mp.events.add("render", e => {
+    if (mp.game.controls.isControlJustPressed(0, 23)) {
+        Zombies.push(new Zombie());
+    }
+    Zombies.forEach(function(zom) {
+        mp.game.graphics.drawText("Zombie", [zom.pos.x,zom.pos.y,zom.pos.z], {
+            font: 4,
+            color: [255, 255, 255, 200],
+            scale: [0.3, 0.3],
+            outline: true,
+            centre: true
+        });
+    })
+});
 
+
+*/
+
+/*mp.keys.bind(0x09, false, () => {
+    new Zombie();
+});
+*/
 },{}],30:[function(require,module,exports){
-function getRandomInt(e,t){return e=Math.ceil(e),t=Math.floor(t),Math.floor(Math.random()*(t-e))+e}var items={Hatchet:{width:2,height:4,max_stack:1,name:"Hatchet",image:"../../source/img/equipment/hatchet.png",type:"Residential",model:"prop_w_me_hatchet",thickness:.15,amount:1,mask:"melee",offset:{pos:new mp.Vector3(0,0,.02),rot:new mp.Vector3(90,0,0)},modifiers:{spread:function(){return getRandomInt(1,3)},durability:function(){return 100}}},Pickaxe:{width:3,height:3,max_stack:1,name:"Pickaxe",image:"../../source/img/equipment/pickaxe.png",type:"Residential",model:"prop_tool_pickaxe",thickness:.15,amount:1,mask:"melee",offset:{pos:new mp.Vector3(0,0,.02),rot:new mp.Vector3(0,0,0)},modifiers:{reward:function(){return getRandomInt(1,3)},durability:function(){return 100}}},"Pump Shotgun":{width:4,height:2,max_stack:1,name:"Pump Shotgun",image:"../../source/img/equipment/weapon_pumpshotgun.png",type:"Residential",model:"w_sg_pumpshotgun",thickness:.15,amount:1,mask:"Primary",offset:{pos:new mp.Vector3(0,0,.02),rot:new mp.Vector3(90,0,0)}},"12 Gauge Shells":{width:1,height:1,max_stack:32,name:"12 Gauge Shells",image:"../../source/img/ammo/12_Gauge_Shells.png",type:"Residential",model:"w_sg_assaultshotgun_mag1",mask:"Ammo",thickness:.15,amount:function(){return getRandomInt(1,Math.floor(this.max_stack/4))},offset:{pos:new mp.Vector3(0,0,.02),rot:new mp.Vector3(90,0,0)}},"Micro SMG":{width:3,height:2,max_stack:1,name:"Micro SMG",image:"../../source/img/equipment/weapon_microsmg.png",type:"Industrial",model:"w_sb_microsmg",thickness:.15,amount:1,mask:"Primary|Secondary",offset:{pos:new mp.Vector3(0,0,.02),rot:new mp.Vector3(90,0,0)}},"9mm Bullets":{width:1,height:1,max_stack:128,name:"9mm Bullets",image:"../../source/img/ammo/9mm_bullets.png",type:"Industrial",model:"w_sb_microsmg_mag1",thickness:.15,mask:"Ammo",amount:function(){return getRandomInt(1,Math.floor(this.max_stack/4))},offset:{pos:new mp.Vector3(0,0,.01),rot:new mp.Vector3(90,0,0)}},"Assault Rifle":{width:4,height:2,max_stack:1,name:"Assault Rifle",image:"../../source/img/equipment/weapon_assaultrifle.png",type:"Military",model:"w_ar_assaultrifle",thickness:.15,amount:1,mask:"Primary",offset:{pos:new mp.Vector3(0,0,.02),rot:new mp.Vector3(90,0,0)}},"5.56m Bullets":{width:1,height:1,max_stack:64,name:"5.56m Bullets",image:"../../source/img/ammo/556m_Bullets.png",type:"Military",model:"w_ar_assaultrifle_mag1",thickness:.15,mask:"Ammo",amount:function(){return getRandomInt(1,Math.floor(this.max_stack/4))},offset:{pos:new mp.Vector3(0,0,.01),rot:new mp.Vector3(90,0,0)}},"Sprunk Can":{width:1,height:2,max_stack:14,name:"Sprunk Can",image:"../../source/img/consumable/energy_drink_small.png",type:"Food",model:"ng_proc_sodacan_01a",thickness:.25,mask:"Food",amount:function(){return 1},offset:{pos:new mp.Vector3(0,0,0),rot:new mp.Vector3(0,0,0)}},Beer:{width:1,height:2,max_stack:15,name:"Beer",image:"https://via.placeholder.com/40x80",type:"Food",mask:"Food",model:"prop_cs_beer_bot_03",thickness:.15,amount:function(){return 1},offset:{pos:new mp.Vector3(0,0,0),rot:new mp.Vector3(0,0,0)}},"Drank Bottle":{width:1,height:2,max_stack:14,name:"Drank Fresh",image:"https://via.placeholder.com/40x80",type:"Food",model:"ng_proc_ojbot_01a",mask:"Food",thickness:.2,amount:function(){return 1},offset:{pos:new mp.Vector3(0,0,0),rot:new mp.Vector3(0,0,0)}},Banana:{width:2,height:1,max_stack:24,name:"Banana",image:"https://via.placeholder.com/80x40",type:"Food",model:"ng_proc_food_nana1a",mask:"Food",thickness:.15,amount:function(){return 1},offset:{pos:new mp.Vector3(0,0,0),rot:new mp.Vector3(0,0,0)}},Orange:{width:1,height:1,max_stack:24,name:"Orange",image:"https://via.placeholder.com/40x40",type:"Food",model:"ng_proc_food_ornge1a",mask:"Food",thickness:.15,amount:function(){return 1},offset:{pos:new mp.Vector3(0,0,0),rot:new mp.Vector3(0,0,0)}},"Crackles O`Dawn":{width:1,height:2,max_stack:24,name:"Crackles O`Dawn",image:"https://via.placeholder.com/40x80",type:"Food",model:"v_res_tt_cereal02",mask:"Food",thickness:.2,amount:function(){return 1},offset:{pos:new mp.Vector3(0,0,0),rot:new mp.Vector3(0,0,0)}},"Strawberry Rails":{width:1,height:2,max_stack:24,name:"Strawberry Rails",image:"https://via.placeholder.com/40x80",type:"Food",model:"v_res_fa_cereal01",mask:"Food",thickness:.2,amount:function(){return 1},offset:{pos:new mp.Vector3(0,0,0),rot:new mp.Vector3(0,0,0)}},"Chicken Noodles":{width:1,height:2,max_stack:24,name:"Chicken Noodles",image:"https://via.placeholder.com/40x80",type:"Food",mask:"Food",model:"v_res_fa_potnoodle",thickness:.15,amount:function(){return 1},offset:{pos:new mp.Vector3(0,0,0),rot:new mp.Vector3(0,0,0)}},Bread:{width:1,height:2,max_stack:24,name:"Bread",image:"https://via.placeholder.com/40x80",type:"Food",mask:"Food",model:"v_res_fa_bread01",thickness:.25,amount:function(){return 1},offset:{pos:new mp.Vector3(0,0,.03),rot:new mp.Vector3(90,0,0)}},"Gas Can":{width:3,height:3,max_stack:1,name:"Gas Can",image:"../../source/img/tools/jerrycan.png",type:"Industrial",model:"prop_oilcan_01a",thickness:.25,mask:"Tool",amount:function(){return 1},offset:{pos:new mp.Vector3(0,0,0),rot:new mp.Vector3(0,0,0)}},Wood:{width:2,height:2,max_stack:128,name:"Wood",image:"../../source/img/resource/wood.png",type:"Craftable",model:"prop_fncwood_13c",mask:"Material",thickness:.35,amount:function(){return 1},offset:{pos:new mp.Vector3(0,0,0),rot:new mp.Vector3(0,0,90)}},Stone:{width:2,height:2,max_stack:128,name:"Stone",image:"../../source/img/resource/stone.png",type:"Craftable",model:"proc_sml_stones01",mask:"Material",thickness:.35,amount:function(){return 1},offset:{pos:new mp.Vector3(0,0,0),rot:new mp.Vector3(0,0,0)}},Leaf:{width:2,height:1,max_stack:128,name:"Leaf",image:"https://via.placeholder.com/80x40",type:"Craftable",model:"ng_proc_leaves05",mask:"Material",thickness:.35,amount:function(){return 1},offset:{pos:new mp.Vector3(0,0,0),rot:new mp.Vector3(0,0,0)}},Tire:{width:4,height:4,max_stack:1,name:"Tire",image:"https://via.placeholder.com/160x160",type:"Industrial",model:"ng_proc_tyre_01",mask:"Wheels",thickness:.35,amount:function(){return 1},offset:{pos:new mp.Vector3(0,0,0),rot:new mp.Vector3(0,0,0)}},Morphine:{width:2,height:1,max_stack:4,name:"Wood",image:"https://via.placeholder.com/40x80",type:"Hospital",model:"ng_proc_syrnige01a",mask:"Heal",thickness:.15,amount:function(){return 1},offset:{pos:new mp.Vector3(0,0,0),rot:new mp.Vector3(0,0,0)}},Furnace:{width:2,height:2,max_stack:1,name:"Furnace",image:"https://via.placeholder.com/40x80",type:"Craftable",model:"prop_paper_bag_01",mask:"Building",thickness:.15,amount:function(){return 1},offset:{pos:new mp.Vector3(0,0,0),rot:new mp.Vector3(0,0,0)}}};module.exports=items;
-
+"use strict";
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min)) + min;
+}
+/*
+ *  types : Residential,Industrial,Farm,Military,Other,Food,...
+ *  image needs to be relative to the client resources
+ */
+var items = {
+    "Hatchet": {
+        width: 2,
+        height: 4,
+        max_stack: 1,
+        name: 'Hatchet',
+        image: '../../source/img/equipment/hatchet.png',
+        type: "Residential",
+        model: "prop_w_me_hatchet",
+        thickness: 0.15,
+        amount: 1,
+        mask: "melee",
+        offset: {
+            pos: new mp.Vector3(0, 0, 0.02),
+            rot: new mp.Vector3(90, 0, 0)
+        },
+        modifiers: {
+            spread: function() {
+                return getRandomInt(1, 3)
+            },
+            durability: function() {
+                return 100
+            }
+        }
+    },/*
+    "Pickaxe": {
+        width: 3,
+        height: 3,
+        max_stack: 1,
+        name: 'Pickaxe',
+        image: '../../source/img/equipment/pickaxe.png',
+        type: "Residential",
+        model: "prop_tool_pickaxe",
+        thickness: 0.15,
+        amount: 1,
+        mask: "melee",
+        offset: {
+            pos: new mp.Vector3(0, 0, 0.02),
+            rot: new mp.Vector3(90, 0, 0)
+        },
+        modifiers: {
+            reward: function() {
+                return getRandomInt(1, 3)
+            },
+            durability: function() {
+                return 100
+            }
+        }
+    },*/
+    "Pump Shotgun": {
+        width: 4,
+        height: 2,
+        max_stack: 1,
+        name: 'Pump Shotgun',
+        image: '../../source/img/equipment/weapon_pumpshotgun.png',
+        type: "Residential",
+        model: "w_sg_pumpshotgun",
+        thickness: 0.15,
+        amount: 1,
+        mask: "Primary",
+        offset: {
+            pos: new mp.Vector3(0, 0, 0.02),
+            rot: new mp.Vector3(90, 0, 0)
+        }
+    },
+    "12 Gauge Shells": {
+        width: 1,
+        height: 1,
+        max_stack: 32,
+        name: '12 Gauge Shells',
+        image: '../../source/img/ammo/12_Gauge_Shells.png',
+        type: "Residential",
+        model: "w_sg_assaultshotgun_mag1",
+        mask: "Ammo",
+        thickness: 0.15,
+        amount: function() {
+            return getRandomInt(1, Math.floor(this.max_stack / 4))
+        },
+        offset: {
+            pos: new mp.Vector3(0, 0, 0.02),
+            rot: new mp.Vector3(90, 0, 0)
+        }
+    },
+    "Micro SMG": {
+        width: 3,
+        height: 2,
+        max_stack: 1,
+        name: 'Micro SMG',
+        image: '../../source/img/equipment/weapon_microsmg.png',
+        type: "Industrial",
+        model: "w_sb_microsmg",
+        thickness: 0.15,
+        amount: 1,
+        mask: "Primary|Secondary",
+        offset: {
+            pos: new mp.Vector3(0, 0, 0.02),
+            rot: new mp.Vector3(90, 0, 0)
+        },
+    },
+    "9mm Bullets": {
+        width: 1,
+        height: 1,
+        max_stack: 128,
+        name: '9mm Bullets',
+        image: '../../source/img/ammo/9mm_bullets.png',
+        type: "Industrial",
+        model: "w_sb_microsmg_mag1",
+        thickness: 0.15,
+        mask: "Ammo",
+        amount: function() {
+            return getRandomInt(1, Math.floor(this.max_stack / 4))
+        },
+        offset: {
+            pos: new mp.Vector3(0, 0, 0.01),
+            rot: new mp.Vector3(90, 0, 0)
+        }
+    },
+    "Assault Rifle": {
+        width: 4,
+        height: 2,
+        max_stack: 1,
+        name: 'Assault Rifle',
+        image: '../../source/img/equipment/weapon_assaultrifle.png',
+        type: "Residential",//"Military",
+        model: "w_ar_assaultrifle",
+        thickness: 0.15,
+        amount: 1,
+        mask: "Primary",
+        offset: {
+            pos: new mp.Vector3(0, 0, 0.02),
+            rot: new mp.Vector3(90, 0, 0)
+        }
+    },
+    "5.56m Bullets": {
+        width: 1,
+        height: 1,
+        max_stack: 64,
+        name: '5.56m Bullets',
+        image: '../../source/img/ammo/556m_Bullets.png',
+        type: "Residential",//"Military",
+        model: "w_ar_assaultrifle_mag1",
+        thickness: 0.15,
+        mask: "Ammo",
+        amount: function() {
+            return getRandomInt(1, Math.floor(this.max_stack / 4))
+        },
+        offset: {
+            pos: new mp.Vector3(0, 0, 0.01),
+            rot: new mp.Vector3(90, 0, 0)
+        }
+    },
+    "Sprunk Can": {
+        width: 1,
+        height: 2,
+        max_stack: 14,
+        name: 'Sprunk Can',
+        image: '../../source/img/consumable/energy_drink_small.png',
+        type: "Food",
+        model: "ng_proc_sodacan_01a",
+        thickness: 0.25,
+        mask: "Food",
+        amount: function() {
+            return 1;
+        },
+        offset: {
+            pos: new mp.Vector3(0, 0, 0),
+            rot: new mp.Vector3(0, 0, 0)
+        }
+    },
+    "Beer": {
+        width: 1,
+        height: 2,
+        max_stack: 15,
+        name: 'Beer',
+        image: 'https://via.placeholder.com/40x80',
+        type: "Food",
+        mask: "Food",
+        model: "prop_cs_beer_bot_03",
+        thickness: 0.15,
+        amount: function() {
+            return 1;
+        },
+        offset: {
+            pos: new mp.Vector3(0, 0, 0),
+            rot: new mp.Vector3(0, 0, 0)
+        }
+    },
+    "Drank Bottle": {
+        width: 1,
+        height: 2,
+        max_stack: 14,
+        name: 'Drank Fresh',
+        image: 'https://via.placeholder.com/40x80',
+        type: "Food",
+        model: "ng_proc_ojbot_01a",
+        mask: "Food",
+        thickness: 0.2,
+        amount: function() {
+            return 1;
+        },
+        offset: {
+            pos: new mp.Vector3(0, 0, 0),
+            rot: new mp.Vector3(0, 0, 0)
+        }
+    },
+    "Banana": {
+        width: 2,
+        height: 1,
+        max_stack: 24,
+        name: 'Banana',
+        image: 'https://via.placeholder.com/80x40',
+        type: "Food",
+        model: "ng_proc_food_nana1a",
+        mask: "Food",
+        thickness: 0.15,
+        amount: function() {
+            return 1;
+        },
+        offset: {
+            pos: new mp.Vector3(0, 0, 0),
+            rot: new mp.Vector3(0, 0, 0)
+        }
+    },
+    "Orange": {
+        width: 1,
+        height: 1,
+        max_stack: 24,
+        name: 'Orange',
+        image: 'https://via.placeholder.com/40x40',
+        type: "Food",
+        model: "ng_proc_food_ornge1a",
+        mask: "Food",
+        thickness: 0.15,
+        amount: function() {
+            return 1;
+        },
+        offset: {
+            pos: new mp.Vector3(0, 0, 0),
+            rot: new mp.Vector3(0, 0, 0)
+        }
+    },
+    "Crackles O`Dawn": {
+        width: 1,
+        height: 2,
+        max_stack: 24,
+        name: "Crackles O`Dawn",
+        image: 'https://via.placeholder.com/40x80',
+        type: "Food",
+        model: "v_res_tt_cereal02",
+        mask: "Food",
+        thickness: 0.2,
+        amount: function() {
+            return 1;
+        },
+        offset: {
+            pos: new mp.Vector3(0, 0, 0.0),
+            rot: new mp.Vector3(0, 0, 0)
+        }
+    },
+    "Strawberry Rails": {
+        width: 1,
+        height: 2,
+        max_stack: 24,
+        name: "Strawberry Rails",
+        image: 'https://via.placeholder.com/40x80',
+        type: "Food",
+        model: "v_res_fa_cereal01",
+        mask: "Food",
+        thickness: 0.2,
+        amount: function() {
+            return 1;
+        },
+        offset: {
+            pos: new mp.Vector3(0, 0, 0),
+            rot: new mp.Vector3(0, 0, 0)
+        }
+    },
+    "Chicken Noodles": {
+        width: 1,
+        height: 2,
+        max_stack: 24,
+        name: "Chicken Noodles",
+        image: 'https://via.placeholder.com/40x80',
+        type: "Food",
+        mask: "Food",
+        model: "v_res_fa_potnoodle",
+        thickness: 0.15,
+        amount: function() {
+            return 1;
+        },
+        offset: {
+            pos: new mp.Vector3(0, 0, 0),
+            rot: new mp.Vector3(0, 0, 0)
+        }
+    },
+    "Bread": {
+        width: 1,
+        height: 2,
+        max_stack: 24,
+        name: "Bread",
+        image: 'https://via.placeholder.com/40x80',
+        type: "Food",
+        mask: "Food",
+        model: "v_res_fa_bread01",
+        thickness: 0.25,
+        amount: function() {
+            return 1;
+        },
+        offset: {
+            pos: new mp.Vector3(0, 0, 0.03),
+            rot: new mp.Vector3(90, 0, 0)
+        }
+    },
+    "Gas Can": {
+        width: 3,
+        height: 3,
+        max_stack: 1,
+        name: 'Gas Can',
+        image: '../../source/img/tools/jerrycan.png',
+        type: "Industrial",
+        model: "prop_oilcan_01a",
+        thickness: 0.25,
+        mask: "Tool",
+        amount: function() {
+            return 1
+        },
+        offset: {
+            pos: new mp.Vector3(0, 0, 0),
+            rot: new mp.Vector3(0, 0, 0)
+        }
+    },
+    /*Resources*/
+    "Wood": {
+        width: 2,
+        height: 2,
+        max_stack: 128,
+        name: 'Wood',
+        image: '../../source/img/resource/wood.png',
+        type: "Craftable",
+        model: "prop_fncwood_13c",
+        mask: "Material",
+        thickness: 0.35,
+        amount: function() {
+            return 1;
+        },
+        offset: {
+            pos: new mp.Vector3(0, 0, 0),
+            rot: new mp.Vector3(0, 0, 90)
+        }
+    },
+    "Stone": {
+        width: 2,
+        height: 2,
+        max_stack: 128,
+        name: 'Stone',
+        image: '../../source/img/resource/stone.png',
+        type: "Craftable",
+        model: "proc_sml_stones01",
+        mask: "Material",
+        thickness: 0.35,
+        amount: function() {
+            return 1;
+        },
+        offset: {
+            pos: new mp.Vector3(0, 0, 0),
+            rot: new mp.Vector3(0, 0, 0)
+        }
+    },
+    "Leaf": {
+        width: 2,
+        height: 1,
+        max_stack: 128,
+        name: 'Leaf',
+        image: 'https://via.placeholder.com/80x40',
+        type: "Craftable",
+        model: "ng_proc_leaves05",
+        mask: "Material",
+        thickness: 0.35,
+        amount: function() {
+            return 1;
+        },
+        offset: {
+            pos: new mp.Vector3(0, 0, 0),
+            rot: new mp.Vector3(0, 0, 0)
+        }
+    },
+    "Tire": {
+        width: 4,
+        height: 4,
+        max_stack: 1,
+        name: 'Tire',
+        image: 'https://via.placeholder.com/160x160',
+        type: "Industrial",
+        model: "ng_proc_tyre_01",
+        mask: "Wheels",
+        thickness: 0.35,
+        amount: function() {
+            return 1;
+        },
+        offset: {
+            pos: new mp.Vector3(0, 0, 0),
+            rot: new mp.Vector3(0, 0, 0)
+        }
+    },
+    "Morphine": {
+        width: 2,
+        height: 1,
+        max_stack: 4,
+        name: 'Wood',
+        image: 'https://via.placeholder.com/40x80',
+        type: "Hospital",
+        model: "ng_proc_syrnige01a",
+        mask: "Heal",
+        thickness: 0.15,
+        amount: function() {
+            return 1;
+        },
+        offset: {
+            pos: new mp.Vector3(0, 0, 0),
+            rot: new mp.Vector3(0, 0, 0)
+        }
+    },
+    "Furnace": {
+        width: 2,
+        height: 2,
+        max_stack: 1,
+        name: 'Furnace',
+        image: 'https://via.placeholder.com/40x80',
+        type: "Craftable",
+        model: "prop_paper_bag_01",
+        mask: "Building",
+        thickness: 0.15,
+        amount: function() {
+            return 1;
+        },
+        offset: {
+            pos: new mp.Vector3(0, 0, 0),
+            rot: new mp.Vector3(0, 0, 0)
+        }
+    }
+};
+module.exports = items;
 },{}]},{},[8]);

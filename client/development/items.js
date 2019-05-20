@@ -50,46 +50,46 @@ class LootPool {
     }
     load() {
         let self = this;
-        try {
-            let center = new mp.Vector3(self._lootData.pos.x, self._lootData.pos.y, self._lootData.pos.z);
-            let Angle_Item = 360 / 8;
-            self._lootData.items.forEach(function(item, index) {
-                if (item != null) {
-                    item.index = index;
-                    let offset_pos = center.findRot(0, 0.5, Angle_Item * index);
-                    let base_rot = (Angle_Item * index) + (offset_pos.rotPoint(center) + Math.floor(Math.random() * (360 - 0)));
-                    if (base_rot > 360) base_rot -= 360;
-                    if (item.rot == undefined) {
-                        item.rot = base_rot
-                    }
-                    let pos = offset_pos;
-                    pos.z += 1;
-                    let obj = mp.objects.new(mp.game.joaat(item.model), pos, {
-                        rotation: new mp.Vector3(0, 0, item.rot),
-                        alpha: 255,
-                        dimension: 0
-                    });
-                    obj.placeOnGroundProperly();
-                    let rotobj = obj.getRotation(0);
-                    let posobj = obj.getCoords(false);
-                    obj.setCollision(false, true);
-                    obj.freezePosition(true);
-                    obj.setPhysicsParams(9000000, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
-                    if ((item.offset.rot.x > 0) || (item.offset.rot.y > 0)) {
-                        obj.setCoords(posobj.x + item.offset.pos.x, posobj.y + item.offset.pos.y, (posobj.z - obj.getHeightAboveGround()) + item.offset.pos.z, false, false, false, false);
-                    } else {
-                        obj.setCoords(posobj.x + item.offset.pos.x, posobj.y + item.offset.pos.y, posobj.z + item.offset.pos.z, false, false, false, false);
-                    }
-                    obj.setRotation(rotobj.x + item.offset.rot.x, rotobj.y + item.offset.rot.y, rotobj.z, 0, true);
-                    self._pickupObjects.push({
-                        id: self._lootData.id,
-                        obj: obj
-                    })
+        //console.log("self._lootData",JSON.stringify(self._lootData));
+        let center = new mp.Vector3(self._lootData.pos.x, self._lootData.pos.y, self._lootData.pos.z);
+        let Angle_Item = 360 / 8;
+        console.log("load");
+        self._lootData.items.forEach(function(item, index) {
+            if (item != null) {
+                item.index = index;
+                let offset_pos = center.findRot(0, 0.5, Angle_Item * index);
+                let base_rot = (Angle_Item * index) + (offset_pos.rotPoint(center) + Math.floor(Math.random() * (360 - 0)));
+                if (base_rot > 360) base_rot -= 360;
+                if (item.rot == undefined) {
+                    item.rot = base_rot
                 }
-            })
-        } catch (err) {
-            console.log("err", err);
-        }
+                let pos = offset_pos;
+                pos.z += 1;
+                console.log("item.model",item.name,item.model,mp.game.joaat(item.model));
+                
+                let obj = mp.objects.new(mp.game.joaat(item.model), pos, {
+                    rotation: new mp.Vector3(0, 0, item.rot),
+                    alpha: 255,
+                    dimension: 0
+                });
+                /*obj.placeOnGroundProperly();
+                let rotobj = obj.getRotation(0);
+                let posobj = obj.getCoords(false);
+                obj.setCollision(false, true);
+                obj.freezePosition(true);
+                obj.setPhysicsParams(9000000, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+                if ((item.offset.rot.x > 0) || (item.offset.rot.y > 0)) {
+                    obj.setCoords(posobj.x + item.offset.pos.x, posobj.y + item.offset.pos.y, (posobj.z - obj.getHeightAboveGround()) + item.offset.pos.z, false, false, false, false);
+                } else {
+                    obj.setCoords(posobj.x + item.offset.pos.x, posobj.y + item.offset.pos.y, posobj.z + item.offset.pos.z, false, false, false, false);
+                }
+                obj.setRotation(rotobj.x + item.offset.rot.x, rotobj.y + item.offset.rot.y, rotobj.z, 0, true);
+                self._pickupObjects.push({
+                    id: self._lootData.id,
+                    obj: obj
+                })*/
+            }
+        })
     }
     unload(id) {
         let self = this;
@@ -105,7 +105,7 @@ class LootPool {
 mp.events.add("Loot:Load", (id, poolData) => {
     if (!streamedPools[id]) {
         console.log("CHECK STREAM IN");
-        //streamedPools[id] = new LootPool(poolData);
+        streamedPools[id] = new LootPool(poolData);
     }
 });
 mp.events.add("Loot:Unload", (id) => {

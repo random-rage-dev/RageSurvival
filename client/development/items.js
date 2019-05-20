@@ -1,3 +1,5 @@
+"use strict";
+var natives = require("./natives.js")
 var CEFNotification = require("./browser.js").notification;
 var CEFInventory = require("./browser.js").inventory;
 var StorageSystem = require("./storage.js");
@@ -5,14 +7,16 @@ var Notifications = require("./notifications.js");
 var streamedPools = [];
 class LootPool {
     constructor(data) {
-        console.log("LootPool create");
         this._setup(data);
     }
     _setup(data) {
         let self = this;
         self._lootData = data;
         self._pickupObjects = [];
-        self.load()
+        //let dist = mp.localPlayer.getPos().dist2d(new mp.Vector3(this._lootData.pos.x, this._lootData.pos.y, this._lootData.pos.z));
+        //setTimeout(function() {
+        self.load();
+        // }, 50*dist );
     }
     get position() {
         return new mp.Vector3(this._lootData.pos.x, this._lootData.pos.y, this._lootData.pos.z);
@@ -50,61 +54,76 @@ class LootPool {
     }
     load() {
         let self = this;
-        //console.log("self._lootData",JSON.stringify(self._lootData));
         let center = new mp.Vector3(self._lootData.pos.x, self._lootData.pos.y, self._lootData.pos.z);
+        console.log("mp.objects", mp.objects.length);
         let Angle_Item = 360 / 8;
-        console.log("load");
         self._lootData.items.forEach(function(item, index) {
             if (item != null) {
                 item.index = index;
-                let offset_pos = center.findRot(0, 0.5, Angle_Item * index);
-                let base_rot = (Angle_Item * index) + (offset_pos.rotPoint(center) + Math.floor(Math.random() * (360 - 0)));
-                if (base_rot > 360) base_rot -= 360;
-                if (item.rot == undefined) {
-                    item.rot = base_rot
+                console.log("index", index)
+                if (mp.game.streaming.isModelInCdimage(mp.game.joaat(item.model))) {
+                    console.log("isModelInCdimage", true)
+                    let offset_pos = center.findRot(0, 0.5, Angle_Item * index);
+                    console.log("offset_pos")
+                    let base_rot = (Angle_Item * index) + (offset_pos.rotPoint(center) + Math.floor(Math.random() * (360 - 0)));
+                    if (base_rot > 360) base_rot -= 360;
+                    console.log("base_rot", base_rot)
+                    if (item.rot == undefined) {
+                        item.rot = base_rot
+                    }
+                    let pos = offset_pos;
+                    pos.z += 1;
+                    console.log("item.rot", item.rot)
+                    console.log("pos", JSON.stringify(pos));
+                    console.log("item.model", item.model)
+                    // let obj = mp.game.object.createObject(mp.game.joaat(item.model), pos.x, pos.y, pos.z, false, true, false);
+                    let obj = mp.objects.new(mp.game.joaat(item.model), pos, { //item.model
+                        rotation: new mp.Vector3(0, 0, item.rot),
+                        alpha: 255,
+                        dimension: 0
+                    });
+                    console.log("created")
+                    //obj.placeOnGroundProperly();
+                    let rotobj = obj.getRotation(0);
+                    let posobj = obj.getCoords(false);
+                    obj.setCollision(false, true);
+                    obj.freezePosition(true);
+                    if ((item.offset.rot.x > 0) || (item.offset.rot.y > 0)) {
+                        obj.setCoords(posobj.x + item.offset.pos.x, posobj.y + item.offset.pos.y, (posobj.z - obj.getHeightAboveGround()) + item.offset.pos.z, false, false, false, false);
+                    } else {
+                        obj.setCoords(posobj.x + item.offset.pos.x, posobj.y + item.offset.pos.y, posobj.z + item.offset.pos.z, false, false, false, false);
+                    }
+                    obj.setRotation(rotobj.x + item.offset.rot.x, rotobj.y + item.offset.rot.y, rotobj.z, 0, true);
+                    self._pickupObjects.push({
+                        id: self._lootData.id,
+                        obj: obj
+                    })
                 }
-                let pos = offset_pos;
-                pos.z += 1;
-                console.log("item.model",item.name,item.model,mp.game.joaat(item.model));
-                
-                let obj = mp.objects.new(mp.game.joaat(item.model), pos, {
-                    rotation: new mp.Vector3(0, 0, item.rot),
-                    alpha: 255,
-                    dimension: 0
-                });
-                /*obj.placeOnGroundProperly();
-                let rotobj = obj.getRotation(0);
-                let posobj = obj.getCoords(false);
-                obj.setCollision(false, true);
-                obj.freezePosition(true);
-                obj.setPhysicsParams(9000000, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
-                if ((item.offset.rot.x > 0) || (item.offset.rot.y > 0)) {
-                    obj.setCoords(posobj.x + item.offset.pos.x, posobj.y + item.offset.pos.y, (posobj.z - obj.getHeightAboveGround()) + item.offset.pos.z, false, false, false, false);
-                } else {
-                    obj.setCoords(posobj.x + item.offset.pos.x, posobj.y + item.offset.pos.y, posobj.z + item.offset.pos.z, false, false, false, false);
-                }
-                obj.setRotation(rotobj.x + item.offset.rot.x, rotobj.y + item.offset.rot.y, rotobj.z, 0, true);
-                self._pickupObjects.push({
-                    id: self._lootData.id,
-                    obj: obj
-                })*/
             }
         })
+        console.log("mp.objects 1", mp.objects.length);
     }
     unload(id) {
         let self = this;
+        console.log("unload mp.objects 2", mp.objects.length);
         self._pickupObjects.forEach(function(item, i) {
             if (item.id == id) {
-                item.obj.markForDeletion();
-                item.obj.destroy();
+                if (mp.objects.atHandle(item.obj)) {
+                    console.log("exists");
+                }
+                //if(mp.objects.exists(objList[i]) objList[i].destroy();
+                //item.obj.markForDeletion();
+                //item.obj.destroy();
+                mp.game.object.deleteObject(item.obj);
                 delete self._pickupObjects[i];
+                console.log("removed");
             }
         })
+        console.log("unload mp.objects 3", mp.objects.length);
     }
 }
 mp.events.add("Loot:Load", (id, poolData) => {
     if (!streamedPools[id]) {
-        console.log("CHECK STREAM IN");
         streamedPools[id] = new LootPool(poolData);
     }
 });
@@ -122,10 +141,10 @@ mp.events.add("Loot:Reload", (id, new_data) => {
 
 function pointingAt() {
     let ray_dist = 25;
-    direction = mp.gameplayCam.getDirection();
-    coords = mp.gameplayCam.getCoord();
-    const farAway = new mp.Vector3((direction.x * ray_dist) + (coords.x), (direction.y * ray_dist) + (coords.y), (direction.z * ray_dist) + (coords.z));
-    const result = mp.raycasting.testPointToPoint(coords, farAway, mp.players.local, -1);
+    let direction = mp.gameplayCam.getDirection();
+    let coords = mp.gameplayCam.getCoord();
+    let farAway = new mp.Vector3((direction.x * ray_dist) + (coords.x), (direction.y * ray_dist) + (coords.y), (direction.z * ray_dist) + (coords.z));
+    let result = mp.raycasting.testPointToPoint(coords, farAway, mp.players.local, -1);
     if (result === undefined) {
         return undefined;
     }
@@ -150,7 +169,7 @@ mp.events.add("render", () => {
                 if (item != null) {
                     let offset_pos = pos.findRot(0, 0.5, Angle_Item * index).ground();
                     let thickness = item.thickness //(mp.players.local.isRunning() == true) ? item.thickness * 2 : item.thickness;
-                    //mp.game.graphics.drawMarker(28, offset_pos.x, offset_pos.y, offset_pos.z, 0, 0, 0, 0, 0, 0, thickness, thickness, thickness, 255, 255, 255, 150, false, false, 2, false, "", "", false);
+                    mp.game.graphics.drawMarker(28, offset_pos.x, offset_pos.y, offset_pos.z, 0, 0, 0, 0, 0, 0, thickness, thickness, thickness, 255, 255, 255, 150, false, false, 2, false, "", "", false);
                     let player_pos = mp.vector(mp.localPlayer.position).ground();
                     let near_dist = thickness * 2.5;
                     let pointAtPos;

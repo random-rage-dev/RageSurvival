@@ -1,3 +1,4 @@
+"use strict";
 console.log = function(...a) {
     mp.gui.chat.push("DEBUG:" + a.join(" "))
 };
@@ -5,6 +6,7 @@ require("./libs/attachments.js")
 require("./libs/weapon_attachments.js")
 
 require("./libs/animations.js")
+require("./vector.js")
 /*Register Attachments for Player Animatiuons etc TODO*/
 mp.attachmentMngr.register("mining", "prop_tool_pickaxe", 57005, new mp.Vector3(0.085, -0.3, 0), new mp.Vector3(-90, 0, 0));
 mp.attachmentMngr.register("lumberjack", "w_me_hatchet", 57005, new mp.Vector3(0.085, -0.05, 0), new mp.Vector3(-90, 0, 0));
@@ -24,10 +26,12 @@ mp.canCrouch = true;
 mp.gameplayCam = mp.cameras.new('gameplay');
 mp.defaultCam = mp.cameras.new('default');
 mp.localPlayer = mp.players.local;
+mp.localPlayer.getPos = function() {
+    return mp.vector(this.position);
+}
 mp.ui = {};
 mp.ui.ready = false;
 mp.gameplayCam.setAffectsAiming(true);
-require("./vector.js")
 require("./scaleforms/index.js")
 require("./crouch.js")
 require("./items.js")

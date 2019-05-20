@@ -6,7 +6,7 @@ const PistolAttachmentRot = new mp.Vector3(-100.0, 0.0, 0.0);
 const SMGAttachmentPos = new mp.Vector3(0.08, 0.03, -0.1);
 const SMGAttachmentRot = new mp.Vector3(-80.77, 0.0, 0.0);
 
-const ShotgunAttachmentPos = new mp.Vector3(-0.1, -0.15, 0.11);
+const ShotgunAttachmentPos = new mp.Vector3(-0.1, -0.12, 0.11);
 const ShotgunAttachmentRot = new mp.Vector3(-180.0, 0.0, 0.0);
 
 const RifleAttachmentPos = new mp.Vector3(-0.1, -0.15, -0.13);
@@ -18,6 +18,8 @@ const RifleAttachmentRot = new mp.Vector3(0.0, 0.0, 3.5);
  */
 const weaponAttachmentData = {
     // Pistols
+    "weapon_hatchet": { Slot: "RIGHT_THIGH", AttachBone: 51826, AttachPosition: PistolAttachmentPos, AttachRotation: new mp.Vector3(-100.0, 110.0, 0.0) },
+
     "WEAPON_PISTOL": { Slot: "RIGHT_THIGH", AttachBone: 51826, AttachPosition: PistolAttachmentPos, AttachRotation: PistolAttachmentRot },
     "WEAPON_PISTOL_MK2": { Slot: "RIGHT_THIGH", AttachBone: 51826, AttachPosition: PistolAttachmentPos, AttachRotation: PistolAttachmentRot },
     "WEAPON_COMBATPISTOL": { Slot: "RIGHT_THIGH", AttachBone: 51826, AttachPosition: PistolAttachmentPos, AttachRotation: PistolAttachmentRot },
@@ -66,15 +68,16 @@ for (let weapon in weaponAttachmentData) {
     let hash = mp.game.joaat(weapon);
 
     if (weaponData[hash]) {
-        weaponAttachmentData[weapon].AttachName = `WDSP_${weaponData[hash].HashKey}`;
+        weaponAttachmentData[weapon].AttachName = weaponData[hash].HashKey;
         weaponAttachmentData[weapon].AttachModel = weaponData[hash].ModelHashKey;
     } else {
         console.log(`[!] ${weapon} not found in weapon data file and will cause issues, remove it from weaponAttachmentData.`);
     }
 }
 
+
+
 for (let weapon in weaponAttachmentData) {
-    console.log(weaponAttachmentData[weapon].AttachName, weaponAttachmentData[weapon].AttachModel);
     mp.attachmentMngr.register(weaponAttachmentData[weapon].AttachName, weaponAttachmentData[weapon].AttachModel, weaponAttachmentData[weapon].AttachBone, weaponAttachmentData[weapon].AttachPosition, weaponAttachmentData[weapon].AttachRotation);
 }
 

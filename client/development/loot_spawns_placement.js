@@ -59,24 +59,24 @@ function getSelectedType() {
     return selected_type;
 }
 mp.events.add('render', () => {
-    const fly = global.fly;
-    direction = global.gameplayCam.getDirection();
-    coords = global.gameplayCam.getCoord();
+    let fly = global.fly;
+    let direction = global.gameplayCam.getDirection();
+    let coords = global.gameplayCam.getCoord();
     if (mp.game.controls.isControlJustPressed(0, controlsIds.F5)) {
         fly.flying = !fly.flying;
-        const player = mp.players.local;
+        let player = mp.players.local;
         player.setInvincible(fly.flying);
         player.freezePosition(fly.flying);
         player.setAlpha(fly.flying ? 0 : 255);
         if (!fly.flying) {
-            const position = mp.players.local.position;
+            let position = mp.players.local.position;
             position.z = mp.game.gameplay.getGroundZFor3dCoord(position.x, position.y, position.z, 0.0, false);
             mp.players.local.setCoordsNoOffset(position.x, position.y, position.z, false, false, false);
         }
         mp.game.graphics.notify(fly.flying ? 'Fly: ~g~Enabled' : 'Fly: ~r~Disabled');
     } else if (fly.flying) {
         let updated = false;
-        const position = mp.players.local.position;
+        let position = mp.players.local.position;
         if (mp.game.controls.isControlPressed(0, controlsIds.W)) {
             if (mp.game.controls.isControlPressed(0, controlsIds.LCtrl)) {
                 fly.f = 0.1;

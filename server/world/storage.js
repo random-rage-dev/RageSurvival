@@ -1,3 +1,4 @@
+"use strict";
 var rpc = require('rage-rpc');
 var itemIdentity = require("./items.js");
 var MongoDB = require("../libs/mongodb.js")
@@ -31,7 +32,9 @@ var Storage = new class {
 	log(...msg) {
 		console.log(msg.join(" "))
 	}
-	error(...msg) {}
+	error(...msg) {
+		console.log(msg.join(" "))
+	}
 	async canInteract(player, data) {
 		console.log("check can interact");
 		if (!this._interactionOpen[data.id]) {

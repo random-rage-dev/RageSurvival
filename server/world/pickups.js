@@ -1,3 +1,4 @@
+"use strict";
 var LootTable = require("./loottable.js");
 var loot_spawns = require("./lootspawns.js");
 var PickupManager = new class {

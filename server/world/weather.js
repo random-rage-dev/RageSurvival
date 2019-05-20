@@ -1,4 +1,4 @@
-
+"use strict";
 //vector.insidePolygon(polygon)
 var WeatherManager = new class {
     constructor() {

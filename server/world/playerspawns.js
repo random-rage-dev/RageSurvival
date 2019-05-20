@@ -1,3 +1,4 @@
+"use strict";
 /*
  *  Tiers : Residential,Industrial,Farm,Military,Other,Food,...
  */

@@ -1,3 +1,4 @@
+"use strict";
 var Items = require("./items.js");
 var Pickups = require("./pickups.js");
 var loot_tiers = [];

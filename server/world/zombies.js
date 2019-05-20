@@ -1,3 +1,4 @@
+"use strict";
 var tick_rate = 4;
 const moveEnums = {
     1: "walk",

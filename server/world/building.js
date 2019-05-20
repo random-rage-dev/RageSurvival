@@ -1,3 +1,4 @@
+"use strict";
 var MongoDB = require("../libs/mongodb.js")
 var Storage = require("./storage.js")
 var Buildings = MongoDB.getBuildingModel();

@@ -1,3 +1,4 @@
+"use strict";
 var materials = {};
 
 materials[2379541433] = "Tree";

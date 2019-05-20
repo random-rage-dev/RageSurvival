@@ -1,3 +1,4 @@
+"use strict";
 function getRandomInt(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
@@ -31,7 +32,7 @@ var items = {
                 return 100
             }
         }
-    },
+    },/*
     "Pickaxe": {
         width: 3,
         height: 3,
@@ -45,7 +46,7 @@ var items = {
         mask: "melee",
         offset: {
             pos: new mp.Vector3(0, 0, 0.02),
-            rot: new mp.Vector3(0, 0, 0)
+            rot: new mp.Vector3(90, 0, 0)
         },
         modifiers: {
             reward: function() {
@@ -55,7 +56,7 @@ var items = {
                 return 100
             }
         }
-    },
+    },*/
     "Pump Shotgun": {
         width: 4,
         height: 2,
@@ -130,7 +131,7 @@ var items = {
         max_stack: 1,
         name: 'Assault Rifle',
         image: '../../source/img/equipment/weapon_assaultrifle.png',
-        type: "Military",
+        type: "Residential",//"Military",
         model: "w_ar_assaultrifle",
         thickness: 0.15,
         amount: 1,
@@ -146,7 +147,7 @@ var items = {
         max_stack: 64,
         name: '5.56m Bullets',
         image: '../../source/img/ammo/556m_Bullets.png',
-        type: "Military",
+        type: "Residential",//"Military",
         model: "w_ar_assaultrifle_mag1",
         thickness: 0.15,
         mask: "Ammo",

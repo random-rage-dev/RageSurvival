@@ -145,6 +145,7 @@ var Player = class {
         mp.events.call("Player:Inventory", self._player, self._inventory)*/
         // console.log("TODO: Relaod inventory in spawn");
         Promise.all([self.loadInventory(), self.loadEquipment((fresh == 0) ? false : self._equipment)]).then(() => {
+            console.log("Player:UiReady")
             self._player.call("Player:UiReady");
         }).catch(err => {
             console.log(err);
@@ -192,47 +193,105 @@ var Player = class {
     fireWeapon(id, ammo) {
         var self = this;
         if (id != 0) {
-            // self.exp(15);
-            let wIndex = self._weapons.findIndex(weapon => {
+            console.log("fire weapon");
+            /*let wIndex = self._weapons.findIndex(weapon => {
                 return weapon.id == id;
             });
             if (wIndex == -1) {
-                //self.error(Number(id), "Weapon Cheat", self._player.name)
-                //self._player.removeWeapon(Number(id));
-            }
+                self.error(Number(id), "Weapon Cheat", self._player.name)
+                self._player.removeWeapon(Number(id));
+            }*/
         }
+    }
+    manageAttachments(oWeapon, nWeapon) {
+        let self = this;
+        console.log("nWeapon", nWeapon);
+        console.log("oWeapon", oWeapon);
+        if (nWeapon == undefined) {
+            nWeapon = self._player.weapon;
+        }
+        if (!self._attachments) {
+            self._attachments = {};
+        }
+
+        /* Weapon Attachments */
+        if (self._equipment["weapon_primary"] != undefined) {
+            let e = Equipment[self._equipment["weapon_primary"].name]
+            if (nWeapon != mp.joaat(e.hash)) {
+                self._player.addAttachment(e.hash, false);
+                self._attachments["primary"] = e.hash
+            } else {
+                self._player.addAttachment(e.hash, true);
+                self._attachments["primary"] = undefined;
+            }
+        } else if (self._attachments["primary"] != undefined) {
+            self._player.addAttachment(self._attachments["primary"], true);
+            self._attachments["primary"] = undefined;
+        }
+        if (self._equipment["weapon_secondary"] != undefined) {
+            let e = Equipment[self._equipment["weapon_secondary"].name]
+            if (nWeapon != mp.joaat(e.hash)) {
+                self._player.addAttachment(e.hash, false);
+                self._attachments["secondary"] = e.hash
+            } else {
+                self._player.addAttachment(e.hash, true);
+                self._attachments["secondary"] = undefined
+            }
+        } else if (self._attachments["secondary"] != undefined) {
+            self._player.addAttachment(self._attachments["secondary"], true);
+            self._attachments["secondary"] = undefined;
+        }
+        if (self._equipment["weapon_melee"] != undefined) {
+            let e = Equipment[self._equipment["weapon_melee"].name]
+            if (nWeapon != mp.joaat(e.hash)) {
+                self._player.addAttachment(e.hash, false);
+                self._attachments["melee"] = e.hash
+            } else {
+                self._player.addAttachment(e.hash, true);
+                self._attachments["melee"] = undefined
+            }
+        } else if (self._attachments["melee"] != undefined) {
+            self._player.addAttachment(self._attachments["melee"], true);
+            self._attachments["melee"] = undefined;
+        }
+
+        /*Clothing Attachments*/
+
     }
     gather(material) {
         var self = this;
-        self._player.setVariable("canGather", false);
-        console.log("gather material", material, Materials[material]);
-        let temp_weapon = self._player.weapon;
-        let temp_weaponAmmo = self._player.weaponAmmo;
-        if (temp_weapon) {
-            self._player.removeWeapon(temp_weapon);
-        }
-        let attachments = ""
-        if (Materials[material] == "Tree") {
-            self._player.playAnimation(animations.gather.wood.dict, animations.gather.wood.anim, 2.0, (1))
-            attachments = "lumberjack"
-        }
-        if ((Materials[material] == "Stone") || (Materials[material] == "Mineral Stone")) {
-            self._player.playAnimation(animations.gather.stone.dict, animations.gather.stone.anim, 2.0, (1))
-            attachments = "mining"
-        }
-        if (attachments != "") {
-            self._player.addAttachment(attachments, false);
-        }
-        setTimeout(function() {
-            self._player.stopAnimation();
-            self._player.setVariable("canGather", true);
-            self._player.addAttachment(attachments, true);
+        if (self._player.getVariable("canGather") == true) {
+            self._player.setVariable("canGather", false);
+            console.log("gather material", material, Materials[material]);
+            let temp_weapon = self._player.weapon;
+            let temp_weaponAmmo = self._player.weaponAmmo;
             if (temp_weapon) {
-                self._player.giveWeapon(temp_weapon, temp_weaponAmmo);
+                self._player.removeWeapon(temp_weapon);
             }
-            console.log("TODO Give Item after Gather!!!");
-        }, 4000)
+            let attachments = ""
+            if (Materials[material] == "Tree") {
+                self._player.playAnimation(animations.gather.wood.dict, animations.gather.wood.anim, 2.0, (1))
+                attachments = "lumberjack"
+            }
+            if ((Materials[material] == "Stone") || (Materials[material] == "Mineral Stone")) {
+                self._player.playAnimation(animations.gather.stone.dict, animations.gather.stone.anim, 2.0, (1))
+                attachments = "mining"
+            }
+            if (attachments != "") {
+                self._player.addAttachment(attachments, false);
+            }
+            setTimeout(function() {
+                self._player.stopAnimation();
+                self._player.setVariable("canGather", true);
+                self._player.addAttachment(attachments, true);
+                if (temp_weapon) {
+                    self._player.giveWeapon(temp_weapon, temp_weaponAmmo);
+                }
+                console.log("TODO Give Item after Gather!!!");
+            }, 4000)
+        }
     }
+    /*Attachments*/
     getInventoryItemByIndex(index = 0) {
         return this._inventory[index];
     }
@@ -273,16 +332,16 @@ var Player = class {
         self._player.removeAllWeapons();
         if (self._equipment["weapon_primary"] != undefined) {
             let e = Equipment[self._equipment["weapon_primary"].name]
-            self._player.giveWeapon(e.hash, ammoByType[e.ammo]);
+            self._player.giveWeapon(mp.joaat(e.hash), ammoByType[e.ammo]);
         }
         if (self._equipment["weapon_secondary"] != undefined) {
             let e = Equipment[self._equipment["weapon_secondary"].name]
-            self._player.giveWeapon(e.hash, ammoByType[e.ammo]);
+            self._player.giveWeapon(mp.joaat(e.hash), ammoByType[e.ammo]);
         }
         if (self._equipment["weapon_melee"] != undefined) {
             let e = Equipment[self._equipment["weapon_melee"].name]
             if (e) {
-                self._player.giveWeapon(e.hash, 1);
+                self._player.giveWeapon(mp.joaat(e.hash), 1);
             }
             if (self._equipment["weapon_melee"].name == "Hatchet") {
                 self._player.setVariable("hasHatchet", true);
@@ -300,6 +359,7 @@ var Player = class {
         }
         console.log("self._equipment", self._equipment)
         console.log("ammoByType", ammoByType)
+        self.manageAttachments(false)
     }
     /* Equipment */
     async loadEquipment(data = false) {
@@ -364,6 +424,7 @@ var Player = class {
                     self._player.call("Inventory:Resize", [10, 10])
                     self._player.call("Inventory:Update", [self._inventory])
                     mp.events.call("Player:Inventory", self._player, self._inventory)
+                    console.log("Loaded Player Inventory");
                     return resolve();
                 } else {
                     self.error("Account:Inventory", "Failed loading player inventory")

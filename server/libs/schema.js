@@ -103,6 +103,19 @@ var inventory = mongoose.Schema({
 }, {
     autoIndex: true
 });
+var groups = mongoose.Schema({
+    gid: {
+        type: Number,
+        unique: true
+    },
+    name: String,
+    members: {
+        type:Array,
+        default:[]
+    }
+}, {
+    autoIndex: true
+});
 var buildings = mongoose.Schema({
     health: {
         type: Number,
@@ -131,6 +144,9 @@ var buildings = mongoose.Schema({
 }, {
     autoIndex: true
 })
+groups.index({
+    gid: 1
+});
 buildings.index({
     placed: 1,
     owner_id: 1
@@ -151,5 +167,6 @@ module.exports = {
     user: user,
     inventory: inventory,
     buildings: buildings,
-    vehicles: vehicles
+    vehicles: vehicles,
+    groups: groups
 };

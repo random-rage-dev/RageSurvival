@@ -1028,6 +1028,10 @@ class LootPool {
         console.log("unload mp.objects 3", mp.objects.length);
     }
 }
+mp.events.add('entityStreamIn', (entity) => {
+    console.log("stream in entity");
+});
+
 mp.events.add("Loot:Load", (id, poolData) => {
     if (!streamedPools[id]) {
         streamedPools[id] = new LootPool(poolData);

@@ -2,6 +2,9 @@
 console.log = function(...a) {
     mp.gui.chat.push("DEBUG:" + a.join(" "))
 };
+mp.lerp = function(a, b, n) {
+    return (1 - n) * a + n * b;
+}
 require("./libs/attachments.js")
 require("./libs/weapon_attachments.js")
 

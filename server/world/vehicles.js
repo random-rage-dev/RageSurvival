@@ -102,8 +102,14 @@ var Vehicle = class {
         this._veh.setVariable("key", this._key);
         this._veh.setVariable("health", this._health);
         this._veh.setVariable("vehicle", true);
+        this._veh.setVariable("interactable", true);
+        this._veh.setVariable("interact_event", "Vehicle:Interact");
+        this._veh.setVariable("openDuration", 1000);
     }
 }
+mp.events.add("Vehicle:Interact", function(player,vehicle_ID) {
+    console.log("vehicle_ID",vehicle_ID)
+});
 mp.events.add("Vehicles:createVehicle", function(vehicle) {});
 mp.events.add("Vehicles:RequestInventory", function(player) {
     if (player.vehicle) {

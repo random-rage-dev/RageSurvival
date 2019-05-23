@@ -476,6 +476,9 @@ var Player = class {
         let self = this;
         return new Promise(async function(resolve, reject) {
             try {
+                var hasItem = self.hasItem(item.name);
+                
+                console.log("hasItem", hasItem);
                 console.log("giveItem", item);
                 let dbItem = await new Inventory({
                     owner_id: self._userId,

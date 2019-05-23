@@ -301,9 +301,12 @@ var DragHandler = new class {
 				if (self._registeredTargets[key].type == "storage") {
 					bounds = $("#" + key).find(".grid")[0].getBoundingClientRect();
 				}
-				if ((event.clientY >= bounds.top) && (event.clientY <= bounds.bottom)) {
-					if ((event.clientX >= bounds.left) && (event.clientX <= bounds.right)) {
-						isInArea = key;
+				let active = self._registeredTargets[key].isActive;
+				if (active == true) {
+					if ((event.clientY >= bounds.top) && (event.clientY <= bounds.bottom)) {
+						if ((event.clientX >= bounds.left) && (event.clientX <= bounds.right)) {
+							isInArea = key;
+						}
 					}
 				}
 			});
@@ -826,6 +829,9 @@ var Storage = class {
 			}
 		});
 	}
+	get isActive() {
+		return this.isToggled();
+	}
 	get isToggled() {
 		return toggledInto.indexOf("storage_interface") > -1
 	}
@@ -1306,6 +1312,13 @@ var CustomSlots = class {
 		});
 		self.render();
 	}
+	get isActive() {
+		return this.isToggled();
+	}
+	clear() {
+		this._slots = [];
+		this.render();
+	}
 	inventory() {
 		return this._slots.map(function(value) {
 			return {
@@ -1489,6 +1502,9 @@ storageContainers["#equipment"] = equipment;
 function show(interface = "storage_interface") {
 	toggledInto.push(interface);
 	isToggledInto = true;
+	$("#" + interface).css({
+		"display": "block"
+	});
 	DragHandler.refreshStorages();
 	$("#" + interface).css({
 		"opacity": "1"
@@ -1497,7 +1513,8 @@ function show(interface = "storage_interface") {
 
 function hide(interface = "storage_interface") {
 	$("#" + interface).css({
-		"opacity": "0"
+		"opacity": "0",
+		"display": "none"
 	});
 	toggledInto.splice(toggledInto.indexOf(interface), 1);
 	Object.keys(nonStandartContainer).forEach(function(id) {

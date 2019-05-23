@@ -43,37 +43,3 @@ class mongodb {
     }
 }
 module.exports = new mongodb();
-/*
- db.getUser("RootGangwar");
-    use gangwar
-    db.createUser(
-   {
-       user: "RootGangwar", 
-       pwd: "S§F_yJ5nQpaTw#SS", 
-       roles:["root"]
-   })
-
-    db.updateUser( "RootGangwar",
-               {
-                 roles : ["root"]
-                }
-             );
-
-
-
-db.grantRolesToUser(
-    "RootGangwar",
-    [
-      { role: "readWrite", db: "gangwar" }
-    ]
-)
-
-
-
-    db.createUser(
-   {
-       user: "feris", 
-       pwd: "Lappen123!", 
-       roles:["root"]
-   })
-   db.auth("z8pn", "hashtag99%" )*/

@@ -12238,7 +12238,7 @@ var items = {
                 return 100
             }
         }
-    },/*
+    },
     "Pickaxe": {
         width: 3,
         height: 3,
@@ -12262,7 +12262,7 @@ var items = {
                 return 100
             }
         }
-    },*/
+    },
     "Pump Shotgun": {
         width: 4,
         height: 2,
@@ -12645,6 +12645,61 @@ var items = {
         type: "Craftable",
         model: "prop_paper_bag_01",
         mask: "Building",
+        thickness: 0.15,
+        amount: function() {
+            return 1;
+        },
+        offset: {
+            pos: new mp.Vector3(0, 0, 0),
+            rot: new mp.Vector3(0, 0, 0)
+        }
+    },
+    /*Clothing*/
+    "Light Armor": {
+        width: 3,
+        height: 3,
+        max_stack: 1,
+        name: 'Light Armor',
+        image: 'https://via.placeholder.com/160x160',
+        type: "Clothing",
+        model: "prop_bodyarmour_04",
+        mask: "bodyarmor",
+        thickness: 0.15,
+        amount: function() {
+            return 1;
+        },
+        offset: {
+            pos: new mp.Vector3(0, 0, 0),
+            rot: new mp.Vector3(0, 0, 0)
+        }
+    },
+    "Medium Armor": {
+        width: 3,
+        height: 3,
+        max_stack: 1,
+        name: 'Medium Armor',
+        image: 'https://via.placeholder.com/160x160',
+        type: "Clothing",
+        model: "prop_bodyarmour_06",
+        mask: "bodyarmor",
+        thickness: 0.15,
+        amount: function() {
+            return 1;
+        },
+        offset: {
+            pos: new mp.Vector3(0, 0, 0),
+            rot: new mp.Vector3(0, 0, 0)
+        }
+    },
+    "Heavy Armor": {
+        width: 3,
+        height: 3,
+        max_stack: 1,
+        name: 'Heavy Armor',
+        image: 'https://via.placeholder.com/160x160',
+        type: "Clothing",
+        model: "prop_bodyarmour_03",
+        mask: "bodyarmor",
         thickness: 0.15,
         amount: function() {
             return 1;

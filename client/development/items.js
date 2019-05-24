@@ -13,9 +13,13 @@ class LootPool {
         let self = this;
         self._lootData = data;
         self._pickupObjects = [];
+        self.loaded = false;
         //let dist = mp.localPlayer.getPos().dist2d(new mp.Vector3(this._lootData.pos.x, this._lootData.pos.y, this._lootData.pos.z));
         //setTimeout(function() {
-        self.load();
+        self.interval = setInterval(function() {
+            self.check();
+        }, 1000)
+        self.check();
         // }, 50*dist );
     }
     get position() {
@@ -50,32 +54,33 @@ class LootPool {
             }
             return sArr;
         });
-        self.load();
+        self.check();
     }
-    load() {
+    check() {
         let self = this;
         let center = new mp.Vector3(self._lootData.pos.x, self._lootData.pos.y, self._lootData.pos.z);
-        console.log("mp.objects", mp.objects.length);
         let Angle_Item = 360 / 8;
-        self._lootData.items.forEach(function(item, index) {
-            if (item != null) {
-                item.index = index;
-                if (mp.game.streaming.isModelInCdimage(mp.game.joaat(item.model))) {
-                    let offset_pos = center.findRot(0, 0.5, Angle_Item * index);
-                    let base_rot = (Angle_Item * index) + (offset_pos.rotPoint(center) + Math.floor(Math.random() * (360 - 0)));
-                    if (base_rot > 360) base_rot -= 360;
-                    if (item.rot == undefined) {
-                        item.rot = base_rot
-                    }
-                    let pos = offset_pos;
-                    pos.z += 1;
-                    // let obj = mp.game.object.createObject(mp.game.joaat(item.model), pos.x, pos.y, pos.z, false, true, false);
-                    let obj = mp.objects.new(mp.game.joaat(item.model), pos, { //item.model
-                        rotation: new mp.Vector3(0, 0, item.rot),
-                        alpha: 255,
-                        dimension: 0
-                    });
-                    setTimeout(function() {
+        if ((self.loaded == false) && ((!mp.raycasting.testPointToPoint(mp.vector(mp.localPlayer.position).add(0,0,100), center, mp.players.local, (1))) || (!mp.raycasting.testPointToPoint(mp.vector(mp.localPlayer.position), center, mp.players.local, (1))))) {
+            console.log("create loot items");
+            self.loaded = true;
+            self._lootData.items.forEach(function(item, index) {
+                if (item != null) {
+                    item.index = index;
+                    if (mp.game.streaming.isModelInCdimage(mp.game.joaat(item.model))) {
+                        let offset_pos = center.findRot(0, 0.5, Angle_Item * index);
+                        let base_rot = (Angle_Item * index) + (offset_pos.rotPoint(center) + Math.floor(Math.random() * (360 - 0)));
+                        if (base_rot > 360) base_rot -= 360;
+                        if (item.rot == undefined) {
+                            item.rot = base_rot
+                        }
+                        let pos = offset_pos;
+                        pos.z += 1;
+                        // let obj = mp.game.object.createObject(mp.game.joaat(item.model), pos.x, pos.y, pos.z, false, true, false);
+                        let obj = mp.objects.new(mp.game.joaat(item.model), pos, { //item.model
+                            rotation: new mp.Vector3(0, 0, item.rot),
+                            alpha: 255,
+                            dimension: 0
+                        });
                         obj.placeOnGroundProperly();
                         let rotobj = obj.getRotation(0);
                         let posobj = obj.getCoords(false);
@@ -91,15 +96,16 @@ class LootPool {
                             id: self._lootData.id,
                             obj: obj
                         })
-                    }, 0)
+                    }
                 }
-            }
-        })
-        console.log("mp.objects 1", mp.objects.length);
+            })
+            console.log("mp.objects 1", mp.objects.length);
+        }
     }
     unload(id) {
         let self = this;
         console.log("unload mp.objects2", mp.objects.length);
+        clearInterval(self.interval);
         self._pickupObjects.forEach(function(item, i) {
             if (item.id == id) {
                 if (mp.objects.atHandle(item.obj.handle)) {

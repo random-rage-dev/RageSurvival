@@ -1273,7 +1273,7 @@ var CustomSlots = class {
 					"z-index": 0
 				})
 			})
-			$("#equipment").css({
+			self._selector.css({
 				"z-index": 0
 			})
 			$(self._selector).css({
@@ -1498,6 +1498,35 @@ var equipment = new CustomSlots("#equipment", [
 	}
 ]);
 storageContainers["#equipment"] = equipment;
+
+
+var Vehicle4W = new CustomSlots("#vehicle_gear4w", [
+	{
+		id: "front_left_tire",
+		mask: "tire"
+	},
+	{
+		id: "front_right_tire",
+		mask: "tire"
+	},
+	{
+		id: "rear_left_tire",
+		mask: "tire"
+	},
+	{
+		id: "rear_right_tire",
+		mask: "tire"
+	},
+	{
+		id: "battery",
+		mask: "battery"
+	},
+	{
+		id: "plugs",
+		mask: "plugs"
+	},
+]);
+storageContainers["#vehicle_gear4w"] = Vehicle4W;
 
 function show(interface = "storage_interface") {
 	toggledInto.push(interface);

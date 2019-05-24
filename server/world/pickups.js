@@ -61,7 +61,7 @@ var Pickups = new class {
     _setup() {
         var self = this;
         self._pickups = [];
-        self._streamRadius = 100;
+        self._streamRadius = 50;
         self.generatePickups();
         mp.events.add("playerEnterColshape", function(player, colshape) {
             if (colshape.getVariable("item_colshape")) {

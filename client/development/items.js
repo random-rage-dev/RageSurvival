@@ -1,7 +1,6 @@
 "use strict";
 var natives = require("./natives.js")
 var CEFNotification = require("./browser.js").notification;
-var CEFInventory = require("./browser.js").inventory;
 var StorageSystem = require("./storage.js");
 var Notifications = require("./notifications.js");
 var streamedPools = [];

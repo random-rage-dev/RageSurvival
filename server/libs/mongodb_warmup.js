@@ -20,16 +20,24 @@ var warmup = {
     },
     check: function() {
         var self = this;
-        self.checkTimer = setInterval(function() {
-            self.checkTime().then(function(time) {
-                console.log("- MongoDB Response Time", time+"ms")
-                if (time > self.threshold) {
-                    console.log("- MongoDB Instance warming up...")
-                    clearInterval(self.checkTimer);
+        self.checkTime().then(function(time) {
+            console.log("- MongoDB Response Time", time + "ms")
+            if (time > self.threshold) {
+                console.log("- MongoDB Instance warming up...")
+                if (!self.timer) {
                     self.start();
                 }
-            });
-        }, 1000);
+            } else {
+                console.log("- MongoDB Instance warmed up!")
+                clearInterval(self.checkTimer);
+                clearInterval(self.timer);
+            }
+        });
+        if (!self.checkTimer) {
+            self.checkTimer = setInterval(function() {
+                self.check()
+            }, 5000);
+        }
     },
     warmup: function() {
         var self = this;
@@ -48,5 +56,5 @@ var warmup = {
     }
 }
 setTimeout(function() {
-    warmup.start();
+    warmup.check();
 }, 100)

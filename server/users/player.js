@@ -41,6 +41,7 @@ var Player = class {
         self._warns = 0;
         self._userId = 0;
         self._skin = 'mp_m_freemode_01';
+        self._inCombat = false;
         self._death = 0;
         self._health = 100;
         self._armor = 100;
@@ -115,6 +116,16 @@ var Player = class {
     isDead() {
         return this._death;
     }
+    Combat() {
+        self = this;
+        self._inCombat = true;
+        if (self._combatTimer) {
+            clearTimeout(self._combatTimer);
+        }
+        self._combatTimer = setTimeout(function() {
+            self._inCombat = false;
+        }, 2 * 60 * 1000)
+    }
     killed(victim, weapon, teamkill) {
         let self = this;
         self._player.call("Notifications:New", [{
@@ -159,6 +170,7 @@ var Player = class {
         self._player.armour = self._armor;
         self._damage = [];
         self._death = 0;
+        self._inCombat = false;
         self._player.setVariable("spawned", true)
         self._player.setVariable("invincible", true)
         self._player.setVariable("canGather", true)
@@ -213,7 +225,6 @@ var Player = class {
         if (!self._attachments) {
             self._attachments = {};
         }
-
         /* Weapon Attachments */
         if (self._equipment["weapon_primary"] != undefined) {
             let e = Equipment[self._equipment["weapon_primary"].name]
@@ -254,9 +265,7 @@ var Player = class {
             self._player.addAttachment(self._attachments["melee"], true);
             self._attachments["melee"] = undefined;
         }
-
         /*Clothing Attachments*/
-
     }
     gather(material) {
         var self = this;
@@ -477,7 +486,6 @@ var Player = class {
         return new Promise(async function(resolve, reject) {
             try {
                 var hasItem = self.hasItem(item.name);
-                
                 console.log("hasItem", hasItem);
                 console.log("giveItem", item);
                 let dbItem = await new Inventory({

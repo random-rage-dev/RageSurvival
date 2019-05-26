@@ -1,4 +1,4 @@
-const absolute_path = "package://RageZombies/cef/views/";
+const absolute_path = "package://RageSurvival/cef/views/";
 class CEFBrowser {
     constructor(url) {
         this._setup(url);

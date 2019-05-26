@@ -35,6 +35,7 @@ mp.localPlayer.getPos = function() {
 mp.ui = {};
 mp.ui.ready = false;
 mp.gameplayCam.setAffectsAiming(true);
+require("./player.js")
 require("./scaleforms/index.js")
 require("./crouch.js")
 require("./items.js")
@@ -62,7 +63,10 @@ mp.events.add("Player:WanderDuration", (ms) => {
         mp.players.local.clearTasksImmediately();
     }, ms)
 });
-mp.events.add('Player:UiReady', () => {
+mp.events.add('Player:ShowUI', () => {
+    mp.ui.ready = true;
+});
+mp.events.add('Player:HideUI', () => {
     mp.ui.ready = true;
 });
 mp.events.add('Player:Collision', (enable) => {

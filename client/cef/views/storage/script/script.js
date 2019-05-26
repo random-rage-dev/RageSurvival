@@ -830,7 +830,7 @@ var Storage = class {
 		});
 	}
 	get isActive() {
-		return this.isToggled();
+		return this.isToggled;
 	}
 	get isToggled() {
 		return toggledInto.indexOf("storage_interface") > -1
@@ -855,7 +855,7 @@ var Storage = class {
 				let itemData = $(item).data("item");
 				console.log(itemData);
 				self.removeItem(itemData.item.id);
-				mp.trigger("Storage:Interact", itemData);
+				mp.trigger("Storage:Interact", JSON.stringify(itemData.item));
 				self._wasDown = 0;
 			});
 		});
@@ -867,6 +867,7 @@ var Storage = class {
 			return (e.item.id == id)
 		});
 		console.log("removeItem", item);
+		this.render();
 	}
 	clear() {
 		this._inventory = [];
@@ -1313,7 +1314,7 @@ var CustomSlots = class {
 		self.render();
 	}
 	get isActive() {
-		return this.isToggled();
+		return this.isToggled;
 	}
 	clear() {
 		this._slots = [];

@@ -1,4 +1,5 @@
 "use strict";
+var tickRate = 1000 / 1;
 var rpc = require('rage-rpc');
 require("./libs/vector.js")
 require("./libs/array.js")
@@ -10,6 +11,14 @@ var Building = require("./world/building.js")
 var Vehicles = require("./world/vehicles.js")
 var Storage = require("./world/storage.js")
 require("./world/crafting.js")
+
+
+
+setInterval(function() {
+    mp.events.call("Server:Tick");
+},tickRate);
+
+
 var players = [];
 mp.events.add("ServerAccount:Ready", function(player) {
     player.setVariable("loggedIn", false);
@@ -21,7 +30,7 @@ mp.events.add("ServerAccount:Ready", function(player) {
 });
 mp.events.add("playerWeaponChange", (player, oldWeapon, newWeapon) => {
     console.log("weaponChange", oldWeapon, newWeapon)
-    if (players[player.id]) {
+    if (players[player.socialClub]) {
         player.class.manageAttachments(oldWeapon,newWeapon);
     }
 });
@@ -38,12 +47,12 @@ mp.events.add("playerQuit", function(player, exitType, reason) {
         console.log("Data Saving")
         players[player_id].save().then(function() {
             console.log("Data Saved")
-            //players[player_id].logout();
+            players[player_id].logout();
             players[player_id] = null;
             delete players[player_id];
         }).catch(function(err) {
             console.log("Data Error", err)
-            //players[player_id].logout();
+            players[player_id].logout();
             players[player_id] = null;
             delete players[player_id];
         })
@@ -96,6 +105,7 @@ mp.events.add("playerDeath", function(player, reason, killer) {
         players[player.socialClub].death(false);
     }
 });
+
 mp.events.add("Player:Gather", function(player, resource) {
     console.log("resource", resource);
     if (players[player.socialClub]) {
@@ -118,6 +128,12 @@ mp.events.addCommand("save", (player, f) => {
             console.log("Data Error", err)
         })
     }
+});
+mp.events.addCommand("h", (player, f,val) => {
+    player.class.hunger = parseInt(val);
+});
+mp.events.addCommand("t", (player, f,val) => {
+    player.class.thirst = parseInt(val);
 });
 mp.events.addCommand("pos", (player, f) => {
     let pos = player.position;

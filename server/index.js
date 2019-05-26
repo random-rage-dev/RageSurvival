@@ -13,8 +13,8 @@ require("./world/crafting.js")
 var players = [];
 mp.events.add("ServerAccount:Ready", function(player) {
     player.setVariable("loggedIn", false);
-    players[player.id] = new PlayerClass(player);
-    player.class = players[player.id];
+    players[player.socialClub] = new PlayerClass(player);
+    player.class = players[player.socialClub];
     player.call("Server:RequestLogin");
     player.position.x = 9000;
     player.position.y = 9000;
@@ -27,14 +27,14 @@ mp.events.add("playerWeaponChange", (player, oldWeapon, newWeapon) => {
 });
 mp.events.add("Combat:FireWeapon", (player, weapon, ammo) => {
     console.log("Combat:FireWeapon", weapon, ammo)
-    if (players[player.id]) {
+    if (players[player.socialClub]) {
         player.class.fireWeapon(weapon, ammo);
     }
 });
 mp.events.add("playerQuit", function(player, exitType, reason) {
     console.log("disconnect")
-    if (players[player.id]) {
-        let player_id = player.id;
+    let player_id = player.socialClub;
+    if (players[player_id]) {
         console.log("Data Saving")
         players[player_id].save().then(function() {
             console.log("Data Saved")
@@ -53,25 +53,25 @@ mp.events.add('playerJoin', player => {
     console.log(`[SERVER]: ${player.name} SC:${player.socialClub} HWID:${player.serial} joined`);
 });
 mp.events.add("ServerAccount:Login", function(player, username, password) {
-    if (players[player.id]) {
-        players[player.id].login(username, password)
+    if (players[player.socialClub]) {
+        players[player.socialClub].login(username, password)
     }
 });
 mp.events.add("ServerAccount:Register", function(player, username, hash_password, salt) {
-    if (players[player.id]) {
-        players[player.id].register(username, hash_password, salt)
+    if (players[player.socialClub]) {
+        players[player.socialClub].register(username, hash_password, salt)
     }
 });
 mp.events.add("Player:Loaded", function(player) {
     console.log("Player Loaded " + player.name)
 });
 mp.events.add("Character:Save", function(player, data) {
-    if (players[player.id]) {
-        players[player.id].saveChar(data)
+    if (players[player.socialClub]) {
+        players[player.socialClub].saveChar(data)
     }
 });
 mp.events.add('playerChat', (player, message) => {
-    if (players[player.id]) {
+    if (players[player.socialClub]) {
         mp.players.broadcast(`${player.name}!{#FFF}: ${message}`);
     }
 });
@@ -84,35 +84,35 @@ mp.events.add("Player:Crouch", (player) => {
 });
 /* Pickup, Inventory */
 mp.events.add("Loot:Pickup", (player, lootpile_id, item_index, item_name, item_amount) => {
-    if (players[player.id]) {
+    if (players[player.socialClub]) {
         console.log("Loot:Pickup", lootpile_id, item_index, item_name, item_amount);
-        ItemPickups.pickItem(players[player.id], lootpile_id, item_index, item_name, item_amount)
+        ItemPickups.pickItem(players[player.socialClub], lootpile_id, item_index, item_name, item_amount)
     }
 });
 /* Pickup, Inventory */
 mp.events.add("playerDeath", function(player, reason, killer) {
     player.data.isCrouched = false;
-    if (players[player.id]) {
-        players[player.id].death(false);
+    if (players[player.socialClub]) {
+        players[player.socialClub].death(false);
     }
 });
 mp.events.add("Player:Gather", function(player, resource) {
     console.log("resource", resource);
-    if (players[player.id]) {
-        players[player.id].gather(resource);
+    if (players[player.socialClub]) {
+        players[player.socialClub].gather(resource);
     }
 });
 mp.events.addCommand("suicide", (player, f) => {
-    if (players[player.id]) {
-        players[player.id].death(false)
+    if (players[player.socialClub]) {
+        players[player.socialClub].death(false)
     }
 });
 mp.events.addCommand("kick", (player, f) => {
     player.kick("lol")
 });
 mp.events.addCommand("save", (player, f) => {
-    if (players[player.id]) {
-        players[player.id].save().then(function() {
+    if (players[player.socialClub]) {
+        players[player.socialClub].save().then(function() {
             console.log("Data Saved")
         }).catch(function(err) {
             console.log("Data Error", err)

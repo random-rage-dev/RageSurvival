@@ -1,7 +1,6 @@
 //1868.765869140625, 3710.90283203125, 113.74462127685547
 var natives = require("./natives.js")
 var CEFInterface = require("./browser.js").interface;
-var CEFInventory = require("./browser.js").inventory;
 var CEFNotification = require("./browser.js").notification;
 CEFInterface.load("login/index.html");
 

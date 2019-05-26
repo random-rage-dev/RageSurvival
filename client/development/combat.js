@@ -201,7 +201,7 @@ function calculateShotgunPelletsOnPlayers() {
 					let ped_dist = mp.game.system.vdist(pos.x, pos.y, pos.z, gun_pos.x, gun_pos.y, gun_pos.z)
 					let w_data = getWeaponDetails(Number(mp.players.local.weapon));
 					if (w_data) {
-						let spray_size = lerp(0.5, w_data.spray, 1 / w_data.max_dist * ped_dist)
+						let spray_size = mp.lerp(0.5, w_data.spray, 1 / w_data.max_dist * ped_dist)
 						if (spray_size > w_data.spray) spray_size = w_data.spray;
 						let would_hit = false;
 						if (spray_size > spray_dist) would_hit = true;

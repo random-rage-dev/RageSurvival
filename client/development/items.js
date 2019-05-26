@@ -1,7 +1,6 @@
 "use strict";
 var natives = require("./natives.js")
 var CEFNotification = require("./browser.js").notification;
-var CEFInventory = require("./browser.js").inventory;
 var StorageSystem = require("./storage.js");
 var Notifications = require("./notifications.js");
 var streamedPools = [];
@@ -13,9 +12,13 @@ class LootPool {
         let self = this;
         self._lootData = data;
         self._pickupObjects = [];
+        self.loaded = false;
         //let dist = mp.localPlayer.getPos().dist2d(new mp.Vector3(this._lootData.pos.x, this._lootData.pos.y, this._lootData.pos.z));
         //setTimeout(function() {
-        self.load();
+        self.interval = setInterval(function() {
+            self.check();
+        }, 1000)
+        self.check();
         // }, 50*dist );
     }
     get position() {
@@ -50,82 +53,72 @@ class LootPool {
             }
             return sArr;
         });
-        self.load();
+        self.check();
     }
-    load() {
+    check() {
         let self = this;
         let center = new mp.Vector3(self._lootData.pos.x, self._lootData.pos.y, self._lootData.pos.z);
-        console.log("mp.objects", mp.objects.length);
         let Angle_Item = 360 / 8;
-        self._lootData.items.forEach(function(item, index) {
-            if (item != null) {
-                item.index = index;
-                console.log("index", index)
-                if (mp.game.streaming.isModelInCdimage(mp.game.joaat(item.model))) {
-                    console.log("isModelInCdimage", true)
-                    let offset_pos = center.findRot(0, 0.5, Angle_Item * index);
-                    console.log("offset_pos")
-                    let base_rot = (Angle_Item * index) + (offset_pos.rotPoint(center) + Math.floor(Math.random() * (360 - 0)));
-                    if (base_rot > 360) base_rot -= 360;
-                    console.log("base_rot", base_rot)
-                    if (item.rot == undefined) {
-                        item.rot = base_rot
+        if ((self.loaded == false) && ((!mp.raycasting.testPointToPoint(mp.vector(mp.localPlayer.position).add(0,0,100), center, mp.players.local, (1))) || (!mp.raycasting.testPointToPoint(mp.vector(mp.localPlayer.position), center, mp.players.local, (1))))) {
+            console.log("create loot items");
+            self.loaded = true;
+            self._lootData.items.forEach(function(item, index) {
+                if (item != null) {
+                    item.index = index;
+                    if (mp.game.streaming.isModelInCdimage(mp.game.joaat(item.model))) {
+                        let offset_pos = center.findRot(0, 0.5, Angle_Item * index);
+                        let base_rot = (Angle_Item * index) + (offset_pos.rotPoint(center) + Math.floor(Math.random() * (360 - 0)));
+                        if (base_rot > 360) base_rot -= 360;
+                        if (item.rot == undefined) {
+                            item.rot = base_rot
+                        }
+                        let pos = offset_pos;
+                        pos.z += 1;
+                        // let obj = mp.game.object.createObject(mp.game.joaat(item.model), pos.x, pos.y, pos.z, false, true, false);
+                        let obj = mp.objects.new(mp.game.joaat(item.model), pos, { //item.model
+                            rotation: new mp.Vector3(0, 0, item.rot),
+                            alpha: 255,
+                            dimension: 0
+                        });
+                        obj.placeOnGroundProperly();
+                        let rotobj = obj.getRotation(0);
+                        let posobj = obj.getCoords(false);
+                        obj.setCollision(false, true);
+                        obj.freezePosition(true);
+                        if ((item.offset.rot.x > 0) || (item.offset.rot.y > 0)) {
+                            obj.setCoords(posobj.x + item.offset.pos.x, posobj.y + item.offset.pos.y, (posobj.z - obj.getHeightAboveGround()) + item.offset.pos.z, false, false, false, false);
+                        } else {
+                            obj.setCoords(posobj.x + item.offset.pos.x, posobj.y + item.offset.pos.y, posobj.z + item.offset.pos.z, false, false, false, false);
+                        }
+                        obj.setRotation(rotobj.x + item.offset.rot.x, rotobj.y + item.offset.rot.y, rotobj.z, 0, true);
+                        self._pickupObjects.push({
+                            id: self._lootData.id,
+                            obj: obj
+                        })
                     }
-                    let pos = offset_pos;
-                    pos.z += 1;
-                    console.log("item.rot", item.rot)
-                    console.log("pos", JSON.stringify(pos));
-                    console.log("item.model", item.model)
-                    // let obj = mp.game.object.createObject(mp.game.joaat(item.model), pos.x, pos.y, pos.z, false, true, false);
-                    let obj = mp.objects.new(mp.game.joaat(item.model), pos, { //item.model
-                        rotation: new mp.Vector3(0, 0, item.rot),
-                        alpha: 255,
-                        dimension: 0
-                    });
-                    console.log("created")
-                    //obj.placeOnGroundProperly();
-                    let rotobj = obj.getRotation(0);
-                    let posobj = obj.getCoords(false);
-                    obj.setCollision(false, true);
-                    obj.freezePosition(true);
-                    if ((item.offset.rot.x > 0) || (item.offset.rot.y > 0)) {
-                        obj.setCoords(posobj.x + item.offset.pos.x, posobj.y + item.offset.pos.y, (posobj.z - obj.getHeightAboveGround()) + item.offset.pos.z, false, false, false, false);
-                    } else {
-                        obj.setCoords(posobj.x + item.offset.pos.x, posobj.y + item.offset.pos.y, posobj.z + item.offset.pos.z, false, false, false, false);
-                    }
-                    obj.setRotation(rotobj.x + item.offset.rot.x, rotobj.y + item.offset.rot.y, rotobj.z, 0, true);
-                    self._pickupObjects.push({
-                        id: self._lootData.id,
-                        obj: obj
-                    })
                 }
-            }
-        })
-        console.log("mp.objects 1", mp.objects.length);
+            })
+            console.log("mp.objects 1", mp.objects.length);
+        }
     }
     unload(id) {
         let self = this;
-        console.log("unload mp.objects 2", mp.objects.length);
+        console.log("unload mp.objects2", mp.objects.length);
+        clearInterval(self.interval);
         self._pickupObjects.forEach(function(item, i) {
             if (item.id == id) {
-                if (mp.objects.atHandle(item.obj)) {
+                if (mp.objects.atHandle(item.obj.handle)) {
                     console.log("exists");
+                    item.obj.markForDeletion();
+                    item.obj.destroy();
+                    delete self._pickupObjects[i];
+                    console.log("removed");
                 }
-                //if(mp.objects.exists(objList[i]) objList[i].destroy();
-                //item.obj.markForDeletion();
-                //item.obj.destroy();
-                mp.game.object.deleteObject(item.obj);
-                delete self._pickupObjects[i];
-                console.log("removed");
             }
         })
-        console.log("unload mp.objects 3", mp.objects.length);
+        console.log("unload mp.objects3", mp.objects.length);
     }
 }
-mp.events.add('entityStreamIn', (entity) => {
-    console.log("stream in entity");
-});
-
 mp.events.add("Loot:Load", (id, poolData) => {
     if (!streamedPools[id]) {
         streamedPools[id] = new LootPool(poolData);
@@ -157,6 +150,7 @@ function pointingAt() {
 let cStatus = "";
 let cItem = 0;
 let timer_anim;
+let isOpening = 0;
 mp.events.add("render", () => {
     /*Display Items*/
     let cur_selected = false;
@@ -263,7 +257,7 @@ mp.events.add("render", () => {
                     if (pointAt.entity.getVariable("container") == true) {
                         if (pointAt.entity.getVariable("opened") == false) {
                             mp.game.ui.showHudComponentThisFrame(14);
-                            mp.game.graphics.drawText("[E] Open Container", [0.5, 0.55], {
+                            mp.game.graphics.drawText("[E] Open", [0.5, 0.55], {
                                 font: 4,
                                 color: [255, 255, 255, 200],
                                 scale: [0.3, 0.3],
@@ -271,14 +265,47 @@ mp.events.add("render", () => {
                                 centre: true
                             });
                             if (mp.game.controls.isDisabledControlJustPressed(0, 51)) { // 51 == "E"
-                                console.log("E Pressed");
                                 let id = pointAt.entity.getVariable("id");
-                                console.log("entity id", id);
                                 mp.events.callRemote("Building:Interact", id);
                             }
                         }
+                    } else if (pointAt.entity.getVariable("interactable") == true) {
+                        let openDur = pointAt.entity.getVariable("openDuration") || 2000;
+                        mp.game.ui.showHudComponentThisFrame(14);
+                        mp.game.graphics.drawText("[E] Open", [0.5, 0.55], {
+                            font: 4,
+                            color: [255, 255, 255, 200],
+                            scale: [0.3, 0.3],
+                            outline: true,
+                            centre: true
+                        });
+                        if (mp.game.controls.isDisabledControlJustPressed(0, 51) && (isOpening == 0)) { // 51 == "E"
+                            isOpening = Date.now();
+                        }
+                        if (isOpening != 0) {
+                            if (mp.game.controls.isDisabledControlPressed(0, 51)) { // 51 == "E"
+                                mp.game.graphics.drawRect(0.5, 0.525, 0.025, 0.0025, 0, 0, 0, 155);
+                                let t = (Date.now() - isOpening);
+                                t = (t < openDur) ? t : openDur;
+                                let w = mp.lerp(0, 0.025, 1 / openDur * t);
+                                mp.game.graphics.drawRect((0.5 - (0.025 / 2) + w / 2), 0.525, w, 0.0025, 255, 255, 255, 155);
+                                if (t == openDur) {
+                                    let e = pointAt.entity.getVariable("interact_event");
+                                    isOpening = 0;
+                                    if (e != "") {
+                                        let id = pointAt.entity.getVariable("id");
+                                        mp.events.callRemote(e, id);
+                                    }
+                                }
+                            } else {
+                                isOpening = 0;
+                            }
+                            //
+                        }
                     }
                 }
+            } else {
+                isOpening = 0;
             }
         }
     }

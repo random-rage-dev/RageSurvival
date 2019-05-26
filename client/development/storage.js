@@ -3,10 +3,10 @@ var padding = 5;
 var inv_cells = 6;
 var inv_rows = 5;
 var TempStorage = [];
-var CEFInventory = require("./browser.js").inventory;
+var CEFStorage = require("./browser.js").storage;
 var CEFNotification = require("./browser.js").notification;
 var ScreenResolution = mp.game.graphics.getScreenActiveResolution(0, 0);
-CEFInventory.load("interface/index.html");
+CEFStorage.load("storage/index.html");
 let clientWidth = cell_size * inv_cells + (padding * 2)
 let clientHeight = cell_size * inv_rows + 37 + (padding * 2)
 var Inventory_Order = {
@@ -41,10 +41,10 @@ if (mp.storage.data.inventory_order) {
 mp.events.add("Inventory:Resize", (cell_count, row_count) => {
 	inv_cells = cell_count;
 	inv_rows = row_count;
-	CEFInventory.call("resize", "inventory", inv_cells, inv_rows);
+	CEFStorage.call("resize", "inventory", inv_cells, inv_rows);
 });
 mp.events.add("Inventory:Ready", (data) => {
-	CEFInventory.call("initialize", "inventory", inv_cells, inv_rows, {
+	CEFStorage.call("initialize", "inventory", inv_cells, inv_rows, {
 		top: Inventory_Order.positions["inventory"].top,
 		left: Inventory_Order.positions["inventory"].left
 	})
@@ -57,21 +57,21 @@ function toggleInventory() {
 	console.log("mp.ui.ready", mp.ui.ready);
 	if (windowsOpen.indexOf("inventory") == -1) {
 		if ((mp.gui.chat.enabled == false) && (mp.ui.ready == true)) {
-			CEFInventory.call("setPos", "inventory", Inventory_Order.positions["inventory"].top, Inventory_Order.positions["inventory"].left);
-			CEFInventory.call("show");
-			CEFInventory.cursor(true);
+			CEFStorage.call("setPos", "inventory", Inventory_Order.positions["inventory"].top, Inventory_Order.positions["inventory"].left);
+			CEFStorage.call("show");
+			CEFStorage.cursor(true);
 			windowsOpen.push("inventory");
 			mp.canCrouch = false;
 			mp.gui.chat.activate(false)
 		}
 	} else {
-		mp.rpc.callBrowser(CEFInventory.browser, 'isBusy').then(value => {
+		mp.rpc.callBrowser(CEFStorage.browser, 'isBusy').then(value => {
 			if (value == false) {
-				CEFInventory.call("hide");
+				CEFStorage.call("hide");
 				windowsOpen.splice(windowsOpen.indexOf("inventory"), 1);
 				if (windowsOpen.length == 0) {
 					mp.gui.chat.activate(true)
-					CEFInventory.cursor(false);
+					CEFStorage.cursor(false);
 					mp.canCrouch = true;
 				}
 			} else {
@@ -87,11 +87,11 @@ function toggleInventory() {
 			}
 		}).catch(err => {
 			console.log("error", err);
-			CEFInventory.call("hide");
+			CEFStorage.call("hide");
 			windowsOpen.splice(windowsOpen.indexOf("inventory"), 1);
 			if (windowsOpen.length == 0) {
 				mp.gui.chat.activate(true)
-				CEFInventory.cursor(false);
+				CEFStorage.cursor(false);
 				mp.canCrouch = true;
 			}
 		});
@@ -106,22 +106,22 @@ function toggleEquipment() {
 		if ((mp.gui.chat.enabled == false) && (mp.ui.ready == true)) {
 			console.log("x");
 			//console.log("setPos", "equipment", Inventory_Order.positions["equipment"].top || 0, Inventory_Order.positions["equipment"].left || 0);
-			CEFInventory.call("setPos", "equipment", Inventory_Order.positions["equipment"].top || 0, Inventory_Order.positions["equipment"].left || 0);
-			CEFInventory.call("show", "equipment");
-			CEFInventory.cursor(true);
+			CEFStorage.call("setPos", "equipment", Inventory_Order.positions["equipment"].top || 0, Inventory_Order.positions["equipment"].left || 0);
+			CEFStorage.call("show", "equipment");
+			CEFStorage.cursor(true);
 			toggleInvState = true;
 			mp.canCrouch = false;
 			mp.gui.chat.activate(false)
 			windowsOpen.push("equipment");
 		}
 	} else {
-		mp.rpc.callBrowser(CEFInventory.browser, 'isBusy').then(value => {
+		mp.rpc.callBrowser(CEFStorage.browser, 'isBusy').then(value => {
 			if (value == false) {
-				CEFInventory.call("hide", "equipment");
+				CEFStorage.call("hide", "equipment");
 				windowsOpen.splice(windowsOpen.indexOf("equipment"), 1);
 				if (windowsOpen.length == 0) {
 					mp.gui.chat.activate(true)
-					CEFInventory.cursor(false);
+					CEFStorage.cursor(false);
 					mp.canCrouch = true;
 				}
 			} else {
@@ -137,11 +137,11 @@ function toggleEquipment() {
 			}
 		}).catch(err => {
 			console.log("error", err);
-			CEFInventory.call("hide");
+			CEFStorage.call("hide");
 			windowsOpen.splice(windowsOpen.indexOf("equipment"), 1);
 			if (windowsOpen.length == 0) {
 				mp.gui.chat.activate(true)
-				CEFInventory.cursor(false);
+				CEFStorage.cursor(false);
 				mp.canCrouch = true;
 			}
 		});
@@ -159,7 +159,7 @@ mp.events.add("Inventory:Update", (inventory) => {
 	if (!TempStorage["inventory"]) {
 		TempStorage["inventory"] = [];
 	}
-	CEFInventory.call("clear", "inventory");
+	CEFStorage.call("clear", "inventory");
 	TempStorage["inventory"] = [];
 	inventory = inventory.sort(function(a, b) {
 		return b.height - a.height || b.width - a.width;
@@ -193,7 +193,7 @@ mp.events.add("Inventory:Update", (inventory) => {
 			cell: tempSettings.cell || 0,
 			row: tempSettings.row || 0
 		})
-		CEFInventory.call("addItem", "inventory", tempSettings.cell || 0, tempSettings.row || 0, citem.width, citem.height, JSON.stringify(gData), tempSettings.flipped || false)
+		CEFStorage.call("addItem", "inventory", tempSettings.cell || 0, tempSettings.row || 0, citem.width, citem.height, JSON.stringify(gData), tempSettings.flipped || false)
 	})
 });
 mp.events.add("Inventory:EditItem", (citem) => {
@@ -232,7 +232,7 @@ mp.events.add("Inventory:AddItem", (citem) => {
 		row: tempSettings.row || 0,
 		mask: citem.mask
 	})
-	CEFInventory.call("addItem", "inventory", tempSettings.cell || 0, tempSettings.row || 0, citem.width, citem.height, JSON.stringify(gData), tempSettings.flipped || false)
+	CEFStorage.call("addItem", "inventory", tempSettings.cell || 0, tempSettings.row || 0, citem.width, citem.height, JSON.stringify(gData), tempSettings.flipped || false)
 });
 mp.events.add("Storage:Interact", (item) => {
 	console.log("Item use",item);
@@ -316,7 +316,7 @@ mp.events.add("Storage:TransferSlots", (storage, slots) => {
 mp.events.add("Storage:UpdateSlots", (target, items) => {
 	items.forEach(function(item, index) {
 		setTimeout(() => {
-			CEFInventory.call("addItemSlot", target, item);
+			CEFStorage.call("addItemSlot", target, item);
 		}, 1 * index)
 	})
 	//console.log(target, JSON.stringify(items));
@@ -353,18 +353,18 @@ mp.events.add("Storage:AddContainer", (headline, selector, cells, rows, items) =
 		}
 		return gItem;
 	})
-	CEFInventory.call("show");
-	CEFInventory.call("setPos", "inventory", Inventory_Order.positions["inventory"].top, Inventory_Order.positions["inventory"].left);
+	CEFStorage.call("show");
+	CEFStorage.call("setPos", "inventory", Inventory_Order.positions["inventory"].top, Inventory_Order.positions["inventory"].left);
 	let clientWidth = cell_size * cells + (padding * 2)
 	let clientHeight = cell_size * rows + 37 + (padding * 2)
 	let config = {
 		top: Inventory_Order.positions[selector] ? Inventory_Order.positions[selector].top : `calc(50% - ${clientHeight/2}px)`,
 		left: Inventory_Order.positions[selector] ? Inventory_Order.positions[selector].left : `calc(50% - ${clientWidth/2}px)`
 	};
-	CEFInventory.call("addStorageContainer", headline, selector, config, cells, rows, gItems);
+	CEFStorage.call("addStorageContainer", headline, selector, config, cells, rows, gItems);
 	TempStorage[selector] = gItems.map(e => e.item);
-	CEFInventory.call("focus", selector);
-	CEFInventory.cursor(true);
+	CEFStorage.call("focus", selector);
+	CEFStorage.cursor(true);
 	toggleInvState = true;
 });
 var itemIdentity = require("../../server/world/items.js");
@@ -485,7 +485,7 @@ var StorageSystem = new class {
 	}
 	checkFit(where, w, h) {
 		return new Promise(function(fulfill, reject) {
-			mp.rpc.callBrowser(CEFInventory.browser, 'doesFitInto', {
+			mp.rpc.callBrowser(CEFStorage.browser, 'doesFitInto', {
 				what: where,
 				w: w,
 				h: h

@@ -116,6 +116,31 @@ var groups = mongoose.Schema({
 }, {
     autoIndex: true
 });
+var crops = mongoose.Schema({
+    cropType:{
+        type:String,
+        default:"None"
+    },
+    planted:{
+        type:Number,
+        default:Date.now()
+    },
+    lastWatered:{
+        type:Number,
+        default:Date.now() 
+    },
+    yield_mul: {
+        type:Number,
+        default:1
+    },
+    planter:{
+        type:Number,
+        default:0
+    }
+}, {
+    autoIndex: true
+});
+
 var buildings = mongoose.Schema({
     health: {
         type: Number,
@@ -147,6 +172,9 @@ var buildings = mongoose.Schema({
 groups.index({
     gid: 1
 });
+crops.index({
+    planted: 1
+});
 buildings.index({
     placed: 1,
     owner_id: 1
@@ -168,5 +196,6 @@ module.exports = {
     inventory: inventory,
     buildings: buildings,
     vehicles: vehicles,
-    groups: groups
+    groups: groups,
+    crops: crops,
 };

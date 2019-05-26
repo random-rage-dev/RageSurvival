@@ -409,7 +409,7 @@ var items = {
         },
         offset: {
             pos: new mp.Vector3(0, 0, 0),
-            rot: new mp.Vector3(0, 0, 0)
+            rot: new mp.Vector3(90, 0, 0)
         }
     },
     "Morphine": {

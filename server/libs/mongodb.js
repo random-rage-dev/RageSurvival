@@ -22,6 +22,7 @@ class mongodb {
         self._dbInventoryModel = mongoose.model('Inventory', schema.inventory);
         self._dbBuildingModel = mongoose.model('Buildings', schema.buildings);
         self._dbVehicleModel = mongoose.model('Vehicles', schema.vehicles);
+        self._dbCropModel = mongoose.model('Crops', schema.crops);
 
         self._db.once('open', function() {
             self._conncted = true;
@@ -40,6 +41,9 @@ class mongodb {
     }
     getVehicleModel() {
         return this._dbVehicleModel;
+    }
+    getCropModel() {
+        return this._dbCropModel;
     }
 }
 module.exports = new mongodb();

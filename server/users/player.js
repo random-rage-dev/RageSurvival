@@ -45,6 +45,8 @@ var Player = class {
         self._death = 0;
         self._health = 100;
         self._armor = 100;
+        self._hunger = 0;
+        self._thirst = 0;
         self._storage = {};
         self._characterData = [];
         self._equipment = {};
@@ -53,6 +55,30 @@ var Player = class {
             y: 0,
             z: 0
         }
+        self._tickEvent = new mp.Event("Server:Tick", () => {
+            self.tick();
+        });
+    }
+    set hunger(h) {
+        this._hunger = h;
+        this._player.setVariable("hunger", this._hunger)
+    }
+    set thirst(t) {
+        this._thirst = t;
+        this._player.setVariable("thirst", this._thirst)
+    }
+    tick() {
+        console.log("Player Tick");
+        if (!this.lastTick) {
+            this.lastTick = Date.now();
+        }
+        let dif = Date.now() - this.lastTick;
+        console.log("tick diff", dif)
+        let hUsage = 70 / (60 * 60 * 1000)
+        let tUsage = 90 / (60 * 60 * 1000)
+        this.hunger = this._hunger - (hUsage * dif);
+        this.thirst = this._thirst - (tUsage * dif);
+        this.lastTick = Date.now();
     }
     log(...args) {
         console.log("Account:Log", args)
@@ -75,6 +101,10 @@ var Player = class {
     get player() {
         return this._player;
     }
+    logout() {
+        console.log("DESRTROY");
+        mp.events.remove('Server:Tick', this._tickEvent)
+    }
     save() {
         let self = this;
         let position = self._player.position;
@@ -88,7 +118,9 @@ var Player = class {
                         x: position.x,
                         y: position.y,
                         z: position.z
-                    }
+                    },
+                    hunger: self._hunger,
+                    thirst: self._thirst
                 }, function(err, numberAffected, rawResponse) {
                     if (!err) {
                         self.log("Succesfully saved data", self._username)
@@ -141,6 +173,7 @@ var Player = class {
         let self = this;
         //Building.addTempObject(model, pos, rot, data = {})
         self._position = mp.vector(PlayerSpawns[Math.floor(Math.random() * PlayerSpawns.length)]);
+        self._player.call("Player:HideUI");
         setTimeout(function() {
             self.spawn(1);
         }, 1000);
@@ -157,7 +190,7 @@ var Player = class {
         // console.log("TODO: Relaod inventory in spawn");
         Promise.all([self.loadInventory(), self.loadEquipment((fresh == 0) ? false : self._equipment)]).then(() => {
             console.log("Player:UiReady")
-            self._player.call("Player:UiReady");
+            self._player.call("Player:ShowUI");
         }).catch(err => {
             console.log(err);
         })
@@ -171,8 +204,9 @@ var Player = class {
         self._damage = [];
         self._death = 0;
         self._inCombat = false;
+        self._player.setVariable("hunger", self._hunger)
+        self._player.setVariable("thirst", self._thirst)
         self._player.setVariable("spawned", true)
-        self._player.setVariable("invincible", true)
         self._player.setVariable("canGather", true)
         self._player.alpha = 255;
         self._player.call("Cam:Hide")
@@ -463,6 +497,9 @@ var Player = class {
             console.log("err setEquipment", err);
         }
     }
+    useItem(id) {
+        console.log("use Item",id);
+    }
     setInventory(arr) {
         this._inventory = arr.map(function(item, i) {
             let itemData = Storage.map({
@@ -658,6 +695,8 @@ var Player = class {
                 self._equipment = cUser.equipment || {};
                 if ((cUser.character) && (cUser.character.length > 0)) {
                     self._characterData = cUser.character[0];
+                    self._hunger = cUser.hunger || 100;
+                    self._thirst = cUser.thirst || 100;
                     self._player.setVariable("user_id", self._userId)
                     self._player.setVariable("loggedIn", true);
                     self._player.setVariable("spawned", false)

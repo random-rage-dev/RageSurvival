@@ -18,6 +18,14 @@ var user = mongoose.Schema({
             z: 0
         }
     },
+    hunger:{
+        type:Number,
+        default:100
+    },
+    thirst:{
+        type:Number,
+        default:100
+    },
     hwid: String,
     social_club: String,
     password: String,

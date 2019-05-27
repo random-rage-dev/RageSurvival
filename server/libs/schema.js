@@ -45,10 +45,6 @@ var user = mongoose.Schema({
     equipment: {
         type: Object,
         default: {}
-    },
-    buffs:{
-        type:Object,
-        default:{}
     }
 }, {
     autoIndex: true
@@ -133,17 +129,17 @@ var crops = mongoose.Schema({
         type:String,
         default:"None"
     },
+    position: {
+        type: Object,
+        default: {
+            x: 0,
+            y: 0,
+            z: 0
+        }
+    },
     planted:{
         type:Number,
         default:Date.now()
-    },
-    lastWatered:{
-        type:Number,
-        default:Date.now() 
-    },
-    yield_mul: {
-        type:Number,
-        default:1
     },
     planter:{
         type:Number,

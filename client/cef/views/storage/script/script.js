@@ -843,22 +843,26 @@ var Storage = class {
 	}
 	click(item) {
 		let self = this;
-		console.log("click", item);
-		$(item).animate({
-			backgroundColor: "rgba(50,200,50,0.4)"
-		}, 70, function() {
-			console.log("done");
-			$(item).animate({
-				backgroundColor: "rgba(0,0,0,0.6)"
-			}, 70, function() {
-				console.log("done1");
-				let itemData = $(item).data("item");
-				console.log(itemData);
-				self.removeItem(itemData.item.id);
-				mp.trigger("Storage:Interact", JSON.stringify(itemData.item));
-				self._wasDown = 0;
-			});
-		});
+		let itemData = $(item).data("item");
+		if (itemData) {
+			if (itemData.item.usable == true) {
+				console.log("click", item);
+				$(item).animate({
+					backgroundColor: "rgba(50,200,50,0.4)"
+				}, 70, function() {
+					console.log("done");
+					$(item).animate({
+						backgroundColor: "rgba(0,0,0,0.6)"
+					}, 70, function() {
+						console.log("done1");
+						console.log(itemData);
+						self.removeItem(itemData.item.id);
+						mp.trigger("Storage:Interact", JSON.stringify(itemData.item));
+						self._wasDown = 0;
+					});
+				});
+			}
+		}
 	}
 	removeItem(id) {
 		console.log("id", id);
@@ -1499,8 +1503,6 @@ var equipment = new CustomSlots("#equipment", [
 	}
 ]);
 storageContainers["#equipment"] = equipment;
-
-
 var Vehicle4W = new CustomSlots("#vehicle_gear4w", [
 	{
 		id: "front_left_tire",
@@ -1610,7 +1612,8 @@ function addItemSlot(target, item) {
 				scale: {},
 				amount: item.amount,
 				max_stack: item.max_stack,
-				mask:item.mask
+				mask: item.mask,
+				usable: item.usable || false
 			},
 			height: item.height,
 			width: item.width

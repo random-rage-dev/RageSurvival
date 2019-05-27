@@ -1,5 +1,5 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
-const absolute_path = "package://RageZombies/cef/views/";
+const absolute_path = "package://RageSurvival/cef/views/";
 class CEFBrowser {
     constructor(url) {
         this._setup(url);
@@ -690,7 +690,7 @@ mp.events.add("Combat:HitEntity", () => {
 	timerHitmarker = Date.now() / 1000;
 });
 mp.events.add("Combat:Hitted", (dmg) => {});
-},{"./vector.js":26}],5:[function(require,module,exports){
+},{"./vector.js":28}],5:[function(require,module,exports){
 var Status = [
     "Crafted successfully!",
     "Crafting failed!",
@@ -814,7 +814,7 @@ mp.events.add("render", () => {
     console.log(JSON.stringify(checkResourceInFront(2)));
 });*/
 module.exports = checkResourceInFront;
-},{"./materials.js":16,"./natives.js":17,"./storage.js":25,"./vector.js":26}],8:[function(require,module,exports){
+},{"./materials.js":16,"./natives.js":17,"./storage.js":26,"./vector.js":28}],8:[function(require,module,exports){
 "use strict";
 console.log = function(...a) {
     mp.gui.chat.push("DEBUG:" + a.join(" "))
@@ -852,6 +852,7 @@ mp.localPlayer.getPos = function() {
 mp.ui = {};
 mp.ui.ready = false;
 mp.gameplayCam.setAffectsAiming(true);
+require("./player.js")
 require("./scaleforms/index.js")
 require("./crouch.js")
 require("./items.js")
@@ -879,7 +880,10 @@ mp.events.add("Player:WanderDuration", (ms) => {
         mp.players.local.clearTasksImmediately();
     }, ms)
 });
-mp.events.add('Player:UiReady', () => {
+mp.events.add('Player:ShowUI', () => {
+    mp.ui.ready = true;
+});
+mp.events.add('Player:HideUI', () => {
     mp.ui.ready = true;
 });
 mp.events.add('Player:Collision', (enable) => {
@@ -906,7 +910,7 @@ mp.events.add('Player:Collision', (enable) => {
 
 
 
-},{"./browser.js":1,"./building.js":2,"./character_creator.js":3,"./combat.js":4,"./crafting.js":5,"./crouch.js":6,"./gathering.js":7,"./items.js":9,"./libs/animations.js":10,"./libs/attachments.js":11,"./libs/rage-rpc.min.js":12,"./libs/weapon_attachments.js":14,"./login.js":15,"./natives.js":17,"./scaleforms/index.js":24,"./storage.js":25,"./vector.js":26,"./vehicles.js":27,"./weather.js":28,"./zombies.js":29}],9:[function(require,module,exports){
+},{"./browser.js":1,"./building.js":2,"./character_creator.js":3,"./combat.js":4,"./crafting.js":5,"./crouch.js":6,"./gathering.js":7,"./items.js":9,"./libs/animations.js":10,"./libs/attachments.js":11,"./libs/rage-rpc.min.js":12,"./libs/weapon_attachments.js":14,"./login.js":15,"./natives.js":17,"./player.js":20,"./scaleforms/index.js":25,"./storage.js":26,"./vector.js":28,"./vehicles.js":29,"./weather.js":30,"./zombies.js":31}],9:[function(require,module,exports){
 "use strict";
 var natives = require("./natives.js")
 var CEFNotification = require("./browser.js").notification;
@@ -1219,7 +1223,7 @@ mp.events.add("render", () => {
         }
     }
 });
-},{"./browser.js":1,"./natives.js":17,"./notifications.js":18,"./storage.js":25}],10:[function(require,module,exports){
+},{"./browser.js":1,"./natives.js":17,"./notifications.js":18,"./storage.js":26}],10:[function(require,module,exports){
 var toLoad = ["mp_defend_base"]
 var loadPromises = [];
 toLoad.forEach(function(dict) {
@@ -10974,6 +10978,66 @@ var offsets = {
 }
 module.exports = offsets;
 },{}],20:[function(require,module,exports){
+let utils = require("./utils.js");
+var CEFHud = require("./browser.js").hud;
+var initDone = false;
+var toShow = false;
+var cachedData = {
+	show: false,
+	thirst: 0,
+	hunger: 0
+};
+/*Load Hud*/
+mp.events.add('Player:ShowUI', () => {
+	CEFHud.load("hud/index.html");
+	toShow = true;
+});
+mp.events.add('Player:HideUI', () => {
+	toShow = false;
+});
+mp.events.add("HUD:Ready", () => {
+	let anchor = utils.minimap_anchor();
+	CEFHud.call("init", anchor);
+	initDone = true;
+});
+const statNames = ["SP0_STAMINA﻿", "SP0_STRENGTH", "SP0_LUNG_CAPACITY", "SP0_WHEELIE_ABILITY", "SP0_FLYING_ABILITY", "SP0_SHOOTING_ABILITY", "SP0_STEALTH_ABILITY"];
+// maybe playerReady can be used instead, haven't tested
+mp.events.add("playerSpawn", () => {
+	for (const stat of statNames) mp.game.stats.statSetInt(mp.game.joaat(stat), 100, false);
+});
+//CEFHud
+let opos = undefined;
+mp.events.add("render", () => {
+
+	if (mp.localPlayer.getVariable("spawned") == true) {
+		if (initDone == true) {
+			let hunger = mp.localPlayer.getVariable("hunger")
+			let thirst = mp.localPlayer.getVariable("thirst")
+			if (hunger != cachedData.hunger) {
+				cachedData.hunger = hunger;
+				CEFHud.call("setHunger", cachedData.hunger);
+			}
+			if (thirst != cachedData.thirst) {
+				cachedData.thirst = thirst;
+				CEFHud.call("setThirst", cachedData.thirst);
+			}
+			mp.game.player.setRunSprintMultiplierFor(1 + ((0.49 / 200) * thirst));
+			if (thirst < 30) {
+				mp.game.controls.disableControlAction(2, 21, true);
+			}
+		}
+	}
+	if (toShow != cachedData.show) {
+		if (toShow == true) {
+			cachedData.show = true;
+			CEFHud.call("show")
+		} else {
+			cachedData.show = false;
+			CEFHud.call("hide")
+		}
+	}
+});
+},{"./browser.js":1,"./utils.js":27}],21:[function(require,module,exports){
 var messageScaleform = require("./Scaleform.js");
 let bigMessageScaleform = null;
 let bigMsgInit = 0;
@@ -11024,7 +11088,7 @@ mp.events.add("render", () => {
         }
     }
 });
-},{"./Scaleform.js":23}],21:[function(require,module,exports){
+},{"./Scaleform.js":24}],22:[function(require,module,exports){
 class InstructionButtons {
     constructor() {
         this.handle = mp.game.graphics.requestScaleformMovie("instructional_buttons");
@@ -11070,7 +11134,7 @@ class InstructionButtons {
     }
 }
 module.exports = new InstructionButtons();
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 var messageScaleform = require("./Scaleform.js");
 let midsizedMessageScaleform = null;
 let msgInit = 0;
@@ -11114,7 +11178,7 @@ mp.events.add("render", () => {
         }
     }
 });
-},{"./Scaleform.js":23}],23:[function(require,module,exports){
+},{"./Scaleform.js":24}],24:[function(require,module,exports){
 class BasicScaleform {
     constructor(scaleformName) {
         this.handle = mp.game.graphics.requestScaleformMovie(scaleformName);
@@ -11160,7 +11224,7 @@ class BasicScaleform {
 }
 
 module.exports = BasicScaleform;
-},{}],24:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 var messageScaleform = require("./Scaleform.js");
 require("./BigMessage.js");
 require("./MidsizedMessage.js");
@@ -11175,7 +11239,7 @@ mp.game.ui.messages = {
 };
 
 
-},{"./BigMessage.js":20,"./InstructionButtons.js":21,"./MidsizedMessage.js":22,"./Scaleform.js":23}],25:[function(require,module,exports){
+},{"./BigMessage.js":21,"./InstructionButtons.js":22,"./MidsizedMessage.js":23,"./Scaleform.js":24}],26:[function(require,module,exports){
 var cell_size = 40;
 var padding = 5;
 var inv_cells = 6;
@@ -11414,6 +11478,9 @@ mp.events.add("Inventory:AddItem", (citem) => {
 });
 mp.events.add("Storage:Interact", (item) => {
 	console.log("Item use",item);
+
+	mp.events.callRemote("Storage:Interact", item);
+
 });
 mp.events.add("Storage:Drag", (positions) => {
 	positions = JSON.parse(positions);
@@ -11692,7 +11759,32 @@ var StorageSystem = new class {
 	}
 }
 module.exports = StorageSystem;
-},{"../../server/world/items.js":30,"./browser.js":1}],26:[function(require,module,exports){
+},{"../../server/world/items.js":32,"./browser.js":1}],27:[function(require,module,exports){
+// https://github.com/glitchdetector/fivem-minimap-anchor
+function getMinimapAnchor() {
+    let sfX = 1.0 / 20.0;
+    let sfY = 1.0 / 20.0;
+    let safeZone = mp.game.graphics.getSafeZoneSize();
+    let aspectRatio = mp.game.graphics.getScreenAspectRatio(false);
+    let resolution = mp.game.graphics.getScreenActiveResolution(0, 0);
+    let scaleX = 1.0 / resolution.x;
+    let scaleY = 1.0 / resolution.y;
+    let minimap = {
+        width: scaleX * (resolution.x / (4 * aspectRatio)),
+        height: scaleY * (resolution.y / 5.674),
+        scaleX: scaleX,
+        scaleY: scaleY,
+        leftX: scaleX * (resolution.x * (sfX * (Math.abs(safeZone - 1.0) * 10))),
+        bottomY: 1.0 - scaleY * (resolution.y * (sfY * (Math.abs(safeZone - 1.0) * 10))),
+    };
+    minimap.rightX = minimap.leftX + minimap.width;
+    minimap.topY = minimap.bottomY - minimap.height;
+    return minimap;
+}
+module.exports = {
+    minimap_anchor: getMinimapAnchor
+}
+},{}],28:[function(require,module,exports){
 mp.Vector3.prototype.findRot = function(rz, dist, rot) {
     let nVector = new mp.Vector3(this.x, this.y, this.z);
     var degrees = (rz + rot) * (Math.PI / 180);
@@ -11710,6 +11802,17 @@ mp.Vector3.prototype.rotPoint = function(pos) {
     var winkel = Math.atan2(gegenkathete, ankathete) * 180 / Math.PI
     return winkel;
 }
+mp.Vector3.prototype.toPixels = function() {
+    let clientScreen = mp.game.graphics.getScreenActiveResolution(0, 0);
+    let toScreen = mp.game.graphics.world3dToScreen2d(new mp.Vector3(pos.x, pos.y, pos.z)) || {
+        x: 0,
+        y: 0
+    };
+    return {
+        x: Math.floor(clientScreen.x * toScreen.x) + "px",
+        y: Math.floor(clientScreen.y * toScreen.y) + "px"
+    };
+}
 /*mp.Vector3.prototype.normalize = function(n) {
     let nVector = new mp.Vector3(this.x, this.y, this.z);
     nVector.x = this.x / n;
@@ -11717,7 +11820,7 @@ mp.Vector3.prototype.rotPoint = function(pos) {
     nVector.z = this.z / n;
     return this;
 }*/
-mp.Vector3.prototype.lerp = function(vector2,deltaTime) {
+mp.Vector3.prototype.lerp = function(vector2, deltaTime) {
     let nVector = new mp.Vector3(this.x, this.y, this.z);
     nVector.x = this.x + (vector2.x - this.x) * deltaTime
     nVector.y = this.y + (vector2.y - this.y) * deltaTime
@@ -11789,7 +11892,7 @@ mp.Vector3.prototype.ground = function() {
 }
 mp.Vector3.prototype.ground2 = function(ignore) {
     let nVector = new mp.Vector3(this.x, this.y, this.z);
-    let r = mp.raycasting.testPointToPoint(nVector.add(0,0,1), nVector.sub(0, 0, 100), ignore.handle, (1 | 16));
+    let r = mp.raycasting.testPointToPoint(nVector.add(0, 0, 1), nVector.sub(0, 0, 100), ignore.handle, (1 | 16));
     if ((r) && (r.position)) {
         nVector = mp.vector(r.position);
     }
@@ -11804,7 +11907,6 @@ mp.Vector3.prototype.add = function(x, y, z) {
 mp.vector = function(vec) {
     return new mp.Vector3(vec.x, vec.y, vec.z);
 }
-
 mp.Vector3.prototype.insidePolygon = function(polygon) {
     var x = this.x,
         y = this.y;
@@ -11819,7 +11921,6 @@ mp.Vector3.prototype.insidePolygon = function(polygon) {
     }
     return inside;
 };
-
 Array.prototype.shuffle = function() {
     var i = this.length;
     while (i) {
@@ -11830,7 +11931,7 @@ Array.prototype.shuffle = function() {
     }
     return this;
 }
-},{}],27:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 const toSync = ["health", "running", "engine", "wheel_fl", "wheel_fr", "wheel_rl", "wheel_rr", "fuel", "spark_plugs", "battery"]
 
 function syncVehicle(type, vehicle, value) {
@@ -12068,7 +12169,7 @@ mp.keys.bind(0x47, false, () => {
         }
     }
 });
-},{}],28:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 require("./vector.js");
 mp.game.audio.startAudioScene("FBI_HEIST_H5_MUTE_AMBIENCE_SCENE");
 mp.game.audio.startAudioScene("MIC1_RADIO_DISABLE");
@@ -12130,7 +12231,7 @@ var Weather = new class {
     }
 }
 module.exports = Weather;
-},{"./vector.js":26}],29:[function(require,module,exports){
+},{"./vector.js":28}],31:[function(require,module,exports){
 var Zombie = class {
     constructor() {
         this._setup();
@@ -12232,7 +12333,7 @@ mp.events.add("render", e => {
     new Zombie();
 });
 */
-},{}],30:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 "use strict";
 function getRandomInt(min, max) {
     min = Math.ceil(min);

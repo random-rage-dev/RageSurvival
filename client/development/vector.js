@@ -15,6 +15,17 @@ mp.Vector3.prototype.rotPoint = function(pos) {
     var winkel = Math.atan2(gegenkathete, ankathete) * 180 / Math.PI
     return winkel;
 }
+mp.Vector3.prototype.toPixels = function() {
+    let clientScreen = mp.game.graphics.getScreenActiveResolution(0, 0);
+    let toScreen = mp.game.graphics.world3dToScreen2d(new mp.Vector3(pos.x, pos.y, pos.z)) || {
+        x: 0,
+        y: 0
+    };
+    return {
+        x: Math.floor(clientScreen.x * toScreen.x) + "px",
+        y: Math.floor(clientScreen.y * toScreen.y) + "px"
+    };
+}
 /*mp.Vector3.prototype.normalize = function(n) {
     let nVector = new mp.Vector3(this.x, this.y, this.z);
     nVector.x = this.x / n;
@@ -22,7 +33,7 @@ mp.Vector3.prototype.rotPoint = function(pos) {
     nVector.z = this.z / n;
     return this;
 }*/
-mp.Vector3.prototype.lerp = function(vector2,deltaTime) {
+mp.Vector3.prototype.lerp = function(vector2, deltaTime) {
     let nVector = new mp.Vector3(this.x, this.y, this.z);
     nVector.x = this.x + (vector2.x - this.x) * deltaTime
     nVector.y = this.y + (vector2.y - this.y) * deltaTime
@@ -94,7 +105,7 @@ mp.Vector3.prototype.ground = function() {
 }
 mp.Vector3.prototype.ground2 = function(ignore) {
     let nVector = new mp.Vector3(this.x, this.y, this.z);
-    let r = mp.raycasting.testPointToPoint(nVector.add(0,0,1), nVector.sub(0, 0, 100), ignore.handle, (1 | 16));
+    let r = mp.raycasting.testPointToPoint(nVector.add(0, 0, 1), nVector.sub(0, 0, 100), ignore.handle, (1 | 16));
     if ((r) && (r.position)) {
         nVector = mp.vector(r.position);
     }
@@ -109,7 +120,6 @@ mp.Vector3.prototype.add = function(x, y, z) {
 mp.vector = function(vec) {
     return new mp.Vector3(vec.x, vec.y, vec.z);
 }
-
 mp.Vector3.prototype.insidePolygon = function(polygon) {
     var x = this.x,
         y = this.y;
@@ -124,7 +134,6 @@ mp.Vector3.prototype.insidePolygon = function(polygon) {
     }
     return inside;
 };
-
 Array.prototype.shuffle = function() {
     var i = this.length;
     while (i) {

@@ -241,7 +241,7 @@ mp.events.add("Building:Cancel", () => {
     }
 });
 module.exports = Building;
-},{"./object_offsets.js":19}],3:[function(require,module,exports){
+},{"./object_offsets.js":20}],3:[function(require,module,exports){
 var values = [];
 values["father"] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 42, 43, 44];
 values["mother"] = [21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 45];
@@ -690,7 +690,7 @@ mp.events.add("Combat:HitEntity", () => {
 	timerHitmarker = Date.now() / 1000;
 });
 mp.events.add("Combat:Hitted", (dmg) => {});
-},{"./vector.js":28}],5:[function(require,module,exports){
+},{"./vector.js":29}],5:[function(require,module,exports){
 var Status = [
     "Crafted successfully!",
     "Crafting failed!",
@@ -702,6 +702,176 @@ mp.events.add('Crafting:Reply', (status) => {
     console.log(Status[status]);
 });
 },{}],6:[function(require,module,exports){
+"use strict";
+var natives = require("./natives.js")
+var CEFNotification = require("./browser.js").notification;
+var StorageSystem = require("./storage.js");
+var Notifications = require("./notifications.js");
+const convertNameTypes = [];
+convertNameTypes["potato"] = "Potato";
+convertNameTypes["onion"] = "Onion"; // Ples
+convertNameTypes["carrot"] = "Carrot";
+convertNameTypes["salat"] = "Salat";
+convertNameTypes["cucumber"] = "Cucumber";
+const cropObjects = [];
+cropObjects["potato"] = {
+    obj: "prop_plant_int_04a",
+    offset: -0.25,
+    rotation: new mp.Vector3(0, 0, 0)
+};
+cropObjects["onion"] = {
+    obj: "prop_plant_int_04b",
+    offset: -0.25,
+    rotation: new mp.Vector3(0, 0, 0)
+};
+cropObjects["carrot"] = {
+    obj: "p_int_jewel_plant_01",
+    offset: -0.25,
+    rotation: new mp.Vector3(0, 0, 0)
+};
+cropObjects["salat"] = {
+    obj: "prop_veg_crop_03_cab",
+    offset: -0.1,
+    rotation: new mp.Vector3(0, 0, 0)
+};
+cropObjects["cucumber"] = {
+    obj: "p_int_jewel_plant_02",
+    offset: -0.25,
+    rotation: new mp.Vector3(0, 0, 0)
+};
+
+function msToTime(s) {
+    let ms = s % 1000;
+    s = (s - ms) / 1000;
+    let secs = s % 60;
+    s = (s - secs) / 60;
+    let mins = s % 60;
+    let hrs = (s - mins) / 60;
+    //if (hrs < 10) hrs = "0" + hrs;
+    if (mins < 10) mins = "0" + mins;
+    if (secs < 10) secs = "0" + secs;
+    return hrs + 'h:' + mins + 'm';
+}
+var streamedCrops = [];
+
+function pointingAt(max_dist = 25) {
+    let ray_dist = max_dist;
+    let direction = mp.gameplayCam.getDirection();
+    let coords = mp.gameplayCam.getCoord();
+    let farAway = new mp.Vector3((direction.x * ray_dist) + (coords.x), (direction.y * ray_dist) + (coords.y), (direction.z * ray_dist) + (coords.z));
+    let result = mp.raycasting.testPointToPoint(coords, farAway, mp.players.local, -1);
+    if (result === undefined) {
+        return undefined;
+    }
+    return result;
+}
+class Crop {
+    constructor(data) {
+        this._setup(data);
+    }
+    _setup(data) {
+        let self = this;
+        self._data = data;
+        console.log("init crop");
+        self._id = data._id;
+        self._cropType = data.type;
+        self._planted = data.planted;
+        self._yield = data.yield;
+        self.loaded = false;
+        self._position = mp.vector(data.position);
+        self.create();
+    }
+    create() {
+        let self = this;
+        if (cropObjects[self._cropType]) {
+            let cropData = cropObjects[self._cropType];
+            let ground = self._position.ground();
+            self.obj = mp.objects.new(mp.game.joaat(cropData.obj), ground.add(0, 0, cropData.offset), { //item.model
+                rotation: cropData.rotation,
+                alpha: 255,
+                dimension: 0
+            });
+        }
+    }
+    render() {
+        let self = this;
+        let dist = mp.localPlayer.getPos().dist(self._position)
+        if (dist < 20) {
+            let raycast = mp.raycasting.testPointToPoint(mp.localPlayer.getPos(), self._position, mp.players.local, (1));
+            if (!raycast) {
+                let text_size = mp.lerp(0.3, 0.1, 1 / 30 * dist);
+                if (self.obj) {
+                    let pos = self.obj.getCoords(false);
+                    let yield1 = mp.lerp(0, self._yield.max, 1 / self._yield.ttg * (Date.now() - self._planted)).toFixed(0);
+                    if (yield1 > self._yield.max) yield1 = self._yield.max;
+                    mp.game.graphics.drawText(convertNameTypes[self._cropType] + "\nYield :" + yield1 + "\nAge :" + msToTime(Date.now() - self._planted), [pos.x, pos.y, pos.z + 1], {
+                        font: 4,
+                        color: [255, 255, 255, 200],
+                        scale: [text_size, text_size],
+                        outline: true,
+                        centre: true
+                    });
+                    let pointAt = pointingAt(15);
+                    if ((pointAt) && (pointAt.entity)) {
+                        if (typeof pointAt.entity == "object") {
+                            if (mp.vector(mp.localPlayer.position).dist(pointAt.entity.getCoords(true)) < 2) {
+                                if (pointAt.entity == self.obj) {
+                                    if (yield1 > 0) {
+                                        mp.game.ui.showHudComponentThisFrame(14);
+                                        mp.game.graphics.drawText("[E] Harvest", [0.5, 0.55], {
+                                            font: 4,
+                                            color: [255, 255, 255, 200],
+                                            scale: [0.3, 0.3],
+                                            outline: true,
+                                            centre: true
+                                        });
+                                        if (mp.game.controls.isDisabledControlPressed(0, 51)) { // 51 == "E"
+                                            console.log("TODO: HARVEST CROPS")
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    unload() {
+        let self = this;
+        console.log("unloade");
+        if (this.obj) {
+            this.obj.destroy();
+        }
+    }
+}
+mp.events.add("playerExitColshape", (colshape) => {
+    if (colshape.getVariable("crop_colshape")) {
+        let id = colshape.getVariable("crop_colshape_id");
+        if (streamedCrops[id]) {
+            console.log("unload clientside2");
+            streamedCrops[id].unload()
+            delete streamedCrops[id];
+        }
+    }
+});
+mp.events.add("Crops:Load", (id, poolData) => {
+    if (!streamedCrops[id]) {
+        streamedCrops[id] = new Crop(poolData);
+    }
+});
+mp.events.add("Crops:Unload", (id) => {
+    if (streamedCrops[id]) {
+        streamedCrops[id].unload()
+        delete streamedCrops[id];
+    }
+});
+mp.events.add("render", () => {
+    Object.keys(streamedCrops).forEach(function(key) {
+        streamedCrops[key].render();
+    })
+});
+},{"./browser.js":1,"./natives.js":18,"./notifications.js":19,"./storage.js":27}],7:[function(require,module,exports){
 const movementClipSet = "move_ped_crouched";
 const strafeClipSet = "move_ped_crouched_strafing";
 const clipSetSwitchTime = 0.25;
@@ -732,7 +902,7 @@ mp.keys.bind(0x11, false, () => {
         mp.events.callRemote("Player:Crouch");
     }
 });
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 require("./vector.js")
 var natives = require("./natives.js")
 var materials = require("./materials.js")
@@ -814,7 +984,7 @@ mp.events.add("render", () => {
     console.log(JSON.stringify(checkResourceInFront(2)));
 });*/
 module.exports = checkResourceInFront;
-},{"./materials.js":16,"./natives.js":17,"./storage.js":26,"./vector.js":28}],8:[function(require,module,exports){
+},{"./materials.js":17,"./natives.js":18,"./storage.js":27,"./vector.js":29}],9:[function(require,module,exports){
 "use strict";
 console.log = function(...a) {
     mp.gui.chat.push("DEBUG:" + a.join(" "))
@@ -852,6 +1022,7 @@ mp.localPlayer.getPos = function() {
 mp.ui = {};
 mp.ui.ready = false;
 mp.gameplayCam.setAffectsAiming(true);
+require("./crops.js")
 require("./player.js")
 require("./scaleforms/index.js")
 require("./crouch.js")
@@ -910,7 +1081,7 @@ mp.events.add('Player:Collision', (enable) => {
 
 
 
-},{"./browser.js":1,"./building.js":2,"./character_creator.js":3,"./combat.js":4,"./crafting.js":5,"./crouch.js":6,"./gathering.js":7,"./items.js":9,"./libs/animations.js":10,"./libs/attachments.js":11,"./libs/rage-rpc.min.js":12,"./libs/weapon_attachments.js":14,"./login.js":15,"./natives.js":17,"./player.js":20,"./scaleforms/index.js":25,"./storage.js":26,"./vector.js":28,"./vehicles.js":29,"./weather.js":30,"./zombies.js":31}],9:[function(require,module,exports){
+},{"./browser.js":1,"./building.js":2,"./character_creator.js":3,"./combat.js":4,"./crafting.js":5,"./crops.js":6,"./crouch.js":7,"./gathering.js":8,"./items.js":10,"./libs/animations.js":11,"./libs/attachments.js":12,"./libs/rage-rpc.min.js":13,"./libs/weapon_attachments.js":15,"./login.js":16,"./natives.js":18,"./player.js":21,"./scaleforms/index.js":26,"./storage.js":27,"./vector.js":29,"./vehicles.js":30,"./weather.js":31,"./zombies.js":32}],10:[function(require,module,exports){
 "use strict";
 var natives = require("./natives.js")
 var CEFNotification = require("./browser.js").notification;
@@ -1019,7 +1190,7 @@ class LootPool {
         console.log("unload mp.objects2", mp.objects.length);
         clearInterval(self.interval);
         self._pickupObjects.forEach(function(item, i) {
-            if (item.id == id) {
+            //if (item.id == id) {
                 if (mp.objects.atHandle(item.obj.handle)) {
                     console.log("exists");
                     item.obj.markForDeletion();
@@ -1027,7 +1198,7 @@ class LootPool {
                     delete self._pickupObjects[i];
                     console.log("removed");
                 }
-            }
+            //}
         })
         console.log("unload mp.objects3", mp.objects.length);
     }
@@ -1037,9 +1208,21 @@ mp.events.add("Loot:Load", (id, poolData) => {
         streamedPools[id] = new LootPool(poolData);
     }
 });
+
+
+mp.events.add("playerExitColshape", (colshape) => {
+    if (colshape.getVariable("item_colshape")) {
+        let id = colshape.getVariable("item_colshape_id");
+        if (streamedPools[id]) {
+            console.log("unload clientside1");
+            streamedPools[id].unload(id)
+            delete streamedPools[id];
+        }
+    }
+});
 mp.events.add("Loot:Unload", (id) => {
     if (streamedPools[id]) {
-        streamedPools[id].unload(id)
+        streamedPools[id].unload()
         delete streamedPools[id];
     }
 });
@@ -1223,7 +1406,7 @@ mp.events.add("render", () => {
         }
     }
 });
-},{"./browser.js":1,"./natives.js":17,"./notifications.js":18,"./storage.js":26}],10:[function(require,module,exports){
+},{"./browser.js":1,"./natives.js":18,"./notifications.js":19,"./storage.js":27}],11:[function(require,module,exports){
 var toLoad = ["mp_defend_base"]
 var loadPromises = [];
 toLoad.forEach(function(dict) {
@@ -1242,7 +1425,7 @@ Promise.all(loadPromises).then(() => {
 }).catch(err => {
 	console.log("all dicts err", err)
 })
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 mp.attachmentMngr = 
 {
 	attachments: {},
@@ -1455,9 +1638,9 @@ function InitAttachmentsOnJoin()
 }
 
 InitAttachmentsOnJoin();
-},{}],12:[function(require,module,exports){
-!function(e,r){"object"==typeof exports&&"object"==typeof module?module.exports=r():"function"==typeof define&&define.amd?define([],r):"object"==typeof exports?exports=r():e.rpc=r()}("undefined"!=typeof self?self:this,function(){return function(e){var r={};function n(t){if(r[t])return r[t].exports;var c=r[t]={i:t,l:!1,exports:{}};return e[t].call(c.exports,c,c.exports,n),c.l=!0,c.exports}return n.m=e,n.c=r,n.d=function(e,r,t){n.o(e,r)||Object.defineProperty(e,r,{enumerable:!0,get:t})},n.r=function(e){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(e,"__esModule",{value:!0})},n.t=function(e,r){if(1&r&&(e=n(e)),8&r)return e;if(4&r&&"object"==typeof e&&e&&e.__esModule)return e;var t=Object.create(null);if(n.r(t),Object.defineProperty(t,"default",{enumerable:!0,value:e}),2&r&&"string"!=typeof e)for(var c in e)n.d(t,c,function(r){return e[r]}.bind(null,c));return t},n.n=function(e){var r=e&&e.__esModule?function(){return e.default}:function(){return e};return n.d(r,"a",r),r},n.o=function(e,r){return Object.prototype.hasOwnProperty.call(e,r)},n.p="",n(n.s=1)}([function(e,r,n){"use strict";var t;function c(e,r){const n="client"===o();if(e&&"object"==typeof e&&void 0!==e.id){const c=(r,t,c)=>n?e.type===r&&t.at(e.id)===e:e instanceof c;switch(r){case t.Blip:return c("blip",mp.blips,mp.Blip);case t.Checkpoint:return c("checkpoint",mp.checkpoints,mp.Checkpoint);case t.Colshape:return c("colshape",mp.colshapes,mp.Colshape);case t.Label:return c("textlabel",mp.labels,mp.TextLabel);case t.Marker:return c("marker",mp.markers,mp.Marker);case t.Object:return c("object",mp.objects,mp.Object);case t.Pickup:return c("pickup",mp.pickups,mp.Pickup);case t.Player:return c("player",mp.players,mp.Player);case t.Vehicle:return c("vehicle",mp.vehicles,mp.Vehicle)}}return!1}function s(){const e=46656*Math.random()|0,r=46656*Math.random()|0;return("000"+e.toString(36)).slice(-3)+("000"+r.toString(36)).slice(-3)}function o(){return mp.joaat?"server":mp.game&&mp.game.joaat?"client":mp.trigger?"cef":void 0}function i(e){const r=o();return JSON.stringify(e,(e,n)=>{if("client"===r||"server"===r&&n&&"object"==typeof n){let e;if(c(n,t.Blip)?e=t.Blip:c(n,t.Checkpoint)?e=t.Checkpoint:c(n,t.Colshape)?e=t.Colshape:c(n,t.Marker)?e=t.Marker:c(n,t.Object)?e=t.Object:c(n,t.Pickup)?e=t.Pickup:c(n,t.Player)?e=t.Player:c(n,t.Vehicle)&&(e=t.Vehicle),e)return{__t:e,i:n.remoteId||n.id}}return n})}function a(e){const r=o();return JSON.parse(e,(e,n)=>{if(("client"===r||"server"===r)&&n&&"object"==typeof n&&"string"==typeof n.__t&&"number"==typeof n.i&&2===Object.keys(n).length){const e=n.i;let c;switch(n.__t){case t.Blip:c=mp.blips;break;case t.Checkpoint:c=mp.checkpoints;break;case t.Colshape:c=mp.colshapes;break;case t.Label:c=mp.labels;break;case t.Marker:c=mp.markers;break;case t.Object:c=mp.objects;break;case t.Pickup:c=mp.pickups;break;case t.Player:c=mp.players;break;case t.Vehicle:c=mp.vehicles}if(c)return c["client"===r?"atRemoteId":"at"](e)}return n})}function l(e){return new Promise(r=>setTimeout(()=>r(e),0))}function p(e){return new Promise((r,n)=>setTimeout(()=>n(e),0))}function u(e){try{e.url}catch(e){return!1}return!0}n.d(r,"g",function(){return s}),n.d(r,"a",function(){return o}),n.d(r,"f",function(){return i}),n.d(r,"c",function(){return a}),n.d(r,"e",function(){return l}),n.d(r,"d",function(){return p}),n.d(r,"b",function(){return u}),function(e){e.Blip="b",e.Checkpoint="cp",e.Colshape="c",e.Label="l",e.Marker="m",e.Object="o",e.Pickup="p",e.Player="pl",e.Vehicle="v"}(t||(t={}))},function(e,r,n){"use strict";n.r(r),function(e){n.d(r,"register",function(){return d}),n.d(r,"unregister",function(){return m}),n.d(r,"call",function(){return g}),n.d(r,"callServer",function(){return _}),n.d(r,"callClient",function(){return b}),n.d(r,"callBrowsers",function(){return y}),n.d(r,"callBrowser",function(){return k});var t=n(0);const c=t.a();if(!c)throw"Unknown RAGE environment";const s="PROCEDURE_NOT_FOUND",o="__rpc:id",i="__rpc:process",a="__rpc:browserRegister",l="__rpc:browserUnregister",p="cef"===c?window:e;if(!p[i])if(p.__rpcListeners={},p.__rpcPending={},p[i]=((e,r)=>{"server"!==c&&(r=e);const n=t.c(r);if(n.req){const r={id:n.id,environment:n.fenv||n.env};"server"===c&&(r.player=e);const s={ret:1,id:n.id,env:c};let o;switch(c){case"server":o=(e=>r.player.call(i,[t.f(e)]));break;case"client":if("server"===n.env)o=(e=>mp.events.callRemote(i,t.f(e)));else if("cef"===n.env){const e=n.b&&p.__rpcBrowsers[n.b];r.browser=e,o=(r=>e&&t.b(e)&&u(e,r,!0))}break;case"cef":o=(e=>mp.trigger(i,t.f(e)))}o&&f(n.name,n.args,r).then(e=>o({...s,res:e})).catch(e=>o({...s,err:e}))}else if(n.ret){const r=p.__rpcPending[n.id];if("server"===c&&r.player!==e)return;r&&(r.resolve(n.err?t.d(n.err):t.e(n.res)),delete p.__rpcPending[n.id])}}),"cef"!==c){if(mp.events.add(i,p[i]),"client"===c){d("__rpc:callServer",([e,r],n)=>h(e,r,{fenv:n.environment})),d("__rpc:callBrowsers",([e,r],n)=>w(null,e,r,{fenv:n.environment})),p.__rpcBrowsers={};const e=e=>{const r=t.g();Object.keys(p.__rpcBrowsers).forEach(r=>{const n=p.__rpcBrowsers[r];n&&t.b(n)&&n!==e||delete p.__rpcBrowsers[r]}),p.__rpcBrowsers[r]=e,e.execute(`if(typeof window['${o}'] === 'undefined'){ window['${o}'] = Promise.resolve('${r}'); }else{ window['${o}:resolve']('${r}'); }`)};mp.browsers.forEach(e),mp.events.add("browserCreated",e),p.__rpcBrowserProcedures={},mp.events.add(a,e=>{const[r,n]=JSON.parse(e);p.__rpcBrowserProcedures[n]=r}),mp.events.add(l,e=>{const[r,n]=JSON.parse(e);p.__rpcBrowserProcedures[n]===r&&delete p.__rpcBrowserProcedures[n]})}}else void 0===p[o]&&(p[o]=new Promise(e=>{p[o+":resolve"]=e}));function u(e,r,n){const c=t.f(r);e.execute(`var process = window["${i}"]; if(process){ process(${JSON.stringify(c)}); }else{ ${n?"":`mp.trigger("${i}", '{"ret":1,"id":"${r.id}","err":"${s}","env":"cef"}');`} }`)}function f(e,r,n){const c=p.__rpcListeners[e];return c?t.e(c(r,n)):t.d(s)}function d(e,r){if(2!==arguments.length)throw'register expects 2 arguments: "name" and "cb"';"cef"===c&&p[o].then(r=>mp.trigger(a,JSON.stringify([r,e]))),p.__rpcListeners[e]=r}function m(e){if(1!==arguments.length)throw'unregister expects 1 argument: "name"';"cef"===c&&p[o].then(r=>mp.trigger(l,JSON.stringify([r,e]))),p.__rpcListeners[e]=void 0}function g(e,r){return 1!==arguments.length&&2!==arguments.length?t.d('call expects 1 or 2 arguments: "name" and optional "args"'):f(e,r,{environment:c})}function h(e,r,n={}){switch(c){case"server":return g(e,r);case"client":{const s=t.g();return new Promise(o=>{p.__rpcPending[s]={resolve:o};const a={req:1,id:s,name:e,env:c,args:r,...n};mp.events.callRemote(i,t.f(a))})}case"cef":return b("__rpc:callServer",[e,r])}}function _(e,r){return 1!==arguments.length&&2!==arguments.length?t.d('callServer expects 1 or 2 arguments: "name" and optional "args"'):h(e,r,{})}function b(e,r,n){switch(c){case"client":return n=r,r=e,1!==arguments.length&&2!==arguments.length||"string"!=typeof r?t.d('callClient from the client expects 1 or 2 arguments: "name" and optional "args"'):g(r,n);case"server":{if(2!==arguments.length&&3!==arguments.length||"object"!=typeof e)return t.d('callClient from the server expects 2 or 3 arguments: "player", "name", and optional "args"');const s=t.g();return new Promise(o=>{p.__rpcPending[s]={resolve:o,player:e};const a={req:1,id:s,name:r,env:c,args:n};e.call(i,[t.f(a)])})}case"cef":{if(n=r,r=e,1!==arguments.length&&2!==arguments.length||"string"!=typeof r)return t.d('callClient from the browser expects 1 or 2 arguments: "name" and optional "args"');const s=t.g();return p[o].then(e=>new Promise(o=>{p.__rpcPending[s]={resolve:o};const a={b:e,req:1,id:s,name:r,env:c,args:n};mp.trigger(i,t.f(a))}))}}}function v(e,r,n,t,s={}){return new Promise(o=>{p.__rpcPending[e]={resolve:o},u(r,{req:1,id:e,name:n,env:c,args:t,...s},!1)})}function w(e,r,n,o={}){switch(c){case"client":const i=t.g(),a=p.__rpcBrowserProcedures[r];if(!a)return t.d(s);const l=p.__rpcBrowsers[a];return l&&t.b(l)?v(i,l,r,n,o):t.d(s);case"server":return b(e,"__rpc:callBrowsers",[r,n]);case"cef":return b("__rpc:callBrowsers",[r,n])}}function y(e,r,n){switch(c){case"client":case"cef":return 1!==arguments.length&&2!==arguments.length?t.d('callBrowsers from the client or browser expects 1 or 2 arguments: "name" and optional "args"'):w(null,e,r,{});case"server":return 2!==arguments.length&&3!==arguments.length?t.d('callBrowsers from the server expects 2 or 3 arguments: "player", "name", and optional "args"'):w(e,r,n,{})}}function k(e,r,n){if("client"!==c)return t.d("callBrowser can only be used in the client environment");if(2!==arguments.length&&3!==arguments.length)return t.d('callBrowser expects 2 or 3 arguments: "browser", "name", and optional "args"');return v(t.g(),e,r,n,{})}}.call(this,n(2))},function(e,r){var n;n=function(){return this}();try{n=n||new Function("return this")()}catch(e){"object"==typeof window&&(n=window)}e.exports=n}])});
 },{}],13:[function(require,module,exports){
+!function(e,r){"object"==typeof exports&&"object"==typeof module?module.exports=r():"function"==typeof define&&define.amd?define([],r):"object"==typeof exports?exports=r():e.rpc=r()}("undefined"!=typeof self?self:this,function(){return function(e){var r={};function n(t){if(r[t])return r[t].exports;var c=r[t]={i:t,l:!1,exports:{}};return e[t].call(c.exports,c,c.exports,n),c.l=!0,c.exports}return n.m=e,n.c=r,n.d=function(e,r,t){n.o(e,r)||Object.defineProperty(e,r,{enumerable:!0,get:t})},n.r=function(e){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(e,"__esModule",{value:!0})},n.t=function(e,r){if(1&r&&(e=n(e)),8&r)return e;if(4&r&&"object"==typeof e&&e&&e.__esModule)return e;var t=Object.create(null);if(n.r(t),Object.defineProperty(t,"default",{enumerable:!0,value:e}),2&r&&"string"!=typeof e)for(var c in e)n.d(t,c,function(r){return e[r]}.bind(null,c));return t},n.n=function(e){var r=e&&e.__esModule?function(){return e.default}:function(){return e};return n.d(r,"a",r),r},n.o=function(e,r){return Object.prototype.hasOwnProperty.call(e,r)},n.p="",n(n.s=1)}([function(e,r,n){"use strict";var t;function c(e,r){const n="client"===o();if(e&&"object"==typeof e&&void 0!==e.id){const c=(r,t,c)=>n?e.type===r&&t.at(e.id)===e:e instanceof c;switch(r){case t.Blip:return c("blip",mp.blips,mp.Blip);case t.Checkpoint:return c("checkpoint",mp.checkpoints,mp.Checkpoint);case t.Colshape:return c("colshape",mp.colshapes,mp.Colshape);case t.Label:return c("textlabel",mp.labels,mp.TextLabel);case t.Marker:return c("marker",mp.markers,mp.Marker);case t.Object:return c("object",mp.objects,mp.Object);case t.Pickup:return c("pickup",mp.pickups,mp.Pickup);case t.Player:return c("player",mp.players,mp.Player);case t.Vehicle:return c("vehicle",mp.vehicles,mp.Vehicle)}}return!1}function s(){const e=46656*Math.random()|0,r=46656*Math.random()|0;return("000"+e.toString(36)).slice(-3)+("000"+r.toString(36)).slice(-3)}function o(){return mp.joaat?"server":mp.game&&mp.game.joaat?"client":mp.trigger?"cef":void 0}function i(e){const r=o();return JSON.stringify(e,(e,n)=>{if("client"===r||"server"===r&&n&&"object"==typeof n){let e;if(c(n,t.Blip)?e=t.Blip:c(n,t.Checkpoint)?e=t.Checkpoint:c(n,t.Colshape)?e=t.Colshape:c(n,t.Marker)?e=t.Marker:c(n,t.Object)?e=t.Object:c(n,t.Pickup)?e=t.Pickup:c(n,t.Player)?e=t.Player:c(n,t.Vehicle)&&(e=t.Vehicle),e)return{__t:e,i:n.remoteId||n.id}}return n})}function a(e){const r=o();return JSON.parse(e,(e,n)=>{if(("client"===r||"server"===r)&&n&&"object"==typeof n&&"string"==typeof n.__t&&"number"==typeof n.i&&2===Object.keys(n).length){const e=n.i;let c;switch(n.__t){case t.Blip:c=mp.blips;break;case t.Checkpoint:c=mp.checkpoints;break;case t.Colshape:c=mp.colshapes;break;case t.Label:c=mp.labels;break;case t.Marker:c=mp.markers;break;case t.Object:c=mp.objects;break;case t.Pickup:c=mp.pickups;break;case t.Player:c=mp.players;break;case t.Vehicle:c=mp.vehicles}if(c)return c["client"===r?"atRemoteId":"at"](e)}return n})}function l(e){return new Promise(r=>setTimeout(()=>r(e),0))}function p(e){return new Promise((r,n)=>setTimeout(()=>n(e),0))}function u(e){try{e.url}catch(e){return!1}return!0}n.d(r,"g",function(){return s}),n.d(r,"a",function(){return o}),n.d(r,"f",function(){return i}),n.d(r,"c",function(){return a}),n.d(r,"e",function(){return l}),n.d(r,"d",function(){return p}),n.d(r,"b",function(){return u}),function(e){e.Blip="b",e.Checkpoint="cp",e.Colshape="c",e.Label="l",e.Marker="m",e.Object="o",e.Pickup="p",e.Player="pl",e.Vehicle="v"}(t||(t={}))},function(e,r,n){"use strict";n.r(r),function(e){n.d(r,"register",function(){return d}),n.d(r,"unregister",function(){return m}),n.d(r,"call",function(){return g}),n.d(r,"callServer",function(){return _}),n.d(r,"callClient",function(){return b}),n.d(r,"callBrowsers",function(){return y}),n.d(r,"callBrowser",function(){return k});var t=n(0);const c=t.a();if(!c)throw"Unknown RAGE environment";const s="PROCEDURE_NOT_FOUND",o="__rpc:id",i="__rpc:process",a="__rpc:browserRegister",l="__rpc:browserUnregister",p="cef"===c?window:e;if(!p[i])if(p.__rpcListeners={},p.__rpcPending={},p[i]=((e,r)=>{"server"!==c&&(r=e);const n=t.c(r);if(n.req){const r={id:n.id,environment:n.fenv||n.env};"server"===c&&(r.player=e);const s={ret:1,id:n.id,env:c};let o;switch(c){case"server":o=(e=>r.player.call(i,[t.f(e)]));break;case"client":if("server"===n.env)o=(e=>mp.events.callRemote(i,t.f(e)));else if("cef"===n.env){const e=n.b&&p.__rpcBrowsers[n.b];r.browser=e,o=(r=>e&&t.b(e)&&u(e,r,!0))}break;case"cef":o=(e=>mp.trigger(i,t.f(e)))}o&&f(n.name,n.args,r).then(e=>o({...s,res:e})).catch(e=>o({...s,err:e}))}else if(n.ret){const r=p.__rpcPending[n.id];if("server"===c&&r.player!==e)return;r&&(r.resolve(n.err?t.d(n.err):t.e(n.res)),delete p.__rpcPending[n.id])}}),"cef"!==c){if(mp.events.add(i,p[i]),"client"===c){d("__rpc:callServer",([e,r],n)=>h(e,r,{fenv:n.environment})),d("__rpc:callBrowsers",([e,r],n)=>w(null,e,r,{fenv:n.environment})),p.__rpcBrowsers={};const e=e=>{const r=t.g();Object.keys(p.__rpcBrowsers).forEach(r=>{const n=p.__rpcBrowsers[r];n&&t.b(n)&&n!==e||delete p.__rpcBrowsers[r]}),p.__rpcBrowsers[r]=e,e.execute(`if(typeof window['${o}'] === 'undefined'){ window['${o}'] = Promise.resolve('${r}'); }else{ window['${o}:resolve']('${r}'); }`)};mp.browsers.forEach(e),mp.events.add("browserCreated",e),p.__rpcBrowserProcedures={},mp.events.add(a,e=>{const[r,n]=JSON.parse(e);p.__rpcBrowserProcedures[n]=r}),mp.events.add(l,e=>{const[r,n]=JSON.parse(e);p.__rpcBrowserProcedures[n]===r&&delete p.__rpcBrowserProcedures[n]})}}else void 0===p[o]&&(p[o]=new Promise(e=>{p[o+":resolve"]=e}));function u(e,r,n){const c=t.f(r);e.execute(`var process = window["${i}"]; if(process){ process(${JSON.stringify(c)}); }else{ ${n?"":`mp.trigger("${i}", '{"ret":1,"id":"${r.id}","err":"${s}","env":"cef"}');`} }`)}function f(e,r,n){const c=p.__rpcListeners[e];return c?t.e(c(r,n)):t.d(s)}function d(e,r){if(2!==arguments.length)throw'register expects 2 arguments: "name" and "cb"';"cef"===c&&p[o].then(r=>mp.trigger(a,JSON.stringify([r,e]))),p.__rpcListeners[e]=r}function m(e){if(1!==arguments.length)throw'unregister expects 1 argument: "name"';"cef"===c&&p[o].then(r=>mp.trigger(l,JSON.stringify([r,e]))),p.__rpcListeners[e]=void 0}function g(e,r){return 1!==arguments.length&&2!==arguments.length?t.d('call expects 1 or 2 arguments: "name" and optional "args"'):f(e,r,{environment:c})}function h(e,r,n={}){switch(c){case"server":return g(e,r);case"client":{const s=t.g();return new Promise(o=>{p.__rpcPending[s]={resolve:o};const a={req:1,id:s,name:e,env:c,args:r,...n};mp.events.callRemote(i,t.f(a))})}case"cef":return b("__rpc:callServer",[e,r])}}function _(e,r){return 1!==arguments.length&&2!==arguments.length?t.d('callServer expects 1 or 2 arguments: "name" and optional "args"'):h(e,r,{})}function b(e,r,n){switch(c){case"client":return n=r,r=e,1!==arguments.length&&2!==arguments.length||"string"!=typeof r?t.d('callClient from the client expects 1 or 2 arguments: "name" and optional "args"'):g(r,n);case"server":{if(2!==arguments.length&&3!==arguments.length||"object"!=typeof e)return t.d('callClient from the server expects 2 or 3 arguments: "player", "name", and optional "args"');const s=t.g();return new Promise(o=>{p.__rpcPending[s]={resolve:o,player:e};const a={req:1,id:s,name:r,env:c,args:n};e.call(i,[t.f(a)])})}case"cef":{if(n=r,r=e,1!==arguments.length&&2!==arguments.length||"string"!=typeof r)return t.d('callClient from the browser expects 1 or 2 arguments: "name" and optional "args"');const s=t.g();return p[o].then(e=>new Promise(o=>{p.__rpcPending[s]={resolve:o};const a={b:e,req:1,id:s,name:r,env:c,args:n};mp.trigger(i,t.f(a))}))}}}function v(e,r,n,t,s={}){return new Promise(o=>{p.__rpcPending[e]={resolve:o},u(r,{req:1,id:e,name:n,env:c,args:t,...s},!1)})}function w(e,r,n,o={}){switch(c){case"client":const i=t.g(),a=p.__rpcBrowserProcedures[r];if(!a)return t.d(s);const l=p.__rpcBrowsers[a];return l&&t.b(l)?v(i,l,r,n,o):t.d(s);case"server":return b(e,"__rpc:callBrowsers",[r,n]);case"cef":return b("__rpc:callBrowsers",[r,n])}}function y(e,r,n){switch(c){case"client":case"cef":return 1!==arguments.length&&2!==arguments.length?t.d('callBrowsers from the client or browser expects 1 or 2 arguments: "name" and optional "args"'):w(null,e,r,{});case"server":return 2!==arguments.length&&3!==arguments.length?t.d('callBrowsers from the server expects 2 or 3 arguments: "player", "name", and optional "args"'):w(e,r,n,{})}}function k(e,r,n){if("client"!==c)return t.d("callBrowser can only be used in the client environment");if(2!==arguments.length&&3!==arguments.length)return t.d('callBrowser expects 2 or 3 arguments: "browser", "name", and optional "args"');return v(t.g(),e,r,n,{})}}.call(this,n(2))},function(e,r){var n;n=function(){return this}();try{n=n||new Function("return this")()}catch(e){"object"==typeof window&&(n=window)}e.exports=n}])});
+},{}],14:[function(require,module,exports){
 module.exports={
   "2725352035": {
     "HashKey": "WEAPON_UNARMED",
@@ -10686,7 +10869,7 @@ module.exports={
     "DLC": "spupgrade"
   }
 }
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 const weaponData = require("./weaponData");
 
 const PistolAttachmentPos = new mp.Vector3(0.02, 0.06, 0.1);
@@ -10771,7 +10954,7 @@ for (let weapon in weaponAttachmentData) {
 }
 
 
-},{"./weaponData":13}],15:[function(require,module,exports){
+},{"./weaponData":14}],16:[function(require,module,exports){
 //1868.765869140625, 3710.90283203125, 113.74462127685547
 var natives = require("./natives.js")
 var CEFInterface = require("./browser.js").interface;
@@ -10878,7 +11061,7 @@ function startMakingItems() {
         mp.game.graphics.drawBox(1000, 500, 550, 1000, 1500, 1550, 0, 255, 0, 255);
     });
 }*/
-},{"./browser.js":1,"./natives.js":17}],16:[function(require,module,exports){
+},{"./browser.js":1,"./natives.js":18}],17:[function(require,module,exports){
 var materials = {};
 
 materials[2379541433] = 1;
@@ -10887,7 +11070,7 @@ materials[3454750755] = 2;
 //materials[581794674] = true;
 
 module.exports = materials;
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 var natives = {};
 mp.game.vehicle.getVehicleSeats = (veh) => mp.game.invoke("0xA7C4F2C6E744A550", veh.handle);
 mp.game.graphics.clearDrawOrigin = () => mp.game.invoke('0xFF0B610F6BE0D7AF'); // 26.07.2018 // GTA 1.44 
@@ -10920,7 +11103,7 @@ natives.SET_ENTITY_COORDS = ( entity,  xPos,  yPos,  zPos,  xAxis,  yAxis,  zAxi
 natives.SET_ENTITY_ROTATION = (  entity,  pitch,  roll,  yaw,  rotationOrder,  p5) => mp.game.invoke("0x8524A8B0171D5E07", entity,  pitch,  roll,  yaw,  rotationOrder,  p5); // SET_ENTITY_ROTATION
 natives.GET_ENTITY_HEIGHT_ABOVE_GROUND = (  entity) => mp.game.invoke("0x1DD55701034110E5", entity); // GET_ENTITY_HEIGHT_ABOVE_GROUND
 module.exports = natives;
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 var Notifications = new class {
     constructor() {
         let self = this;
@@ -10965,7 +11148,7 @@ var Notifications = new class {
 }
 module.exports = Notifications;
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 var offsets = {
 	"sr_prop_sr_boxwood_01": {
 		pos: new mp.Vector3(0, 0, 0),
@@ -10977,7 +11160,7 @@ var offsets = {
 	}
 }
 module.exports = offsets;
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 let utils = require("./utils.js");
 var CEFHud = require("./browser.js").hud;
 var initDone = false;
@@ -10985,7 +11168,11 @@ var toShow = false;
 var cachedData = {
 	show: false,
 	thirst: 0,
-	hunger: 0
+	hunger: 0,
+	energy: {
+		show: false,
+		val: 0
+	}
 };
 /*Load Hud*/
 mp.events.add('Player:ShowUI', () => {
@@ -11008,7 +11195,6 @@ mp.events.add("playerSpawn", () => {
 //CEFHud
 let opos = undefined;
 mp.events.add("render", () => {
-
 	if (mp.localPlayer.getVariable("spawned") == true) {
 		if (initDone == true) {
 			let hunger = mp.localPlayer.getVariable("hunger")
@@ -11021,7 +11207,7 @@ mp.events.add("render", () => {
 				cachedData.thirst = thirst;
 				CEFHud.call("setThirst", cachedData.thirst);
 			}
-			mp.game.player.setRunSprintMultiplierFor(1 + ((0.49 / 200) * thirst));
+			mp.game.player.setRunSprintMultiplierFor(1 + ((0.49 / 400) * thirst));
 			if (thirst < 30) {
 				mp.game.controls.disableControlAction(2, 21, true);
 			}
@@ -11037,7 +11223,7 @@ mp.events.add("render", () => {
 		}
 	}
 });
-},{"./browser.js":1,"./utils.js":27}],21:[function(require,module,exports){
+},{"./browser.js":1,"./utils.js":28}],22:[function(require,module,exports){
 var messageScaleform = require("./Scaleform.js");
 let bigMessageScaleform = null;
 let bigMsgInit = 0;
@@ -11088,7 +11274,7 @@ mp.events.add("render", () => {
         }
     }
 });
-},{"./Scaleform.js":24}],22:[function(require,module,exports){
+},{"./Scaleform.js":25}],23:[function(require,module,exports){
 class InstructionButtons {
     constructor() {
         this.handle = mp.game.graphics.requestScaleformMovie("instructional_buttons");
@@ -11134,7 +11320,7 @@ class InstructionButtons {
     }
 }
 module.exports = new InstructionButtons();
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 var messageScaleform = require("./Scaleform.js");
 let midsizedMessageScaleform = null;
 let msgInit = 0;
@@ -11178,7 +11364,7 @@ mp.events.add("render", () => {
         }
     }
 });
-},{"./Scaleform.js":24}],24:[function(require,module,exports){
+},{"./Scaleform.js":25}],25:[function(require,module,exports){
 class BasicScaleform {
     constructor(scaleformName) {
         this.handle = mp.game.graphics.requestScaleformMovie(scaleformName);
@@ -11224,7 +11410,7 @@ class BasicScaleform {
 }
 
 module.exports = BasicScaleform;
-},{}],25:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 var messageScaleform = require("./Scaleform.js");
 require("./BigMessage.js");
 require("./MidsizedMessage.js");
@@ -11239,7 +11425,7 @@ mp.game.ui.messages = {
 };
 
 
-},{"./BigMessage.js":21,"./InstructionButtons.js":22,"./MidsizedMessage.js":23,"./Scaleform.js":24}],26:[function(require,module,exports){
+},{"./BigMessage.js":22,"./InstructionButtons.js":23,"./MidsizedMessage.js":24,"./Scaleform.js":25}],27:[function(require,module,exports){
 var cell_size = 40;
 var padding = 5;
 var inv_cells = 6;
@@ -11415,7 +11601,8 @@ mp.events.add("Inventory:Update", (inventory) => {
 			scale: tempSettings.scale || {},
 			amount: citem.amount,
 			max_stack: citem.max_stack,
-			mask: citem.mask
+			mask: citem.mask,
+			usable: citem.usable || false
 		}
 		let width = citem.width;
 		let height = citem.height;
@@ -11453,7 +11640,8 @@ mp.events.add("Inventory:AddItem", (citem) => {
 		scale: tempSettings.scale || {},
 		amount: citem.amount,
 		max_stack: citem.max_stack,
-		mask: citem.mask
+		mask: citem.mask,
+		usable: citem.usable || false
 	}
 	let width = citem.width;
 	let height = citem.height;
@@ -11587,7 +11775,8 @@ mp.events.add("Storage:AddContainer", (headline, selector, cells, rows, items) =
 			scale: tempSettings.scale || {},
 			amount: citem.amount,
 			max_stack: citem.max_stack,
-			mask: citem.mask
+			mask: citem.mask,
+			usable: citem.usable || false
 		}
 		let gItem = {
 			width: citem.width,
@@ -11759,7 +11948,7 @@ var StorageSystem = new class {
 	}
 }
 module.exports = StorageSystem;
-},{"../../server/world/items.js":32,"./browser.js":1}],27:[function(require,module,exports){
+},{"../../server/world/items.js":33,"./browser.js":1}],28:[function(require,module,exports){
 // https://github.com/glitchdetector/fivem-minimap-anchor
 function getMinimapAnchor() {
     let sfX = 1.0 / 20.0;
@@ -11784,7 +11973,7 @@ function getMinimapAnchor() {
 module.exports = {
     minimap_anchor: getMinimapAnchor
 }
-},{}],28:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 mp.Vector3.prototype.findRot = function(rz, dist, rot) {
     let nVector = new mp.Vector3(this.x, this.y, this.z);
     var degrees = (rz + rot) * (Math.PI / 180);
@@ -11902,7 +12091,7 @@ mp.Vector3.prototype.sub = function(x, y, z) {
     return new mp.Vector3(this.x - x, this.y - y, this.z - z);
 };
 mp.Vector3.prototype.add = function(x, y, z) {
-    return new mp.Vector3(this.x + x, this.y + -y, this.z + z);
+    return new mp.Vector3(this.x + x, this.y + y, this.z + z);
 };
 mp.vector = function(vec) {
     return new mp.Vector3(vec.x, vec.y, vec.z);
@@ -11931,7 +12120,7 @@ Array.prototype.shuffle = function() {
     }
     return this;
 }
-},{}],29:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 const toSync = ["health", "running", "engine", "wheel_fl", "wheel_fr", "wheel_rl", "wheel_rr", "fuel", "spark_plugs", "battery"]
 
 function syncVehicle(type, vehicle, value) {
@@ -12169,7 +12358,7 @@ mp.keys.bind(0x47, false, () => {
         }
     }
 });
-},{}],30:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 require("./vector.js");
 mp.game.audio.startAudioScene("FBI_HEIST_H5_MUTE_AMBIENCE_SCENE");
 mp.game.audio.startAudioScene("MIC1_RADIO_DISABLE");
@@ -12231,7 +12420,7 @@ var Weather = new class {
     }
 }
 module.exports = Weather;
-},{"./vector.js":28}],31:[function(require,module,exports){
+},{"./vector.js":29}],32:[function(require,module,exports){
 var Zombie = class {
     constructor() {
         this._setup();
@@ -12333,7 +12522,7 @@ mp.events.add("render", e => {
     new Zombie();
 });
 */
-},{}],32:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 "use strict";
 function getRandomInt(min, max) {
     min = Math.ceil(min);
@@ -12505,6 +12694,7 @@ var items = {
         model: "ng_proc_sodacan_01a",
         thickness: 0.25,
         mask: "Food",
+        usable:true,
         amount: function() {
             return 1;
         },
@@ -12522,6 +12712,7 @@ var items = {
         type: "Food",
         mask: "Food",
         model: "prop_cs_beer_bot_03",
+        usable:true,
         thickness: 0.15,
         amount: function() {
             return 1;
@@ -12539,6 +12730,7 @@ var items = {
         image: 'https://via.placeholder.com/40x80',
         type: "Food",
         model: "ng_proc_ojbot_01a",
+        usable:true,
         mask: "Food",
         thickness: 0.2,
         amount: function() {
@@ -12557,6 +12749,7 @@ var items = {
         image: 'https://via.placeholder.com/80x40',
         type: "Food",
         model: "ng_proc_food_nana1a",
+        usable:true,
         mask: "Food",
         thickness: 0.15,
         amount: function() {
@@ -12576,6 +12769,7 @@ var items = {
         type: "Food",
         model: "ng_proc_food_ornge1a",
         mask: "Food",
+        usable:true,
         thickness: 0.15,
         amount: function() {
             return 1;
@@ -12594,6 +12788,7 @@ var items = {
         type: "Food",
         model: "v_res_tt_cereal02",
         mask: "Food",
+        usable:true,
         thickness: 0.2,
         amount: function() {
             return 1;
@@ -12612,6 +12807,7 @@ var items = {
         type: "Food",
         model: "v_res_fa_cereal01",
         mask: "Food",
+        usable:true,
         thickness: 0.2,
         amount: function() {
             return 1;
@@ -12629,6 +12825,7 @@ var items = {
         image: 'https://via.placeholder.com/40x80',
         type: "Food",
         mask: "Food",
+        usable:true,
         model: "v_res_fa_potnoodle",
         thickness: 0.15,
         amount: function() {
@@ -12647,6 +12844,7 @@ var items = {
         image: 'https://via.placeholder.com/40x80',
         type: "Food",
         mask: "Food",
+        usable:true,
         model: "v_res_fa_bread01",
         thickness: 0.25,
         amount: function() {
@@ -12667,6 +12865,7 @@ var items = {
         model: "prop_oilcan_01a",
         thickness: 0.25,
         mask: "Tool",
+        usable:true,
         amount: function() {
             return 1
         },
@@ -12757,6 +12956,7 @@ var items = {
         type: "Hospital",
         model: "ng_proc_syrnige01a",
         mask: "Heal",
+        usable:true,
         thickness: 0.15,
         amount: function() {
             return 1;
@@ -12841,4 +13041,4 @@ var items = {
     }
 };
 module.exports = items;
-},{}]},{},[8]);
+},{}]},{},[9]);

@@ -9,9 +9,9 @@ var ItemPickups = require("./world/pickups.js")
 var Zombies = require("./world/zombies.js")
 var Building = require("./world/building.js")
 var Vehicles = require("./world/vehicles.js")
+var Crops = require("./world/crops.js")
 var Storage = require("./world/storage.js")
 require("./world/crafting.js")
-
 
 
 setInterval(function() {
@@ -100,7 +100,7 @@ mp.events.add("Loot:Pickup", (player, lootpile_id, item_index, item_name, item_a
 });
 /* Pickup, Inventory */
 mp.events.add("playerDeath", function(player, reason, killer) {
-    player.data.isCrouched = false;
+    player.setVariable("isCrouched",false);
     if (players[player.socialClub]) {
         players[player.socialClub].death(false);
     }

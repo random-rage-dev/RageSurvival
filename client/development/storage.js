@@ -173,7 +173,8 @@ mp.events.add("Inventory:Update", (inventory) => {
 			scale: tempSettings.scale || {},
 			amount: citem.amount,
 			max_stack: citem.max_stack,
-			mask: citem.mask
+			mask: citem.mask,
+			usable: citem.usable || false
 		}
 		let width = citem.width;
 		let height = citem.height;
@@ -211,7 +212,8 @@ mp.events.add("Inventory:AddItem", (citem) => {
 		scale: tempSettings.scale || {},
 		amount: citem.amount,
 		max_stack: citem.max_stack,
-		mask: citem.mask
+		mask: citem.mask,
+		usable: citem.usable || false
 	}
 	let width = citem.width;
 	let height = citem.height;
@@ -345,7 +347,8 @@ mp.events.add("Storage:AddContainer", (headline, selector, cells, rows, items) =
 			scale: tempSettings.scale || {},
 			amount: citem.amount,
 			max_stack: citem.max_stack,
-			mask: citem.mask
+			mask: citem.mask,
+			usable: citem.usable || false
 		}
 		let gItem = {
 			width: citem.width,

@@ -106,7 +106,7 @@ class LootPool {
         console.log("unload mp.objects2", mp.objects.length);
         clearInterval(self.interval);
         self._pickupObjects.forEach(function(item, i) {
-            if (item.id == id) {
+            //if (item.id == id) {
                 if (mp.objects.atHandle(item.obj.handle)) {
                     console.log("exists");
                     item.obj.markForDeletion();
@@ -114,7 +114,7 @@ class LootPool {
                     delete self._pickupObjects[i];
                     console.log("removed");
                 }
-            }
+            //}
         })
         console.log("unload mp.objects3", mp.objects.length);
     }
@@ -124,9 +124,21 @@ mp.events.add("Loot:Load", (id, poolData) => {
         streamedPools[id] = new LootPool(poolData);
     }
 });
+
+
+mp.events.add("playerExitColshape", (colshape) => {
+    if (colshape.getVariable("item_colshape")) {
+        let id = colshape.getVariable("item_colshape_id");
+        if (streamedPools[id]) {
+            console.log("unload clientside1");
+            streamedPools[id].unload(id)
+            delete streamedPools[id];
+        }
+    }
+});
 mp.events.add("Loot:Unload", (id) => {
     if (streamedPools[id]) {
-        streamedPools[id].unload(id)
+        streamedPools[id].unload()
         delete streamedPools[id];
     }
 });

@@ -50,7 +50,6 @@ var Player = class {
         self._storage = {};
         self._characterData = [];
         self._equipment = {};
-        self._effects = {}
         self._position = {
             x: 0,
             y: 0,
@@ -69,14 +68,12 @@ var Player = class {
         this._player.setVariable("thirst", this._thirst)
     }
     tick() {
-        console.log("Player Tick");
         if (!this.lastTick) {
             this.lastTick = Date.now();
         }
         let dif = Date.now() - this.lastTick;
-        console.log("tick diff", dif)
-        let hUsage = 70 / (60 * 60 * 1000)
-        let tUsage = 90 / (60 * 60 * 1000)
+        let hUsage = 70 / (60 * 60 * 1000);
+        let tUsage = 120 / (60 * 60 * 1000);
         this.hunger = this._hunger - (hUsage * dif);
         this.thirst = this._thirst - (tUsage * dif);
         this.lastTick = Date.now();
@@ -205,10 +202,6 @@ var Player = class {
         self._damage = [];
         self._death = 0;
         self._inCombat = false;
-        self._effects = {
-            radiation: 1,
-            boost: 2
-        }
         self._player.setVariable("hunger", self._hunger)
         self._player.setVariable("thirst", self._thirst)
         self._player.setVariable("effects", self._effects)
@@ -256,55 +249,59 @@ var Player = class {
     }
     manageAttachments(oWeapon, nWeapon) {
         let self = this;
-        console.log("nWeapon", nWeapon);
-        console.log("oWeapon", oWeapon);
-        if (nWeapon == undefined) {
-            nWeapon = self._player.weapon;
-        }
-        if (!self._attachments) {
-            self._attachments = {};
-        }
-        /* Weapon Attachments */
-        if (self._equipment["weapon_primary"] != undefined) {
-            let e = Equipment[self._equipment["weapon_primary"].name]
-            if (nWeapon != mp.joaat(e.hash)) {
-                self._player.addAttachment(e.hash, false);
-                self._attachments["primary"] = e.hash
-            } else {
-                self._player.addAttachment(e.hash, true);
-                self._attachments["primary"] = undefined;
+        if (self._loggedIn == true) {
+            if ((Date.now() - self._spawnedTimestamp)/1000 > 1) {
+                console.log("nWeapon", nWeapon);
+                console.log("oWeapon", oWeapon);
+                if (nWeapon == undefined) {
+                    nWeapon = self._player.weapon;
+                }
+                if (!self._attachments) {
+                    self._attachments = {};
+                }
+                /* Weapon Attachments */
+                if (self._equipment["weapon_primary"] != undefined) {
+                    let e = Equipment[self._equipment["weapon_primary"].name]
+                    if (nWeapon != mp.joaat(e.hash)) {
+                        self._player.addAttachment(e.hash, false);
+                        self._attachments["primary"] = e.hash
+                    } else {
+                        self._player.addAttachment(e.hash, true);
+                        self._attachments["primary"] = undefined;
+                    }
+                } else if (self._attachments["primary"] != undefined) {
+                    self._player.addAttachment(self._attachments["primary"], true);
+                    self._attachments["primary"] = undefined;
+                }
+                if (self._equipment["weapon_secondary"] != undefined) {
+                    let e = Equipment[self._equipment["weapon_secondary"].name]
+                    if (nWeapon != mp.joaat(e.hash)) {
+                        self._player.addAttachment(e.hash, false);
+                        self._attachments["secondary"] = e.hash
+                    } else {
+                        self._player.addAttachment(e.hash, true);
+                        self._attachments["secondary"] = undefined
+                    }
+                } else if (self._attachments["secondary"] != undefined) {
+                    self._player.addAttachment(self._attachments["secondary"], true);
+                    self._attachments["secondary"] = undefined;
+                }
+                if (self._equipment["weapon_melee"] != undefined) {
+                    let e = Equipment[self._equipment["weapon_melee"].name]
+                    if (nWeapon != mp.joaat(e.hash)) {
+                        self._player.addAttachment(e.hash, false);
+                        self._attachments["melee"] = e.hash
+                    } else {
+                        self._player.addAttachment(e.hash, true);
+                        self._attachments["melee"] = undefined
+                    }
+                } else if (self._attachments["melee"] != undefined) {
+                    self._player.addAttachment(self._attachments["melee"], true);
+                    self._attachments["melee"] = undefined;
+                }
+                /*Clothing Attachments*/
             }
-        } else if (self._attachments["primary"] != undefined) {
-            self._player.addAttachment(self._attachments["primary"], true);
-            self._attachments["primary"] = undefined;
         }
-        if (self._equipment["weapon_secondary"] != undefined) {
-            let e = Equipment[self._equipment["weapon_secondary"].name]
-            if (nWeapon != mp.joaat(e.hash)) {
-                self._player.addAttachment(e.hash, false);
-                self._attachments["secondary"] = e.hash
-            } else {
-                self._player.addAttachment(e.hash, true);
-                self._attachments["secondary"] = undefined
-            }
-        } else if (self._attachments["secondary"] != undefined) {
-            self._player.addAttachment(self._attachments["secondary"], true);
-            self._attachments["secondary"] = undefined;
-        }
-        if (self._equipment["weapon_melee"] != undefined) {
-            let e = Equipment[self._equipment["weapon_melee"].name]
-            if (nWeapon != mp.joaat(e.hash)) {
-                self._player.addAttachment(e.hash, false);
-                self._attachments["melee"] = e.hash
-            } else {
-                self._player.addAttachment(e.hash, true);
-                self._attachments["melee"] = undefined
-            }
-        } else if (self._attachments["melee"] != undefined) {
-            self._player.addAttachment(self._attachments["melee"], true);
-            self._attachments["melee"] = undefined;
-        }
-        /*Clothing Attachments*/
     }
     gather(material) {
         var self = this;

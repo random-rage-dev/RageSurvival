@@ -34,15 +34,15 @@ mp.events.add("render", () => {
 				cachedData.thirst = thirst;
 				CEFHud.call("setThirst", cachedData.thirst);
 			}
-			if (toShow != cachedData.show) {
-				if (toShow == true) {
-					cachedData.show = true;
-					CEFHud.call("show")
-				} else {
-					cachedData.show = false;
-					CEFHud.call("hide")
-				}
-			}
+		}
+	}
+	if (toShow != cachedData.show) {
+		if (toShow == true) {
+			cachedData.show = true;
+			CEFHud.call("show")
+		} else {
+			cachedData.show = false;
+			CEFHud.call("hide")
 		}
 	}
 });

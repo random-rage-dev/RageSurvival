@@ -186,14 +186,6 @@ var Pickups = new class {
         loot_spawns.forEach(function(spawn) {
             let count = LootTable.getItemCountForSpawn(spawn.type);
             let items = LootTable.getItemsForSpawn(spawn.type, count);
-            /*items = items.map(function(a, i) {
-                if (typeof a.amount === "function") {
-                    a.amount = a.amount();
-                } else if (typeof a.amount !== "number") {
-                    a.amount = 1;
-                }
-                return a;
-            })*/
             let colshape = mp.colshapes.newSphere(spawn.x, spawn.y, spawn.z, self._streamRadius, 0);
             let blip = mp.blips.new(1, new mp.Vector3(spawn.x, spawn.y, spawn.z), {
                 name: spawn.type,

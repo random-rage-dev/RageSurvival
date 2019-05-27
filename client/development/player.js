@@ -5,7 +5,11 @@ var toShow = false;
 var cachedData = {
 	show: false,
 	thirst: 0,
-	hunger: 0
+	hunger: 0,
+	energy: {
+		show: false,
+		val: 0
+	}
 };
 /*Load Hud*/
 mp.events.add('Player:ShowUI', () => {
@@ -28,7 +32,6 @@ mp.events.add("playerSpawn", () => {
 //CEFHud
 let opos = undefined;
 mp.events.add("render", () => {
-
 	if (mp.localPlayer.getVariable("spawned") == true) {
 		if (initDone == true) {
 			let hunger = mp.localPlayer.getVariable("hunger")
@@ -41,7 +44,7 @@ mp.events.add("render", () => {
 				cachedData.thirst = thirst;
 				CEFHud.call("setThirst", cachedData.thirst);
 			}
-			mp.game.player.setRunSprintMultiplierFor(1 + ((0.49 / 200) * thirst));
+			mp.game.player.setRunSprintMultiplierFor(1 + ((0.49 / 400) * thirst));
 			if (thirst < 30) {
 				mp.game.controls.disableControlAction(2, 21, true);
 			}

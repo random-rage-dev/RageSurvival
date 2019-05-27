@@ -236,6 +236,9 @@ mp.events.add("Inventory:AddItem", (citem) => {
 });
 mp.events.add("Storage:Interact", (item) => {
 	console.log("Item use",item);
+
+	mp.events.callRemote("Storage:Interact", item);
+
 });
 mp.events.add("Storage:Drag", (positions) => {
 	positions = JSON.parse(positions);

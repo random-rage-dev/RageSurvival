@@ -50,6 +50,7 @@ var Player = class {
         self._storage = {};
         self._characterData = [];
         self._equipment = {};
+        self._effects = {}
         self._position = {
             x: 0,
             y: 0,
@@ -204,8 +205,13 @@ var Player = class {
         self._damage = [];
         self._death = 0;
         self._inCombat = false;
+        self._effects = {
+            radiation: 1,
+            boost: 2
+        }
         self._player.setVariable("hunger", self._hunger)
         self._player.setVariable("thirst", self._thirst)
+        self._player.setVariable("effects", self._effects)
         self._player.setVariable("spawned", true)
         self._player.setVariable("canGather", true)
         self._player.alpha = 255;
@@ -214,7 +220,6 @@ var Player = class {
         if (fresh == 1) {
             self._player.call("Player:WanderDuration", [1000]);
         }
-        //self._player.addAttachment("mining", false);
         self._spawnedTimestamp = Date.now();
     }
     hit(hitter, weapon, bone) {
@@ -497,8 +502,9 @@ var Player = class {
             console.log("err setEquipment", err);
         }
     }
-    useItem(id) {
-        console.log("use Item",id);
+    useItem(item_data) {
+        console.log("use Item", item_data);
+        //this._player.playScenario("CODE_HUMAN_PARK_CAR")
     }
     setInventory(arr) {
         this._inventory = arr.map(function(item, i) {

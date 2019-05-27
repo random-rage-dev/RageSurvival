@@ -9,6 +9,9 @@ var Storage = new class {
 		this._tempStorage = [];
 		this._interactionOpen = [];
 		console.log("New Storage Class");
+		mp.events.add("Storage:Interact", function(player, item) {
+			player.class.useItem(item);
+		});
 		mp.events.add("Storage:Transfer", function(player, source, target) {
 			self.validate(player, JSON.parse(source), JSON.parse(target))
 		});

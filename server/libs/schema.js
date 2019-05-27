@@ -45,6 +45,10 @@ var user = mongoose.Schema({
     equipment: {
         type: Object,
         default: {}
+    },
+    buffs:{
+        type:Object,
+        default:{}
     }
 }, {
     autoIndex: true

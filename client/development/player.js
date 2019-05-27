@@ -20,8 +20,15 @@ mp.events.add("HUD:Ready", () => {
 	CEFHud.call("init", anchor);
 	initDone = true;
 });
+const statNames = ["SP0_STAMINA﻿", "SP0_STRENGTH", "SP0_LUNG_CAPACITY", "SP0_WHEELIE_ABILITY", "SP0_FLYING_ABILITY", "SP0_SHOOTING_ABILITY", "SP0_STEALTH_ABILITY"];
+// maybe playerReady can be used instead, haven't tested
+mp.events.add("playerSpawn", () => {
+	for (const stat of statNames) mp.game.stats.statSetInt(mp.game.joaat(stat), 100, false);
+});
 //CEFHud
+let opos = undefined;
 mp.events.add("render", () => {
+
 	if (mp.localPlayer.getVariable("spawned") == true) {
 		if (initDone == true) {
 			let hunger = mp.localPlayer.getVariable("hunger")
@@ -33,6 +40,10 @@ mp.events.add("render", () => {
 			if (thirst != cachedData.thirst) {
 				cachedData.thirst = thirst;
 				CEFHud.call("setThirst", cachedData.thirst);
+			}
+			mp.game.player.setRunSprintMultiplierFor(1 + ((0.49 / 200) * thirst));
+			if (thirst < 30) {
+				mp.game.controls.disableControlAction(2, 21, true);
 			}
 		}
 	}

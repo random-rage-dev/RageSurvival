@@ -169,6 +169,7 @@ var items = {
         model: "ng_proc_sodacan_01a",
         thickness: 0.25,
         mask: "Food",
+        usable:true,
         amount: function() {
             return 1;
         },
@@ -186,6 +187,7 @@ var items = {
         type: "Food",
         mask: "Food",
         model: "prop_cs_beer_bot_03",
+        usable:true,
         thickness: 0.15,
         amount: function() {
             return 1;
@@ -203,6 +205,7 @@ var items = {
         image: 'https://via.placeholder.com/40x80',
         type: "Food",
         model: "ng_proc_ojbot_01a",
+        usable:true,
         mask: "Food",
         thickness: 0.2,
         amount: function() {
@@ -221,6 +224,7 @@ var items = {
         image: 'https://via.placeholder.com/80x40',
         type: "Food",
         model: "ng_proc_food_nana1a",
+        usable:true,
         mask: "Food",
         thickness: 0.15,
         amount: function() {
@@ -240,6 +244,7 @@ var items = {
         type: "Food",
         model: "ng_proc_food_ornge1a",
         mask: "Food",
+        usable:true,
         thickness: 0.15,
         amount: function() {
             return 1;
@@ -258,6 +263,7 @@ var items = {
         type: "Food",
         model: "v_res_tt_cereal02",
         mask: "Food",
+        usable:true,
         thickness: 0.2,
         amount: function() {
             return 1;
@@ -276,6 +282,7 @@ var items = {
         type: "Food",
         model: "v_res_fa_cereal01",
         mask: "Food",
+        usable:true,
         thickness: 0.2,
         amount: function() {
             return 1;
@@ -293,6 +300,7 @@ var items = {
         image: 'https://via.placeholder.com/40x80',
         type: "Food",
         mask: "Food",
+        usable:true,
         model: "v_res_fa_potnoodle",
         thickness: 0.15,
         amount: function() {
@@ -311,6 +319,7 @@ var items = {
         image: 'https://via.placeholder.com/40x80',
         type: "Food",
         mask: "Food",
+        usable:true,
         model: "v_res_fa_bread01",
         thickness: 0.25,
         amount: function() {
@@ -331,6 +340,7 @@ var items = {
         model: "prop_oilcan_01a",
         thickness: 0.25,
         mask: "Tool",
+        usable:true,
         amount: function() {
             return 1
         },
@@ -421,6 +431,7 @@ var items = {
         type: "Hospital",
         model: "ng_proc_syrnige01a",
         mask: "Heal",
+        usable:true,
         thickness: 0.15,
         amount: function() {
             return 1;

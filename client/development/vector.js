@@ -115,7 +115,7 @@ mp.Vector3.prototype.sub = function(x, y, z) {
     return new mp.Vector3(this.x - x, this.y - y, this.z - z);
 };
 mp.Vector3.prototype.add = function(x, y, z) {
-    return new mp.Vector3(this.x + x, this.y + -y, this.z + z);
+    return new mp.Vector3(this.x + x, this.y + y, this.z + z);
 };
 mp.vector = function(vec) {
     return new mp.Vector3(vec.x, vec.y, vec.z);

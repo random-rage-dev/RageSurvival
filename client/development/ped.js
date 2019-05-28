@@ -1,7 +1,7 @@
 var Peds = [];
 class Ped {
     constructor(id, model, pos) {
-        if (!new.target) new Error('class must be called with new');
+        //if (!new.target) new Error('class must be called with new');
 
         this._ped = mp.peds.new(model, pos, 0, (streamPed) => {
             // Ped Streamed

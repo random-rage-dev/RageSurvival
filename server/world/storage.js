@@ -397,7 +397,8 @@ var Storage = new class {
 				image: itemIdentity[object.name].image,
 				thickness: itemIdentity[object.name].thickness,
 				mask: itemIdentity[object.name].mask,
-				offset: itemIdentity[object.name].offset
+				offset: itemIdentity[object.name].offset,
+				model: itemIdentity[object.name].model
 			}
 			return Object.assign(object, masked);
 		}

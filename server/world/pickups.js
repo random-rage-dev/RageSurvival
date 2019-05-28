@@ -1,6 +1,7 @@
 "use strict";
 var LootTable = require("./loottable.js");
 var loot_spawns = require("./lootspawns.js");
+var Storage = require("./storage.js");
 var PickupManager = new class {
     constructor() {
         this._setup();
@@ -144,7 +145,8 @@ var Pickups = new class {
         if (item_data != undefined) {
             let id = (item_data.amount + "." + item_data.name + "." + x + "." + y + "." + z).substr(0, 4) + (Date.now() + Math.random()).toString().replace('.', '').substr(-6);
             if (self.isUnique(id) == true) {
-                let temp_item = [{
+                let itemData = Storage.map({
+                    id: item_data.id,
                     type: item_data.type,
                     model: item_data.model,
                     thickness: item_data.thickness,
@@ -152,11 +154,12 @@ var Pickups = new class {
                     offset: item_data.offset,
                     name: item_data.name,
                     data: item_data.data
-                }]
+                });
+                let temp_item = [itemData]
                 console.log("item_data", item_data);
                 let colshape = mp.colshapes.newSphere(x, y, z, self._streamRadius, 0);
                 let blip = mp.blips.new(1, new mp.Vector3(x, y, z), {
-                    name: item,
+                    name: temp_item.name,
                     color: 4,
                     shortRange: true,
                     scale: 0.3
@@ -261,7 +264,7 @@ var Pickups = new class {
                         self.updatePickup(id)
                     }
                 }).catch((err) => {
-                    console.log("error giveItem",err);
+                    console.log("error giveItem", err);
                 })
             }
         }
@@ -278,8 +281,9 @@ mp.events.addCommand("drop", (player, fulltext) => {
     //player.call("Building:Start", [model])
     let pos = mp.players.local.position;
     let item = player.class.getInventoryItemByIndex();
-    console.log("f",item);
-    Pickups.dropItem(item, pos.x, pos.y, pos.z)
+    console.log("f", item);
+    player.class.removeItem(item.id);
+    Pickups.dropItem(item, pos.x, pos.y, pos.z);
     //Pickups.dropItem(name, amount, pos.x, pos.y, pos.z)
 });
 module.exports = Pickups;

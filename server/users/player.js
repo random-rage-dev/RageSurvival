@@ -515,6 +515,12 @@ var Player = class {
         });
     }
     hasItem(name) {
+        let index = this._inventory.findIndex(function(item) {
+            return (item.name == name);
+        })
+        return index > -1 ? this._inventory[index] : false;
+    }
+    hasSpaceInItemStack(name) {
         let stack = Storage.getMaxStack(name);
         let index = this._inventory.findIndex(function(item) {
             return (item.name == name) && (item.amount < stack);
@@ -550,7 +556,22 @@ var Player = class {
             }
         })
     }
-    removeItem(name, amount) {}
+    removeItem(id) {
+        console.log("remove item",id);
+        let index = this._inventory.findIndex(function(item) {
+            return (item.id == id);
+        })
+        if (index > -1) {
+            console.log("removed");
+            delete this._inventory[index];
+            this._inventory.splice(index,1)
+
+            this._player.call("Inventory:RemoveItem", [id])
+        }
+
+        console.log("index item",index);
+
+    }
     /* Inventory */
     /*Character*/
     saveChar(data) {

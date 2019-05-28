@@ -36,6 +36,10 @@ $(window).keyup(function(e) {
 var ContextHandler = new class {
 	constructor() {
 		let self = this;
+		self._busy = false; 
+	}
+	get busy() {
+		return this._busy;
 	}
 	open(item, source) {
 		//TODO EXTEND!!!
@@ -518,6 +522,9 @@ var DragHandler = new class {
 			}
 		}
 	}
+	get busy() {
+		return this._dragging;
+	}
 	isDragging() {
 		return this._dragging;
 	}
@@ -751,6 +758,8 @@ var Storage = class {
 		}
 		$(selector).on('contextmenu', ".item, img", function(event) {
 			if (self.isToggled == false) return;
+			if (ContextHandler.busy == true) return;
+			if (DragHandler.busy == true) return;
 			event.preventDefault();
 			let cTarget = event.currentTarget;
 			if ($(event.currentTarget).hasClass("item") == false) {
@@ -763,6 +772,8 @@ var Storage = class {
 		self._wasDown = 0;
 		$(selector).on('mousedown', ".headline", function(event) {
 			if (self.isToggled == false) return;
+			if (ContextHandler.busy == true) return;
+			if (DragHandler.busy == true) return;
 			let cursor = {
 				top: event.clientY,
 				left: event.clientX
@@ -786,6 +797,8 @@ var Storage = class {
 		});
 		$(selector).on('mousedown', ".item, img", function(event) {
 			if (self.isToggled == false) return;
+			if (ContextHandler.busy == true) return;
+			if (DragHandler.busy == true) return;
 			event.preventDefault();
 			let cTarget = event.currentTarget;
 			if ($(event.currentTarget).hasClass("item") == false) {
@@ -1268,6 +1281,8 @@ var CustomSlots = class {
 		DragHandler.registerDropable(self, this._rawSelector);
 		$(selector).on('mousedown', ".headline", function(event) {
 			if (self.isToggled == false) return;
+			if (ContextHandler.busy == true) return;
+			if (DragHandler.busy == true) return;
 			let cursor = {
 				top: event.clientY,
 				left: event.clientX
@@ -1291,6 +1306,8 @@ var CustomSlots = class {
 		});
 		$(selector).on('mousedown', ".item, img", function(event) {
 			if (self.isToggled == false) return;
+			if (ContextHandler.busy == true) return;
+			if (DragHandler.busy == true) return;
 			event.preventDefault();
 			let cTarget = event.currentTarget;
 			if ($(event.currentTarget).hasClass("item") == false) {

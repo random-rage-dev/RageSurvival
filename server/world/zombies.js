@@ -8,6 +8,7 @@ const moveEnums = {
 }
 var Zombie = class {
     constructor(x, y, z) {
+        if (!new.target) new Error('class must be called with new');
         this._setup(x, y, z);
     }
     _setup(x, y, z) {

@@ -23,6 +23,7 @@ cropObjects["cucumber"] = {
 };
 var Crop = class {
     constructor(data) {
+        if (!new.target) new Error('class must be called with new');
         let self = this;
         console.log("new crop class");
         console.log(data);
@@ -65,6 +66,9 @@ var Crop = class {
     }
     streamOut(player) {
         console.log("streamOut")
+    }
+    harvest() {
+
     }
 }
 mp.events.add("Crop:Interact", function(player, crop_ID) {

@@ -5,6 +5,7 @@ var Buildings = MongoDB.getBuildingModel();
 /*Building Class*/
 var Building = class {
 	constructor(data) {
+		if (!new.target) new Error('class must be called with new');
 		try {
 			this._data = data;
 			this._id = data._id;

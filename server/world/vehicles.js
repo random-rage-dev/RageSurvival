@@ -3,6 +3,7 @@ var Vehicles = MongoDB.getVehicleModel();
 var Inventory = MongoDB.getInventoryModel();
 var Vehicle = class {
     constructor(data) {
+        if (!new.target) new Error('class must be called with new');
         let self = this;
         console.log("new veh class");
         this._data = data;

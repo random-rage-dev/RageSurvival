@@ -60,7 +60,6 @@ class LootPool {
         let center = new mp.Vector3(self._lootData.pos.x, self._lootData.pos.y, self._lootData.pos.z);
         let Angle_Item = 360 / 8;
         if ((self.loaded == false) && ((!mp.raycasting.testPointToPoint(mp.vector(mp.localPlayer.position).add(0,0,100), center, mp.players.local, (1))) || (!mp.raycasting.testPointToPoint(mp.vector(mp.localPlayer.position), center, mp.players.local, (1))))) {
-            console.log("create loot items");
             self.loaded = true;
             self._lootData.items.forEach(function(item, index) {
                 if (item != null) {

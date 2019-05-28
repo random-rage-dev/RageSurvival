@@ -154,7 +154,6 @@ mp.keys.bind(0x55, false, () => {
 mp.keys.bind(0x49, false, () => {
 	toggleInventory();
 });
-
 mp.events.add("Inventory:Update", (inventory) => {
 	if (!TempStorage["inventory"]) {
 		TempStorage["inventory"] = [];
@@ -200,6 +199,28 @@ mp.events.add("Inventory:Update", (inventory) => {
 mp.events.add("Inventory:EditItem", (citem) => {
 	console.log("Inventory:EditItem item", citem);
 });
+mp.events.add("Inventory:RemoveItem", (id) => {
+	if (TempStorage["inventory"]) {
+		let index = TempStorage["inventory"].findIndex((e) => {
+			return e.id == id;
+		})
+		console.log("index in temp inv",index);
+		if (index > -1) {
+			//CEFStorage.call("removeItemByID", "inventory", id);
+			mp.rpc.callBrowser(CEFStorage.browser, 'removeItemByID', {
+				selector: "inventory",
+				id: id
+			}).then(value => {
+				console.log("removeItemByID", value);
+			}).catch(err => {
+				console.log("error", err);
+			});
+			TempStorage["inventory"][index] = null;
+			delete TempStorage["inventory"][index];
+            TempStorage["inventory"].splice(index,1)
+		}
+	}
+});
 mp.events.add("Inventory:AddItem", (citem) => {
 	if (!TempStorage["inventory"]) {
 		TempStorage["inventory"] = [];
@@ -237,10 +258,8 @@ mp.events.add("Inventory:AddItem", (citem) => {
 	CEFStorage.call("addItem", "inventory", tempSettings.cell || 0, tempSettings.row || 0, citem.width, citem.height, JSON.stringify(gData), tempSettings.flipped || false)
 });
 mp.events.add("Storage:Interact", (item) => {
-	console.log("Item use",item);
-
+	console.log("Item use", item);
 	mp.events.callRemote("Storage:Interact", item);
-
 });
 mp.events.add("Storage:Drag", (positions) => {
 	positions = JSON.parse(positions);

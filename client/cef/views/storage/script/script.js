@@ -36,15 +36,10 @@ $(window).keyup(function(e) {
 var ContextHandler = new class {
 	constructor() {
 		let self = this;
-		$(window).on('contextmenu', function(event) {
-			if (toggledInto.length == 0) return;
-			event.preventDefault();
-			console.log("context");
-			self.contextmenu(event);
-		});
 	}
-	contextmenu(id, source) {
+	open(item, source) {
 		//TODO EXTEND!!!
+		console.log(item, source);
 	}
 }
 var ItemStorageHandler = new class {
@@ -856,7 +851,6 @@ var Storage = class {
 					}, 70, function() {
 						console.log("done1");
 						console.log(itemData);
-						self.removeItem(itemData.item.id);
 						mp.trigger("Storage:Interact", JSON.stringify(itemData.item));
 						self._wasDown = 0;
 					});
@@ -866,12 +860,17 @@ var Storage = class {
 	}
 	removeItem(id) {
 		console.log("id", id);
-		let item = this._inventory.filter((e) => {
-			console.log("e", e);
+		let index = this._inventory.findIndex((e) => {
 			return (e.item.id == id)
 		});
-		console.log("removeItem", item);
-		this.render();
+		if (index > -1) {
+			console.log("removeItem", index);
+			this._inventory[index] = undefined;
+			delete this._inventory[index];
+			this._inventory.splice(index,1);
+			this.render();
+		}
+		return index > -1;
 	}
 	clear() {
 		this._inventory = [];
@@ -1178,13 +1177,17 @@ var Storage = class {
 		let cells = $(this._selector.find(".grid")).find('.cell').toArray();
 		let toRemove = self._oldInventory.filter(function(item) {
 			let iIndex = self._inventory.findIndex(function(d) {
-				return (d.cell == item.cell) && (d.row == item.row) && (d.width == item.width) && (d.height == item.height) && (d.item.amount == item.item.amount) && (d.item.id == item.item.id);
+				if (d != undefined) {
+					return (d.cell == item.cell) && (d.row == item.row) && (d.width == item.width) && (d.height == item.height) && (d.item.amount == item.item.amount) && (d.item.id == item.item.id);
+				} else {
+					return false;
+				}
 			})
 			return iIndex == -1;
 		})
 		let toAdd = self._inventory.filter(function(item) {
 			let iIndex = self._oldInventory.findIndex(function(d) {
-				return (d.cell == item.cell) && (d.row == item.row) && (d.width == item.width) && (d.height == item.height) && (d.item.amount == item.item.amount) && (d.item.id == item.item.id);
+				return (d != undefined) && (d.cell == item.cell) && (d.row == item.row) && (d.width == item.width) && (d.height == item.height) && (d.item.amount == item.item.amount) && (d.item.id == item.item.id);
 			})
 			return iIndex == -1 && self._inventory[iIndex] == undefined;
 		})
@@ -1713,6 +1716,18 @@ if (rpc !== undefined) {
 	rpc.register('editItemID', function(options) {
 		if (storageContainers["#" + options.selector]) {
 			return storageContainers["#" + options.selector].editID(options.id, options.name, options.amount, options.overwrite_data)
+		}
+		return undefined;
+	});
+	rpc.register('editItemByID', function(options) {
+		if (storageContainers["#" + options.selector]) {
+			return storageContainers["#" + options.selector].editByID(options.id, options.overwrite_data)
+		}
+		return undefined;
+	});
+	rpc.register('removeItemByID', function(options) {
+		if (storageContainers["#" + options.selector]) {
+			return storageContainers["#" + options.selector].removeItem(options.id);
 		}
 		return undefined;
 	});

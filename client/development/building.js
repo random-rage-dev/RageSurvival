@@ -161,7 +161,7 @@ var Building = new class {
 }
 mp.events.add("Building:Start", (model) => {
     if (Building.busy == false) {
-        console.log("loading building object", model);
+       // console.log("loading building object", model);
         Building.loadObject(model);
     }
 });

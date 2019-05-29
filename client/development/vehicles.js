@@ -2,7 +2,7 @@ const toSync = ["health", "running", "engine", "wheel_fl", "wheel_fr", "wheel_rl
 
 function syncVehicle(type, vehicle, value) {
     if (type == "running") {
-        console.log("Set Engine to", value);
+        //console.log("Set Engine to", value);
         vehicle.setEngineOn(value, true, true);
     }
     if (type == "health") {
@@ -56,7 +56,7 @@ toSync.forEach(function(data) {
     mp.events.addDataHandler(data, (entity, value) => {
         if (entity.type === "vehicle") {
             syncVehicle(data, entity, value);
-            console.log(`${data} changed to ${value} on entity ${entity.handle}.`);
+            //console.log(`${data} changed to ${value} on entity ${entity.handle}.`);
         }
     });
 })

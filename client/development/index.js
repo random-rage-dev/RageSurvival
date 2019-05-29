@@ -1,21 +1,25 @@
 "use strict";
 console.log = function(...a) {
-    mp.gui.chat.push("DEBUG:" + a.join(" "))
+    mp.gui.chat.push("~r~D~w~:" + a.join(" "))
 };
+
 mp.lerp = function(a, b, n) {
     return (1 - n) * a + n * b;
 }
 require("./libs/attachments.js")
 require("./libs/weapon_attachments.js")
-
 require("./libs/animations.js")
-require("./vector.js")
+
+
+
 /*Register Attachments for Player Animatiuons etc TODO*/
 mp.attachmentMngr.register("mining", "prop_tool_pickaxe", 57005, new mp.Vector3(0.085, -0.3, 0), new mp.Vector3(-90, 0, 0));
 mp.attachmentMngr.register("lumberjack", "w_me_hatchet", 57005, new mp.Vector3(0.085, -0.05, 0), new mp.Vector3(-90, 0, 0));
 
-mp.rpc = require("./libs/rage-rpc.min.js");
 
+require("./vector.js")
+
+mp.rpc = require("./libs/rage-rpc.min.js");
 mp.isValid = function(val) {
     return val != null && val != undefined && val != "";
 }
@@ -35,6 +39,7 @@ mp.localPlayer.getPos = function() {
 mp.ui = {};
 mp.ui.ready = false;
 mp.gameplayCam.setAffectsAiming(true);
+require("./object.js")
 require("./interface.js")
 require("./crops.js")
 require("./player.js")
@@ -56,7 +61,6 @@ var CEFNotification = require("./browser.js").notification;
 mp.events.add("Notifications:New", (notification_data) => {
     CEFNotification.call("notify", notification_data)
 })
-
 mp.events.add("Player:WanderDuration", (ms) => {
     console.log("GO WANDER");
     let p = mp.players.local.position;
@@ -92,5 +96,3 @@ mp.events.add('Player:Collision', (enable) => {
         });
     }
 });
-
-

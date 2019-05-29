@@ -63,7 +63,7 @@ mp.attachmentMngr =
 		{
 			id = mp.game.joaat(id);
 		}
-		console.log("register attachment id",id);
+		//console.log("register attachment id",id);
 		if(typeof(model) === 'string')
 		{
 			model = mp.game.joaat(model);

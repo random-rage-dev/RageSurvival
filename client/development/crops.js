@@ -68,7 +68,7 @@ class Crop {
     _setup(data) {
         let self = this;
         self._data = data;
-        console.log("init crop");
+       // console.log("init crop");
         self._id = data._id;
         self._cropType = data.type;
         self._planted = data.planted;

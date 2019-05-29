@@ -12,7 +12,7 @@ toLoad.forEach(function(dict) {
 	}));
 })
 Promise.all(loadPromises).then(() => {
-	console.log("all dicts loaded")
+	//console.log("all dicts loaded")
 }).catch(err => {
 	console.log("all dicts err", err)
 })

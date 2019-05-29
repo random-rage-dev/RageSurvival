@@ -5,6 +5,7 @@ class Ped {
 
         this._ped = mp.peds.new(model, pos, 0, (streamPed) => {
             // Ped Streamed
+            console.log("ped streamed in");
             mp.events.callRemote('Ped:Stream', id);
         }, 0);
         this._id = id;

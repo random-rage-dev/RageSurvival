@@ -8,7 +8,7 @@ class CEFBrowser {
         let self = this;
         self.browser = mp.browsers.new(absolute_path + url);
         self.cursorState = false;
-        console.log("new instance");
+       // console.log("new instance");
 
     }
     call() {
@@ -231,7 +231,7 @@ var Building = new class {
 }
 mp.events.add("Building:Start", (model) => {
     if (Building.busy == false) {
-        console.log("loading building object", model);
+       // console.log("loading building object", model);
         Building.loadObject(model);
     }
 });
@@ -241,7 +241,7 @@ mp.events.add("Building:Cancel", () => {
     }
 });
 module.exports = Building;
-},{"./object_offsets.js":21}],3:[function(require,module,exports){
+},{"./object_offsets.js":22}],3:[function(require,module,exports){
 var values = [];
 values["father"] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 42, 43, 44];
 values["mother"] = [21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 45];
@@ -690,7 +690,7 @@ mp.events.add("Combat:HitEntity", () => {
 	timerHitmarker = Date.now() / 1000;
 });
 mp.events.add("Combat:Hitted", (dmg) => {});
-},{"./vector.js":30}],5:[function(require,module,exports){
+},{"./vector.js":31}],5:[function(require,module,exports){
 var Status = [
     "Crafted successfully!",
     "Crafting failed!",
@@ -772,7 +772,7 @@ class Crop {
     _setup(data) {
         let self = this;
         self._data = data;
-        console.log("init crop");
+       // console.log("init crop");
         self._id = data._id;
         self._cropType = data.type;
         self._planted = data.planted;
@@ -871,7 +871,7 @@ mp.events.add("render", () => {
         streamedCrops[key].render();
     })
 });
-},{"./browser.js":1,"./natives.js":19,"./notifications.js":20,"./storage.js":28}],7:[function(require,module,exports){
+},{"./browser.js":1,"./natives.js":19,"./notifications.js":20,"./storage.js":29}],7:[function(require,module,exports){
 const movementClipSet = "move_ped_crouched";
 const strafeClipSet = "move_ped_crouched_strafing";
 const clipSetSwitchTime = 0.25;
@@ -984,25 +984,29 @@ mp.events.add("render", () => {
     console.log(JSON.stringify(checkResourceInFront(2)));
 });*/
 module.exports = checkResourceInFront;
-},{"./materials.js":18,"./natives.js":19,"./storage.js":28,"./vector.js":30}],9:[function(require,module,exports){
+},{"./materials.js":18,"./natives.js":19,"./storage.js":29,"./vector.js":31}],9:[function(require,module,exports){
 "use strict";
 console.log = function(...a) {
-    mp.gui.chat.push("DEBUG:" + a.join(" "))
+    mp.gui.chat.push("~r~D~w~:" + a.join(" "))
 };
+
 mp.lerp = function(a, b, n) {
     return (1 - n) * a + n * b;
 }
 require("./libs/attachments.js")
 require("./libs/weapon_attachments.js")
-
 require("./libs/animations.js")
-require("./vector.js")
+
+
+
 /*Register Attachments for Player Animatiuons etc TODO*/
 mp.attachmentMngr.register("mining", "prop_tool_pickaxe", 57005, new mp.Vector3(0.085, -0.3, 0), new mp.Vector3(-90, 0, 0));
 mp.attachmentMngr.register("lumberjack", "w_me_hatchet", 57005, new mp.Vector3(0.085, -0.05, 0), new mp.Vector3(-90, 0, 0));
 
-mp.rpc = require("./libs/rage-rpc.min.js");
 
+require("./vector.js")
+
+mp.rpc = require("./libs/rage-rpc.min.js");
 mp.isValid = function(val) {
     return val != null && val != undefined && val != "";
 }
@@ -1022,6 +1026,7 @@ mp.localPlayer.getPos = function() {
 mp.ui = {};
 mp.ui.ready = false;
 mp.gameplayCam.setAffectsAiming(true);
+require("./object.js")
 require("./interface.js")
 require("./crops.js")
 require("./player.js")
@@ -1043,7 +1048,6 @@ var CEFNotification = require("./browser.js").notification;
 mp.events.add("Notifications:New", (notification_data) => {
     CEFNotification.call("notify", notification_data)
 })
-
 mp.events.add("Player:WanderDuration", (ms) => {
     console.log("GO WANDER");
     let p = mp.players.local.position;
@@ -1079,10 +1083,7 @@ mp.events.add('Player:Collision', (enable) => {
         });
     }
 });
-
-
-
-},{"./browser.js":1,"./building.js":2,"./character_creator.js":3,"./combat.js":4,"./crafting.js":5,"./crops.js":6,"./crouch.js":7,"./gathering.js":8,"./interface.js":10,"./items.js":11,"./libs/animations.js":12,"./libs/attachments.js":13,"./libs/rage-rpc.min.js":14,"./libs/weapon_attachments.js":16,"./login.js":17,"./natives.js":19,"./player.js":22,"./scaleforms/index.js":27,"./storage.js":28,"./vector.js":30,"./vehicles.js":31,"./weather.js":32,"./zombies.js":33}],10:[function(require,module,exports){
+},{"./browser.js":1,"./building.js":2,"./character_creator.js":3,"./combat.js":4,"./crafting.js":5,"./crops.js":6,"./crouch.js":7,"./gathering.js":8,"./interface.js":10,"./items.js":11,"./libs/animations.js":12,"./libs/attachments.js":13,"./libs/rage-rpc.min.js":14,"./libs/weapon_attachments.js":16,"./login.js":17,"./natives.js":19,"./object.js":21,"./player.js":23,"./scaleforms/index.js":28,"./storage.js":29,"./vector.js":31,"./vehicles.js":32,"./weather.js":33,"./zombies.js":34}],10:[function(require,module,exports){
 //Interaction
 },{}],11:[function(require,module,exports){
 "use strict";
@@ -1408,7 +1409,7 @@ mp.events.add("render", () => {
         }
     }
 });
-},{"./browser.js":1,"./natives.js":19,"./notifications.js":20,"./storage.js":28}],12:[function(require,module,exports){
+},{"./browser.js":1,"./natives.js":19,"./notifications.js":20,"./storage.js":29}],12:[function(require,module,exports){
 var toLoad = ["mp_defend_base"]
 var loadPromises = [];
 toLoad.forEach(function(dict) {
@@ -1423,7 +1424,7 @@ toLoad.forEach(function(dict) {
 	}));
 })
 Promise.all(loadPromises).then(() => {
-	console.log("all dicts loaded")
+	//console.log("all dicts loaded")
 }).catch(err => {
 	console.log("all dicts err", err)
 })
@@ -1493,7 +1494,7 @@ mp.attachmentMngr =
 		{
 			id = mp.game.joaat(id);
 		}
-		console.log("register attachment id",id);
+		//console.log("register attachment id",id);
 		if(typeof(model) === 'string')
 		{
 			model = mp.game.joaat(model);
@@ -11151,6 +11152,8 @@ var Notifications = new class {
 module.exports = Notifications;
 
 },{}],21:[function(require,module,exports){
+//object.js
+},{}],22:[function(require,module,exports){
 var offsets = {
 	"sr_prop_sr_boxwood_01": {
 		pos: new mp.Vector3(0, 0, 0),
@@ -11162,7 +11165,7 @@ var offsets = {
 	}
 }
 module.exports = offsets;
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 let utils = require("./utils.js");
 var CEFHud = require("./browser.js").hud;
 var initDone = false;
@@ -11225,7 +11228,7 @@ mp.events.add("render", () => {
 		}
 	}
 });
-},{"./browser.js":1,"./utils.js":29}],23:[function(require,module,exports){
+},{"./browser.js":1,"./utils.js":30}],24:[function(require,module,exports){
 var messageScaleform = require("./Scaleform.js");
 let bigMessageScaleform = null;
 let bigMsgInit = 0;
@@ -11276,7 +11279,7 @@ mp.events.add("render", () => {
         }
     }
 });
-},{"./Scaleform.js":26}],24:[function(require,module,exports){
+},{"./Scaleform.js":27}],25:[function(require,module,exports){
 class InstructionButtons {
     constructor() {
         this.handle = mp.game.graphics.requestScaleformMovie("instructional_buttons");
@@ -11322,7 +11325,7 @@ class InstructionButtons {
     }
 }
 module.exports = new InstructionButtons();
-},{}],25:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 var messageScaleform = require("./Scaleform.js");
 let midsizedMessageScaleform = null;
 let msgInit = 0;
@@ -11366,7 +11369,7 @@ mp.events.add("render", () => {
         }
     }
 });
-},{"./Scaleform.js":26}],26:[function(require,module,exports){
+},{"./Scaleform.js":27}],27:[function(require,module,exports){
 class BasicScaleform {
     constructor(scaleformName) {
         this.handle = mp.game.graphics.requestScaleformMovie(scaleformName);
@@ -11412,7 +11415,7 @@ class BasicScaleform {
 }
 
 module.exports = BasicScaleform;
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 var messageScaleform = require("./Scaleform.js");
 require("./BigMessage.js");
 require("./MidsizedMessage.js");
@@ -11427,7 +11430,7 @@ mp.game.ui.messages = {
 };
 
 
-},{"./BigMessage.js":23,"./InstructionButtons.js":24,"./MidsizedMessage.js":25,"./Scaleform.js":26}],28:[function(require,module,exports){
+},{"./BigMessage.js":24,"./InstructionButtons.js":25,"./MidsizedMessage.js":26,"./Scaleform.js":27}],29:[function(require,module,exports){
 var cell_size = 40;
 var padding = 5;
 var inv_cells = 6;
@@ -11969,7 +11972,7 @@ var StorageSystem = new class {
 	}
 }
 module.exports = StorageSystem;
-},{"../../server/world/items.js":34,"./browser.js":1}],29:[function(require,module,exports){
+},{"../../server/world/items.js":35,"./browser.js":1}],30:[function(require,module,exports){
 // https://github.com/glitchdetector/fivem-minimap-anchor
 function getMinimapAnchor() {
     let sfX = 1.0 / 20.0;
@@ -11994,7 +11997,7 @@ function getMinimapAnchor() {
 module.exports = {
     minimap_anchor: getMinimapAnchor
 }
-},{}],30:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 mp.Vector3.prototype.findRot = function(rz, dist, rot) {
     let nVector = new mp.Vector3(this.x, this.y, this.z);
     var degrees = (rz + rot) * (Math.PI / 180);
@@ -12141,12 +12144,12 @@ Array.prototype.shuffle = function() {
     }
     return this;
 }
-},{}],31:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 const toSync = ["health", "running", "engine", "wheel_fl", "wheel_fr", "wheel_rl", "wheel_rr", "fuel", "spark_plugs", "battery"]
 
 function syncVehicle(type, vehicle, value) {
     if (type == "running") {
-        console.log("Set Engine to", value);
+        //console.log("Set Engine to", value);
         vehicle.setEngineOn(value, true, true);
     }
     if (type == "health") {
@@ -12200,7 +12203,7 @@ toSync.forEach(function(data) {
     mp.events.addDataHandler(data, (entity, value) => {
         if (entity.type === "vehicle") {
             syncVehicle(data, entity, value);
-            console.log(`${data} changed to ${value} on entity ${entity.handle}.`);
+            //console.log(`${data} changed to ${value} on entity ${entity.handle}.`);
         }
     });
 })
@@ -12379,7 +12382,7 @@ mp.keys.bind(0x47, false, () => {
         }
     }
 });
-},{}],32:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 require("./vector.js");
 mp.game.audio.startAudioScene("FBI_HEIST_H5_MUTE_AMBIENCE_SCENE");
 mp.game.audio.startAudioScene("MIC1_RADIO_DISABLE");
@@ -12441,7 +12444,7 @@ var Weather = new class {
     }
 }
 module.exports = Weather;
-},{"./vector.js":30}],33:[function(require,module,exports){
+},{"./vector.js":31}],34:[function(require,module,exports){
 var Zombie = class {
     constructor() {
         this._setup();
@@ -12543,7 +12546,7 @@ mp.events.add("render", e => {
     new Zombie();
 });
 */
-},{}],34:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 "use strict";
 function getRandomInt(min, max) {
     min = Math.ceil(min);

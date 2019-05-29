@@ -1,5 +1,16 @@
 var PEDS = [];
 
+
+/**
+ *  Behaviour Group : Animal
+ */
+class SyncedPed {
+
+
+}
+
+
+
 /**
  *  Controls syncing for NPCs
  */

@@ -5,7 +5,7 @@ var Vehicle = class {
     constructor(data) {
         if (!new.target) new Error('class must be called with new');
         let self = this;
-        console.log("new veh class");
+        //console.log("new veh class");
         this._data = data;
         this._id = data.veh_id;
         this._model = data.model;
@@ -86,7 +86,7 @@ var Vehicle = class {
         this._veh.setVariable("running", this._running);
     }
     create() {
-        console.log("create veh1");
+       // console.log("create veh1");
         this._veh = mp.vehicles.new(this._model, mp.vector(this._position), {
             heading: mp.vector(this._rotation),
             numberPlate: "I3Ass",

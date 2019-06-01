@@ -1,12 +1,11 @@
 "use strict";
-var tickRate = 1000 / 1;
 var rpc = require('rage-rpc');
 require("./libs/vector.js")
 require("./libs/array.js")
 require("./libs/attachments.js")
 var PlayerClass = require("./users/player.js")
 var ItemPickups = require("./world/pickups.js")
-var EntitySync = require("./libs/sync_entities.js.js")
+var EntitySync = require("./libs/sync_entities.js")
 var Building = require("./world/building.js")
 var Vehicles = require("./world/vehicles.js")
 var Crops = require("./world/crops.js")
@@ -14,6 +13,7 @@ var Storage = require("./world/storage.js")
 require("./world/crafting.js")
 
 
+var tickRate = 1000 / 1;
 setInterval(function() {
     mp.events.call("Server:Tick");
 },tickRate);

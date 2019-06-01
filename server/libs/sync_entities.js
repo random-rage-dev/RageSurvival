@@ -4,7 +4,7 @@ var PEDS = [];
 /**
  *  Behaviour Group : Animal
  */
-class SyncedPed {
+class Animal {
 
 
 }
@@ -21,28 +21,31 @@ class SyncedPed {
     moodList = [];
     dimension = 0;
     _active = true;
+    group = undefined;
+    streamedIn = [];
 
-    constructor(model, pos) {
+    constructor(model, pos, group) {
         this.id = PEDS.length;
-        PEDS[this.id] = this;
         this.model = mp.joaat(model);
         this.position = pos;
-
         this.addTaskTimer();
-
-        mp.players.call('Ped:Create', [this.model, this.position]);
+        this.group = new group();
+        mp.players.call('Ped:Create', [this.id,this.model, this.position]);
     }
-
-    static getPed(id) {
-        return PEDS[id];
-    }
-
     /**
      *
      * @returns boolean : are we active? if false, stop doing things to clear processing power, i.e. if no one is streamed in to this ped
      */
     get active() {
         return this._active;
+    }
+    /*
+    * Player streamed in to NPC
+    */
+    streamIn(player) {
+        if (this.streamedIn.indexOf(player.id) == -1) {
+            this.streamedIn.push(player.id);
+        }
     }
 
     set active(state) {
@@ -183,7 +186,7 @@ class SyncedPed {
 
     }
 }
-
+new SyncedPed("a_c_deer", new mp.Vector3(0,0,0), Animal)
 mp.events.addCommand("addped", (player, args, model = "a_c_deer") => {
     let ped = new SyncedPed(model, player.position);
     player.outputChatBox("adding ped: " + ped.id);

@@ -26,7 +26,6 @@ var Crop = class {
         if (!new.target) new Error('class must be called with new');
         let self = this;
         console.log("new crop class");
-        console.log(data);
         self._id = data._id;
         self._data = data;
         self._type = data.cropType;

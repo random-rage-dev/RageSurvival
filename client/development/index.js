@@ -1,24 +1,20 @@
 "use strict";
 console.log = function(...a) {
-    mp.gui.chat.push("~r~D~w~:" + a.join(" "))
+    a = a.map(function(e) {
+        return JSON.stringify(e);
+    })
+    mp.gui.chat.push("DeBuG:" + a.join(" "))
 };
-
 mp.lerp = function(a, b, n) {
     return (1 - n) * a + n * b;
 }
 require("./libs/attachments.js")
 require("./libs/weapon_attachments.js")
 require("./libs/animations.js")
-
-
-
 /*Register Attachments for Player Animatiuons etc TODO*/
 mp.attachmentMngr.register("mining", "prop_tool_pickaxe", 57005, new mp.Vector3(0.085, -0.3, 0), new mp.Vector3(-90, 0, 0));
 mp.attachmentMngr.register("lumberjack", "w_me_hatchet", 57005, new mp.Vector3(0.085, -0.05, 0), new mp.Vector3(-90, 0, 0));
-
-
 require("./vector.js")
-
 mp.rpc = require("./libs/rage-rpc.min.js");
 mp.isValid = function(val) {
     return val != null && val != undefined && val != "";
@@ -39,6 +35,7 @@ mp.localPlayer.getPos = function() {
 mp.ui = {};
 mp.ui.ready = false;
 mp.gameplayCam.setAffectsAiming(true);
+require("./peds.js")
 require("./object.js")
 require("./interface.js")
 require("./crops.js")

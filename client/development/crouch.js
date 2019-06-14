@@ -23,8 +23,11 @@ mp.events.addDataHandler("isCrouched", (entity, value) => {
         entity.resetStrafeClipset();
     }
 });
-mp.keys.bind(0x11, false, () => {
-    if ((mp.canCrouch == true) && (mp.gui.chat.enabled == false) && (mp.ui.ready == true)) {
-        mp.events.callRemote("Player:Crouch");
+mp.events.add("render", () => {
+    mp.game.controls.disableControlAction(2, 36, true);
+    if (mp.game.controls.isDisabledControlJustPressed(2, 36)) {
+        if ((mp.canCrouch == true) && (mp.gui.chat.enabled == false) && (mp.ui.ready == true)) {
+            mp.events.callRemote("Player:Crouch");
+        }
     }
-});
+})

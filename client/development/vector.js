@@ -1,18 +1,18 @@
 mp.Vector3.prototype.findRot = function(rz, dist, rot) {
     let nVector = new mp.Vector3(this.x, this.y, this.z);
-    var degrees = (rz + rot) * (Math.PI / 180);
+    let degrees = (rz + rot) * (Math.PI / 180);
     nVector.x = this.x + dist * Math.cos(degrees);
     nVector.y = this.y + dist * Math.sin(degrees);
     return nVector;
 }
 mp.Vector3.prototype.rotPoint = function(pos) {
-    var temp = new mp.Vector3(this.x, this.y, this.z);
-    var temp1 = new mp.Vector3(pos.x, pos.y, pos.z);
-    var gegenkathete = temp1.z - temp.z
-    var a = temp.x - temp1.x;
-    var b = temp.y - temp1.y;
-    var ankathete = Math.sqrt(a * a + b * b);
-    var winkel = Math.atan2(gegenkathete, ankathete) * 180 / Math.PI
+    let temp = new mp.Vector3(this.x, this.y, this.z);
+    let temp1 = new mp.Vector3(pos.x, pos.y, pos.z);
+    let gegenkathete = temp1.z - temp.z
+    let a = temp.x - temp1.x;
+    let b = temp.y - temp1.y;
+    let ankathete = Math.sqrt(a * a + b * b);
+    let winkel = Math.atan2(gegenkathete, ankathete) * 180 / Math.PI
     return winkel;
 }
 mp.Vector3.prototype.toPixels = function() {
@@ -26,13 +26,7 @@ mp.Vector3.prototype.toPixels = function() {
         y: Math.floor(clientScreen.y * toScreen.y) + "px"
     };
 }
-/*mp.Vector3.prototype.normalize = function(n) {
-    let nVector = new mp.Vector3(this.x, this.y, this.z);
-    nVector.x = this.x / n;
-    nVector.y = this.y / n;
-    nVector.z = this.z / n;
-    return this;
-}*/
+
 mp.Vector3.prototype.lerp = function(vector2, deltaTime) {
     let nVector = new mp.Vector3(this.x, this.y, this.z);
     nVector.x = this.x + (vector2.x - this.x) * deltaTime
@@ -117,28 +111,28 @@ mp.Vector3.prototype.sub = function(x, y, z) {
 mp.Vector3.prototype.add = function(x, y, z) {
     return new mp.Vector3(this.x + x, this.y + y, this.z + z);
 };
-mp.vector = function(vec) {
-    return new mp.Vector3(vec.x, vec.y, vec.z);
-}
 mp.Vector3.prototype.insidePolygon = function(polygon) {
-    var x = this.x,
+    let x = this.x,
         y = this.y;
-    var inside = false;
-    for (var i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-        var xi = polygon[i][0],
+    let inside = false;
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+        let xi = polygon[i][0],
             yi = polygon[i][1];
-        var xj = polygon[j][0],
+        let xj = polygon[j][0],
             yj = polygon[j][1];
-        var intersect = ((yi > y) != (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+        let intersect = ((yi > y) != (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
         if (intersect) inside = !inside;
     }
     return inside;
 };
+mp.vector = function(vec) {
+    return new mp.Vector3(vec.x, vec.y, vec.z);
+}
 Array.prototype.shuffle = function() {
-    var i = this.length;
+    let i = this.length;
     while (i) {
-        var j = Math.floor(Math.random() * i);
-        var t = this[--i];
+        let j = Math.floor(Math.random() * i);
+        let t = this[--i];
         this[i] = this[j];
         this[j] = t;
     }

@@ -35,7 +35,7 @@ mp.localPlayer.getPos = function() {
 mp.ui = {};
 mp.ui.ready = false;
 mp.gameplayCam.setAffectsAiming(true);
-require("./peds.js")
+require("./ped.js")
 require("./object.js")
 require("./interface.js")
 require("./crops.js")

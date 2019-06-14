@@ -9,8 +9,7 @@ var ObjectManager = new class {
 	}
 	destroy(object) {
 		this.objects.splice(this.objects.indexOf(object),1);
-		delete object;
-
+		delete this.objects[this.objects.indexOf(object)];
 	}
 }
 class Object {
@@ -20,6 +19,7 @@ class Object {
 		this.position = mp.vector(position);
 		this.rotation = mp.vector(rotation);
 		this.customData = customData;
+		this.created = false;
 		ObjectManager.register(this);
 	}
 	create() {
@@ -42,6 +42,9 @@ class Object {
 			}
 			this.obj.setRotation(rotobj.x + offset.rot.x, rotobj.y + offset.rot.y, rotobj.z, 0, true);
 		}
+		this.created = true;
+
+		return this.created;
 	}
 	get handle() {
 		return this.obj.handle || 0;

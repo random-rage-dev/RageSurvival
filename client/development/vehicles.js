@@ -136,16 +136,21 @@ mp.events.add("render", () => {
     }
     if (mp.players.local.isInAnyVehicle(false)) {
         if (mp.players.local.vehicle != null) {
-            if (mp.players.local.vehicle.getVariable("running") != true) {
-                mp.game.controls.disableControlAction(0, 278, true);
-                mp.game.controls.disableControlAction(0, 279, true);
-                mp.game.controls.disableControlAction(0, 280, true);
-                mp.game.controls.disableControlAction(0, 281, true);
-                mp.game.controls.disableControlAction(2, 278, true);
-                mp.game.controls.disableControlAction(2, 279, true);
-                mp.game.controls.disableControlAction(2, 280, true);
-                mp.game.controls.disableControlAction(2, 281, true);
-                mp.players.local.vehicle.setEngineOn(false, true, true);
+            if (mp.players.local.vehicle.getVariable("running") != undefined) {
+                if (mp.players.local.vehicle.getVariable("running") != true) {
+                    mp.game.controls.disableControlAction(0, 278, true);
+                    mp.game.controls.disableControlAction(0, 279, true);
+                    mp.game.controls.disableControlAction(0, 280, true);
+                    mp.game.controls.disableControlAction(0, 281, true);
+                    mp.game.controls.disableControlAction(2, 278, true);
+                    mp.game.controls.disableControlAction(2, 279, true);
+                    mp.game.controls.disableControlAction(2, 280, true);
+                    mp.game.controls.disableControlAction(2, 281, true);
+                    mp.players.local.vehicle.setEngineOn(false, true, true);
+                }
+            } else {
+                    mp.players.local.vehicle.setEngineOn(true, true, true);
+                
             }
         }
     }
@@ -175,7 +180,6 @@ var seats = {
 }
 mp.game.controls.useDefaultVehicleEntering = false;
 mp.keys.bind(0x47, false, () => {
-    console.log("G");
     if (mp.players.local.vehicle === null) {
         if (mp.gui.cursor.visible) return;
         let pos = mp.players.local.position;

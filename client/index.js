@@ -690,7 +690,7 @@ mp.events.add("Combat:HitEntity", () => {
 	timerHitmarker = Date.now() / 1000;
 });
 mp.events.add("Combat:Hitted", (dmg) => {});
-},{"./vector.js":31}],5:[function(require,module,exports){
+},{"./vector.js":32}],5:[function(require,module,exports){
 var Status = [
     "Crafted successfully!",
     "Crafting failed!",
@@ -871,7 +871,7 @@ mp.events.add("render", () => {
         streamedCrops[key].render();
     })
 });
-},{"./browser.js":1,"./natives.js":19,"./notifications.js":20,"./storage.js":29}],7:[function(require,module,exports){
+},{"./browser.js":1,"./natives.js":19,"./notifications.js":20,"./storage.js":30}],7:[function(require,module,exports){
 const movementClipSet = "move_ped_crouched";
 const strafeClipSet = "move_ped_crouched_strafing";
 const clipSetSwitchTime = 0.25;
@@ -984,28 +984,24 @@ mp.events.add("render", () => {
     console.log(JSON.stringify(checkResourceInFront(2)));
 });*/
 module.exports = checkResourceInFront;
-},{"./materials.js":18,"./natives.js":19,"./storage.js":29,"./vector.js":31}],9:[function(require,module,exports){
+},{"./materials.js":18,"./natives.js":19,"./storage.js":30,"./vector.js":32}],9:[function(require,module,exports){
 "use strict";
 console.log = function(...a) {
-    mp.gui.chat.push("~r~D~w~:" + a.join(" "))
+    a = a.map(function(e) {
+        return JSON.stringify(e);
+    })
+    mp.gui.chat.push("DeBuG:" + a.join(" "))
 };
-
 mp.lerp = function(a, b, n) {
     return (1 - n) * a + n * b;
 }
 require("./libs/attachments.js")
 require("./libs/weapon_attachments.js")
 require("./libs/animations.js")
-
-
-
 /*Register Attachments for Player Animatiuons etc TODO*/
 mp.attachmentMngr.register("mining", "prop_tool_pickaxe", 57005, new mp.Vector3(0.085, -0.3, 0), new mp.Vector3(-90, 0, 0));
 mp.attachmentMngr.register("lumberjack", "w_me_hatchet", 57005, new mp.Vector3(0.085, -0.05, 0), new mp.Vector3(-90, 0, 0));
-
-
 require("./vector.js")
-
 mp.rpc = require("./libs/rage-rpc.min.js");
 mp.isValid = function(val) {
     return val != null && val != undefined && val != "";
@@ -1026,6 +1022,7 @@ mp.localPlayer.getPos = function() {
 mp.ui = {};
 mp.ui.ready = false;
 mp.gameplayCam.setAffectsAiming(true);
+require("./ped.js")
 require("./object.js")
 require("./interface.js")
 require("./crops.js")
@@ -1083,7 +1080,7 @@ mp.events.add('Player:Collision', (enable) => {
         });
     }
 });
-},{"./browser.js":1,"./building.js":2,"./character_creator.js":3,"./combat.js":4,"./crafting.js":5,"./crops.js":6,"./crouch.js":7,"./gathering.js":8,"./interface.js":10,"./items.js":11,"./libs/animations.js":12,"./libs/attachments.js":13,"./libs/rage-rpc.min.js":14,"./libs/weapon_attachments.js":16,"./login.js":17,"./natives.js":19,"./object.js":21,"./player.js":23,"./scaleforms/index.js":28,"./storage.js":29,"./vector.js":31,"./vehicles.js":32,"./weather.js":33,"./zombies.js":34}],10:[function(require,module,exports){
+},{"./browser.js":1,"./building.js":2,"./character_creator.js":3,"./combat.js":4,"./crafting.js":5,"./crops.js":6,"./crouch.js":7,"./gathering.js":8,"./interface.js":10,"./items.js":11,"./libs/animations.js":12,"./libs/attachments.js":13,"./libs/rage-rpc.min.js":14,"./libs/weapon_attachments.js":16,"./login.js":17,"./natives.js":19,"./object.js":21,"./ped.js":23,"./player.js":24,"./scaleforms/index.js":29,"./storage.js":30,"./vector.js":32,"./vehicles.js":33,"./weather.js":34,"./zombies.js":35}],10:[function(require,module,exports){
 //Interaction
 },{}],11:[function(require,module,exports){
 "use strict";
@@ -1409,7 +1406,7 @@ mp.events.add("render", () => {
         }
     }
 });
-},{"./browser.js":1,"./natives.js":19,"./notifications.js":20,"./storage.js":29}],12:[function(require,module,exports){
+},{"./browser.js":1,"./natives.js":19,"./notifications.js":20,"./storage.js":30}],12:[function(require,module,exports){
 var toLoad = ["mp_defend_base"]
 var loadPromises = [];
 toLoad.forEach(function(dict) {
@@ -11153,6 +11150,63 @@ module.exports = Notifications;
 
 },{}],21:[function(require,module,exports){
 //object.js
+var ObjectManager = new class {
+	constructor() {
+		this.objects = [];
+		this.lastCreation = Date.now();
+	}
+	register(object) {
+		this.objects.push(object);
+	}
+	destroy(object) {
+		this.objects.splice(this.objects.indexOf(object),1);
+		delete this.objects[this.objects.indexOf(object)];
+	}
+}
+class Object {
+	constructor(model, position, rotation, customData) {
+		this.obj = undefined;
+		this.model = model;
+		this.position = mp.vector(position);
+		this.rotation = mp.vector(rotation);
+		this.customData = customData;
+		this.created = false;
+		ObjectManager.register(this);
+	}
+	create() {
+		this.obj = mp.objects.new(mp.game.joaat(this.model), this.position, {
+			rotation: this.rotation,
+			alpha: 255,
+			dimension: 0
+		});
+		if (this.customData.type == "pickup") {
+			let offset = this.customData.offset;
+			this.obj.placeOnGroundProperly();
+			let rotobj = this.obj.getRotation(0);
+			let posobj = this.obj.getCoords(false);
+			this.obj.setCollision(false, true);
+			this.obj.freezePosition(true);
+			if ((offset.rot.x > 0) || (offset.rot.y > 0)) {
+				this.obj.setCoords(posobj.x + offset.pos.x, posobj.y + offset.pos.y, (posobj.z - this.obj.getHeightAboveGround()) + offset.pos.z, false, false, false, false);
+			} else {
+				this.obj.setCoords(posobj.x + offset.pos.x, posobj.y + offset.pos.y, posobj.z + offset.pos.z, false, false, false, false);
+			}
+			this.obj.setRotation(rotobj.x + offset.rot.x, rotobj.y + offset.rot.y, rotobj.z, 0, true);
+		}
+		this.created = true;
+
+		return this.created;
+	}
+	get handle() {
+		return this.obj.handle || 0;
+	}
+	delete() {
+		if (typeof this.obj != "object") return;
+		this.obj.markForDeletion();
+		this.obj.destroy();
+		ObjectManager.destroy(this);
+	}
+}
 },{}],22:[function(require,module,exports){
 var offsets = {
 	"sr_prop_sr_boxwood_01": {
@@ -11166,6 +11220,96 @@ var offsets = {
 }
 module.exports = offsets;
 },{}],23:[function(require,module,exports){
+var Peds = [];
+class Ped {
+    constructor(id, model, pos) {
+        let self = this;
+        this._id = id;
+        this._ped = mp.peds.new(model, pos, 0, 0);
+        this._ped.streamInHandler = function(streamed_ped) {
+            console.log("ped streamed in",self._id);
+            mp.events.callRemote('Ped:Stream', id);
+            self.streamIn(streamed_ped);
+        };
+    }
+    streamIn(ped) {
+
+        ped.freezePosition(false);
+        ped.setCanRagdoll(true);
+        ped.setRagdollOnCollision(true);
+        ped.setCanRagdollFromPlayerImpact(true);
+        ped.setCombatAbility(100);
+        ped.setCombatMovement(3);
+        for (var i = 1; i < 64; i += 2) {
+            ped.setFleeAttributes(i, false);
+        }
+        ped.setFleeAttributes(0, false);
+        ped.setCombatAttributes(17, true);
+        ped.setCombatAttributes(16, true);
+        ped.setInvincible(false);
+        ped.setCanBeDamaged(true);
+        ped.setOnlyDamagedByPlayer(false);
+        ped.setBlockingOfNonTemporaryEvents(true);
+
+
+
+        let style = "move_heist_lester";
+        if (!mp.game.streaming.hasClipSetLoaded(style)) {
+            mp.game.streaming.requestClipSet(style);
+            while (!mp.game.streaming.hasClipSetLoaded(style)) mp.game.wait(0);
+        }
+        ped.setMovementClipset(style, 0.0);
+    }
+    set pos(pos) {
+        this._ped.setPosition(pos);
+        this._pos = pos;
+    }
+    set target(pos) {
+        if (typeof this.speed === 'undefined') this.speed = 1.0;
+        if (typeof this.walkingStyle === 'undefined') this.walkingStyle = 0;
+        this._ped.taskGoToCoordAnyMeans(pos.x, pos.y, pos.z, this.speed, 0, 0, this.walkingStyle, true);
+    }
+    set setPosition(pos) {
+        this._ped.setCoords(pos.x, pos.y, pos.z, true, true, true, false);
+    }
+    set attack(id) {
+        let player = mp.players.at(id);
+        if (!player) return;
+        //this._ped.taskCombat(player.handle, 0, 16);
+        this._ped.taskPutDirectlyIntoMelee(player.handle, 0.0, -1.0, 1.0, false)
+    }
+    playAnimation(dict, anim) {
+        this._ped.taskPlayAnim(dict, anim, 8.0, 1.0, 0, 0, 1.0, false, false, false);
+    }
+    doTask(task, param) {
+        switch (task) {
+            case 'attack':
+                this.attack(param);
+                break;
+            case 'move':
+                this.target(param);
+                break;
+            case 'animate':
+                this.playAnimation(param[0], param[1]);
+                break;
+            case 'wander':
+                //this._ped.taskWanderStandard(10.0, 10);
+                console.log("do wander only with coords");
+                break;
+        }
+    }
+}
+mp.events.add("Ped:Create", (id,model, pos) => {
+    console.log("Ped:Create",id,model, pos);
+    Peds[id] = new Ped(id, model, pos);
+});
+mp.events.add("Ped:DoTask", (id, task, param = null) => {
+    mp.gui.chat.push("Ped:DoTask " + id + " " + task + " " + param);
+    if (Peds[id]) {
+        Peds[id].doTask(task, param);
+    }
+});
+},{}],24:[function(require,module,exports){
 let utils = require("./utils.js");
 var CEFHud = require("./browser.js").hud;
 var initDone = false;
@@ -11228,7 +11372,7 @@ mp.events.add("render", () => {
 		}
 	}
 });
-},{"./browser.js":1,"./utils.js":30}],24:[function(require,module,exports){
+},{"./browser.js":1,"./utils.js":31}],25:[function(require,module,exports){
 var messageScaleform = require("./Scaleform.js");
 let bigMessageScaleform = null;
 let bigMsgInit = 0;
@@ -11279,7 +11423,7 @@ mp.events.add("render", () => {
         }
     }
 });
-},{"./Scaleform.js":27}],25:[function(require,module,exports){
+},{"./Scaleform.js":28}],26:[function(require,module,exports){
 class InstructionButtons {
     constructor() {
         this.handle = mp.game.graphics.requestScaleformMovie("instructional_buttons");
@@ -11325,7 +11469,7 @@ class InstructionButtons {
     }
 }
 module.exports = new InstructionButtons();
-},{}],26:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 var messageScaleform = require("./Scaleform.js");
 let midsizedMessageScaleform = null;
 let msgInit = 0;
@@ -11369,7 +11513,7 @@ mp.events.add("render", () => {
         }
     }
 });
-},{"./Scaleform.js":27}],27:[function(require,module,exports){
+},{"./Scaleform.js":28}],28:[function(require,module,exports){
 class BasicScaleform {
     constructor(scaleformName) {
         this.handle = mp.game.graphics.requestScaleformMovie(scaleformName);
@@ -11415,7 +11559,7 @@ class BasicScaleform {
 }
 
 module.exports = BasicScaleform;
-},{}],28:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 var messageScaleform = require("./Scaleform.js");
 require("./BigMessage.js");
 require("./MidsizedMessage.js");
@@ -11430,7 +11574,7 @@ mp.game.ui.messages = {
 };
 
 
-},{"./BigMessage.js":24,"./InstructionButtons.js":25,"./MidsizedMessage.js":26,"./Scaleform.js":27}],29:[function(require,module,exports){
+},{"./BigMessage.js":25,"./InstructionButtons.js":26,"./MidsizedMessage.js":27,"./Scaleform.js":28}],30:[function(require,module,exports){
 var cell_size = 40;
 var padding = 5;
 var inv_cells = 6;
@@ -11972,7 +12116,7 @@ var StorageSystem = new class {
 	}
 }
 module.exports = StorageSystem;
-},{"../../server/world/items.js":35,"./browser.js":1}],30:[function(require,module,exports){
+},{"../../server/world/items.js":36,"./browser.js":1}],31:[function(require,module,exports){
 // https://github.com/glitchdetector/fivem-minimap-anchor
 function getMinimapAnchor() {
     let sfX = 1.0 / 20.0;
@@ -11997,22 +12141,22 @@ function getMinimapAnchor() {
 module.exports = {
     minimap_anchor: getMinimapAnchor
 }
-},{}],31:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 mp.Vector3.prototype.findRot = function(rz, dist, rot) {
     let nVector = new mp.Vector3(this.x, this.y, this.z);
-    var degrees = (rz + rot) * (Math.PI / 180);
+    let degrees = (rz + rot) * (Math.PI / 180);
     nVector.x = this.x + dist * Math.cos(degrees);
     nVector.y = this.y + dist * Math.sin(degrees);
     return nVector;
 }
 mp.Vector3.prototype.rotPoint = function(pos) {
-    var temp = new mp.Vector3(this.x, this.y, this.z);
-    var temp1 = new mp.Vector3(pos.x, pos.y, pos.z);
-    var gegenkathete = temp1.z - temp.z
-    var a = temp.x - temp1.x;
-    var b = temp.y - temp1.y;
-    var ankathete = Math.sqrt(a * a + b * b);
-    var winkel = Math.atan2(gegenkathete, ankathete) * 180 / Math.PI
+    let temp = new mp.Vector3(this.x, this.y, this.z);
+    let temp1 = new mp.Vector3(pos.x, pos.y, pos.z);
+    let gegenkathete = temp1.z - temp.z
+    let a = temp.x - temp1.x;
+    let b = temp.y - temp1.y;
+    let ankathete = Math.sqrt(a * a + b * b);
+    let winkel = Math.atan2(gegenkathete, ankathete) * 180 / Math.PI
     return winkel;
 }
 mp.Vector3.prototype.toPixels = function() {
@@ -12026,13 +12170,7 @@ mp.Vector3.prototype.toPixels = function() {
         y: Math.floor(clientScreen.y * toScreen.y) + "px"
     };
 }
-/*mp.Vector3.prototype.normalize = function(n) {
-    let nVector = new mp.Vector3(this.x, this.y, this.z);
-    nVector.x = this.x / n;
-    nVector.y = this.y / n;
-    nVector.z = this.z / n;
-    return this;
-}*/
+
 mp.Vector3.prototype.lerp = function(vector2, deltaTime) {
     let nVector = new mp.Vector3(this.x, this.y, this.z);
     nVector.x = this.x + (vector2.x - this.x) * deltaTime
@@ -12117,34 +12255,34 @@ mp.Vector3.prototype.sub = function(x, y, z) {
 mp.Vector3.prototype.add = function(x, y, z) {
     return new mp.Vector3(this.x + x, this.y + y, this.z + z);
 };
-mp.vector = function(vec) {
-    return new mp.Vector3(vec.x, vec.y, vec.z);
-}
 mp.Vector3.prototype.insidePolygon = function(polygon) {
-    var x = this.x,
+    let x = this.x,
         y = this.y;
-    var inside = false;
-    for (var i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-        var xi = polygon[i][0],
+    let inside = false;
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+        let xi = polygon[i][0],
             yi = polygon[i][1];
-        var xj = polygon[j][0],
+        let xj = polygon[j][0],
             yj = polygon[j][1];
-        var intersect = ((yi > y) != (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+        let intersect = ((yi > y) != (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
         if (intersect) inside = !inside;
     }
     return inside;
 };
+mp.vector = function(vec) {
+    return new mp.Vector3(vec.x, vec.y, vec.z);
+}
 Array.prototype.shuffle = function() {
-    var i = this.length;
+    let i = this.length;
     while (i) {
-        var j = Math.floor(Math.random() * i);
-        var t = this[--i];
+        let j = Math.floor(Math.random() * i);
+        let t = this[--i];
         this[i] = this[j];
         this[j] = t;
     }
     return this;
 }
-},{}],32:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 const toSync = ["health", "running", "engine", "wheel_fl", "wheel_fr", "wheel_rl", "wheel_rr", "fuel", "spark_plugs", "battery"]
 
 function syncVehicle(type, vehicle, value) {
@@ -12283,16 +12421,21 @@ mp.events.add("render", () => {
     }
     if (mp.players.local.isInAnyVehicle(false)) {
         if (mp.players.local.vehicle != null) {
-            if (mp.players.local.vehicle.getVariable("running") != true) {
-                mp.game.controls.disableControlAction(0, 278, true);
-                mp.game.controls.disableControlAction(0, 279, true);
-                mp.game.controls.disableControlAction(0, 280, true);
-                mp.game.controls.disableControlAction(0, 281, true);
-                mp.game.controls.disableControlAction(2, 278, true);
-                mp.game.controls.disableControlAction(2, 279, true);
-                mp.game.controls.disableControlAction(2, 280, true);
-                mp.game.controls.disableControlAction(2, 281, true);
-                mp.players.local.vehicle.setEngineOn(false, true, true);
+            if (mp.players.local.vehicle.getVariable("running") != undefined) {
+                if (mp.players.local.vehicle.getVariable("running") != true) {
+                    mp.game.controls.disableControlAction(0, 278, true);
+                    mp.game.controls.disableControlAction(0, 279, true);
+                    mp.game.controls.disableControlAction(0, 280, true);
+                    mp.game.controls.disableControlAction(0, 281, true);
+                    mp.game.controls.disableControlAction(2, 278, true);
+                    mp.game.controls.disableControlAction(2, 279, true);
+                    mp.game.controls.disableControlAction(2, 280, true);
+                    mp.game.controls.disableControlAction(2, 281, true);
+                    mp.players.local.vehicle.setEngineOn(false, true, true);
+                }
+            } else {
+                    mp.players.local.vehicle.setEngineOn(true, true, true);
+                
             }
         }
     }
@@ -12322,7 +12465,6 @@ var seats = {
 }
 mp.game.controls.useDefaultVehicleEntering = false;
 mp.keys.bind(0x47, false, () => {
-    console.log("G");
     if (mp.players.local.vehicle === null) {
         if (mp.gui.cursor.visible) return;
         let pos = mp.players.local.position;
@@ -12382,7 +12524,7 @@ mp.keys.bind(0x47, false, () => {
         }
     }
 });
-},{}],33:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 require("./vector.js");
 mp.game.audio.startAudioScene("FBI_HEIST_H5_MUTE_AMBIENCE_SCENE");
 mp.game.audio.startAudioScene("MIC1_RADIO_DISABLE");
@@ -12444,7 +12586,7 @@ var Weather = new class {
     }
 }
 module.exports = Weather;
-},{"./vector.js":31}],34:[function(require,module,exports){
+},{"./vector.js":32}],35:[function(require,module,exports){
 var Zombie = class {
     constructor() {
         this._setup();
@@ -12546,7 +12688,7 @@ mp.events.add("render", e => {
     new Zombie();
 });
 */
-},{}],35:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 "use strict";
 function getRandomInt(min, max) {
     min = Math.ceil(min);

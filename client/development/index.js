@@ -29,12 +29,17 @@ mp.canCrouch = true;
 mp.gameplayCam = mp.cameras.new('gameplay');
 mp.defaultCam = mp.cameras.new('default');
 mp.localPlayer = mp.players.local;
+
+mp.Player.prototype.getPosition = function() {
+    return mp.vector(this.position);
+}
 mp.localPlayer.getPos = function() {
     return mp.vector(this.position);
 }
 mp.ui = {};
 mp.ui.ready = false;
 mp.gameplayCam.setAffectsAiming(true);
+require("./vegetation.js")
 require("./ped.js")
 require("./object.js")
 require("./interface.js")

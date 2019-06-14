@@ -85,10 +85,10 @@ mp.events.add('playerChat', (player, message) => {
     }
 });
 mp.events.add("Player:Crouch", (player) => {
-    if (player.data.isCrouched === undefined) {
-        player.data.isCrouched = true;
-    } else {
-        player.data.isCrouched = !player.data.isCrouched;
+    if (players[player.socialClub]) {
+
+        player.class.crouch = !player.class.crouch;
+
     }
 });
 /* Pickup, Inventory */

@@ -50,6 +50,7 @@ var Player = class {
 		self._storage = {};
 		self._characterData = [];
 		self._equipment = {};
+		self._crouching = false;
 		self._position = {
 			x: 0,
 			y: 0,
@@ -58,6 +59,14 @@ var Player = class {
 		self._tickEvent = new mp.Event("Server:Tick", () => {
 			self.tick();
 		});
+	}
+	get crouch() {
+		return this._crouching
+	}
+	set crouch(is) {
+		console.log("crouching",is)
+		this._crouching = is;
+		this._player.setVariable("isCrouched", this._crouching)
 	}
 	set hunger(h) {
 		this._hunger = h;

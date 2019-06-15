@@ -94,7 +94,7 @@ mp.events.add("Player:Crouch", (player) => {
 /* Pickup, Inventory */
 mp.events.add("Loot:Pickup", (player, lootpile_id, item_index, item_name, item_amount) => {
     if (players[player.socialClub]) {
-        console.log("Loot:Pickup", lootpile_id, item_index, item_name, item_amount);
+        console.log("Loot:Pickup", "lootpile_id",lootpile_id, "item_index",item_index,"item_name", item_name, "item_amount",item_amount);
         ItemPickups.pickItem(players[player.socialClub], lootpile_id, item_index, item_name, item_amount)
     }
 });

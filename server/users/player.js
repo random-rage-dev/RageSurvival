@@ -64,7 +64,7 @@ var Player = class {
 		return this._crouching
 	}
 	set crouch(is) {
-		console.log("crouching",is)
+		console.log("crouching", is)
 		this._crouching = is;
 		this._player.setVariable("isCrouched", this._crouching)
 	}
@@ -139,7 +139,7 @@ var Player = class {
 								messageColor: 'rgba(0,0,0,.8)',
 								position: "bottomRight",
 								close: false
-                            }])
+							}])
 						}
 						return fulfill("Succesfully saved data", self._username);
 					} else {
@@ -174,7 +174,7 @@ var Player = class {
 			messageColor: 'rgba(0,0,0,.8)',
 			position: "bottomCenter",
 			close: false
-        }])
+		}])
 	}
 	death(killer, weapon, reason) {
 		let self = this;
@@ -195,7 +195,7 @@ var Player = class {
 		console.log(self._inventory);
 		mp.events.call("Player:Inventory", self._player, self._inventory)*/
 		// console.log("TODO: Relaod inventory in spawn");
-		Promise.all([self.loadInventory(), self.loadEquipment((fresh == 0) ? false : self._equipment)]).then(() => {
+		Promise.all([self.loadEquipment((fresh == 0) ? false : self._equipment), self.loadInventory()]).then(() => {
 			console.log("Player:UiReady")
 			self._player.call("Player:ShowUI");
 		}).catch(err => {
@@ -277,8 +277,8 @@ var Player = class {
 					}, 0);
 				})
 				let totalAmmo = ammoByType[weapon.ammo];
-				console.log("ammo",totalAmmo);
-				console.log("ammo1",ammo);
+				console.log("ammo", totalAmmo);
+				console.log("ammo1", ammo);
 			} else {
 				console.log("Weapon Chat Detected");
 			}
@@ -440,7 +440,13 @@ var Player = class {
 			self._player.setVariable("hasHatchet", false);
 		}
 		console.log("self._equipment", self._equipment)
-		console.log("ammoByType", ammoByType)
+		console.log("ammoByType", ammoByType);
+		if (self._equipment["bag"] != undefined) {
+			self._player.call("Inventory:Resize", [10, 10])
+		} else {
+
+			self._player.call("Inventory:Resize", [10, 10])
+		}
 		self.manageAttachments(false)
 	}
 	/* Equipment */
@@ -503,7 +509,6 @@ var Player = class {
 						});
 						return itemData;
 					});
-					self._player.call("Inventory:Resize", [10, 10])
 					self._player.call("Inventory:Update", [self._inventory])
 					mp.events.call("Player:Inventory", self._player, self._inventory)
 					console.log("Loaded Player Inventory");
@@ -625,7 +630,7 @@ var Player = class {
 						messageColor: 'rgba(0,0,0,.8)',
 						position: "bottomCenter",
 						close: false
-                    }])
+					}])
 					self._characterData = JSON.parse(data);
 					self.load(self._username, 1);
 				}

@@ -1,4 +1,269 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+// shim for using process in browser
+var process = module.exports = {};
+
+// cached from whatever global is present so that test runners that stub it
+// don't break things.  But we need to wrap it in a try catch in case it is
+// wrapped in strict mode code which doesn't define any globals.  It's inside a
+// function because try/catches deoptimize in certain engines.
+
+var cachedSetTimeout;
+var cachedClearTimeout;
+
+function defaultSetTimout() {
+    throw new Error('setTimeout has not been defined');
+}
+function defaultClearTimeout () {
+    throw new Error('clearTimeout has not been defined');
+}
+(function () {
+    try {
+        if (typeof setTimeout === 'function') {
+            cachedSetTimeout = setTimeout;
+        } else {
+            cachedSetTimeout = defaultSetTimout;
+        }
+    } catch (e) {
+        cachedSetTimeout = defaultSetTimout;
+    }
+    try {
+        if (typeof clearTimeout === 'function') {
+            cachedClearTimeout = clearTimeout;
+        } else {
+            cachedClearTimeout = defaultClearTimeout;
+        }
+    } catch (e) {
+        cachedClearTimeout = defaultClearTimeout;
+    }
+} ())
+function runTimeout(fun) {
+    if (cachedSetTimeout === setTimeout) {
+        //normal enviroments in sane situations
+        return setTimeout(fun, 0);
+    }
+    // if setTimeout wasn't available but was latter defined
+    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+        cachedSetTimeout = setTimeout;
+        return setTimeout(fun, 0);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedSetTimeout(fun, 0);
+    } catch(e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
+            return cachedSetTimeout.call(null, fun, 0);
+        } catch(e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
+            return cachedSetTimeout.call(this, fun, 0);
+        }
+    }
+
+
+}
+function runClearTimeout(marker) {
+    if (cachedClearTimeout === clearTimeout) {
+        //normal enviroments in sane situations
+        return clearTimeout(marker);
+    }
+    // if clearTimeout wasn't available but was latter defined
+    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+        cachedClearTimeout = clearTimeout;
+        return clearTimeout(marker);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedClearTimeout(marker);
+    } catch (e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
+            return cachedClearTimeout.call(null, marker);
+        } catch (e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
+            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
+            return cachedClearTimeout.call(this, marker);
+        }
+    }
+
+
+
+}
+var queue = [];
+var draining = false;
+var currentQueue;
+var queueIndex = -1;
+
+function cleanUpNextTick() {
+    if (!draining || !currentQueue) {
+        return;
+    }
+    draining = false;
+    if (currentQueue.length) {
+        queue = currentQueue.concat(queue);
+    } else {
+        queueIndex = -1;
+    }
+    if (queue.length) {
+        drainQueue();
+    }
+}
+
+function drainQueue() {
+    if (draining) {
+        return;
+    }
+    var timeout = runTimeout(cleanUpNextTick);
+    draining = true;
+
+    var len = queue.length;
+    while(len) {
+        currentQueue = queue;
+        queue = [];
+        while (++queueIndex < len) {
+            if (currentQueue) {
+                currentQueue[queueIndex].run();
+            }
+        }
+        queueIndex = -1;
+        len = queue.length;
+    }
+    currentQueue = null;
+    draining = false;
+    runClearTimeout(timeout);
+}
+
+process.nextTick = function (fun) {
+    var args = new Array(arguments.length - 1);
+    if (arguments.length > 1) {
+        for (var i = 1; i < arguments.length; i++) {
+            args[i - 1] = arguments[i];
+        }
+    }
+    queue.push(new Item(fun, args));
+    if (queue.length === 1 && !draining) {
+        runTimeout(drainQueue);
+    }
+};
+
+// v8 likes predictible objects
+function Item(fun, array) {
+    this.fun = fun;
+    this.array = array;
+}
+Item.prototype.run = function () {
+    this.fun.apply(null, this.array);
+};
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+process.version = ''; // empty string to avoid regexp issues
+process.versions = {};
+
+function noop() {}
+
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+process.prependListener = noop;
+process.prependOnceListener = noop;
+
+process.listeners = function (name) { return [] }
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+};
+
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+process.umask = function() { return 0; };
+
+},{}],2:[function(require,module,exports){
+(function (setImmediate,clearImmediate){
+var nextTick = require('process/browser.js').nextTick;
+var apply = Function.prototype.apply;
+var slice = Array.prototype.slice;
+var immediateIds = {};
+var nextImmediateId = 0;
+
+// DOM APIs, for completeness
+
+exports.setTimeout = function() {
+  return new Timeout(apply.call(setTimeout, window, arguments), clearTimeout);
+};
+exports.setInterval = function() {
+  return new Timeout(apply.call(setInterval, window, arguments), clearInterval);
+};
+exports.clearTimeout =
+exports.clearInterval = function(timeout) { timeout.close(); };
+
+function Timeout(id, clearFn) {
+  this._id = id;
+  this._clearFn = clearFn;
+}
+Timeout.prototype.unref = Timeout.prototype.ref = function() {};
+Timeout.prototype.close = function() {
+  this._clearFn.call(window, this._id);
+};
+
+// Does not start the time, just sets up the members needed.
+exports.enroll = function(item, msecs) {
+  clearTimeout(item._idleTimeoutId);
+  item._idleTimeout = msecs;
+};
+
+exports.unenroll = function(item) {
+  clearTimeout(item._idleTimeoutId);
+  item._idleTimeout = -1;
+};
+
+exports._unrefActive = exports.active = function(item) {
+  clearTimeout(item._idleTimeoutId);
+
+  var msecs = item._idleTimeout;
+  if (msecs >= 0) {
+    item._idleTimeoutId = setTimeout(function onTimeout() {
+      if (item._onTimeout)
+        item._onTimeout();
+    }, msecs);
+  }
+};
+
+// That's not how node.js implements it but the exposed api is the same.
+exports.setImmediate = typeof setImmediate === "function" ? setImmediate : function(fn) {
+  var id = nextImmediateId++;
+  var args = arguments.length < 2 ? false : slice.call(arguments, 1);
+
+  immediateIds[id] = true;
+
+  nextTick(function onNextTick() {
+    if (immediateIds[id]) {
+      // fn.call() is faster so we optimize for the common use-case
+      // @see http://jsperf.com/call-apply-segu
+      if (args) {
+        fn.apply(null, args);
+      } else {
+        fn.call(null);
+      }
+      // Prevent ids from leaking
+      exports.clearImmediate(id);
+    }
+  });
+
+  return id;
+};
+
+exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate : function(id) {
+  delete immediateIds[id];
+};
+}).call(this,require("timers").setImmediate,require("timers").clearImmediate)
+},{"process/browser.js":1,"timers":2}],3:[function(require,module,exports){
 const absolute_path = "package://RageSurvival/cef/views/";
 class CEFBrowser {
     constructor(url) {
@@ -67,7 +332,7 @@ module.exports = {
     notification:new CEFBrowser("notifications/index.html"),
     class:CEFBrowser
 };
-},{}],2:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 var Offsets = require("./object_offsets.js")
 var Building = new class {
     constructor() {
@@ -241,7 +506,7 @@ mp.events.add("Building:Cancel", () => {
     }
 });
 module.exports = Building;
-},{"./object_offsets.js":22}],3:[function(require,module,exports){
+},{"./object_offsets.js":24}],5:[function(require,module,exports){
 var values = [];
 values["father"] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 42, 43, 44];
 values["mother"] = [21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 45];
@@ -427,7 +692,7 @@ function BeginCharacterCreator() {
         0.5, 0.5, 0.0, false);
     clearTasksRender = true;
 }
-},{"./browser.js":1}],4:[function(require,module,exports){
+},{"./browser.js":3}],6:[function(require,module,exports){
 require("./vector.js")
 var player_bones = {
 	"SKEL_L_UpperArm": {
@@ -690,7 +955,7 @@ mp.events.add("Combat:HitEntity", () => {
 	timerHitmarker = Date.now() / 1000;
 });
 mp.events.add("Combat:Hitted", (dmg) => {});
-},{"./vector.js":32}],5:[function(require,module,exports){
+},{"./vector.js":34}],7:[function(require,module,exports){
 var Status = [
     "Crafted successfully!",
     "Crafting failed!",
@@ -701,7 +966,7 @@ var Status = [
 mp.events.add('Crafting:Reply', (status) => {
     console.log(Status[status]);
 });
-},{}],6:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 "use strict";
 var natives = require("./natives.js")
 var CEFNotification = require("./browser.js").notification;
@@ -871,7 +1136,7 @@ mp.events.add("render", () => {
         streamedCrops[key].render();
     })
 });
-},{"./browser.js":1,"./natives.js":19,"./notifications.js":20,"./storage.js":30}],7:[function(require,module,exports){
+},{"./browser.js":3,"./natives.js":21,"./notifications.js":22,"./storage.js":32}],9:[function(require,module,exports){
 const movementClipSet = "move_ped_crouched";
 const strafeClipSet = "move_ped_crouched_strafing";
 const clipSetSwitchTime = 0.25;
@@ -905,7 +1170,7 @@ mp.events.add("render", () => {
         }
     }
 })
-},{}],8:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 require("./vector.js")
 var natives = require("./natives.js")
 var materials = require("./materials.js")
@@ -987,7 +1252,7 @@ mp.events.add("render", () => {
     console.log(JSON.stringify(checkResourceInFront(2)));
 });*/
 module.exports = checkResourceInFront;
-},{"./materials.js":18,"./natives.js":19,"./storage.js":30,"./vector.js":32}],9:[function(require,module,exports){
+},{"./materials.js":20,"./natives.js":21,"./storage.js":32,"./vector.js":34}],11:[function(require,module,exports){
 "use strict";
 console.log = function(...a) {
     a = a.map(function(e) {
@@ -1088,14 +1353,15 @@ mp.events.add('Player:Collision', (enable) => {
         });
     }
 });
-},{"./browser.js":1,"./building.js":2,"./character_creator.js":3,"./combat.js":4,"./crafting.js":5,"./crops.js":6,"./crouch.js":7,"./gathering.js":8,"./interface.js":10,"./items.js":11,"./libs/animations.js":12,"./libs/attachments.js":13,"./libs/rage-rpc.min.js":14,"./libs/weapon_attachments.js":16,"./login.js":17,"./natives.js":19,"./object.js":21,"./ped.js":23,"./player.js":24,"./scaleforms/index.js":29,"./storage.js":30,"./vector.js":32,"./vegetation.js":33,"./vehicles.js":34,"./weather.js":35,"./zombies.js":36}],10:[function(require,module,exports){
+},{"./browser.js":3,"./building.js":4,"./character_creator.js":5,"./combat.js":6,"./crafting.js":7,"./crops.js":8,"./crouch.js":9,"./gathering.js":10,"./interface.js":12,"./items.js":13,"./libs/animations.js":14,"./libs/attachments.js":15,"./libs/rage-rpc.min.js":16,"./libs/weapon_attachments.js":18,"./login.js":19,"./natives.js":21,"./object.js":23,"./ped.js":25,"./player.js":26,"./scaleforms/index.js":31,"./storage.js":32,"./vector.js":34,"./vegetation.js":35,"./vehicles.js":36,"./weather.js":37,"./zombies.js":38}],12:[function(require,module,exports){
 //Interaction
-},{}],11:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 "use strict";
 var natives = require("./natives.js")
 var CEFNotification = require("./browser.js").notification;
 var StorageSystem = require("./storage.js");
 var Notifications = require("./notifications.js");
+var StreamedObject = require("./object.js");
 var streamedPools = [];
 class LootPool {
     constructor(data) {
@@ -1108,9 +1374,6 @@ class LootPool {
         self.loaded = false;
         //let dist = mp.localPlayer.getPos().dist2d(new mp.Vector3(this._lootData.pos.x, this._lootData.pos.y, this._lootData.pos.z));
         //setTimeout(function() {
-        self.interval = setInterval(function() {
-            self.check();
-        }, 1000)
         self.check();
         // }, 50*dist );
     }
@@ -1146,69 +1409,56 @@ class LootPool {
             }
             return sArr;
         });
+        self.loaded = false;
         self.check();
     }
     check() {
         let self = this;
-        let center = new mp.Vector3(self._lootData.pos.x, self._lootData.pos.y, self._lootData.pos.z);
-        let Angle_Item = 360 / 8;
-        if ((self.loaded == false) && ((!mp.raycasting.testPointToPoint(mp.vector(mp.localPlayer.position).add(0,0,100), center, mp.players.local, (1))) || (!mp.raycasting.testPointToPoint(mp.vector(mp.localPlayer.position), center, mp.players.local, (1))))) {
-            self.loaded = true;
-            self._lootData.items.forEach(function(item, index) {
-                if (item != null) {
-                    item.index = index;
-                    if (mp.game.streaming.isModelInCdimage(mp.game.joaat(item.model))) {
-                        let offset_pos = center.findRot(0, 0.5, Angle_Item * index);
-                        let base_rot = (Angle_Item * index) + (offset_pos.rotPoint(center) + Math.floor(Math.random() * (360 - 0)));
-                        if (base_rot > 360) base_rot -= 360;
-                        if (item.rot == undefined) {
-                            item.rot = base_rot
+        try {
+            let center = new mp.Vector3(self._lootData.pos.x, self._lootData.pos.y, self._lootData.pos.z);
+            let Angle_Item = 360 / 8;
+            if ((self.loaded == false) && ((!mp.raycasting.testPointToPoint(mp.vector(mp.localPlayer.position).add(0, 0, 100), center, mp.players.local, (1))) || (!mp.raycasting.testPointToPoint(mp.vector(mp.localPlayer.position), center, mp.players.local, (1))))) {
+                self.loaded = true;
+                self._lootData.items.forEach(function(item, index) {
+                    if (item != null) {
+                        item.index = index;
+                        if (mp.game.streaming.isModelInCdimage(mp.game.joaat(item.model))) {
+                            let offset_pos = center.findRot(0, 0.5, Angle_Item * index);
+                            let base_rot = (Angle_Item * index) + (offset_pos.rotPoint(center) + Math.floor(Math.random() * (360 - 0)));
+                            if (base_rot > 360) base_rot -= 360;
+                            if (item.rot == undefined) {
+                                item.rot = base_rot
+                            }
+                            let pos = offset_pos;
+                            pos.z += 1;
+                            let obj = new StreamedObject(item.model, pos, new mp.Vector3(0, 0, item.rot), {
+                                type: "pickup",
+                                offset: item.offset
+                            })
+                            self._pickupObjects.push({
+                                id: self._lootData.id,
+                                obj: obj
+                            })
                         }
-                        let pos = offset_pos;
-                        pos.z += 1;
-                        // let obj = mp.game.object.createObject(mp.game.joaat(item.model), pos.x, pos.y, pos.z, false, true, false);
-                        let obj = mp.objects.new(mp.game.joaat(item.model), pos, { //item.model
-                            rotation: new mp.Vector3(0, 0, item.rot),
-                            alpha: 255,
-                            dimension: 0
-                        });
-                        obj.placeOnGroundProperly();
-                        let rotobj = obj.getRotation(0);
-                        let posobj = obj.getCoords(false);
-                        obj.setCollision(false, true);
-                        obj.freezePosition(true);
-                        if ((item.offset.rot.x > 0) || (item.offset.rot.y > 0)) {
-                            obj.setCoords(posobj.x + item.offset.pos.x, posobj.y + item.offset.pos.y, (posobj.z - obj.getHeightAboveGround()) + item.offset.pos.z, false, false, false, false);
-                        } else {
-                            obj.setCoords(posobj.x + item.offset.pos.x, posobj.y + item.offset.pos.y, posobj.z + item.offset.pos.z, false, false, false, false);
-                        }
-                        obj.setRotation(rotobj.x + item.offset.rot.x, rotobj.y + item.offset.rot.y, rotobj.z, 0, true);
-                        self._pickupObjects.push({
-                            id: self._lootData.id,
-                            obj: obj
-                        })
                     }
-                }
-            })
-            console.log("mp.objects 1", mp.objects.length);
+                })
+            }
+        } catch (err) {
+            console.log("err", err);
         }
     }
     unload(id) {
         let self = this;
-        console.log("unload mp.objects2", mp.objects.length);
-        clearInterval(self.interval);
         self._pickupObjects.forEach(function(item, i) {
             //if (item.id == id) {
-                if (mp.objects.atHandle(item.obj.handle)) {
-                    console.log("exists");
-                    item.obj.markForDeletion();
-                    item.obj.destroy();
-                    delete self._pickupObjects[i];
-                    console.log("removed");
-                }
+            if (mp.objects.atHandle(item.obj.handle)) {
+                console.log("exists");
+                item.obj.delete();
+                delete self._pickupObjects[i];
+                console.log("removed");
+            }
             //}
         })
-        console.log("unload mp.objects3", mp.objects.length);
     }
 }
 mp.events.add("Loot:Load", (id, poolData) => {
@@ -1216,13 +1466,10 @@ mp.events.add("Loot:Load", (id, poolData) => {
         streamedPools[id] = new LootPool(poolData);
     }
 });
-
-
 mp.events.add("playerExitColshape", (colshape) => {
     if (colshape.getVariable("item_colshape")) {
         let id = colshape.getVariable("item_colshape_id");
         if (streamedPools[id]) {
-            console.log("unload clientside1");
             streamedPools[id].unload(id)
             delete streamedPools[id];
         }
@@ -1324,7 +1571,8 @@ mp.events.add("render", () => {
                 if (amount > 0) {
                     let doesFit = StorageSystem.checkFit("inventory", cur_selected.width, cur_selected.height)
                     doesFit.then(function(fit) {
-                        if (fit != undefined) {
+                        if ((fit != undefined) && (cur_selected.index)) {
+                            console.log("Loot:Pickup", pool_data, cur_selected);
                             mp.events.callRemote("Loot:Pickup", pool_data, cur_selected.index, cur_selected.name, cur_selected.amount);
                             /*3d Notify*/
                             let pos = cur_selected.position;
@@ -1414,7 +1662,7 @@ mp.events.add("render", () => {
         }
     }
 });
-},{"./browser.js":1,"./natives.js":19,"./notifications.js":20,"./storage.js":30}],12:[function(require,module,exports){
+},{"./browser.js":3,"./natives.js":21,"./notifications.js":22,"./object.js":23,"./storage.js":32}],14:[function(require,module,exports){
 var toLoad = ["mp_defend_base"]
 var loadPromises = [];
 toLoad.forEach(function(dict) {
@@ -1433,7 +1681,7 @@ Promise.all(loadPromises).then(() => {
 }).catch(err => {
 	console.log("all dicts err", err)
 })
-},{}],13:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 mp.attachmentMngr = 
 {
 	attachments: {},
@@ -1646,9 +1894,9 @@ function InitAttachmentsOnJoin()
 }
 
 InitAttachmentsOnJoin();
-},{}],14:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 !function(e,r){"object"==typeof exports&&"object"==typeof module?module.exports=r():"function"==typeof define&&define.amd?define([],r):"object"==typeof exports?exports=r():e.rpc=r()}("undefined"!=typeof self?self:this,function(){return function(e){var r={};function n(t){if(r[t])return r[t].exports;var c=r[t]={i:t,l:!1,exports:{}};return e[t].call(c.exports,c,c.exports,n),c.l=!0,c.exports}return n.m=e,n.c=r,n.d=function(e,r,t){n.o(e,r)||Object.defineProperty(e,r,{enumerable:!0,get:t})},n.r=function(e){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(e,"__esModule",{value:!0})},n.t=function(e,r){if(1&r&&(e=n(e)),8&r)return e;if(4&r&&"object"==typeof e&&e&&e.__esModule)return e;var t=Object.create(null);if(n.r(t),Object.defineProperty(t,"default",{enumerable:!0,value:e}),2&r&&"string"!=typeof e)for(var c in e)n.d(t,c,function(r){return e[r]}.bind(null,c));return t},n.n=function(e){var r=e&&e.__esModule?function(){return e.default}:function(){return e};return n.d(r,"a",r),r},n.o=function(e,r){return Object.prototype.hasOwnProperty.call(e,r)},n.p="",n(n.s=1)}([function(e,r,n){"use strict";var t;function c(e,r){const n="client"===o();if(e&&"object"==typeof e&&void 0!==e.id){const c=(r,t,c)=>n?e.type===r&&t.at(e.id)===e:e instanceof c;switch(r){case t.Blip:return c("blip",mp.blips,mp.Blip);case t.Checkpoint:return c("checkpoint",mp.checkpoints,mp.Checkpoint);case t.Colshape:return c("colshape",mp.colshapes,mp.Colshape);case t.Label:return c("textlabel",mp.labels,mp.TextLabel);case t.Marker:return c("marker",mp.markers,mp.Marker);case t.Object:return c("object",mp.objects,mp.Object);case t.Pickup:return c("pickup",mp.pickups,mp.Pickup);case t.Player:return c("player",mp.players,mp.Player);case t.Vehicle:return c("vehicle",mp.vehicles,mp.Vehicle)}}return!1}function s(){const e=46656*Math.random()|0,r=46656*Math.random()|0;return("000"+e.toString(36)).slice(-3)+("000"+r.toString(36)).slice(-3)}function o(){return mp.joaat?"server":mp.game&&mp.game.joaat?"client":mp.trigger?"cef":void 0}function i(e){const r=o();return JSON.stringify(e,(e,n)=>{if("client"===r||"server"===r&&n&&"object"==typeof n){let e;if(c(n,t.Blip)?e=t.Blip:c(n,t.Checkpoint)?e=t.Checkpoint:c(n,t.Colshape)?e=t.Colshape:c(n,t.Marker)?e=t.Marker:c(n,t.Object)?e=t.Object:c(n,t.Pickup)?e=t.Pickup:c(n,t.Player)?e=t.Player:c(n,t.Vehicle)&&(e=t.Vehicle),e)return{__t:e,i:n.remoteId||n.id}}return n})}function a(e){const r=o();return JSON.parse(e,(e,n)=>{if(("client"===r||"server"===r)&&n&&"object"==typeof n&&"string"==typeof n.__t&&"number"==typeof n.i&&2===Object.keys(n).length){const e=n.i;let c;switch(n.__t){case t.Blip:c=mp.blips;break;case t.Checkpoint:c=mp.checkpoints;break;case t.Colshape:c=mp.colshapes;break;case t.Label:c=mp.labels;break;case t.Marker:c=mp.markers;break;case t.Object:c=mp.objects;break;case t.Pickup:c=mp.pickups;break;case t.Player:c=mp.players;break;case t.Vehicle:c=mp.vehicles}if(c)return c["client"===r?"atRemoteId":"at"](e)}return n})}function l(e){return new Promise(r=>setTimeout(()=>r(e),0))}function p(e){return new Promise((r,n)=>setTimeout(()=>n(e),0))}function u(e){try{e.url}catch(e){return!1}return!0}n.d(r,"g",function(){return s}),n.d(r,"a",function(){return o}),n.d(r,"f",function(){return i}),n.d(r,"c",function(){return a}),n.d(r,"e",function(){return l}),n.d(r,"d",function(){return p}),n.d(r,"b",function(){return u}),function(e){e.Blip="b",e.Checkpoint="cp",e.Colshape="c",e.Label="l",e.Marker="m",e.Object="o",e.Pickup="p",e.Player="pl",e.Vehicle="v"}(t||(t={}))},function(e,r,n){"use strict";n.r(r),function(e){n.d(r,"register",function(){return d}),n.d(r,"unregister",function(){return m}),n.d(r,"call",function(){return g}),n.d(r,"callServer",function(){return _}),n.d(r,"callClient",function(){return b}),n.d(r,"callBrowsers",function(){return y}),n.d(r,"callBrowser",function(){return k});var t=n(0);const c=t.a();if(!c)throw"Unknown RAGE environment";const s="PROCEDURE_NOT_FOUND",o="__rpc:id",i="__rpc:process",a="__rpc:browserRegister",l="__rpc:browserUnregister",p="cef"===c?window:e;if(!p[i])if(p.__rpcListeners={},p.__rpcPending={},p[i]=((e,r)=>{"server"!==c&&(r=e);const n=t.c(r);if(n.req){const r={id:n.id,environment:n.fenv||n.env};"server"===c&&(r.player=e);const s={ret:1,id:n.id,env:c};let o;switch(c){case"server":o=(e=>r.player.call(i,[t.f(e)]));break;case"client":if("server"===n.env)o=(e=>mp.events.callRemote(i,t.f(e)));else if("cef"===n.env){const e=n.b&&p.__rpcBrowsers[n.b];r.browser=e,o=(r=>e&&t.b(e)&&u(e,r,!0))}break;case"cef":o=(e=>mp.trigger(i,t.f(e)))}o&&f(n.name,n.args,r).then(e=>o({...s,res:e})).catch(e=>o({...s,err:e}))}else if(n.ret){const r=p.__rpcPending[n.id];if("server"===c&&r.player!==e)return;r&&(r.resolve(n.err?t.d(n.err):t.e(n.res)),delete p.__rpcPending[n.id])}}),"cef"!==c){if(mp.events.add(i,p[i]),"client"===c){d("__rpc:callServer",([e,r],n)=>h(e,r,{fenv:n.environment})),d("__rpc:callBrowsers",([e,r],n)=>w(null,e,r,{fenv:n.environment})),p.__rpcBrowsers={};const e=e=>{const r=t.g();Object.keys(p.__rpcBrowsers).forEach(r=>{const n=p.__rpcBrowsers[r];n&&t.b(n)&&n!==e||delete p.__rpcBrowsers[r]}),p.__rpcBrowsers[r]=e,e.execute(`if(typeof window['${o}'] === 'undefined'){ window['${o}'] = Promise.resolve('${r}'); }else{ window['${o}:resolve']('${r}'); }`)};mp.browsers.forEach(e),mp.events.add("browserCreated",e),p.__rpcBrowserProcedures={},mp.events.add(a,e=>{const[r,n]=JSON.parse(e);p.__rpcBrowserProcedures[n]=r}),mp.events.add(l,e=>{const[r,n]=JSON.parse(e);p.__rpcBrowserProcedures[n]===r&&delete p.__rpcBrowserProcedures[n]})}}else void 0===p[o]&&(p[o]=new Promise(e=>{p[o+":resolve"]=e}));function u(e,r,n){const c=t.f(r);e.execute(`var process = window["${i}"]; if(process){ process(${JSON.stringify(c)}); }else{ ${n?"":`mp.trigger("${i}", '{"ret":1,"id":"${r.id}","err":"${s}","env":"cef"}');`} }`)}function f(e,r,n){const c=p.__rpcListeners[e];return c?t.e(c(r,n)):t.d(s)}function d(e,r){if(2!==arguments.length)throw'register expects 2 arguments: "name" and "cb"';"cef"===c&&p[o].then(r=>mp.trigger(a,JSON.stringify([r,e]))),p.__rpcListeners[e]=r}function m(e){if(1!==arguments.length)throw'unregister expects 1 argument: "name"';"cef"===c&&p[o].then(r=>mp.trigger(l,JSON.stringify([r,e]))),p.__rpcListeners[e]=void 0}function g(e,r){return 1!==arguments.length&&2!==arguments.length?t.d('call expects 1 or 2 arguments: "name" and optional "args"'):f(e,r,{environment:c})}function h(e,r,n={}){switch(c){case"server":return g(e,r);case"client":{const s=t.g();return new Promise(o=>{p.__rpcPending[s]={resolve:o};const a={req:1,id:s,name:e,env:c,args:r,...n};mp.events.callRemote(i,t.f(a))})}case"cef":return b("__rpc:callServer",[e,r])}}function _(e,r){return 1!==arguments.length&&2!==arguments.length?t.d('callServer expects 1 or 2 arguments: "name" and optional "args"'):h(e,r,{})}function b(e,r,n){switch(c){case"client":return n=r,r=e,1!==arguments.length&&2!==arguments.length||"string"!=typeof r?t.d('callClient from the client expects 1 or 2 arguments: "name" and optional "args"'):g(r,n);case"server":{if(2!==arguments.length&&3!==arguments.length||"object"!=typeof e)return t.d('callClient from the server expects 2 or 3 arguments: "player", "name", and optional "args"');const s=t.g();return new Promise(o=>{p.__rpcPending[s]={resolve:o,player:e};const a={req:1,id:s,name:r,env:c,args:n};e.call(i,[t.f(a)])})}case"cef":{if(n=r,r=e,1!==arguments.length&&2!==arguments.length||"string"!=typeof r)return t.d('callClient from the browser expects 1 or 2 arguments: "name" and optional "args"');const s=t.g();return p[o].then(e=>new Promise(o=>{p.__rpcPending[s]={resolve:o};const a={b:e,req:1,id:s,name:r,env:c,args:n};mp.trigger(i,t.f(a))}))}}}function v(e,r,n,t,s={}){return new Promise(o=>{p.__rpcPending[e]={resolve:o},u(r,{req:1,id:e,name:n,env:c,args:t,...s},!1)})}function w(e,r,n,o={}){switch(c){case"client":const i=t.g(),a=p.__rpcBrowserProcedures[r];if(!a)return t.d(s);const l=p.__rpcBrowsers[a];return l&&t.b(l)?v(i,l,r,n,o):t.d(s);case"server":return b(e,"__rpc:callBrowsers",[r,n]);case"cef":return b("__rpc:callBrowsers",[r,n])}}function y(e,r,n){switch(c){case"client":case"cef":return 1!==arguments.length&&2!==arguments.length?t.d('callBrowsers from the client or browser expects 1 or 2 arguments: "name" and optional "args"'):w(null,e,r,{});case"server":return 2!==arguments.length&&3!==arguments.length?t.d('callBrowsers from the server expects 2 or 3 arguments: "player", "name", and optional "args"'):w(e,r,n,{})}}function k(e,r,n){if("client"!==c)return t.d("callBrowser can only be used in the client environment");if(2!==arguments.length&&3!==arguments.length)return t.d('callBrowser expects 2 or 3 arguments: "browser", "name", and optional "args"');return v(t.g(),e,r,n,{})}}.call(this,n(2))},function(e,r){var n;n=function(){return this}();try{n=n||new Function("return this")()}catch(e){"object"==typeof window&&(n=window)}e.exports=n}])});
-},{}],15:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 module.exports={
   "2725352035": {
     "HashKey": "WEAPON_UNARMED",
@@ -10877,7 +11125,7 @@ module.exports={
     "DLC": "spupgrade"
   }
 }
-},{}],16:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 const weaponData = require("./weaponData");
 
 const PistolAttachmentPos = new mp.Vector3(0.02, 0.06, 0.1);
@@ -10962,7 +11210,7 @@ for (let weapon in weaponAttachmentData) {
 }
 
 
-},{"./weaponData":15}],17:[function(require,module,exports){
+},{"./weaponData":17}],19:[function(require,module,exports){
 //1868.765869140625, 3710.90283203125, 113.74462127685547
 var natives = require("./natives.js")
 var CEFInterface = require("./browser.js").interface;
@@ -11069,7 +11317,7 @@ function startMakingItems() {
         mp.game.graphics.drawBox(1000, 500, 550, 1000, 1500, 1550, 0, 255, 0, 255);
     });
 }*/
-},{"./browser.js":1,"./natives.js":19}],18:[function(require,module,exports){
+},{"./browser.js":3,"./natives.js":21}],20:[function(require,module,exports){
 var materials = {};
 
 materials[2379541433] = 1;
@@ -11079,7 +11327,7 @@ materials[581794674] = 3;
 //materials[581794674] = true;
 
 module.exports = materials;
-},{}],19:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 var natives = {};
 mp.game.vehicle.getVehicleSeats = (veh) => mp.game.invoke("0xA7C4F2C6E744A550", veh.handle);
 mp.game.graphics.clearDrawOrigin = () => mp.game.invoke('0xFF0B610F6BE0D7AF'); // 26.07.2018 // GTA 1.44 
@@ -11112,7 +11360,7 @@ natives.SET_ENTITY_COORDS = ( entity,  xPos,  yPos,  zPos,  xAxis,  yAxis,  zAxi
 natives.SET_ENTITY_ROTATION = (  entity,  pitch,  roll,  yaw,  rotationOrder,  p5) => mp.game.invoke("0x8524A8B0171D5E07", entity,  pitch,  roll,  yaw,  rotationOrder,  p5); // SET_ENTITY_ROTATION
 natives.GET_ENTITY_HEIGHT_ABOVE_GROUND = (  entity) => mp.game.invoke("0x1DD55701034110E5", entity); // GET_ENTITY_HEIGHT_ABOVE_GROUND
 module.exports = natives;
-},{}],20:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 var Notifications = new class {
     constructor() {
         let self = this;
@@ -11157,23 +11405,27 @@ var Notifications = new class {
 }
 module.exports = Notifications;
 
-},{}],21:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
+(function (setImmediate){
 //object.js
 var ObjectManager = new class {
 	constructor() {
+		let self = this;
 		this.objects = [];
+		this.streamed = [];
 		this.lastCreation = Date.now();
 	}
 	register(object) {
 		this.objects.push(object);
 	}
 	destroy(object) {
-		this.objects.splice(this.objects.indexOf(object),1);
+		this.objects.splice(this.objects.indexOf(object), 1);
 		delete this.objects[this.objects.indexOf(object)];
 	}
 }
-class Object {
+class ObjectStreamer {
 	constructor(model, position, rotation, customData) {
+		let self = this;
 		this.obj = undefined;
 		this.model = model;
 		this.position = mp.vector(position);
@@ -11181,42 +11433,62 @@ class Object {
 		this.customData = customData;
 		this.created = false;
 		ObjectManager.register(this);
+		setImmediate(function() {
+			self.create();
+		}, 1)
+	}
+	get id() {
+		return this.obj != undefined ? this.obj.id : -1;
 	}
 	create() {
-		this.obj = mp.objects.new(mp.game.joaat(this.model), this.position, {
-			rotation: this.rotation,
-			alpha: 255,
-			dimension: 0
-		});
-		if (this.customData.type == "pickup") {
-			let offset = this.customData.offset;
-			this.obj.placeOnGroundProperly();
-			let rotobj = this.obj.getRotation(0);
-			let posobj = this.obj.getCoords(false);
-			this.obj.setCollision(false, true);
-			this.obj.freezePosition(true);
-			if ((offset.rot.x > 0) || (offset.rot.y > 0)) {
-				this.obj.setCoords(posobj.x + offset.pos.x, posobj.y + offset.pos.y, (posobj.z - this.obj.getHeightAboveGround()) + offset.pos.z, false, false, false, false);
+		let self = this;
+		try {
+			mp.game.streaming.requestModel(mp.game.joaat(this.model));
+			if (mp.game.streaming.hasModelLoaded(mp.game.joaat(this.model))) {
+				this.obj = mp.objects.new(mp.game.joaat(this.model), this.position, {
+					rotation: this.rotation,
+					alpha: 255,
+					dimension: 0
+				});
+				if (this.customData.type == "pickup") {
+					let offset = this.customData.offset;
+					this.obj.placeOnGroundProperly();
+					let rotobj = this.obj.getRotation(0);
+					let posobj = this.obj.getCoords(false);
+					this.obj.setCollision(false, true);
+					this.obj.freezePosition(true);
+					if ((offset.rot.x > 0) || (offset.rot.y > 0)) {
+						this.obj.setCoords(posobj.x + offset.pos.x, posobj.y + offset.pos.y, (posobj.z - this.obj.getHeightAboveGround()) + offset.pos.z, false, false, false, false);
+					} else {
+						this.obj.setCoords(posobj.x + offset.pos.x, posobj.y + offset.pos.y, posobj.z + offset.pos.z, false, false, false, false);
+					}
+					this.obj.setRotation(rotobj.x + offset.rot.x, rotobj.y + offset.rot.y, rotobj.z, 0, true);
+				}
+				this.created = true;
 			} else {
-				this.obj.setCoords(posobj.x + offset.pos.x, posobj.y + offset.pos.y, posobj.z + offset.pos.z, false, false, false, false);
+				setTimeout(function() {
+					self.create()
+				},1000)
 			}
-			this.obj.setRotation(rotobj.x + offset.rot.x, rotobj.y + offset.rot.y, rotobj.z, 0, true);
+		} catch (err) {
+			console.log(err);
 		}
-		this.created = true;
-
 		return this.created;
 	}
 	get handle() {
-		return this.obj.handle || 0;
+		return (this.created == 1) ? this.obj.handle : -1;
 	}
 	delete() {
 		if (typeof this.obj != "object") return;
 		this.obj.markForDeletion();
 		this.obj.destroy();
+		console.log("delted obj")
 		ObjectManager.destroy(this);
 	}
 }
-},{}],22:[function(require,module,exports){
+module.exports = ObjectStreamer;
+}).call(this,require("timers").setImmediate)
+},{"timers":2}],24:[function(require,module,exports){
 var offsets = {
 	"sr_prop_sr_boxwood_01": {
 		pos: new mp.Vector3(0, 0, 0),
@@ -11228,7 +11500,7 @@ var offsets = {
 	}
 }
 module.exports = offsets;
-},{}],23:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 var Peds = [];
 class Ped {
     constructor(id, model, pos) {
@@ -11318,7 +11590,7 @@ mp.events.add("Ped:DoTask", (id, task, param = null) => {
         Peds[id].doTask(task, param);
     }
 });
-},{}],24:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 let utils = require("./utils.js");
 var CEFHud = require("./browser.js").hud;
 var initDone = false;
@@ -11381,7 +11653,7 @@ mp.events.add("render", () => {
 		}
 	}
 });
-},{"./browser.js":1,"./utils.js":31}],25:[function(require,module,exports){
+},{"./browser.js":3,"./utils.js":33}],27:[function(require,module,exports){
 var messageScaleform = require("./Scaleform.js");
 let bigMessageScaleform = null;
 let bigMsgInit = 0;
@@ -11432,7 +11704,7 @@ mp.events.add("render", () => {
         }
     }
 });
-},{"./Scaleform.js":28}],26:[function(require,module,exports){
+},{"./Scaleform.js":30}],28:[function(require,module,exports){
 class InstructionButtons {
     constructor() {
         this.handle = mp.game.graphics.requestScaleformMovie("instructional_buttons");
@@ -11478,7 +11750,7 @@ class InstructionButtons {
     }
 }
 module.exports = new InstructionButtons();
-},{}],27:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 var messageScaleform = require("./Scaleform.js");
 let midsizedMessageScaleform = null;
 let msgInit = 0;
@@ -11522,7 +11794,7 @@ mp.events.add("render", () => {
         }
     }
 });
-},{"./Scaleform.js":28}],28:[function(require,module,exports){
+},{"./Scaleform.js":30}],30:[function(require,module,exports){
 class BasicScaleform {
     constructor(scaleformName) {
         this.handle = mp.game.graphics.requestScaleformMovie(scaleformName);
@@ -11568,7 +11840,7 @@ class BasicScaleform {
 }
 
 module.exports = BasicScaleform;
-},{}],29:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 var messageScaleform = require("./Scaleform.js");
 require("./BigMessage.js");
 require("./MidsizedMessage.js");
@@ -11583,7 +11855,7 @@ mp.game.ui.messages = {
 };
 
 
-},{"./BigMessage.js":25,"./InstructionButtons.js":26,"./MidsizedMessage.js":27,"./Scaleform.js":28}],30:[function(require,module,exports){
+},{"./BigMessage.js":27,"./InstructionButtons.js":28,"./MidsizedMessage.js":29,"./Scaleform.js":30}],32:[function(require,module,exports){
 var cell_size = 40;
 var padding = 5;
 var inv_cells = 6;
@@ -12125,7 +12397,7 @@ var StorageSystem = new class {
 	}
 }
 module.exports = StorageSystem;
-},{"../../server/world/items.js":37,"./browser.js":1}],31:[function(require,module,exports){
+},{"../../server/world/items.js":39,"./browser.js":3}],33:[function(require,module,exports){
 // https://github.com/glitchdetector/fivem-minimap-anchor
 function getMinimapAnchor() {
     let sfX = 1.0 / 20.0;
@@ -12150,7 +12422,7 @@ function getMinimapAnchor() {
 module.exports = {
     minimap_anchor: getMinimapAnchor
 }
-},{}],32:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 mp.Vector3.prototype.findRot = function(rz, dist, rot) {
     let nVector = new mp.Vector3(this.x, this.y, this.z);
     let degrees = (rz + rot) * (Math.PI / 180);
@@ -12291,7 +12563,7 @@ Array.prototype.shuffle = function() {
     }
     return this;
 }
-},{}],33:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 var materials = require("./materials.js")
 var temp_materials = {
 	"Default": -1775485061,
@@ -12519,7 +12791,7 @@ var vegetation_indexes = {
 	"SandDryDeep": "prop_veg_crop_04", //"Heu"
 	"Grass": "prop_veg_grass_01_d" //"Gras Groß 2"
 }
-let effect = 0;
+/*let effect = 0;
 mp.events.add("render", () => {
 	let ppos = mp.vector(mp.players.local.position);
 	let hitData = mp.raycasting.testCapsule(ppos, ppos.ground2(mp.players.local.handle), 0.1, mp.players.local.handle, 1);
@@ -12532,19 +12804,11 @@ mp.events.add("render", () => {
 				outline: true,
 				centre: true
 			});
-				mp.game.graphics.startScreenEffect("DeathFailOut", 1000, true);
+			mp.game.graphics.startScreenEffect("DeathFailOut", 1000, true);
 		}
 	}
-	/*
-	mp.game.graphics.drawText("[E] Gather Material", [0.5, 0.55], {
-	                            font: 4,
-	                            color: [255, 255, 255, 200],
-	                            scale: [0.3, 0.3],
-	                            outline: true,
-	                            centre: true
-	                        });*/
-});
-},{"./materials.js":18}],34:[function(require,module,exports){
+});*/
+},{"./materials.js":20}],36:[function(require,module,exports){
 const toSync = ["health", "running", "engine", "wheel_fl", "wheel_fr", "wheel_rl", "wheel_rr", "fuel", "spark_plugs", "battery"]
 
 function syncVehicle(type, vehicle, value) {
@@ -12786,7 +13050,7 @@ mp.keys.bind(0x47, false, () => {
         }
     }
 });
-},{}],35:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 require("./vector.js");
 mp.game.audio.startAudioScene("FBI_HEIST_H5_MUTE_AMBIENCE_SCENE");
 mp.game.audio.startAudioScene("MIC1_RADIO_DISABLE");
@@ -12848,7 +13112,7 @@ var Weather = new class {
     }
 }
 module.exports = Weather;
-},{"./vector.js":32}],36:[function(require,module,exports){
+},{"./vector.js":34}],38:[function(require,module,exports){
 var Zombie = class {
     constructor() {
         this._setup();
@@ -12950,7 +13214,7 @@ mp.events.add("render", e => {
     new Zombie();
 });
 */
-},{}],37:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 "use strict";
 function getRandomInt(min, max) {
     min = Math.ceil(min);
@@ -13469,4 +13733,4 @@ var items = {
     }
 };
 module.exports = items;
-},{}]},{},[9]);
+},{}]},{},[11]);

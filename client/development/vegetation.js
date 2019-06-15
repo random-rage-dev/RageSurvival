@@ -225,7 +225,7 @@ var vegetation_indexes = {
 	"SandDryDeep": "prop_veg_crop_04", //"Heu"
 	"Grass": "prop_veg_grass_01_d" //"Gras Groß 2"
 }
-let effect = 0;
+/*let effect = 0;
 mp.events.add("render", () => {
 	let ppos = mp.vector(mp.players.local.position);
 	let hitData = mp.raycasting.testCapsule(ppos, ppos.ground2(mp.players.local.handle), 0.1, mp.players.local.handle, 1);
@@ -238,15 +238,7 @@ mp.events.add("render", () => {
 				outline: true,
 				centre: true
 			});
-				mp.game.graphics.startScreenEffect("DeathFailOut", 1000, true);
+			mp.game.graphics.startScreenEffect("DeathFailOut", 1000, true);
 		}
 	}
-	/*
-	mp.game.graphics.drawText("[E] Gather Material", [0.5, 0.55], {
-	                            font: 4,
-	                            color: [255, 255, 255, 200],
-	                            scale: [0.3, 0.3],
-	                            outline: true,
-	                            centre: true
-	                        });*/
-});
+});*/

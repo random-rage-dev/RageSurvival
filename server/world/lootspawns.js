@@ -2,7 +2,14 @@
 /*
  *  Tiers : Residential,Industrial,Farm,Military,Other,Food,...
  */
-var positions = [{
+var positions = [
+/*testspawwN*/{
+    "x": 1672.3009033203125, 
+    "y":1363.6986083984375, 
+    "z":87.27685546875,
+    "type": "Military",
+    "id": -1
+},{
     "x": 1991.8353271484375,
     "y": 3048.703369140625,
     "z": 46.23518753051758,

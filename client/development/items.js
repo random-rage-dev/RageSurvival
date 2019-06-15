@@ -3,6 +3,7 @@ var natives = require("./natives.js")
 var CEFNotification = require("./browser.js").notification;
 var StorageSystem = require("./storage.js");
 var Notifications = require("./notifications.js");
+var StreamedObject = require("./object.js");
 var streamedPools = [];
 class LootPool {
     constructor(data) {
@@ -15,9 +16,6 @@ class LootPool {
         self.loaded = false;
         //let dist = mp.localPlayer.getPos().dist2d(new mp.Vector3(this._lootData.pos.x, this._lootData.pos.y, this._lootData.pos.z));
         //setTimeout(function() {
-        self.interval = setInterval(function() {
-            self.check();
-        }, 1000)
         self.check();
         // }, 50*dist );
     }
@@ -53,69 +51,56 @@ class LootPool {
             }
             return sArr;
         });
+        self.loaded = false;
         self.check();
     }
     check() {
         let self = this;
-        let center = new mp.Vector3(self._lootData.pos.x, self._lootData.pos.y, self._lootData.pos.z);
-        let Angle_Item = 360 / 8;
-        if ((self.loaded == false) && ((!mp.raycasting.testPointToPoint(mp.vector(mp.localPlayer.position).add(0,0,100), center, mp.players.local, (1))) || (!mp.raycasting.testPointToPoint(mp.vector(mp.localPlayer.position), center, mp.players.local, (1))))) {
-            self.loaded = true;
-            self._lootData.items.forEach(function(item, index) {
-                if (item != null) {
-                    item.index = index;
-                    if (mp.game.streaming.isModelInCdimage(mp.game.joaat(item.model))) {
-                        let offset_pos = center.findRot(0, 0.5, Angle_Item * index);
-                        let base_rot = (Angle_Item * index) + (offset_pos.rotPoint(center) + Math.floor(Math.random() * (360 - 0)));
-                        if (base_rot > 360) base_rot -= 360;
-                        if (item.rot == undefined) {
-                            item.rot = base_rot
+        try {
+            let center = new mp.Vector3(self._lootData.pos.x, self._lootData.pos.y, self._lootData.pos.z);
+            let Angle_Item = 360 / 8;
+            if ((self.loaded == false) && ((!mp.raycasting.testPointToPoint(mp.vector(mp.localPlayer.position).add(0, 0, 100), center, mp.players.local, (1))) || (!mp.raycasting.testPointToPoint(mp.vector(mp.localPlayer.position), center, mp.players.local, (1))))) {
+                self.loaded = true;
+                self._lootData.items.forEach(function(item, index) {
+                    if (item != null) {
+                        item.index = index;
+                        if (mp.game.streaming.isModelInCdimage(mp.game.joaat(item.model))) {
+                            let offset_pos = center.findRot(0, 0.5, Angle_Item * index);
+                            let base_rot = (Angle_Item * index) + (offset_pos.rotPoint(center) + Math.floor(Math.random() * (360 - 0)));
+                            if (base_rot > 360) base_rot -= 360;
+                            if (item.rot == undefined) {
+                                item.rot = base_rot
+                            }
+                            let pos = offset_pos;
+                            pos.z += 1;
+                            let obj = new StreamedObject(item.model, pos, new mp.Vector3(0, 0, item.rot), {
+                                type: "pickup",
+                                offset: item.offset
+                            })
+                            self._pickupObjects.push({
+                                id: self._lootData.id,
+                                obj: obj
+                            })
                         }
-                        let pos = offset_pos;
-                        pos.z += 1;
-                        // let obj = mp.game.object.createObject(mp.game.joaat(item.model), pos.x, pos.y, pos.z, false, true, false);
-                        let obj = mp.objects.new(mp.game.joaat(item.model), pos, { //item.model
-                            rotation: new mp.Vector3(0, 0, item.rot),
-                            alpha: 255,
-                            dimension: 0
-                        });
-                        obj.placeOnGroundProperly();
-                        let rotobj = obj.getRotation(0);
-                        let posobj = obj.getCoords(false);
-                        obj.setCollision(false, true);
-                        obj.freezePosition(true);
-                        if ((item.offset.rot.x > 0) || (item.offset.rot.y > 0)) {
-                            obj.setCoords(posobj.x + item.offset.pos.x, posobj.y + item.offset.pos.y, (posobj.z - obj.getHeightAboveGround()) + item.offset.pos.z, false, false, false, false);
-                        } else {
-                            obj.setCoords(posobj.x + item.offset.pos.x, posobj.y + item.offset.pos.y, posobj.z + item.offset.pos.z, false, false, false, false);
-                        }
-                        obj.setRotation(rotobj.x + item.offset.rot.x, rotobj.y + item.offset.rot.y, rotobj.z, 0, true);
-                        self._pickupObjects.push({
-                            id: self._lootData.id,
-                            obj: obj
-                        })
                     }
-                }
-            })
-            console.log("mp.objects 1", mp.objects.length);
+                })
+            }
+        } catch (err) {
+            console.log("err", err);
         }
     }
     unload(id) {
         let self = this;
-        console.log("unload mp.objects2", mp.objects.length);
-        clearInterval(self.interval);
         self._pickupObjects.forEach(function(item, i) {
             //if (item.id == id) {
-                if (mp.objects.atHandle(item.obj.handle)) {
-                    console.log("exists");
-                    item.obj.markForDeletion();
-                    item.obj.destroy();
-                    delete self._pickupObjects[i];
-                    console.log("removed");
-                }
+            if (mp.objects.atHandle(item.obj.handle)) {
+                console.log("exists");
+                item.obj.delete();
+                delete self._pickupObjects[i];
+                console.log("removed");
+            }
             //}
         })
-        console.log("unload mp.objects3", mp.objects.length);
     }
 }
 mp.events.add("Loot:Load", (id, poolData) => {
@@ -123,13 +108,10 @@ mp.events.add("Loot:Load", (id, poolData) => {
         streamedPools[id] = new LootPool(poolData);
     }
 });
-
-
 mp.events.add("playerExitColshape", (colshape) => {
     if (colshape.getVariable("item_colshape")) {
         let id = colshape.getVariable("item_colshape_id");
         if (streamedPools[id]) {
-            console.log("unload clientside1");
             streamedPools[id].unload(id)
             delete streamedPools[id];
         }
@@ -231,7 +213,8 @@ mp.events.add("render", () => {
                 if (amount > 0) {
                     let doesFit = StorageSystem.checkFit("inventory", cur_selected.width, cur_selected.height)
                     doesFit.then(function(fit) {
-                        if (fit != undefined) {
+                        if ((fit != undefined) && (cur_selected.index)) {
+                            console.log("Loot:Pickup", pool_data, cur_selected);
                             mp.events.callRemote("Loot:Pickup", pool_data, cur_selected.index, cur_selected.name, cur_selected.amount);
                             /*3d Notify*/
                             let pos = cur_selected.position;

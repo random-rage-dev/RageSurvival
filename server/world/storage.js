@@ -206,22 +206,19 @@ var Storage = new class {
 							return reject(err);
 						})
 					})
-					console.log("saving done",tSlots.items);
+					console.log("saving done", tSlots.items);
 					player.class.setInventory(sStorage.items);
-
-
-
 					if (tSlots.id == "equipment") {
 						player.class.setEquipment(tSlots.items);
-					} else if (tSlots.id == "vehicle") {	
+					} else if (tSlots.id == "vehicle") {
 						console.log("Storage data on veh");
-					}	
+					}
 				} catch (err) {
 					console.log("err", err);
 				}
 			} else {
-					console.log("reloadInventory");
-					player.class.reloadInventory();
+				console.log("reloadInventory");
+				player.class.reloadInventory();
 			}
 		}
 	}

@@ -14,6 +14,15 @@ var equipment = {
 	"Assault Rifle": {
 		hash: "weapon_assaultrifle",
 		ammo:"5.56m Bullets"
+	},
+	"Small Backpack":{
+		drawable:41,
+		w:10,
+		h:14
+	},
+
+	"Light Armor":{
+		drawable:1
 	}
 }
 

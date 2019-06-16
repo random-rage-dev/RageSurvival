@@ -30,6 +30,10 @@ var user = mongoose.Schema({
     social_club: String,
     password: String,
     salt: String,
+    email:{
+        type:String,
+        default:""
+    },
     warns: {
         type: Number,
         default: 0

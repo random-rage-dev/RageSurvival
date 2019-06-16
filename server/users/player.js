@@ -441,11 +441,25 @@ var Player = class {
 		}
 		console.log("self._equipment", self._equipment)
 		console.log("ammoByType", ammoByType);
+		console.log(self._equipment["bag"])
 		if (self._equipment["bag"] != undefined) {
-			self._player.call("Inventory:Resize", [10, 10])
-		} else {
+			let e = Equipment[self._equipment["bag"].name]
+			if (e) {
+				self._player.setClothes(5, e.drawable, 0, 2);
 
+				self._player.call("Inventory:Resize", [e.w,e.h])
+			}
+		} else {
+				self._player.setClothes(5, 0, 0, 1);
 			self._player.call("Inventory:Resize", [10, 10])
+		}
+		if (self._equipment["armor"] != undefined) {
+			let e = Equipment[self._equipment["armor"].name]
+			if (e) {
+				self._player.setClothes(9, e.drawable, 0, 4);
+			}
+		} else {
+			self._player.setClothes(9, 0, 0, 1);
 		}
 		self.manageAttachments(false)
 	}
@@ -521,6 +535,8 @@ var Player = class {
 		});
 	}
 	async setEquipment(obj) {
+
+
 		let eq = {};
 		obj.forEach(function(item) {
 			console.log(item);

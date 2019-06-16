@@ -461,11 +461,11 @@ var items = {
     },
     /*Clothing*/
     "Light Armor": {
-        width: 3,
+        width: 2,
         height: 3,
         max_stack: 1,
         name: 'Light Armor',
-        image: 'https://via.placeholder.com/160x160',
+        image: '../../source/img/equipment/light_vest.png',
         type: "Clothing",
         model: "prop_bodyarmour_04",
         mask: "bodyarmor",
@@ -513,6 +513,25 @@ var items = {
             pos: new mp.Vector3(0, 0, 0),
             rot: new mp.Vector3(0, 0, 0)
         }
-    }
+    },
+    /*Light backpack*/
+    "Small Backpack": {
+        width: 3,
+        height: 3,
+        max_stack: 1,
+        name: 'Small Backpack',
+        image: '../../source/img/equipment/backpack_small.png',
+        type: "Clothing",
+        model: "bkr_prop_duffel_bag_01a",
+        mask: "bag",
+        thickness: 0.15,
+        amount: function() {
+            return 1;
+        },
+        offset: {
+            pos: new mp.Vector3(0, 0, 0),
+            rot: new mp.Vector3(0, 0, 0)
+        }
+    },
 };
 module.exports = items;

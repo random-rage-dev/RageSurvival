@@ -233,7 +233,7 @@ mp.events.add("render", () => {
                                 mp.players.local.stopAnimTask("mp_take_money_mg", "stand_cash_in_bag_loop", 1.0);
                             }
                             mp.players.local.taskPlayAnim("mp_take_money_mg", "stand_cash_in_bag_loop", 16, 8.0, -1, 49, 0, false, false, false);
-                            timer_anim = setTimeout(function() {
+                             timer_anim = setTimeout(function() {
                                 mp.players.local.stopAnimTask("mp_take_money_mg", "stand_cash_in_bag_loop", 1.0);
                             }, 250);
                         } else {

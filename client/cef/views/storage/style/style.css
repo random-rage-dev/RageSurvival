@@ -180,6 +180,56 @@ img.flip.vert[src*="weapon_microsmg.png"]:not(.drag) {
     z-index: 100;
     transition: all 1ms linear;
 }
+
+#context_menu{
+    z-index:999;
+    position: absolute;
+    display: inline-block;
+    border-top:1px solid var(--color-highlight-trans);
+
+}
+#context_menu >.option{
+    position: relative;
+    background: var(--color-bg-trans-6);
+    padding-left:15px;
+    padding-right:15px;
+    padding-bottom:2px;
+    border:1px solid var(--color-highlight-trans);
+    border-top:0px;
+    line-height:25px;
+    cursor: pointer;
+    font-family:Lato;
+    letter-spacing: 0.05em;
+    color:rgb(239, 239, 239);
+    transition: all 100ms linear;
+}
+
+
+#context_menu >.option:after{
+    position: absolute;
+    content:"-";
+    top:0;
+    left:7px;
+    font-weight:600;
+}
+
+#context_menu >.option:before{
+    position: absolute;
+    content:"";
+    top:0;
+    left:0px;
+    width:0%;
+    height:100%;
+    background: rgba(50,150,50,0.4);
+    font-weight:600;
+    z-index:-1;
+    transition: all 100ms linear;
+}
+
+#context_menu >.option:hover:before{
+    width:100%;
+    transition: all 100ms linear;
+}
 .targetable_interface {
     width: calc(9* var(--cell_size));
     display: block;

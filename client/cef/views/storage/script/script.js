@@ -37,13 +37,67 @@ var ContextHandler = new class {
 	constructor() {
 		let self = this;
 		self._busy = false; 
+		self._contextItemData = {};
+
+		$(window).mouseup(function(event) {
+			if (event.which != 1) return;
+			if (self.busy != true) return;
+			event.preventDefault();
+			self.closeOutOfBounds(event);
+		});
+		$(window).on('contextmenu', function(event) {
+			if (self.busy != true) return;
+			event.preventDefault();
+			self.closeOutOfBounds(event);
+		});
+	}
+	action(what) {
+		console.log("do action",what);
+	}
+	closeOutOfBounds(event) {
+		console.log("event",event);
+		console.log("parents",$(event.target));
+		if ($(event.target).hasClass("option")) {
+			console.log("Is Option")
+		}
 	}
 	get busy() {
 		return this._busy;
 	}
-	open(item, source) {
+	getOptions(item_) {
+		let options = "";
+		options += `<div onclick="ContextHandler.action('drop')" class="option">Drop</div>`
+		if (item_.indexOf("Food") > -1) {
+			options += `<div onclick="ContextHandler.action('consume')" class="option">Consume</div>`
+		}
+		if (item_.indexOf("Tool") > -1) {
+			options += `<div onclick="ContextHandler.action('use')" class="option">Use</div>`
+		}
+
+		if (item_.indexOf("Prop") > -1) {
+			options += `<div onclick="ContextHandler.action('build')" class="option">Build</div>`
+		}
+
+		return options;
+	}
+	open(event,item, source) {
+		let self = this;
 		//TODO EXTEND!!!
-		console.log(item, source);
+		let item_data = $(item).data("item");
+		self._contextItemData = item_data.item;
+		self._busy = true;
+
+
+		$("#context_menu").css({
+			top:event.clientY,
+			left:event.clientX
+		})
+		$("#context_menu").html(self.getOptions(self._contextItemData.mask))
+		$("#context_menu").show();
+
+
+
+
 	}
 }
 var ItemStorageHandler = new class {
@@ -766,7 +820,7 @@ var Storage = class {
 				cTarget = $(event.currentTarget).parents(".item")[0];
 			}
 			if (cTarget) {
-				ContextHandler.open(cTarget, self._rawSelector);
+				ContextHandler.open(event,cTarget, self._rawSelector);
 			}
 		});
 		self._wasDown = 0;

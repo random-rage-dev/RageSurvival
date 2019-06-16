@@ -52,6 +52,7 @@ mp.events.add("Inventory:Ready", (data) => {
 var windowsOpen = [];
 
 function toggleInventory() {
+	
 	console.log("toggle inventory", JSON.stringify(windowsOpen));
 	console.log("mp.gui.chat.enabled", mp.gui.chat.enabled);
 	console.log("mp.ui.ready", mp.ui.ready);

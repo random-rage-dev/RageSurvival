@@ -1,4 +1,4 @@
-var toLoad = ["mp_defend_base"]
+var toLoad = ["mp_defend_base","anim@heists@money_grab@duffel"]
 var loadPromises = [];
 toLoad.forEach(function(dict) {
 	mp.game.streaming.requestAnimDict(dict);
@@ -12,7 +12,7 @@ toLoad.forEach(function(dict) {
 	}));
 })
 Promise.all(loadPromises).then(() => {
-	//console.log("all dicts loaded")
+	console.log("all dicts loaded")
 }).catch(err => {
 	console.log("all dicts err", err)
 })

@@ -1591,7 +1591,7 @@ mp.events.add("render", () => {
                                 mp.players.local.stopAnimTask("mp_take_money_mg", "stand_cash_in_bag_loop", 1.0);
                             }
                             mp.players.local.taskPlayAnim("mp_take_money_mg", "stand_cash_in_bag_loop", 16, 8.0, -1, 49, 0, false, false, false);
-                            timer_anim = setTimeout(function() {
+                             timer_anim = setTimeout(function() {
                                 mp.players.local.stopAnimTask("mp_take_money_mg", "stand_cash_in_bag_loop", 1.0);
                             }, 250);
                         } else {
@@ -1663,7 +1663,7 @@ mp.events.add("render", () => {
     }
 });
 },{"./browser.js":3,"./natives.js":21,"./notifications.js":22,"./object.js":23,"./storage.js":32}],14:[function(require,module,exports){
-var toLoad = ["mp_defend_base"]
+var toLoad = ["mp_defend_base","anim@heists@money_grab@duffel"]
 var loadPromises = [];
 toLoad.forEach(function(dict) {
 	mp.game.streaming.requestAnimDict(dict);
@@ -1677,7 +1677,7 @@ toLoad.forEach(function(dict) {
 	}));
 })
 Promise.all(loadPromises).then(() => {
-	//console.log("all dicts loaded")
+	console.log("all dicts loaded")
 }).catch(err => {
 	console.log("all dicts err", err)
 })
@@ -11233,10 +11233,11 @@ mp.game.graphics.transitionToBlurred(1);
 var LastCam;
 mp.events.add("Server:RequestLogin", () => {
     clearBlips();
-    mp.players.local.position = new mp.Vector3(2927.993408203125, 5618.33544921875, 244.45285034179688);
+    mp.players.local.position = new mp.Vector3(-76.66345977783203, -818.8128051757812, 327.5135498046875);
     mp.players.local.setAlpha(0);
-    mp.defaultCam = mp.cameras.new('default', new mp.Vector3(2927.993408203125, 5618.33544921875, 244.45285034179688), new mp.Vector3(), 70);
-    mp.defaultCam.pointAtCoord(2906.989501953125, 5563.49267578125, 245.226806640625);
+    mp.players.local.freezePosition(true);
+    mp.defaultCam = mp.cameras.new('default', new mp.Vector3(749.273193359375, 1294.376708984375, 391.9619445800781), new mp.Vector3(), 70);
+    mp.defaultCam.pointAtCoord(485.366455078125, -1569.3214111328125, 203.82797241210938);
     mp.defaultCam.setActive(true);
     mp.game.cam.renderScriptCams(true, false, 0, true, false);
     mp.game.ui.displayHud(false);
@@ -11245,6 +11246,12 @@ mp.events.add("Server:RequestLogin", () => {
     CEFInterface.cursor(true);
     setTimeout(function() {
         CEFInterface.call("cef_loadlogin", mp.players.local.name)
+        var camera2 = mp.cameras.new('default', new mp.Vector3(-93.45111846923828, -826.1639404296875, 333.6698303222656), new mp.Vector3(), 70);
+        camera2.pointAtCoord(-76.66345977783203, -818.8128051757812, 327.5135498046875);
+        camera2.setActive(true);
+        camera2.setActiveWithInterp(mp.defaultCam.handle, 60 * 1000 * 10, 0, 0);
+        mp.game.streaming.setHdArea(-76.66345977783203, -818.8128051757812, 327.5135498046875, 327.5135498046875);
+        mp.game.streaming.loadScene(-76.66345977783203, -818.8128051757812, 327.5135498046875);
     }, 100);
 });
 mp.events.add("Account:Alert", function(...args) {
@@ -11910,6 +11917,7 @@ mp.events.add("Inventory:Ready", (data) => {
 var windowsOpen = [];
 
 function toggleInventory() {
+	
 	console.log("toggle inventory", JSON.stringify(windowsOpen));
 	console.log("mp.gui.chat.enabled", mp.gui.chat.enabled);
 	console.log("mp.ui.ready", mp.ui.ready);
@@ -13062,9 +13070,21 @@ var Weather = new class {
         mp.events.add("Weather:LoadAreas", (weathers) => {
             self.loadWeather(JSON.parse(weathers));
         });
+        mp.events.add("Weather:SetWeather", (weather) => {
+            self.setWeather(JSON.parse(weather));
+        });
         setInterval(function() {
             self._check();
         }, 1000);
+    }
+    setWeather(weather_data) {
+        if(this._inside == undefined) {
+
+            mp.game.gameplay.setWind(weather_data.wind.speed);
+            mp.game.gameplay.setWindDirection(weather_data.wind.dir);
+            mp.game.gameplay.setWeatherTypeOverTime(weather_data.name, 1);
+            mp.game.gameplay.setRainFxIntensity(weather_data.rain);
+        }
     }
     loadWeather(arr) {
         let self = this;
@@ -13085,7 +13105,6 @@ var Weather = new class {
         mp.events.callRemote("Weather:TransitionTo", this._inside);
     }
     exit() {
-
         this._inside = undefined;
         mp.events.callRemote("Weather:Exit");
         mp.game.gameplay.setWeatherTypeOverTime("CLEAR", 1);
@@ -13678,11 +13697,11 @@ var items = {
     },
     /*Clothing*/
     "Light Armor": {
-        width: 3,
+        width: 2,
         height: 3,
         max_stack: 1,
         name: 'Light Armor',
-        image: 'https://via.placeholder.com/160x160',
+        image: '../../source/img/equipment/light_vest.png',
         type: "Clothing",
         model: "prop_bodyarmour_04",
         mask: "bodyarmor",
@@ -13730,7 +13749,26 @@ var items = {
             pos: new mp.Vector3(0, 0, 0),
             rot: new mp.Vector3(0, 0, 0)
         }
-    }
+    },
+    /*Light backpack*/
+    "Small Backpack": {
+        width: 3,
+        height: 3,
+        max_stack: 1,
+        name: 'Small Backpack',
+        image: '../../source/img/equipment/backpack_small.png',
+        type: "Clothing",
+        model: "bkr_prop_duffel_bag_01a",
+        mask: "bag",
+        thickness: 0.15,
+        amount: function() {
+            return 1;
+        },
+        offset: {
+            pos: new mp.Vector3(0, 0, 0),
+            rot: new mp.Vector3(0, 0, 0)
+        }
+    },
 };
 module.exports = items;
 },{}]},{},[11]);

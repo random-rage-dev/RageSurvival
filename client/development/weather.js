@@ -9,9 +9,21 @@ var Weather = new class {
         mp.events.add("Weather:LoadAreas", (weathers) => {
             self.loadWeather(JSON.parse(weathers));
         });
+        mp.events.add("Weather:SetWeather", (weather) => {
+            self.setWeather(JSON.parse(weather));
+        });
         setInterval(function() {
             self._check();
         }, 1000);
+    }
+    setWeather(weather_data) {
+        if(this._inside == undefined) {
+
+            mp.game.gameplay.setWind(weather_data.wind.speed);
+            mp.game.gameplay.setWindDirection(weather_data.wind.dir);
+            mp.game.gameplay.setWeatherTypeOverTime(weather_data.name, 1);
+            mp.game.gameplay.setRainFxIntensity(weather_data.rain);
+        }
     }
     loadWeather(arr) {
         let self = this;
@@ -32,7 +44,6 @@ var Weather = new class {
         mp.events.callRemote("Weather:TransitionTo", this._inside);
     }
     exit() {
-
         this._inside = undefined;
         mp.events.callRemote("Weather:Exit");
         mp.game.gameplay.setWeatherTypeOverTime("CLEAR", 1);

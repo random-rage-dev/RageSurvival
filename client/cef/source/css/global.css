@@ -2,6 +2,7 @@
 {
     --color-bg-trans:           rgba(38, 38, 38, .2);
     --color-bg-trans-4:         rgba(38, 38, 38, .4);
+    --color-bg-trans-6:         rgba(38, 38, 38, .6);
     --color-bg-trans-8:         rgba(38, 38, 38, .8);
     --color-highlight:          #dce2ef;
     --color-highlight-trans:    rgba(220, 226, 239, .6);
@@ -18,7 +19,8 @@
     /*Used in Character Creator*/
     --gradient-headline-selected:      linear-gradient(to bottom, #ffffff, #a6aebb);
     --gradient-headline-normal:        linear-gradient(to bottom, #464e63, #353c4e);
-    --font-color-dark:                 #252b3a;
+    --font-color-dark:                 rgb(37, 43, 58);
+    --font-color-light:                rgb(211, 211, 211);
     --color-outline-normal:            rgba(200, 209, 214,0.4);
     --color-background-selected-dark:       rgba(42, 43, 47,0.6);
     --color-background-selected-light:       rgba(93, 93, 95,0.6);

@@ -20,10 +20,11 @@ mp.game.graphics.transitionToBlurred(1);
 var LastCam;
 mp.events.add("Server:RequestLogin", () => {
     clearBlips();
-    mp.players.local.position = new mp.Vector3(2927.993408203125, 5618.33544921875, 244.45285034179688);
+    mp.players.local.position = new mp.Vector3(-76.66345977783203, -818.8128051757812, 327.5135498046875);
     mp.players.local.setAlpha(0);
-    mp.defaultCam = mp.cameras.new('default', new mp.Vector3(2927.993408203125, 5618.33544921875, 244.45285034179688), new mp.Vector3(), 70);
-    mp.defaultCam.pointAtCoord(2906.989501953125, 5563.49267578125, 245.226806640625);
+    mp.players.local.freezePosition(true);
+    mp.defaultCam = mp.cameras.new('default', new mp.Vector3(749.273193359375, 1294.376708984375, 391.9619445800781), new mp.Vector3(), 70);
+    mp.defaultCam.pointAtCoord(485.366455078125, -1569.3214111328125, 203.82797241210938);
     mp.defaultCam.setActive(true);
     mp.game.cam.renderScriptCams(true, false, 0, true, false);
     mp.game.ui.displayHud(false);
@@ -32,6 +33,12 @@ mp.events.add("Server:RequestLogin", () => {
     CEFInterface.cursor(true);
     setTimeout(function() {
         CEFInterface.call("cef_loadlogin", mp.players.local.name)
+        var camera2 = mp.cameras.new('default', new mp.Vector3(-93.45111846923828, -826.1639404296875, 333.6698303222656), new mp.Vector3(), 70);
+        camera2.pointAtCoord(-76.66345977783203, -818.8128051757812, 327.5135498046875);
+        camera2.setActive(true);
+        camera2.setActiveWithInterp(mp.defaultCam.handle, 60 * 1000 * 10, 0, 0);
+        mp.game.streaming.setHdArea(-76.66345977783203, -818.8128051757812, 327.5135498046875, 327.5135498046875);
+        mp.game.streaming.loadScene(-76.66345977783203, -818.8128051757812, 327.5135498046875);
     }, 100);
 });
 mp.events.add("Account:Alert", function(...args) {

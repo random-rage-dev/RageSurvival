@@ -1,13 +1,6 @@
 $(function() {
     $("body").width($(window).width())
     $("body").height($(window).height())
-    $(document).ready(function() {
-        $('select').formSelect();
-        $('select').on('contentChanged', function() {
-            console.log("change")
-            $(this).formSelect()
-        });
-    });
 });
 var Account = new class {
     constructor() {
@@ -36,17 +29,25 @@ var Account = new class {
         this.username = vals.username;
         this.password = vals.password;
         if (this.password.length < 3) {
-            if ($("#join_password").hasClass("invalid") == false) {
-                $("#join_password").remove("valid");
-                $("#join_password").addClass("invalid");
+            if ($("#join_password").hasClass("wrong") == false) {
+                $("#join_password").addClass("wrong");
             }
+        } else {
+            $("#join_password").removeClass("wrong");
         }
-        if ($("#join_password").hasClass("invalid") == false) {
+        if ($("#join_password").hasClass("wrong") == false) {
             console.log("username", this.username);
             console.log("password", this.password);
             mp.trigger("Account:Login", this.username, this.password);
         } else {
-            this.alert("Please Check your Password again")
+            this.alert({
+                title: "Password",
+                titleSize: "16px",
+                message: "Please check your password (Min. length 4)   ",
+                messageColor: 'rgba(0,0,0,.8)',
+                position: "bottomCenter",
+                close: false
+            })
         }
     }
     register() {
@@ -55,45 +56,38 @@ var Account = new class {
         this.username = vals.username;
         this.password = md5(vals.password + "|" + this.salt);
         if (vals.password.length < 3) {
-            if ($("#join_password").hasClass("invalid") == false) {
-                $("#join_password").remove("valid");
-                $("#join_password").addClass("invalid");
+            if ($("#join_password").hasClass("wrong") == false) {
+                $("#join_password").addClass("wrong");
             }
+        } else {
+            $("#join_password").removeClass("wrong");
         }
-        if ($("#join_password").hasClass("invalid") == false) {
+        if ($("#join_password").hasClass("wrong") == false) {
             console.log("username", this.username);
             console.log("password", this.password);
             mp.trigger("Account:Register", this.username, this.password, this.salt);
         } else {
-            this.alert("Please Check your Password again")
+            this.alert({
+                title: "Password",
+                titleSize: "16px",
+                message: "Please check your password (Min. length 4)   ",
+                messageColor: 'rgba(0,0,0,.8)',
+                position: "bottomCenter",
+                close: false
+            })
         }
     }
     alert(text) {
-        $("#alert").show();
-        $("#alert_text").addClass("shake");
-        $("#alert_text").text(text);
-        setTimeout(function() {
-            $("#alert_text").removeClass("shake");
-        }, 500)
+        /* notify({
+             title: "Save",
+             titleSize: "16px",
+             message: "Succesfully saved your Account Data",
+             messageColor: 'rgba(0,0,0,.8)',
+             position: "bottomRight",
+             close: false
+         })*/
+        iziToast.show(text);
     }
-}
-
-var Notifications = new class {
-    constructor() {
-        this._setup();
-    }
-    _setup() {
-        this._current = [];
-    }
-    notify(notification) {
-        iziToast.show(notification);
-    }
-}
-
-
-
-function notify(n) {
-    Notifications.notify(n)
 }
 
 function cef_loadlogin(name) {

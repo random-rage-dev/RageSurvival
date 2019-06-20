@@ -18,7 +18,7 @@ var warmup = {
             })
         })
     },
-    check: function() {
+    check: async function() {
         var self = this;
         self.checkTime().then(function(time) {
             console.log("- MongoDB Response Time", time + "ms")
@@ -55,6 +55,6 @@ var warmup = {
         }, 100);
     }
 }
-setTimeout(function() {
+setTimeout(async function() {
     warmup.check();
 }, 100)

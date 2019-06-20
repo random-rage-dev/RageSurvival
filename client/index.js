@@ -1269,6 +1269,7 @@ require("./libs/animations.js")
 /*Register Attachments for Player Animatiuons etc TODO*/
 mp.attachmentMngr.register("mining", "prop_tool_pickaxe", 57005, new mp.Vector3(0.085, -0.3, 0), new mp.Vector3(-90, 0, 0));
 mp.attachmentMngr.register("lumberjack", "w_me_hatchet", 57005, new mp.Vector3(0.085, -0.05, 0), new mp.Vector3(-90, 0, 0));
+mp.attachmentMngr.register("drink_beer", "prop_cs_beer_bot_03", 57005, new mp.Vector3(0.085, -0.05, 0), new mp.Vector3(-90, 0, 0));
 require("./vector.js")
 mp.rpc = require("./libs/rage-rpc.min.js");
 mp.isValid = function(val) {
@@ -1417,7 +1418,7 @@ class LootPool {
         try {
             let center = new mp.Vector3(self._lootData.pos.x, self._lootData.pos.y, self._lootData.pos.z);
             let Angle_Item = 360 / 8;
-            if ((self.loaded == false) && ((!mp.raycasting.testPointToPoint(mp.vector(mp.localPlayer.position).add(0, 0, 100), center, mp.players.local, (1))) || (!mp.raycasting.testPointToPoint(mp.vector(mp.localPlayer.position), center, mp.players.local, (1))))) {
+            if ((self.loaded == false)) {
                 self.loaded = true;
                 self._lootData.items.forEach(function(item, index) {
                     if (item != null) {
@@ -1571,7 +1572,7 @@ mp.events.add("render", () => {
                 if (amount > 0) {
                     let doesFit = StorageSystem.checkFit("inventory", cur_selected.width, cur_selected.height)
                     doesFit.then(function(fit) {
-                        if ((fit != undefined) && (cur_selected.index)) {
+                        if ((fit != undefined)) {
                             console.log("Loot:Pickup", pool_data, cur_selected);
                             mp.events.callRemote("Loot:Pickup", pool_data, cur_selected.index, cur_selected.name, cur_selected.amount);
                             /*3d Notify*/
@@ -1586,14 +1587,6 @@ mp.events.add("render", () => {
                                 backgroundColor: 'rgba(206, 206, 206, 0.9)',
                                 close: false
                             })
-                            if (timer_anim) {
-                                clearTimeout(timer_anim);
-                                mp.players.local.stopAnimTask("mp_take_money_mg", "stand_cash_in_bag_loop", 1.0);
-                            }
-                            mp.players.local.taskPlayAnim("mp_take_money_mg", "stand_cash_in_bag_loop", 16, 8.0, -1, 49, 0, false, false, false);
-                             timer_anim = setTimeout(function() {
-                                mp.players.local.stopAnimTask("mp_take_money_mg", "stand_cash_in_bag_loop", 1.0);
-                            }, 250);
                         } else {
                             cStatus = "Not enough Space";
                         }
@@ -11442,43 +11435,45 @@ class ObjectStreamer {
 		ObjectManager.register(this);
 		setImmediate(function() {
 			self.create();
-		}, 1)
+		})
 	}
 	get id() {
 		return this.obj != undefined ? this.obj.id : -1;
 	}
 	create() {
 		let self = this;
-		try {
-			mp.game.streaming.requestModel(mp.game.joaat(this.model));
-			if (mp.game.streaming.hasModelLoaded(mp.game.joaat(this.model))) {
-				this.obj = mp.objects.new(mp.game.joaat(this.model), this.position, {
-					rotation: this.rotation,
-					alpha: 255,
-					dimension: 0
-				});
-				if (this.customData.type == "pickup") {
-					let offset = this.customData.offset;
-					this.obj.placeOnGroundProperly();
-					let rotobj = this.obj.getRotation(0);
-					let posobj = this.obj.getCoords(false);
-					this.obj.setCollision(false, true);
-					this.obj.freezePosition(true);
-					if ((offset.rot.x > 0) || (offset.rot.y > 0)) {
-						this.obj.setCoords(posobj.x + offset.pos.x, posobj.y + offset.pos.y, (posobj.z - this.obj.getHeightAboveGround()) + offset.pos.z, false, false, false, false);
-					} else {
-						this.obj.setCoords(posobj.x + offset.pos.x, posobj.y + offset.pos.y, posobj.z + offset.pos.z, false, false, false, false);
+		if (this.created == false) {
+			try {
+				mp.game.streaming.requestModel(mp.game.joaat(this.model));
+				if (mp.game.streaming.hasModelLoaded(mp.game.joaat(this.model))) {
+					this.obj = mp.objects.new(mp.game.joaat(this.model), this.position, {
+						rotation: this.rotation,
+						alpha: 255,
+						dimension: 0
+					});
+					if (this.customData.type == "pickup") {
+						let offset = this.customData.offset;
+						this.obj.placeOnGroundProperly();
+						let rotobj = this.obj.getRotation(0);
+						let posobj = this.obj.getCoords(false);
+						this.obj.setCollision(false, true);
+						this.obj.freezePosition(true);
+						if ((offset.rot.x > 0) || (offset.rot.y > 0)) {
+							this.obj.setCoords(posobj.x + offset.pos.x, posobj.y + offset.pos.y, (posobj.z - this.obj.getHeightAboveGround()) + offset.pos.z, false, false, false, false);
+						} else {
+							this.obj.setCoords(posobj.x + offset.pos.x, posobj.y + offset.pos.y, posobj.z + offset.pos.z, false, false, false, false);
+						}
+						this.obj.setRotation(rotobj.x + offset.rot.x, rotobj.y + offset.rot.y, rotobj.z, 0, true);
 					}
-					this.obj.setRotation(rotobj.x + offset.rot.x, rotobj.y + offset.rot.y, rotobj.z, 0, true);
+					this.created = true;
+				} else {
+					setTimeout(function() {
+						self.create()
+					}, 1000)
 				}
-				this.created = true;
-			} else {
-				setTimeout(function() {
-					self.create()
-				},1000)
+			} catch (err) {
+				console.log(err);
 			}
-		} catch (err) {
-			console.log(err);
 		}
 		return this.created;
 	}
@@ -11623,6 +11618,31 @@ mp.events.add("HUD:Ready", () => {
 	let anchor = utils.minimap_anchor();
 	CEFHud.call("init", anchor);
 	initDone = true;
+});
+mp.events.add("Sync:StopAnimSync", (tID, dict, name) => {
+	var player = mp.players.atRemoteId(tID);
+	if (player) {
+		player.stopAnimTask(dict, name, 1);
+	}
+});
+mp.events.add("Sync:PlayAnimation", (tID, dict, name, speed, speedMultiplier, duration, flag, playbackRate, lockX, lockY, lockZ, timeout) => {
+	var player = mp.players.atRemoteId(tID);
+	if (player) {
+		if (mp.game.streaming.doesAnimDictExist(dict)) {
+			mp.game.streaming.requestAnimDict(dict);
+			while (mp.game.streaming.hasAnimDictLoaded(dict)) {
+				break;
+			}
+			console.log("sync play started for", player.name, dict, name);
+			console.log(dict, name, speed, speedMultiplier, duration, flag, playbackRate, lockX, lockY, lockZ,timeout);
+			player.taskPlayAnim(dict, name, speed, speedMultiplier, duration, flag, playbackRate, lockX, lockY, lockZ);
+			if (timeout != 0) {
+				setTimeout(function() {
+					player.stopAnimTask(dict, name, 1);
+				}, timeout)
+			}
+		}
+	}
 });
 const statNames = ["SP0_STAMINA﻿", "SP0_STRENGTH", "SP0_LUNG_CAPACITY", "SP0_WHEELIE_ABILITY", "SP0_FLYING_ABILITY", "SP0_SHOOTING_ABILITY", "SP0_STEALTH_ABILITY"];
 // maybe playerReady can be used instead, haven't tested
@@ -12126,6 +12146,10 @@ mp.events.add("Inventory:AddItem", (citem) => {
 mp.events.add("Storage:Interact", (item) => {
 	console.log("Item use", item);
 	mp.events.callRemote("Storage:Interact", item);
+});
+mp.events.add("Storage:Action", (action,source,item_id) => {
+	console.log("Action on Item", action,source,item_id);
+	mp.events.callRemote("Storage:Action", source.replace("#",""),action,item_id);
 });
 mp.events.add("Storage:Drag", (positions) => {
 	positions = JSON.parse(positions);

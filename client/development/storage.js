@@ -262,6 +262,10 @@ mp.events.add("Storage:Interact", (item) => {
 	console.log("Item use", item);
 	mp.events.callRemote("Storage:Interact", item);
 });
+mp.events.add("Storage:Action", (action,source,item_id) => {
+	console.log("Action on Item", action,source,item_id);
+	mp.events.callRemote("Storage:Action", source.replace("#",""),action,item_id);
+});
 mp.events.add("Storage:Drag", (positions) => {
 	positions = JSON.parse(positions);
 	if (!Inventory_Order.positions[positions.id]) {

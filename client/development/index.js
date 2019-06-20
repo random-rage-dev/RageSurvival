@@ -14,6 +14,7 @@ require("./libs/animations.js")
 /*Register Attachments for Player Animatiuons etc TODO*/
 mp.attachmentMngr.register("mining", "prop_tool_pickaxe", 57005, new mp.Vector3(0.085, -0.3, 0), new mp.Vector3(-90, 0, 0));
 mp.attachmentMngr.register("lumberjack", "w_me_hatchet", 57005, new mp.Vector3(0.085, -0.05, 0), new mp.Vector3(-90, 0, 0));
+mp.attachmentMngr.register("drink_beer", "prop_cs_beer_bot_03", 57005, new mp.Vector3(0.085, -0.05, 0), new mp.Vector3(-90, 0, 0));
 require("./vector.js")
 mp.rpc = require("./libs/rage-rpc.min.js");
 mp.isValid = function(val) {

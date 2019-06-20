@@ -4,7 +4,8 @@ var ObjectId = Schema.ObjectId;
 var user = mongoose.Schema({
     user_id: {
         type: Number,
-        unique: true
+        unique: true, 
+        index : true
     },
     name: {
         type: String,

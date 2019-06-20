@@ -1,6 +1,7 @@
 var MongoDB = require("../libs/mongodb.js")
 var Vehicles = MongoDB.getVehicleModel();
 var Inventory = MongoDB.getInventoryModel();
+var Buildings = MongoDB.getBuildingModel();
 var Vehicle = class {
     constructor(data) {
         if (!new.target) new Error('class must be called with new');
@@ -16,12 +17,28 @@ var Vehicle = class {
         this._running = data.running;
         this._key = data.key;
         this._inventory = [];
-        this.components = data.components;
+        this._components = data.components;
+        this._isOpened = false;
         this._veh = null;
         this._timer = setInterval(function() {
             self.save();
         }, 5 * 60 * 1000); // Save Interval 5 Min
         this.create();
+    }
+    get id() {
+        return this._id;
+    }
+    get vehicle() {
+        return this._veh;
+    }
+    set opened(f) {
+        this._isOpened = f;
+    }
+    get opened() {
+        return this._isOpened;
+    }
+    get components() {
+        return this._components;
     }
     getInventory() {
         Inventory.find({
@@ -72,7 +89,7 @@ var Vehicle = class {
         return this.components.fuel;
     }
     set fuel(val) {
-        this.components.fuel = val;
+        this._components.fuel = val;
         this._veh.setVariable("components", this.components);
         if (this.components.fuel <= 0) {
             this._veh.setVariable("running", false);
@@ -86,7 +103,7 @@ var Vehicle = class {
         this._veh.setVariable("running", this._running);
     }
     create() {
-       // console.log("create veh1");
+        // console.log("create veh1");
         this._veh = mp.vehicles.new(this._model, mp.vector(this._position), {
             heading: mp.vector(this._rotation),
             numberPlate: "I3Ass",
@@ -108,8 +125,17 @@ var Vehicle = class {
         this._veh.setVariable("openDuration", 1000);
     }
 }
-mp.events.add("Vehicle:Interact", function(player,vehicle_ID) {
-    console.log("vehicle_ID",vehicle_ID)
+mp.events.add("Vehicle:Interact", function(player, vehicle_ID) {
+    console.log("vehicle_ID", vehicle_ID);
+    if (VehicleManager.getVehicle(vehicle_ID) != false) {
+        let veh = VehicleManager.getVehicle(vehicle_ID);
+        if (veh.opened == false) {
+            let components = veh.components;
+            console.log("add slots");
+            player.call("Storage:AddSlots", ["Vehicle Components", veh.id, JSON.stringify(components)])
+            veh.opened = true;
+        }
+    }
 });
 mp.events.add("Vehicles:createVehicle", function(vehicle) {});
 mp.events.add("Vehicles:RequestInventory", function(player) {
@@ -118,6 +144,19 @@ mp.events.add("Vehicles:RequestInventory", function(player) {
         if (VehicleManager.getVehicle(id) != false) {
             let veh = VehicleManager.getVehicle(id);
             let inv = veh.getInventory();
+            if (veh.opened == false) {
+                let packages = {
+                    id: id,
+                    data: {
+                        "container": {
+                            cells: 6,
+                            rows: 6
+                        }
+                    }
+                }
+                Storage.Interact(player, packages, veh.vehicle);
+                veh.opened = true;
+            }
         }
     }
 });
@@ -215,7 +254,7 @@ var VehicleManager = new class {
         dbVehicle.save(function(err) {
             if (err) return console.log(err);
             // saved!
-            console.log("trigger","Vehicles:createVehicle")
+            console.log("trigger", "Vehicles:createVehicle")
             mp.events.call("Vehicles:createVehicle", dbVehicle);
             self._allVehicles[id] = new Vehicle(dbVehicle);
         });

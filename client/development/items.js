@@ -59,7 +59,7 @@ class LootPool {
         try {
             let center = new mp.Vector3(self._lootData.pos.x, self._lootData.pos.y, self._lootData.pos.z);
             let Angle_Item = 360 / 8;
-            if ((self.loaded == false) && ((!mp.raycasting.testPointToPoint(mp.vector(mp.localPlayer.position).add(0, 0, 100), center, mp.players.local, (1))) || (!mp.raycasting.testPointToPoint(mp.vector(mp.localPlayer.position), center, mp.players.local, (1))))) {
+            if ((self.loaded == false)) {
                 self.loaded = true;
                 self._lootData.items.forEach(function(item, index) {
                     if (item != null) {
@@ -213,7 +213,7 @@ mp.events.add("render", () => {
                 if (amount > 0) {
                     let doesFit = StorageSystem.checkFit("inventory", cur_selected.width, cur_selected.height)
                     doesFit.then(function(fit) {
-                        if ((fit != undefined) && (cur_selected.index)) {
+                        if ((fit != undefined)) {
                             console.log("Loot:Pickup", pool_data, cur_selected);
                             mp.events.callRemote("Loot:Pickup", pool_data, cur_selected.index, cur_selected.name, cur_selected.amount);
                             /*3d Notify*/
@@ -228,14 +228,6 @@ mp.events.add("render", () => {
                                 backgroundColor: 'rgba(206, 206, 206, 0.9)',
                                 close: false
                             })
-                            if (timer_anim) {
-                                clearTimeout(timer_anim);
-                                mp.players.local.stopAnimTask("mp_take_money_mg", "stand_cash_in_bag_loop", 1.0);
-                            }
-                            mp.players.local.taskPlayAnim("mp_take_money_mg", "stand_cash_in_bag_loop", 16, 8.0, -1, 49, 0, false, false, false);
-                             timer_anim = setTimeout(function() {
-                                mp.players.local.stopAnimTask("mp_take_money_mg", "stand_cash_in_bag_loop", 1.0);
-                            }, 250);
                         } else {
                             cStatus = "Not enough Space";
                         }

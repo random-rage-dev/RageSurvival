@@ -36,29 +36,50 @@ $(window).keyup(function(e) {
 var ContextHandler = new class {
 	constructor() {
 		let self = this;
-		self._busy = false; 
+		self._busy = false;
 		self._contextItemData = {};
+		self._origin = "";
 
-		$(window).mouseup(function(event) {
+		$(window).on("click",function(event) {
 			if (event.which != 1) return;
 			if (self.busy != true) return;
 			event.preventDefault();
+			event.stopPropagation();
 			self.closeOutOfBounds(event);
 		});
 		$(window).on('contextmenu', function(event) {
 			if (self.busy != true) return;
 			event.preventDefault();
+			event.stopPropagation();
 			self.closeOutOfBounds(event);
 		});
 	}
 	action(what) {
-		console.log("do action",what);
+		console.log("do action", what);
+		let item = this._contextItemData;
+		if (item) {
+			console.log("item", item);
+			mp.trigger("Storage:Action",what,this._origin,item.id)
+			this._busy = false;
+			this.close();
+		}
+	}
+	close() {
+		$("#context_menu").hide();
+		$("#context_menu").html("");
+		$("#context_menu").css({
+			top: -1000,
+			left: -1000
+		})
+		this._busy = false;
 	}
 	closeOutOfBounds(event) {
-		console.log("event",event);
-		console.log("parents",$(event.target));
+		console.log("event", event);
+		console.log("parents", $(event.target));
 		if ($(event.target).hasClass("option")) {
 			console.log("Is Option")
+		} else {
+			this.close();
 		}
 	}
 	get busy() {
@@ -73,31 +94,28 @@ var ContextHandler = new class {
 		if (item_.indexOf("Tool") > -1) {
 			options += `<div onclick="ContextHandler.action('use')" class="option">Use</div>`
 		}
-
 		if (item_.indexOf("Prop") > -1) {
 			options += `<div onclick="ContextHandler.action('build')" class="option">Build</div>`
 		}
-
 		return options;
 	}
-	open(event,item, source) {
+	open(event, item, source) {
 		let self = this;
 		//TODO EXTEND!!!
 		let item_data = $(item).data("item");
 		self._contextItemData = item_data.item;
-		self._busy = true;
-
-
+		self._origin = source;
 		$("#context_menu").css({
-			top:event.clientY,
-			left:event.clientX
+			top: event.clientY,
+			left: event.clientX
 		})
+		console.log(self._contextItemData);
+		console.log(self.getOptions(self._contextItemData.mask));
 		$("#context_menu").html(self.getOptions(self._contextItemData.mask))
 		$("#context_menu").show();
-
-
-
-
+		setTimeout(function() {
+			self._busy = true;
+		}, 1)
 	}
 }
 var ItemStorageHandler = new class {
@@ -254,7 +272,6 @@ var DragHandler = new class {
 		$(window).on('contextmenu', function(event) {
 			if (toggledInto.length == 0) return;
 			event.preventDefault();
-			console.log("context");
 			self.flip(event);
 		});
 	}
@@ -814,13 +831,19 @@ var Storage = class {
 			if (self.isToggled == false) return;
 			if (ContextHandler.busy == true) return;
 			if (DragHandler.busy == true) return;
-			event.preventDefault();
-			let cTarget = event.currentTarget;
-			if ($(event.currentTarget).hasClass("item") == false) {
-				cTarget = $(event.currentTarget).parents(".item")[0];
-			}
-			if (cTarget) {
-				ContextHandler.open(event,cTarget, self._rawSelector);
+			console.log(self._rawSelector);
+			if (self._rawSelector == "#inventory") {
+				event.preventDefault();
+				//event.stopPropagation();
+				console.log("x");
+				let cTarget = event.currentTarget;
+				if ($(event.currentTarget).hasClass("item") == false) {
+					cTarget = $(event.currentTarget).parents(".item")[0];
+				}
+				if (cTarget) {
+				console.log("f");
+					ContextHandler.open(event, cTarget, self._rawSelector);
+				}
 			}
 		});
 		self._wasDown = 0;
@@ -850,10 +873,13 @@ var Storage = class {
 			self.dragStorage();
 		});
 		$(selector).on('mousedown', ".item, img", function(event) {
+			console.log("mousedown check1");
 			if (self.isToggled == false) return;
 			if (ContextHandler.busy == true) return;
 			if (DragHandler.busy == true) return;
+			console.log("mousedown check2");
 			event.preventDefault();
+			console.log("mousedown check3");
 			let cTarget = event.currentTarget;
 			if ($(event.currentTarget).hasClass("item") == false) {
 				cTarget = $(event.currentTarget).parents(".item")[0];
@@ -934,7 +960,7 @@ var Storage = class {
 			console.log("removeItem", index);
 			this._inventory[index] = undefined;
 			delete this._inventory[index];
-			this._inventory.splice(index,1);
+			this._inventory.splice(index, 1);
 			this.render();
 		}
 		return index > -1;
@@ -1534,75 +1560,57 @@ var CustomSlots = class {
 		$(window).mousemove(lEvent);
 	}
 }
-var equipment = new CustomSlots("#equipment", [
-	{
-		id: "clothes_head",
-		mask: "chead"
-	},
-	{
-		id: "helmet",
-		mask: "headarmor"
-	},
-	{
-		id: "armor",
-		mask: "bodyarmor"
-	},
-	{
-		id: "clothes_body",
-		mask: "cbody"
-	},
-	{
-		id: "clothes_pants",
-		mask: "cpants"
-	},
-	{
-		id: "clothes_shoes",
-		mask: "cshoes"
-	},
-	{
-		id: "weapon_primary",
-		mask: "primary"
-	},
-	{
-		id: "weapon_secondary",
-		mask: "secondary"
-	},
-	{
-		id: "weapon_melee",
-		mask: "melee"
-	},
-	{
-		id: "bag",
-		mask: "bag"
-	}
-]);
+var equipment = new CustomSlots("#equipment", [{
+	id: "clothes_head",
+	mask: "chead"
+}, {
+	id: "helmet",
+	mask: "headarmor"
+}, {
+	id: "armor",
+	mask: "bodyarmor"
+}, {
+	id: "clothes_body",
+	mask: "cbody"
+}, {
+	id: "clothes_pants",
+	mask: "cpants"
+}, {
+	id: "clothes_shoes",
+	mask: "cshoes"
+}, {
+	id: "weapon_primary",
+	mask: "primary"
+}, {
+	id: "weapon_secondary",
+	mask: "secondary"
+}, {
+	id: "weapon_melee",
+	mask: "melee"
+}, {
+	id: "bag",
+	mask: "bag"
+}]);
 storageContainers["#equipment"] = equipment;
-var Vehicle4W = new CustomSlots("#vehicle_gear4w", [
-	{
-		id: "front_left_tire",
-		mask: "tire"
-	},
-	{
-		id: "front_right_tire",
-		mask: "tire"
-	},
-	{
-		id: "rear_left_tire",
-		mask: "tire"
-	},
-	{
-		id: "rear_right_tire",
-		mask: "tire"
-	},
-	{
-		id: "battery",
-		mask: "battery"
-	},
-	{
-		id: "plugs",
-		mask: "plugs"
-	},
-]);
+var Vehicle4W = new CustomSlots("#vehicle_gear4w", [{
+	id: "front_left_tire",
+	mask: "tire"
+}, {
+	id: "front_right_tire",
+	mask: "tire"
+}, {
+	id: "rear_left_tire",
+	mask: "tire"
+}, {
+	id: "rear_right_tire",
+	mask: "tire"
+}, {
+	id: "battery",
+	mask: "battery"
+}, {
+	id: "plugs",
+	mask: "plugs"
+}, ]);
 storageContainers["#vehicle_gear4w"] = Vehicle4W;
 
 function show(interface = "storage_interface") {

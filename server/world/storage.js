@@ -12,6 +12,9 @@ var Storage = new class {
 		mp.events.add("Storage:Interact", function(player, item) {
 			player.class.useItem(item);
 		});
+		mp.events.add("Storage:Action", function(player, source, action, item_id) {
+			self.action(player, source, action, item_id);
+		});
 		mp.events.add("Storage:Transfer", function(player, source, target) {
 			self.validate(player, JSON.parse(source), JSON.parse(target))
 		});
@@ -38,6 +41,14 @@ var Storage = new class {
 	error(...msg) {
 		console.log(msg.join(" "))
 	}
+	async action(player, source, action_type, item_id) {
+		if ((source == "inventory")) {
+			//is able to to action;
+			if (source == "inventory") {
+				player.class.doAction(action_type.toLowerCase(), item_id);
+			}
+		}
+	}
 	async canInteract(player, data) {
 		console.log("check can interact");
 		if (!this._interactionOpen[data.id]) {
@@ -51,24 +62,27 @@ var Storage = new class {
 			this._interactionOpen[storData.id] = obj;
 			try {
 				let storageData = storData.data.container;
-				let dbItems = await Inventory.find({
-					owner_id: storData.id,
-					owner_type: "storage"
-				});
-				dbItems = dbItems.map(function(item, i) {
-					let itemData = Storage.map({
-						id: item._id,
-						name: item.name,
-						amount: item.amount,
-						data: item.data
+				setImmediate(async () => {
+					let dbItems = await Inventory.find({
+						owner_id: storData.id,
+						owner_type: "storage"
 					});
-					return itemData;
+					dbItems = dbItems.map(function(item, i) {
+						let itemData = Storage.map({
+							id: item._id,
+							name: item.name,
+							amount: item.amount,
+							data: item.data
+						});
+						return itemData;
+					});
+					console.log("OUTPUT CONTAINER ITEMS");
+					console.log("dbItems", dbItems);
+					console.log("storData", storData);
+					this._tempStorage[storData.id] = dbItems;
+					player.call("Storage:AddContainer", ["Container", storData.id, storageData.cells || 9, storageData.rows || 9, JSON.stringify(dbItems)]);
+					player.class.playAnimSync("mp_take_money_mg", "stand_cash_in_bag_loop",  16.0, 1, -1,  49, 1.0, false, false, false,1000);
 				});
-				console.log("OUTPUT CONTAINER ITEMS");
-				console.log("dbItems", dbItems);
-				console.log("storData", storData);
-				this._tempStorage[storData.id] = dbItems;
-				player.call("Storage:AddContainer", ["Container", storData.id, storageData.cells || 9, storageData.rows || 9, JSON.stringify(dbItems)])
 			} catch (err) {
 				console.log("interact async err", err);
 			}
@@ -149,15 +163,17 @@ var Storage = new class {
 						let p = [];
 						moved_items.forEach(async item => {
 							p.push(new Promise(async function(r1, r2) {
-								let removed = await Inventory.deleteOne({
-									_id: item.id
+								setImmediate(async () => {
+									let removed = await Inventory.deleteOne({
+										_id: item.id
+									});
+									if (removed.ok == 1) {
+										self.log("Removed item out of db", item.id)
+										return r1();
+									} else {
+										return r2();
+									}
 								});
-								if (removed.ok == 1) {
-									self.log("Removed item out of db", item.id)
-									return r1();
-								} else {
-									return r2();
-								}
 							}))
 						});
 						Promise.all(p).then(() => {
@@ -170,33 +186,35 @@ var Storage = new class {
 						let p = [];
 						new_items_in_storage.forEach(async item => {
 							p.push(new Promise(async function(r1, r2) {
-								let dbItem = await new Inventory({
-									owner_type: (sStorage.id == "inventory") ? "player" : "storage",
-									owner_id: sStorageID,
-									name: item.name,
-									amount: item.amount,
-									data: item.data
-								}).save();
-								rpc.callBrowsers(player, 'editItemID', {
-									selector: sStorage.id,
-									id: item.id,
-									name: dbItem.name,
-									amount: dbItem.amount,
-									overwrite_data: {
-										id: dbItem._id
-									}
-								}).then((success) => {
-									self.log("Editing Item", dbItem._id, "success:", success)
-									let editItem = sStorage.items.findIndex(e => {
-										return e.id == item.id;
+								setImmediate(async () => {
+									let dbItem = await new Inventory({
+										owner_type: (sStorage.id == "inventory") ? "player" : "storage",
+										owner_id: sStorageID,
+										name: item.name,
+										amount: item.amount,
+										data: item.data
+									}).save();
+									rpc.callBrowsers(player, 'editItemID', {
+										selector: sStorage.id,
+										id: item.id,
+										name: dbItem.name,
+										amount: dbItem.amount,
+										overwrite_data: {
+											id: dbItem._id
+										}
+									}).then((success) => {
+										self.log("Editing Item", dbItem._id, "success:", success)
+										let editItem = sStorage.items.findIndex(e => {
+											return e.id == item.id;
+										})
+										if (editItem > -1) {
+											sStorage.items[editItem].id = dbItem._id;
+										}
+										return r1();
+									}).catch((error) => {
+										self.error("Error Edit Item", dbItem._id)
+										return r2(error);
 									})
-									if (editItem > -1) {
-										sStorage.items[editItem].id = dbItem._id;
-									}
-									return r1();
-								}).catch((error) => {
-									self.error("Error Edit Item", dbItem._id)
-									return r2(error);
 								})
 							}))
 						});
@@ -322,42 +340,48 @@ var Storage = new class {
 								console.log("removed", removed)*/
 				try {
 					removed.forEach(async item => {
-						let removed = await Inventory.deleteOne({
-							_id: item.id
+						setImmediate(async () => {
+							let removed = await Inventory.deleteOne({
+								_id: item.id
+							});
+							if (removed.ok == 1) {
+								self.log("Removed item out of db", item.id)
+							}
 						});
-						if (removed.ok == 1) {
-							self.log("Removed item out of db", item.id)
-						}
 					});
 					toCreate.forEach(async item => {
-						let dbItem = await new Inventory({
-							owner_type: ((item.origin == tStorage_ID) ? tStorage_Type : sStorage_Type),
-							owner_id: item.origin,
-							name: item.name,
-							amount: item.amount,
-							data: item.data
-						}).save();
-						rpc.callBrowsers(player, 'editItemID', {
-							selector: sStorage.id,
-							id: "NEW",
-							name: dbItem.name,
-							amount: dbItem.amount,
-							overwrite_data: {
-								id: dbItem._id
-							}
-						}).then((success) => {
-							self.log("Editing Item", dbItem._id, "success:", success)
-						}).catch((error) => {
-							self.error("Error Edit Item", dbItem._id)
+						setImmediate(async () => {
+							let dbItem = await new Inventory({
+								owner_type: ((item.origin == tStorage_ID) ? tStorage_Type : sStorage_Type),
+								owner_id: item.origin,
+								name: item.name,
+								amount: item.amount,
+								data: item.data
+							}).save();
+							rpc.callBrowsers(player, 'editItemID', {
+								selector: sStorage.id,
+								id: "NEW",
+								name: dbItem.name,
+								amount: dbItem.amount,
+								overwrite_data: {
+									id: dbItem._id
+								}
+							}).then((success) => {
+								self.log("Editing Item", dbItem._id, "success:", success)
+							}).catch((error) => {
+								self.error("Error Edit Item", dbItem._id)
+							})
 						})
 					})
 					moved.forEach(async (item) => {
-						let inv_update = await Inventory.updateOne({
-							_id: item.id
-						}, {
-							amount: parseInt(item.amount),
-							owner_type: item.target.type,
-							owner_id: item.target.id
+						setImmediate(async () => {
+							let inv_update = await Inventory.updateOne({
+								_id: item.id
+							}, {
+								amount: parseInt(item.amount),
+								owner_type: item.target.type,
+								owner_id: item.target.id
+							})
 						})
 					})
 				} catch (err) {

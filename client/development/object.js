@@ -26,43 +26,45 @@ class ObjectStreamer {
 		ObjectManager.register(this);
 		setImmediate(function() {
 			self.create();
-		}, 1)
+		})
 	}
 	get id() {
 		return this.obj != undefined ? this.obj.id : -1;
 	}
 	create() {
 		let self = this;
-		try {
-			mp.game.streaming.requestModel(mp.game.joaat(this.model));
-			if (mp.game.streaming.hasModelLoaded(mp.game.joaat(this.model))) {
-				this.obj = mp.objects.new(mp.game.joaat(this.model), this.position, {
-					rotation: this.rotation,
-					alpha: 255,
-					dimension: 0
-				});
-				if (this.customData.type == "pickup") {
-					let offset = this.customData.offset;
-					this.obj.placeOnGroundProperly();
-					let rotobj = this.obj.getRotation(0);
-					let posobj = this.obj.getCoords(false);
-					this.obj.setCollision(false, true);
-					this.obj.freezePosition(true);
-					if ((offset.rot.x > 0) || (offset.rot.y > 0)) {
-						this.obj.setCoords(posobj.x + offset.pos.x, posobj.y + offset.pos.y, (posobj.z - this.obj.getHeightAboveGround()) + offset.pos.z, false, false, false, false);
-					} else {
-						this.obj.setCoords(posobj.x + offset.pos.x, posobj.y + offset.pos.y, posobj.z + offset.pos.z, false, false, false, false);
+		if (this.created == false) {
+			try {
+				mp.game.streaming.requestModel(mp.game.joaat(this.model));
+				if (mp.game.streaming.hasModelLoaded(mp.game.joaat(this.model))) {
+					this.obj = mp.objects.new(mp.game.joaat(this.model), this.position, {
+						rotation: this.rotation,
+						alpha: 255,
+						dimension: 0
+					});
+					if (this.customData.type == "pickup") {
+						let offset = this.customData.offset;
+						this.obj.placeOnGroundProperly();
+						let rotobj = this.obj.getRotation(0);
+						let posobj = this.obj.getCoords(false);
+						this.obj.setCollision(false, true);
+						this.obj.freezePosition(true);
+						if ((offset.rot.x > 0) || (offset.rot.y > 0)) {
+							this.obj.setCoords(posobj.x + offset.pos.x, posobj.y + offset.pos.y, (posobj.z - this.obj.getHeightAboveGround()) + offset.pos.z, false, false, false, false);
+						} else {
+							this.obj.setCoords(posobj.x + offset.pos.x, posobj.y + offset.pos.y, posobj.z + offset.pos.z, false, false, false, false);
+						}
+						this.obj.setRotation(rotobj.x + offset.rot.x, rotobj.y + offset.rot.y, rotobj.z, 0, true);
 					}
-					this.obj.setRotation(rotobj.x + offset.rot.x, rotobj.y + offset.rot.y, rotobj.z, 0, true);
+					this.created = true;
+				} else {
+					setTimeout(function() {
+						self.create()
+					}, 1000)
 				}
-				this.created = true;
-			} else {
-				setTimeout(function() {
-					self.create()
-				},1000)
+			} catch (err) {
+				console.log(err);
 			}
-		} catch (err) {
-			console.log(err);
 		}
 		return this.created;
 	}

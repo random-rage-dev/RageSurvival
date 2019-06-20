@@ -6,6 +6,7 @@ var PlayerSpawns = require("../world/playerspawns.js")
 var Building = require("../world/building.js")
 var WeatherManager = require("../world/weather.js")
 var Materials = require("../world/materials.js")
+var Pickups = require("../world/pickups.js");
 var User = MongoDB.getUserModel();
 var Inventory = MongoDB.getInventoryModel();
 var md5 = require("md5");
@@ -107,6 +108,12 @@ var Player = class {
 	}
 	get player() {
 		return this._player;
+	}
+	playAnimSync(dict, name, speed, speedMultiplier, duration, flag, playbackRate, lockX, lockY, lockZ,timeout = 0) {
+		let id = this._player.id;
+		mp.players.forEachInRange(this._player.position, 200, (tPlayer) => {
+			tPlayer.call("Sync:PlayAnimation", [id, dict, name, speed, speedMultiplier, duration, flag, playbackRate, lockX, lockY, lockZ,timeout])
+		});
 	}
 	logout() {
 		console.log("DESRTROY");
@@ -243,7 +250,7 @@ var Player = class {
 			}
 		}
 	}
-	fireWeapon(weapon_id, ammo) {
+	async fireWeapon(weapon_id, ammo) {
 		var self = this;
 		if (id != 0) {
 			let weapon = undefined;
@@ -352,18 +359,21 @@ var Player = class {
 			}
 			let attachments = ""
 			if (Materials[material] == "Tree") {
-				self._player.playAnimation(animations.gather.wood.dict, animations.gather.wood.anim, 2.0, (1))
+				//self._player.playAnimation(animations.gather.wood.dict, animations.gather.wood.anim, 2.0, (1))
+
+               	self.playAnimSync("amb@world_human_hammering@male@base", "base",  16.0, 1, -1,  1, 1.0, false, false, false,1000);
 				attachments = "lumberjack"
 			}
 			if ((Materials[material] == "Stone") || (Materials[material] == "Mineral Stone")) {
-				self._player.playAnimation(animations.gather.stone.dict, animations.gather.stone.anim, 2.0, (1))
+				//self._player.playAnimation(animations.gather.stone.dict, animations.gather.stone.anim, 2.0, (1))
+               	self.playAnimSync("amb@world_human_hammering@male@base", "base",  16.0, 1, -1,  1, 1.0, false, false, false,1000);
 				attachments = "mining"
 			}
 			if (attachments != "") {
 				self._player.addAttachment(attachments, false);
 			}
 			setTimeout(function() {
-				self._player.stopAnimation();
+				//self._player.stopAnimation();
 				self._player.setVariable("canGather", true);
 				self._player.addAttachment(attachments, true);
 				if (temp_weapon) {
@@ -446,11 +456,10 @@ var Player = class {
 			let e = Equipment[self._equipment["bag"].name]
 			if (e) {
 				self._player.setClothes(5, e.drawable, 0, 2);
-
-				self._player.call("Inventory:Resize", [e.w,e.h])
+				self._player.call("Inventory:Resize", [e.w, e.h])
 			}
 		} else {
-				self._player.setClothes(5, 0, 0, 1);
+			self._player.setClothes(5, 0, 0, 1);
 			self._player.call("Inventory:Resize", [10, 10])
 		}
 		if (self._equipment["armor"] != undefined) {
@@ -473,11 +482,13 @@ var Player = class {
 				loadData = data;
 			} else {
 				try {
-					let dbEquipment = await User.find({
-						name: self._username
+					setImmediate(async () => {
+						let dbEquipment = await User.find({
+							name: self._username
+						});
+						loadData = dbEquipment[0].equipment;
+						update = true;
 					});
-					loadData = dbEquipment[0].equipment;
-					update = true;
 				} catch (err) {
 					console.log("loadEquipment async err", err);
 					return reject(err);
@@ -507,36 +518,37 @@ var Player = class {
 	async loadInventory() {
 		let self = this;
 		return new Promise(async (resolve, reject) => {
-			Inventory.find({
-				owner_type: "player",
-				owner_id: self._userId
-			}, async function(err, arr) {
-				if (err) return reject(err);
-				if (arr != undefined) {
-					let cInventory = arr;
-					self._inventory = cInventory.map(function(item, i) {
-						let itemData = Storage.map({
-							id: item._id,
-							name: item.name,
-							amount: item.amount,
-							data: item.data
+			setImmediate(async () => {
+				Inventory.find({
+					owner_type: "player",
+					owner_id: self._userId
+				}, async function(err, arr) {
+					if (err) return reject(err);
+					if (arr != undefined) {
+						let cInventory = arr;
+						self._inventory = cInventory.map(function(item, i) {
+							let itemData = Storage.map({
+								id: item._id,
+								name: item.name,
+								amount: item.amount,
+								data: item.data
+							});
+							return itemData;
 						});
-						return itemData;
-					});
-					self._player.call("Inventory:Update", [self._inventory])
-					mp.events.call("Player:Inventory", self._player, self._inventory)
-					console.log("Loaded Player Inventory");
-					return resolve();
-				} else {
-					self.error("Account:Inventory", "Failed loading player inventory")
-					return reject("Failed loading player inventory");
-				}
-			}).lean()
+						self._player.call("Inventory:Update", [self._inventory])
+						mp.events.call("Player:Inventory", self._player, self._inventory)
+						console.log("Loaded Player Inventory");
+						return resolve();
+					} else {
+						self.error("Account:Inventory", "Failed loading player inventory")
+						return reject("Failed loading player inventory");
+					}
+				}).lean()
+			});
 		});
 	}
 	async setEquipment(obj) {
-
-
+		let self = this;
 		let eq = {};
 		obj.forEach(function(item) {
 			console.log(item);
@@ -547,14 +559,57 @@ var Player = class {
 			}
 		})
 		try {
-			let save = await User.updateOne({
-				user_id: this._userId
-			}, {
-				equipment: eq
+			setImmediate(async () => {
+				let save = await User.updateOne({
+					user_id: self._userId
+				}, {
+					equipment: eq
+				});
+				self.loadEquipment(eq);
 			});
-			this.loadEquipment(eq);
 		} catch (err) {
 			console.log("err setEquipment", err);
+		}
+	}
+	async doAction(action, item_id) {
+		let self = this;
+		console.log("action on Item", action, item_id);
+		let item_index = this.getInventory().findIndex(e => e.id == item_id)
+		if (item_index > -1) {
+			let item = this.getInventoryItemByIndex(item_index);
+			console.log("item exists", item_id, "index", item_index);
+			action = action.toLowerCase().trim();
+			let pos = this._player.position;
+			switch (action) {
+				case "drop":
+					self.removeItem(item.id);
+					self._player.call("Notifications:New", [{
+						title: "Item",
+						titleSize: "16px",
+						message: "You just dropped " + item.name,
+						messageColor: 'rgba(0,0,0,.8)',
+						position: "bottomRight",
+						close: false
+					}])
+					Pickups.dropItem(item, pos.x, pos.y, pos.z);
+                    self.playAnimSync("pickup_object", "putdown_low",  8.0, 1, -1,  49, 1.0, false, false, false,1000);
+					break;
+				case "build":
+					//let pos = this._player.position;
+					self.removeItem(item.id);
+					Pickups.dropItem(item, pos.x, pos.y, pos.z);
+					break;
+				case "consume":
+					//let pos = this._player.position;
+					self._player.addAttachment("drink_beer", false);
+					//self.playAnimSync("anim@heists@box_carry@", "idle", 8.0, 1, -1, 1, 1.0, false, false, false);
+                    self.playAnimSync("mp_player_intdrink", "loop_bottle",  8.0, 1, -1,  49, 1.0, false, false, false,4000);
+					//self.removeItem(item.id,1);
+					//self._player.addAttachment(e.hash, true);
+					break;
+				default:
+					console.log("default switch action", action, item_id)
+			}
 		}
 	}
 	useItem(item_data) {
@@ -592,38 +647,51 @@ var Player = class {
 				var hasItem = self.hasItem(item.name);
 				console.log("hasItem", hasItem);
 				console.log("giveItem", item);
-				let dbItem = await new Inventory({
-					owner_id: self._userId,
-					name: item.name,
-					amount: item.amount,
-					data: item.data
-				}).save();
-				let itemData = Storage.map({
-					id: dbItem._id,
-					name: dbItem.name,
-					amount: dbItem.amount,
-					data: dbItem.data
+				setImmediate(async () => {
+					let dbItem = await new Inventory({
+						owner_id: self._userId,
+						name: item.name,
+						amount: item.amount,
+						data: item.data
+					}).save();
+					let itemData = Storage.map({
+						id: dbItem._id,
+						name: dbItem.name,
+						amount: dbItem.amount,
+						data: dbItem.data
+					});
+					self._inventory.push(itemData);
+					console.log("itemData", itemData);
+					mp.events.call("Player:Inventory:AddItem", self._player, itemData)
+					self._player.call("Inventory:AddItem", [itemData])
+					return resolve();
 				});
-				self._inventory.push(itemData);
-				console.log("itemData", itemData);
-				mp.events.call("Player:Inventory:AddItem", self._player, itemData)
-				self._player.call("Inventory:AddItem", [itemData])
-				return resolve();
 			} catch (err) {
 				return reject(err);
 			}
 		})
 	}
-	removeItem(id) {
+	async removeItem(id) {
+		let self = this;
 		console.log("remove item", id);
-		let index = this._inventory.findIndex(function(item) {
+		let index = self._inventory.findIndex(function(item) {
 			return (item.id == id);
 		})
 		if (index > -1) {
 			console.log("removed");
-			delete this._inventory[index];
-			this._inventory.splice(index, 1)
-			this._player.call("Inventory:RemoveItem", [id])
+			delete self._inventory[index];
+			self._inventory.splice(index, 1)
+			setImmediate(async () => {
+				let removed = await Inventory.deleteOne({
+					_id: id
+				});
+				if (removed.ok == 1) {
+					console.log("removed1 ");
+					self._player.call("Inventory:RemoveItem", [id])
+				} else {
+					console.log("remove failed");
+				}
+			})
 		}
 		console.log("index item", index);
 	}
@@ -853,4 +921,10 @@ var Player = class {
 		});
 	}
 }
+mp.events.addCommand("nox", async function(player, fulltext) {
+	let start = new Date();
+	let dbEquipment = await User.find();
+	let end = new Date();
+	console.log("response time", (end - start))
+});
 module.exports = Player;

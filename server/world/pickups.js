@@ -257,6 +257,8 @@ var Pickups = new class {
                 /*Add Item to Inventory*/
                 console.log("pick item up", id, item_data);
                 playerInstance.giveItem(item_data).then(() => {
+                    //Sync:PlayAnimation
+                    playerInstance.playAnimSync("anim@am_hold_up@male", "shoplift_mid",  16.0, 1, -1,  49, 1.0, false, false, false,1000);
                     /*Add Item to Inventory*/
                     if (self.isEmpty(id) == true) {
                         self.unloadPickup(id);

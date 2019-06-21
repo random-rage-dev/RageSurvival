@@ -89,7 +89,10 @@ var ContextHandler = new class {
 		let options = "";
 		options += `<div onclick="ContextHandler.action('drop')" class="option">Drop</div>`
 		if (item_.indexOf("Food") > -1) {
-			options += `<div onclick="ContextHandler.action('consume')" class="option">Consume</div>`
+			options += `<div onclick="ContextHandler.action('eat')" class="option">Consume</div>`
+		}
+		if (item_.indexOf("Drink") > -1) {
+			options += `<div onclick="ContextHandler.action('drink')" class="option">Consume</div>`
 		}
 		if (item_.indexOf("Tool") > -1) {
 			options += `<div onclick="ContextHandler.action('use')" class="option">Use</div>`

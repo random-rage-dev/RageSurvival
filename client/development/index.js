@@ -1,4 +1,7 @@
 "use strict";
+var Bones = require("./libs/skeleton.js")
+console.log(Bones.SKEL_R_Hand);
+console.log(Bones.SKEL_L_Hand);
 console.log = function(...a) {
     a = a.map(function(e) {
         return JSON.stringify(e);
@@ -12,9 +15,10 @@ require("./libs/attachments.js")
 require("./libs/weapon_attachments.js")
 require("./libs/animations.js")
 /*Register Attachments for Player Animatiuons etc TODO*/
-mp.attachmentMngr.register("mining", "prop_tool_pickaxe", 57005, new mp.Vector3(0.085, -0.3, 0), new mp.Vector3(-90, 0, 0));
-mp.attachmentMngr.register("lumberjack", "w_me_hatchet", 57005, new mp.Vector3(0.085, -0.05, 0), new mp.Vector3(-90, 0, 0));
-mp.attachmentMngr.register("drink_beer", "prop_cs_beer_bot_03", 57005, new mp.Vector3(0.085, -0.05, 0), new mp.Vector3(-90, 0, 0));
+mp.attachmentMngr.register("mining", "prop_tool_pickaxe", Bones.SKEL_R_Hand, new mp.Vector3(0.085, -0.3, 0), new mp.Vector3(-90, 0, 0));
+mp.attachmentMngr.register("lumberjack", "w_me_hatchet", Bones.SKEL_R_Hand, new mp.Vector3(0.085, -0.05, 0), new mp.Vector3(-90, 0, 0));
+mp.attachmentMngr.register("drink_beer", "prop_cs_beer_bot_03", Bones.SKEL_L_Hand, new mp.Vector3(0.1, -0.03, 0.025), new mp.Vector3(-90, 30, 0));
+mp.attachmentMngr.register("eat_burger", "prop_cs_burger_01", Bones.SKEL_L_Hand, new mp.Vector3(0.15, 0.025, 0.025), new mp.Vector3(170, 40, 0));
 require("./vector.js")
 mp.rpc = require("./libs/rage-rpc.min.js");
 mp.isValid = function(val) {

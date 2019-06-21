@@ -357,6 +357,7 @@ mp.events.add("Storage:TransferSlots", (storage, slots) => {
 	slots.items = slots.items.map((item) => Object.assign(StorageSystem.minify(item.item), {
 		slot_id: item.id
 	}));
+	console.log("JSON",JSON.stringify(storage));
 	mp.events.callRemote("Storage:TransferSlots", JSON.stringify(storage), JSON.stringify(slots));
 });
 mp.events.add("Storage:UpdateSlots", (target, items) => {

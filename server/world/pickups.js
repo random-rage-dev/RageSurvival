@@ -279,13 +279,11 @@ var Pickups = new class {
 /drop 9mm_Bullets 256
 
 */
-mp.events.addCommand("drop", (player, fulltext) => {
+mp.events.addCommand("drop", (player, item_name) => {
     //player.call("Building:Start", [model])
     let pos = mp.players.local.position;
-    let item = player.class.getInventoryItemByIndex();
-    console.log("f", item);
-    player.class.removeItem(item.id);
-    Pickups.dropItem(item, pos.x, pos.y, pos.z);
+    console.log("item_name",item_name);
+    //Pickups.dropItem(item, pos.x, pos.y, pos.z);
     //Pickups.dropItem(name, amount, pos.x, pos.y, pos.z)
 });
 module.exports = Pickups;

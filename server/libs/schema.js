@@ -19,6 +19,10 @@ var user = mongoose.Schema({
             z: 0
         }
     },
+    health:{
+        type:Number,
+        default:100
+    },
     hunger:{
         type:Number,
         default:100

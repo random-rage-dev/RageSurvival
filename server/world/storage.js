@@ -104,7 +104,7 @@ var Storage = new class {
 			console.log("old_Amount", old_Amount);
 			console.log("new_Amount", new_Amount);
 			if (old_Amount => new_Amount) {
-				console.log("Amount Valid");
+				console.log("Amount Valid",tSlots.items);
 				let all_items_temp = TempStorage_sStorage.concat(TempStorage_tSlots); // merge the two temp arrays;
 				let moved_items = all_items_temp.filter(e => {
 					let fItem = tSlots.items.findIndex(function(cItem) {
@@ -128,7 +128,20 @@ var Storage = new class {
 						return e.id == f.id;
 					})
 					return f == -1;
+				}).map(e => {
+					let fItem = Object.keys(TempStorage_tSlots).findIndex(function(key) {
+						return (TempStorage_tSlots[key].id == e.id);
+					})
+					if (fItem > -1) {
+						return Object.assign(e, TempStorage_tSlots[Object.keys(TempStorage_tSlots)[fItem]])
+					} else {
+						return e;
+					}
 				})
+
+
+
+
 				tSlots.items = tSlots.items.map(e => {
 					let fItem = TempStorage_sStorage.findIndex(function(cItem) {
 						return (cItem.id == e.id);
@@ -156,7 +169,7 @@ var Storage = new class {
 					}
 				})
 				console.log("moved_items", moved_items);
-				console.log("new_items_in_storage", new_items_in_storage);
+				console.log("tSlots.items", tSlots.items);
 				console.log("sStorage.items", sStorage.items);
 				try {
 					await new Promise(function(resolve, reject) {

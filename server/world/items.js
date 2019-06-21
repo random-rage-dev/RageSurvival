@@ -486,6 +486,11 @@ var items = {
         offset: {
             pos: new mp.Vector3(0, 0, 0),
             rot: new mp.Vector3(0, 0, 0)
+        },
+        modifiers: {
+            durability: function() {
+                return 100
+            }
         }
     },
     "Medium Armor": {
@@ -504,6 +509,11 @@ var items = {
         offset: {
             pos: new mp.Vector3(0, 0, 0),
             rot: new mp.Vector3(0, 0, 0)
+        },
+        modifiers: {
+            durability: function() {
+                return 100
+            }
         }
     },
     "Heavy Armor": {
@@ -522,6 +532,11 @@ var items = {
         offset: {
             pos: new mp.Vector3(0, 0, 0),
             rot: new mp.Vector3(0, 0, 0)
+        },
+        modifiers: {
+            durability: function() {
+                return 100
+            }
         }
     },
     /*Light backpack*/

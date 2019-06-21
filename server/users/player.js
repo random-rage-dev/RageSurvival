@@ -27,8 +27,6 @@ const appearanceIndex = {
 	"freckles": 9,
 	"chesthair": 10
 }
-
-
 var Player = class {
 	constructor(player) {
 		this._setup(player);
@@ -44,6 +42,7 @@ var Player = class {
 		self._warns = 0;
 		self._userId = 0;
 		self._skin = 'mp_m_freemode_01';
+		self._gender = "Male";
 		self._inCombat = false;
 		self._death = 0;
 		self._health = 100;
@@ -77,6 +76,20 @@ var Player = class {
 	}
 	get thirst() {
 		return this._thirst;
+	}
+	set armor(a) {
+		this._armor = a;
+		this._player.armour = this._armor;
+	}
+	get armor() {
+		return this._armor;
+	}
+	get health() {
+		return this._health;
+	}
+	set health(h) {
+		this._health = h;
+		this._player.health = 100 + this._health;
 	}
 	set hunger(h) {
 		if (h > 100) h = 100;
@@ -145,7 +158,8 @@ var Player = class {
 						z: position.z
 					},
 					hunger: self._hunger,
-					thirst: self._thirst
+					thirst: self._thirst,
+					health: self.health
 				}, function(err, numberAffected, rawResponse) {
 					if (!err) {
 						self.log("Succesfully saved data", self._username)
@@ -222,10 +236,7 @@ var Player = class {
 		console.log("TODO: Relaod equipment in spawn");
 		//Player:UiReady
 		self._player.heading = 90;
-		self._health = 100;
-		self._armor = 25;
-		self._player.health = 100 + self._health;
-		self._player.armour = self._armor;
+		self.health = self.health;
 		self._damage = [];
 		self._death = 0;
 		self._inCombat = false;
@@ -474,11 +485,19 @@ var Player = class {
 		}
 		if (self._equipment["armor"] != undefined) {
 			let e = Equipment[self._equipment["armor"].name]
+			let dur = self._equipment["armor"].data["durability"];
+			console.log("eq", self._equipment["armor"]);
+			console.log("dur", dur);
 			if (e) {
-				self._player.setClothes(9, e.drawable, 0, 4);
+				let drawable = e.drawable[self._gender];
+				console.log("drawable", drawable);
+				self._player.setClothes(9, drawable, 0, 4);
+				console.log("dur",dur);
+				self.armor = parseInt(dur);
 			}
 		} else {
 			self._player.setClothes(9, 0, 0, 1);
+				self.armor = 0;
 		}
 		self.manageAttachments(false)
 	}
@@ -488,40 +507,42 @@ var Player = class {
 		return new Promise(async (resolve, reject) => {
 			let loadData = [];
 			let update = false;
-			if (data != false) {
-				loadData = data;
-			} else {
-				try {
-					setImmediate(async () => {
+			console.log("data", data);
+			setImmediate(async () => {
+				if (data != false) {
+					loadData = data;
+				} else {
+					try {
 						let dbEquipment = await User.find({
 							name: self._username
 						});
 						loadData = dbEquipment[0].equipment;
+						console.log("loaded eq", dbEquipment);
 						update = true;
-					});
-				} catch (err) {
-					console.log("loadEquipment async err", err);
-					return reject(err);
+					} catch (err) {
+						console.log("loadEquipment async err", err);
+						return reject(err);
+					}
 				}
-			}
-			console.log("loadData", loadData);
-			if (update == true) {
-				let items = [];
-				Object.keys(loadData).forEach(function(key, value) {
-					let item = loadData[key];
-					let itemData = Storage.map({
-						name: item.name,
-						amount: item.amount,
-						data: item.data,
-						slot_id: key
+				console.log("loadData", loadData);
+				if (update == true) {
+					let items = [];
+					Object.keys(loadData).forEach(function(key, value) {
+						let item = loadData[key];
+						let itemData = Storage.map({
+							name: item.name,
+							amount: item.amount,
+							data: item.data,
+							slot_id: key
+						});
+						items.push(itemData);
 					});
-					items.push(itemData);
-				});
-				self._player.call("Storage:UpdateSlots", ["equipment", items])
-			}
-			self._equipment = loadData;
-			self.applyEquiment();
-			return resolve();
+					self._player.call("Storage:UpdateSlots", ["equipment", items])
+				}
+				self._equipment = loadData;
+				self.applyEquiment();
+				return resolve();
+			});
 		})
 	}
 	/* Inventory */
@@ -547,7 +568,7 @@ var Player = class {
 						});
 						self._player.call("Inventory:Update", [self._inventory])
 						mp.events.call("Player:Inventory", self._player, self._inventory)
-						console.log("Loaded Player Inventory");
+						console.log("Loaded Player Inventory",self._inventory);
 						return resolve();
 					} else {
 						self.error("Account:Inventory", "Failed loading player inventory")
@@ -561,8 +582,9 @@ var Player = class {
 		let self = this;
 		let eq = {};
 		obj.forEach(function(item) {
-			console.log(item);
+			console.log("setEQ",item);
 			eq[item.slot_id] = {
+				id:item.id,
 				name: item.name,
 				amount: item.amount,
 				data: item.data || {}
@@ -587,14 +609,11 @@ var Player = class {
 		let item_index = this.getInventory().findIndex(e => e.id == item_id)
 		if (item_index > -1) {
 			if ((Date.now() - self._canUseItem) < 5000) return;
-
 			let item = this.getInventoryItemByIndex(item_index);
 			console.log("item exists", item_id, "index", item_index, "item", item);
 			action = action.toLowerCase().trim();
 			let pos = this._player.position;
 			let iData = Storage.getItemData(item.name);
-
-
 			self._canUseItem = Date.now();
 			switch (action) {
 				case "drop":
@@ -778,6 +797,7 @@ var Player = class {
 	}
 	loadChar(data) {
 		let self = this;
+		self._gender = data.gender;
 		if (data.gender == "Male") {
 			self._player.model = mp.joaat('mp_m_freemode_01');
 			self._player.setClothes(3, 0, 0, 2);
@@ -895,6 +915,9 @@ var Player = class {
 					self._characterData = cUser.character[0];
 					self.hunger = cUser.hunger || 100;
 					self.thirst = cUser.thirst || 100;
+					self.health = cUser.health || 100;
+
+
 					self._player.setVariable("user_id", self._userId);
 					self._player.setVariable("loggedIn", true);
 					self._player.setVariable("spawned", false);

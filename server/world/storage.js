@@ -408,6 +408,9 @@ var Storage = new class {
 	getMaxStack(name) {
 		return itemIdentity[name].max_stack || undefined;
 	}
+	getItemData(name) {
+		return itemIdentity[name] || undefined;
+	}
 	map(object) {
 		if (itemIdentity[object.name]) {
 			let masked = {

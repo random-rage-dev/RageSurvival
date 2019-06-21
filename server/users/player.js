@@ -27,6 +27,8 @@ const appearanceIndex = {
 	"freckles": 9,
 	"chesthair": 10
 }
+
+
 var Player = class {
 	constructor(player) {
 		this._setup(player);
@@ -49,6 +51,7 @@ var Player = class {
 		self._hunger = 0;
 		self._thirst = 0;
 		self._storage = {};
+		self._canUseItem = Date.now();
 		self._characterData = [];
 		self._equipment = {};
 		self._crouching = false;
@@ -69,11 +72,19 @@ var Player = class {
 		this._crouching = is;
 		this._player.setVariable("isCrouched", this._crouching)
 	}
+	get hunger() {
+		return this._hunger;
+	}
+	get thirst() {
+		return this._thirst;
+	}
 	set hunger(h) {
+		if (h > 100) h = 100;
 		this._hunger = h;
 		this._player.setVariable("hunger", this._hunger)
 	}
 	set thirst(t) {
+		if (t > 100) t = 100;
 		this._thirst = t;
 		this._player.setVariable("thirst", this._thirst)
 	}
@@ -109,10 +120,10 @@ var Player = class {
 	get player() {
 		return this._player;
 	}
-	playAnimSync(dict, name, speed, speedMultiplier, duration, flag, playbackRate, lockX, lockY, lockZ,timeout = 0) {
+	playAnimSync(dict, name, speed, speedMultiplier, duration, flag, playbackRate, lockX, lockY, lockZ, timeout = 0) {
 		let id = this._player.id;
 		mp.players.forEachInRange(this._player.position, 200, (tPlayer) => {
-			tPlayer.call("Sync:PlayAnimation", [id, dict, name, speed, speedMultiplier, duration, flag, playbackRate, lockX, lockY, lockZ,timeout])
+			tPlayer.call("Sync:PlayAnimation", [id, dict, name, speed, speedMultiplier, duration, flag, playbackRate, lockX, lockY, lockZ, timeout])
 		});
 	}
 	logout() {
@@ -252,7 +263,7 @@ var Player = class {
 	}
 	async fireWeapon(weapon_id, ammo) {
 		var self = this;
-		if (id != 0) {
+		if (weapon_id != 0) {
 			let weapon = undefined;
 			if (self._equipment["weapon_primary"] != undefined) {
 				let e = Equipment[self._equipment["weapon_primary"].name]
@@ -360,13 +371,12 @@ var Player = class {
 			let attachments = ""
 			if (Materials[material] == "Tree") {
 				//self._player.playAnimation(animations.gather.wood.dict, animations.gather.wood.anim, 2.0, (1))
-
-               	self.playAnimSync("amb@world_human_hammering@male@base", "base",  16.0, 1, -1,  1, 1.0, false, false, false,1000);
+				self.playAnimSync("amb@world_human_hammering@male@base", "base", 16.0, 1, -1, 1, 1.0, false, false, false, 1000);
 				attachments = "lumberjack"
 			}
 			if ((Materials[material] == "Stone") || (Materials[material] == "Mineral Stone")) {
 				//self._player.playAnimation(animations.gather.stone.dict, animations.gather.stone.anim, 2.0, (1))
-               	self.playAnimSync("amb@world_human_hammering@male@base", "base",  16.0, 1, -1,  1, 1.0, false, false, false,1000);
+				self.playAnimSync("amb@world_human_hammering@male@base", "base", 16.0, 1, -1, 1, 1.0, false, false, false, 1000);
 				attachments = "mining"
 			}
 			if (attachments != "") {
@@ -576,10 +586,16 @@ var Player = class {
 		console.log("action on Item", action, item_id);
 		let item_index = this.getInventory().findIndex(e => e.id == item_id)
 		if (item_index > -1) {
+			if ((Date.now() - self._canUseItem) < 5000) return;
+
 			let item = this.getInventoryItemByIndex(item_index);
-			console.log("item exists", item_id, "index", item_index);
+			console.log("item exists", item_id, "index", item_index, "item", item);
 			action = action.toLowerCase().trim();
 			let pos = this._player.position;
+			let iData = Storage.getItemData(item.name);
+
+
+			self._canUseItem = Date.now();
 			switch (action) {
 				case "drop":
 					self.removeItem(item.id);
@@ -592,20 +608,31 @@ var Player = class {
 						close: false
 					}])
 					Pickups.dropItem(item, pos.x, pos.y, pos.z);
-                    self.playAnimSync("pickup_object", "putdown_low",  8.0, 1, -1,  49, 1.0, false, false, false,1000);
+					self.playAnimSync("pickup_object", "putdown_low", 8.0, 1, -1, 49, 1.0, false, false, false, 1000);
 					break;
 				case "build":
 					//let pos = this._player.position;
 					self.removeItem(item.id);
 					Pickups.dropItem(item, pos.x, pos.y, pos.z);
 					break;
-				case "consume":
+				case "eat":
 					//let pos = this._player.position;
+					self._player.addAttachment("eat_burger", false);
+					self.playAnimSync("mp_player_inteat@burger", "mp_player_int_eat_burger", 8.0, 1, -1, 49, 1.0, false, false, false, 5000);
+					setTimeout(function() {
+						self._player.addAttachment("eat_burger", true);
+						self.hunger += iData.hunger;
+					}, 5000);
+					self.removeItem(item.id, 1);
+					break;
+				case "drink":
 					self._player.addAttachment("drink_beer", false);
-					//self.playAnimSync("anim@heists@box_carry@", "idle", 8.0, 1, -1, 1, 1.0, false, false, false);
-                    self.playAnimSync("mp_player_intdrink", "loop_bottle",  8.0, 1, -1,  49, 1.0, false, false, false,4000);
-					//self.removeItem(item.id,1);
-					//self._player.addAttachment(e.hash, true);
+					self.playAnimSync("mp_player_intdrink", "loop_bottle", 8.0, 1, -1, 49, 1.0, false, false, false, 5000);
+					setTimeout(function() {
+						self._player.addAttachment("drink_beer", true);
+						self.thirst += iData.thirst;
+					}, 5000);
+					self.removeItem(item.id, 1);
 					break;
 				default:
 					console.log("default switch action", action, item_id)
@@ -671,27 +698,51 @@ var Player = class {
 			}
 		})
 	}
-	async removeItem(id) {
+	async removeItem(id, amount) {
 		let self = this;
 		console.log("remove item", id);
 		let index = self._inventory.findIndex(function(item) {
 			return (item.id == id);
 		})
 		if (index > -1) {
-			console.log("removed");
-			delete self._inventory[index];
-			self._inventory.splice(index, 1)
-			setImmediate(async () => {
-				let removed = await Inventory.deleteOne({
-					_id: id
-				});
-				if (removed.ok == 1) {
-					console.log("removed1 ");
-					self._player.call("Inventory:RemoveItem", [id])
+			if (!amount) {
+				console.log("removed");
+				delete self._inventory[index];
+				self._inventory.splice(index, 1)
+				setImmediate(async () => {
+					let removed = await Inventory.deleteOne({
+						_id: id
+					});
+					if (removed.ok == 1) {
+						console.log("removed1 ");
+						self._player.call("Inventory:RemoveItem", [id])
+					} else {
+						console.log("remove failed");
+					}
+				})
+			} else {
+				let cAmount = self._inventory[index].amount;
+				let nAmount = cAmount - amount;
+				if (nAmount > 0) {
+					setImmediate(async () => {
+						let inv_update = await Inventory.updateOne({
+							_id: id
+						}, {
+							amount: nAmount
+						})
+						if (inv_update.ok == 1) {
+							console.log("updated ok ");
+							self._player.call("Inventory:EditItem", [id, {
+								amount: nAmount
+							}])
+						} else {
+							console.log("updated failed");
+						}
+					})
 				} else {
-					console.log("remove failed");
+					self.removeItem(id)
 				}
-			})
+			}
 		}
 		console.log("index item", index);
 	}

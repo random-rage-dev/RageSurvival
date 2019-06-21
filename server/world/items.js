@@ -168,8 +168,9 @@ var items = {
         type: "Food",
         model: "ng_proc_sodacan_01a",
         thickness: 0.25,
-        mask: "Food",
+        mask: "Drink",
         usable:true,
+        thirst:20,
         amount: function() {
             return 1;
         },
@@ -185,8 +186,9 @@ var items = {
         name: 'Beer',
         image: 'https://via.placeholder.com/40x80',
         type: "Food",
-        mask: "Food",
+        mask: "Drink",
         model: "prop_cs_beer_bot_03",
+        thirst:20,
         usable:true,
         thickness: 0.15,
         amount: function() {
@@ -206,7 +208,9 @@ var items = {
         type: "Food",
         model: "ng_proc_ojbot_01a",
         usable:true,
-        mask: "Food",
+        mask: "Drink",
+        thirst:20,
+        animation:"testanim",
         thickness: 0.2,
         amount: function() {
             return 1;
@@ -226,6 +230,7 @@ var items = {
         model: "ng_proc_food_nana1a",
         usable:true,
         mask: "Food",
+        hunger:20,
         thickness: 0.15,
         amount: function() {
             return 1;
@@ -244,6 +249,7 @@ var items = {
         type: "Food",
         model: "ng_proc_food_ornge1a",
         mask: "Food",
+        hunger:20,
         usable:true,
         thickness: 0.15,
         amount: function() {
@@ -263,6 +269,7 @@ var items = {
         type: "Food",
         model: "v_res_tt_cereal02",
         mask: "Food",
+        hunger:20,
         usable:true,
         thickness: 0.2,
         amount: function() {
@@ -282,6 +289,7 @@ var items = {
         type: "Food",
         model: "v_res_fa_cereal01",
         mask: "Food",
+        hunger:20,
         usable:true,
         thickness: 0.2,
         amount: function() {
@@ -299,6 +307,7 @@ var items = {
         name: "Chicken Noodles",
         image: 'https://via.placeholder.com/40x80',
         type: "Food",
+        hunger:20,
         mask: "Food",
         usable:true,
         model: "v_res_fa_potnoodle",
@@ -319,6 +328,7 @@ var items = {
         image: 'https://via.placeholder.com/40x80',
         type: "Food",
         mask: "Food",
+        hunger:20,
         usable:true,
         model: "v_res_fa_bread01",
         thickness: 0.25,

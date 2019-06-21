@@ -52,7 +52,6 @@ mp.events.add("Inventory:Ready", (data) => {
 var windowsOpen = [];
 
 function toggleInventory() {
-	
 	console.log("toggle inventory", JSON.stringify(windowsOpen));
 	console.log("mp.gui.chat.enabled", mp.gui.chat.enabled);
 	console.log("mp.ui.ready", mp.ui.ready);
@@ -197,15 +196,33 @@ mp.events.add("Inventory:Update", (inventory) => {
 		CEFStorage.call("addItem", "inventory", tempSettings.cell || 0, tempSettings.row || 0, citem.width, citem.height, JSON.stringify(gData), tempSettings.flipped || false)
 	})
 });
-mp.events.add("Inventory:EditItem", (citem) => {
-	console.log("Inventory:EditItem item", citem);
+mp.events.add("Inventory:EditItem", (citem_id, nMapData) => {
+	console.log("Inventory:EditItem item", citem_id, nMapData);
+	if (TempStorage["inventory"]) {
+		let index = TempStorage["inventory"].findIndex((e) => {
+			return e.id == citem_id;
+		})
+		console.log("index in temp inv", index);
+		if (index > -1) {
+			//CEFStorage.call("removeItemByID", "inventory", id);
+			mp.rpc.callBrowser(CEFStorage.browser, 'editItemByID', {
+				selector: "inventory",
+				id: citem_id,
+				overwrite_data: nMapData
+			}).then(value => {
+				console.log("editItemByID", value);
+			}).catch(err => {
+				console.log("error", err);
+			});
+		}
+	}
 });
 mp.events.add("Inventory:RemoveItem", (id) => {
 	if (TempStorage["inventory"]) {
 		let index = TempStorage["inventory"].findIndex((e) => {
 			return e.id == id;
 		})
-		console.log("index in temp inv",index);
+		console.log("index in temp inv", index);
 		if (index > -1) {
 			//CEFStorage.call("removeItemByID", "inventory", id);
 			mp.rpc.callBrowser(CEFStorage.browser, 'removeItemByID', {
@@ -218,7 +235,7 @@ mp.events.add("Inventory:RemoveItem", (id) => {
 			});
 			TempStorage["inventory"][index] = null;
 			delete TempStorage["inventory"][index];
-            TempStorage["inventory"].splice(index,1)
+			TempStorage["inventory"].splice(index, 1)
 		}
 	}
 });
@@ -262,9 +279,9 @@ mp.events.add("Storage:Interact", (item) => {
 	console.log("Item use", item);
 	mp.events.callRemote("Storage:Interact", item);
 });
-mp.events.add("Storage:Action", (action,source,item_id) => {
-	console.log("Action on Item", action,source,item_id);
-	mp.events.callRemote("Storage:Action", source.replace("#",""),action,item_id);
+mp.events.add("Storage:Action", (action, source, item_id) => {
+	console.log("Action on Item", action, source, item_id);
+	mp.events.callRemote("Storage:Action", source.replace("#", ""), action, item_id);
 });
 mp.events.add("Storage:Drag", (positions) => {
 	positions = JSON.parse(positions);

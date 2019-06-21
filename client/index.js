@@ -506,7 +506,7 @@ mp.events.add("Building:Cancel", () => {
     }
 });
 module.exports = Building;
-},{"./object_offsets.js":24}],5:[function(require,module,exports){
+},{"./object_offsets.js":25}],5:[function(require,module,exports){
 var values = [];
 values["father"] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 42, 43, 44];
 values["mother"] = [21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 45];
@@ -955,7 +955,7 @@ mp.events.add("Combat:HitEntity", () => {
 	timerHitmarker = Date.now() / 1000;
 });
 mp.events.add("Combat:Hitted", (dmg) => {});
-},{"./vector.js":34}],7:[function(require,module,exports){
+},{"./vector.js":35}],7:[function(require,module,exports){
 var Status = [
     "Crafted successfully!",
     "Crafting failed!",
@@ -1136,7 +1136,7 @@ mp.events.add("render", () => {
         streamedCrops[key].render();
     })
 });
-},{"./browser.js":3,"./natives.js":21,"./notifications.js":22,"./storage.js":32}],9:[function(require,module,exports){
+},{"./browser.js":3,"./natives.js":22,"./notifications.js":23,"./storage.js":33}],9:[function(require,module,exports){
 const movementClipSet = "move_ped_crouched";
 const strafeClipSet = "move_ped_crouched_strafing";
 const clipSetSwitchTime = 0.25;
@@ -1252,8 +1252,11 @@ mp.events.add("render", () => {
     console.log(JSON.stringify(checkResourceInFront(2)));
 });*/
 module.exports = checkResourceInFront;
-},{"./materials.js":20,"./natives.js":21,"./storage.js":32,"./vector.js":34}],11:[function(require,module,exports){
+},{"./materials.js":21,"./natives.js":22,"./storage.js":33,"./vector.js":35}],11:[function(require,module,exports){
 "use strict";
+var Bones = require("./libs/skeleton.js")
+console.log(Bones.SKEL_R_Hand);
+console.log(Bones.SKEL_L_Hand);
 console.log = function(...a) {
     a = a.map(function(e) {
         return JSON.stringify(e);
@@ -1267,9 +1270,10 @@ require("./libs/attachments.js")
 require("./libs/weapon_attachments.js")
 require("./libs/animations.js")
 /*Register Attachments for Player Animatiuons etc TODO*/
-mp.attachmentMngr.register("mining", "prop_tool_pickaxe", 57005, new mp.Vector3(0.085, -0.3, 0), new mp.Vector3(-90, 0, 0));
-mp.attachmentMngr.register("lumberjack", "w_me_hatchet", 57005, new mp.Vector3(0.085, -0.05, 0), new mp.Vector3(-90, 0, 0));
-mp.attachmentMngr.register("drink_beer", "prop_cs_beer_bot_03", 57005, new mp.Vector3(0.085, -0.05, 0), new mp.Vector3(-90, 0, 0));
+mp.attachmentMngr.register("mining", "prop_tool_pickaxe", Bones.SKEL_R_Hand, new mp.Vector3(0.085, -0.3, 0), new mp.Vector3(-90, 0, 0));
+mp.attachmentMngr.register("lumberjack", "w_me_hatchet", Bones.SKEL_R_Hand, new mp.Vector3(0.085, -0.05, 0), new mp.Vector3(-90, 0, 0));
+mp.attachmentMngr.register("drink_beer", "prop_cs_beer_bot_03", Bones.SKEL_L_Hand, new mp.Vector3(0.1, -0.03, 0.025), new mp.Vector3(-90, 30, 0));
+mp.attachmentMngr.register("eat_burger", "prop_cs_burger_01", Bones.SKEL_L_Hand, new mp.Vector3(0.15, 0.025, 0.025), new mp.Vector3(170, 40, 0));
 require("./vector.js")
 mp.rpc = require("./libs/rage-rpc.min.js");
 mp.isValid = function(val) {
@@ -1354,7 +1358,7 @@ mp.events.add('Player:Collision', (enable) => {
         });
     }
 });
-},{"./browser.js":3,"./building.js":4,"./character_creator.js":5,"./combat.js":6,"./crafting.js":7,"./crops.js":8,"./crouch.js":9,"./gathering.js":10,"./interface.js":12,"./items.js":13,"./libs/animations.js":14,"./libs/attachments.js":15,"./libs/rage-rpc.min.js":16,"./libs/weapon_attachments.js":18,"./login.js":19,"./natives.js":21,"./object.js":23,"./ped.js":25,"./player.js":26,"./scaleforms/index.js":31,"./storage.js":32,"./vector.js":34,"./vegetation.js":35,"./vehicles.js":36,"./weather.js":37,"./zombies.js":38}],12:[function(require,module,exports){
+},{"./browser.js":3,"./building.js":4,"./character_creator.js":5,"./combat.js":6,"./crafting.js":7,"./crops.js":8,"./crouch.js":9,"./gathering.js":10,"./interface.js":12,"./items.js":13,"./libs/animations.js":14,"./libs/attachments.js":15,"./libs/rage-rpc.min.js":16,"./libs/skeleton.js":17,"./libs/weapon_attachments.js":19,"./login.js":20,"./natives.js":22,"./object.js":24,"./ped.js":26,"./player.js":27,"./scaleforms/index.js":32,"./storage.js":33,"./vector.js":35,"./vegetation.js":36,"./vehicles.js":37,"./weather.js":38,"./zombies.js":39}],12:[function(require,module,exports){
 //Interaction
 },{}],13:[function(require,module,exports){
 "use strict";
@@ -1655,7 +1659,7 @@ mp.events.add("render", () => {
         }
     }
 });
-},{"./browser.js":3,"./natives.js":21,"./notifications.js":22,"./object.js":23,"./storage.js":32}],14:[function(require,module,exports){
+},{"./browser.js":3,"./natives.js":22,"./notifications.js":23,"./object.js":24,"./storage.js":33}],14:[function(require,module,exports){
 var toLoad = ["mp_defend_base","anim@heists@money_grab@duffel"]
 var loadPromises = [];
 toLoad.forEach(function(dict) {
@@ -1890,6 +1894,107 @@ InitAttachmentsOnJoin();
 },{}],16:[function(require,module,exports){
 !function(e,r){"object"==typeof exports&&"object"==typeof module?module.exports=r():"function"==typeof define&&define.amd?define([],r):"object"==typeof exports?exports=r():e.rpc=r()}("undefined"!=typeof self?self:this,function(){return function(e){var r={};function n(t){if(r[t])return r[t].exports;var c=r[t]={i:t,l:!1,exports:{}};return e[t].call(c.exports,c,c.exports,n),c.l=!0,c.exports}return n.m=e,n.c=r,n.d=function(e,r,t){n.o(e,r)||Object.defineProperty(e,r,{enumerable:!0,get:t})},n.r=function(e){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(e,"__esModule",{value:!0})},n.t=function(e,r){if(1&r&&(e=n(e)),8&r)return e;if(4&r&&"object"==typeof e&&e&&e.__esModule)return e;var t=Object.create(null);if(n.r(t),Object.defineProperty(t,"default",{enumerable:!0,value:e}),2&r&&"string"!=typeof e)for(var c in e)n.d(t,c,function(r){return e[r]}.bind(null,c));return t},n.n=function(e){var r=e&&e.__esModule?function(){return e.default}:function(){return e};return n.d(r,"a",r),r},n.o=function(e,r){return Object.prototype.hasOwnProperty.call(e,r)},n.p="",n(n.s=1)}([function(e,r,n){"use strict";var t;function c(e,r){const n="client"===o();if(e&&"object"==typeof e&&void 0!==e.id){const c=(r,t,c)=>n?e.type===r&&t.at(e.id)===e:e instanceof c;switch(r){case t.Blip:return c("blip",mp.blips,mp.Blip);case t.Checkpoint:return c("checkpoint",mp.checkpoints,mp.Checkpoint);case t.Colshape:return c("colshape",mp.colshapes,mp.Colshape);case t.Label:return c("textlabel",mp.labels,mp.TextLabel);case t.Marker:return c("marker",mp.markers,mp.Marker);case t.Object:return c("object",mp.objects,mp.Object);case t.Pickup:return c("pickup",mp.pickups,mp.Pickup);case t.Player:return c("player",mp.players,mp.Player);case t.Vehicle:return c("vehicle",mp.vehicles,mp.Vehicle)}}return!1}function s(){const e=46656*Math.random()|0,r=46656*Math.random()|0;return("000"+e.toString(36)).slice(-3)+("000"+r.toString(36)).slice(-3)}function o(){return mp.joaat?"server":mp.game&&mp.game.joaat?"client":mp.trigger?"cef":void 0}function i(e){const r=o();return JSON.stringify(e,(e,n)=>{if("client"===r||"server"===r&&n&&"object"==typeof n){let e;if(c(n,t.Blip)?e=t.Blip:c(n,t.Checkpoint)?e=t.Checkpoint:c(n,t.Colshape)?e=t.Colshape:c(n,t.Marker)?e=t.Marker:c(n,t.Object)?e=t.Object:c(n,t.Pickup)?e=t.Pickup:c(n,t.Player)?e=t.Player:c(n,t.Vehicle)&&(e=t.Vehicle),e)return{__t:e,i:n.remoteId||n.id}}return n})}function a(e){const r=o();return JSON.parse(e,(e,n)=>{if(("client"===r||"server"===r)&&n&&"object"==typeof n&&"string"==typeof n.__t&&"number"==typeof n.i&&2===Object.keys(n).length){const e=n.i;let c;switch(n.__t){case t.Blip:c=mp.blips;break;case t.Checkpoint:c=mp.checkpoints;break;case t.Colshape:c=mp.colshapes;break;case t.Label:c=mp.labels;break;case t.Marker:c=mp.markers;break;case t.Object:c=mp.objects;break;case t.Pickup:c=mp.pickups;break;case t.Player:c=mp.players;break;case t.Vehicle:c=mp.vehicles}if(c)return c["client"===r?"atRemoteId":"at"](e)}return n})}function l(e){return new Promise(r=>setTimeout(()=>r(e),0))}function p(e){return new Promise((r,n)=>setTimeout(()=>n(e),0))}function u(e){try{e.url}catch(e){return!1}return!0}n.d(r,"g",function(){return s}),n.d(r,"a",function(){return o}),n.d(r,"f",function(){return i}),n.d(r,"c",function(){return a}),n.d(r,"e",function(){return l}),n.d(r,"d",function(){return p}),n.d(r,"b",function(){return u}),function(e){e.Blip="b",e.Checkpoint="cp",e.Colshape="c",e.Label="l",e.Marker="m",e.Object="o",e.Pickup="p",e.Player="pl",e.Vehicle="v"}(t||(t={}))},function(e,r,n){"use strict";n.r(r),function(e){n.d(r,"register",function(){return d}),n.d(r,"unregister",function(){return m}),n.d(r,"call",function(){return g}),n.d(r,"callServer",function(){return _}),n.d(r,"callClient",function(){return b}),n.d(r,"callBrowsers",function(){return y}),n.d(r,"callBrowser",function(){return k});var t=n(0);const c=t.a();if(!c)throw"Unknown RAGE environment";const s="PROCEDURE_NOT_FOUND",o="__rpc:id",i="__rpc:process",a="__rpc:browserRegister",l="__rpc:browserUnregister",p="cef"===c?window:e;if(!p[i])if(p.__rpcListeners={},p.__rpcPending={},p[i]=((e,r)=>{"server"!==c&&(r=e);const n=t.c(r);if(n.req){const r={id:n.id,environment:n.fenv||n.env};"server"===c&&(r.player=e);const s={ret:1,id:n.id,env:c};let o;switch(c){case"server":o=(e=>r.player.call(i,[t.f(e)]));break;case"client":if("server"===n.env)o=(e=>mp.events.callRemote(i,t.f(e)));else if("cef"===n.env){const e=n.b&&p.__rpcBrowsers[n.b];r.browser=e,o=(r=>e&&t.b(e)&&u(e,r,!0))}break;case"cef":o=(e=>mp.trigger(i,t.f(e)))}o&&f(n.name,n.args,r).then(e=>o({...s,res:e})).catch(e=>o({...s,err:e}))}else if(n.ret){const r=p.__rpcPending[n.id];if("server"===c&&r.player!==e)return;r&&(r.resolve(n.err?t.d(n.err):t.e(n.res)),delete p.__rpcPending[n.id])}}),"cef"!==c){if(mp.events.add(i,p[i]),"client"===c){d("__rpc:callServer",([e,r],n)=>h(e,r,{fenv:n.environment})),d("__rpc:callBrowsers",([e,r],n)=>w(null,e,r,{fenv:n.environment})),p.__rpcBrowsers={};const e=e=>{const r=t.g();Object.keys(p.__rpcBrowsers).forEach(r=>{const n=p.__rpcBrowsers[r];n&&t.b(n)&&n!==e||delete p.__rpcBrowsers[r]}),p.__rpcBrowsers[r]=e,e.execute(`if(typeof window['${o}'] === 'undefined'){ window['${o}'] = Promise.resolve('${r}'); }else{ window['${o}:resolve']('${r}'); }`)};mp.browsers.forEach(e),mp.events.add("browserCreated",e),p.__rpcBrowserProcedures={},mp.events.add(a,e=>{const[r,n]=JSON.parse(e);p.__rpcBrowserProcedures[n]=r}),mp.events.add(l,e=>{const[r,n]=JSON.parse(e);p.__rpcBrowserProcedures[n]===r&&delete p.__rpcBrowserProcedures[n]})}}else void 0===p[o]&&(p[o]=new Promise(e=>{p[o+":resolve"]=e}));function u(e,r,n){const c=t.f(r);e.execute(`var process = window["${i}"]; if(process){ process(${JSON.stringify(c)}); }else{ ${n?"":`mp.trigger("${i}", '{"ret":1,"id":"${r.id}","err":"${s}","env":"cef"}');`} }`)}function f(e,r,n){const c=p.__rpcListeners[e];return c?t.e(c(r,n)):t.d(s)}function d(e,r){if(2!==arguments.length)throw'register expects 2 arguments: "name" and "cb"';"cef"===c&&p[o].then(r=>mp.trigger(a,JSON.stringify([r,e]))),p.__rpcListeners[e]=r}function m(e){if(1!==arguments.length)throw'unregister expects 1 argument: "name"';"cef"===c&&p[o].then(r=>mp.trigger(l,JSON.stringify([r,e]))),p.__rpcListeners[e]=void 0}function g(e,r){return 1!==arguments.length&&2!==arguments.length?t.d('call expects 1 or 2 arguments: "name" and optional "args"'):f(e,r,{environment:c})}function h(e,r,n={}){switch(c){case"server":return g(e,r);case"client":{const s=t.g();return new Promise(o=>{p.__rpcPending[s]={resolve:o};const a={req:1,id:s,name:e,env:c,args:r,...n};mp.events.callRemote(i,t.f(a))})}case"cef":return b("__rpc:callServer",[e,r])}}function _(e,r){return 1!==arguments.length&&2!==arguments.length?t.d('callServer expects 1 or 2 arguments: "name" and optional "args"'):h(e,r,{})}function b(e,r,n){switch(c){case"client":return n=r,r=e,1!==arguments.length&&2!==arguments.length||"string"!=typeof r?t.d('callClient from the client expects 1 or 2 arguments: "name" and optional "args"'):g(r,n);case"server":{if(2!==arguments.length&&3!==arguments.length||"object"!=typeof e)return t.d('callClient from the server expects 2 or 3 arguments: "player", "name", and optional "args"');const s=t.g();return new Promise(o=>{p.__rpcPending[s]={resolve:o,player:e};const a={req:1,id:s,name:r,env:c,args:n};e.call(i,[t.f(a)])})}case"cef":{if(n=r,r=e,1!==arguments.length&&2!==arguments.length||"string"!=typeof r)return t.d('callClient from the browser expects 1 or 2 arguments: "name" and optional "args"');const s=t.g();return p[o].then(e=>new Promise(o=>{p.__rpcPending[s]={resolve:o};const a={b:e,req:1,id:s,name:r,env:c,args:n};mp.trigger(i,t.f(a))}))}}}function v(e,r,n,t,s={}){return new Promise(o=>{p.__rpcPending[e]={resolve:o},u(r,{req:1,id:e,name:n,env:c,args:t,...s},!1)})}function w(e,r,n,o={}){switch(c){case"client":const i=t.g(),a=p.__rpcBrowserProcedures[r];if(!a)return t.d(s);const l=p.__rpcBrowsers[a];return l&&t.b(l)?v(i,l,r,n,o):t.d(s);case"server":return b(e,"__rpc:callBrowsers",[r,n]);case"cef":return b("__rpc:callBrowsers",[r,n])}}function y(e,r,n){switch(c){case"client":case"cef":return 1!==arguments.length&&2!==arguments.length?t.d('callBrowsers from the client or browser expects 1 or 2 arguments: "name" and optional "args"'):w(null,e,r,{});case"server":return 2!==arguments.length&&3!==arguments.length?t.d('callBrowsers from the server expects 2 or 3 arguments: "player", "name", and optional "args"'):w(e,r,n,{})}}function k(e,r,n){if("client"!==c)return t.d("callBrowser can only be used in the client environment");if(2!==arguments.length&&3!==arguments.length)return t.d('callBrowser expects 2 or 3 arguments: "browser", "name", and optional "args"');return v(t.g(),e,r,n,{})}}.call(this,n(2))},function(e,r){var n;n=function(){return this}();try{n=n||new Function("return this")()}catch(e){"object"==typeof window&&(n=window)}e.exports=n}])});
 },{}],17:[function(require,module,exports){
+var Skeleton = [];
+Skeleton.SKEL_ROOT = 0;
+Skeleton.FB_R_Brow_Out_000 = 1356;
+Skeleton.SKEL_L_Toe0 = 2108;
+Skeleton.MH_R_Elbow = 2992;
+Skeleton.SKEL_L_Finger01 = 4089;
+Skeleton.SKEL_L_Finger02 = 4090;
+Skeleton.SKEL_L_Finger31 = 4137;
+Skeleton.SKEL_L_Finger32 = 4138;
+Skeleton.SKEL_L_Finger41 = 4153;
+Skeleton.SKEL_L_Finger42 = 4154;
+Skeleton.SKEL_L_Finger11 = 4169;
+Skeleton.SKEL_L_Finger12 = 4170;
+Skeleton.SKEL_L_Finger21 = 4185;
+Skeleton.SKEL_L_Finger22 = 4186;
+Skeleton.RB_L_ArmRoll = 5232;
+Skeleton.IK_R_Hand = 6286;
+Skeleton.RB_R_ThighRoll = 6442;
+Skeleton.SKEL_R_Clavicle = 10706;
+Skeleton.FB_R_Lip_Corner_000 = 11174;
+Skeleton.SKEL_Pelvis = 11816;
+Skeleton.IK_Head = 12844;
+Skeleton.SKEL_L_Foot = 14201;
+Skeleton.MH_R_Knee = 16335;
+Skeleton.FB_LowerLipRoot_000 = 17188;
+Skeleton.FB_R_Lip_Top_000 = 17719;
+Skeleton.SKEL_L_Hand = 18905;
+Skeleton.FB_R_CheekBone_000 = 19336;
+Skeleton.FB_UpperLipRoot_000 = 20178;
+Skeleton.FB_L_Lip_Top_000 = 20279;
+Skeleton.FB_LowerLip_000 = 20623;
+Skeleton.SKEL_R_Toe0 = 20781;
+Skeleton.FB_L_CheekBone_000 = 21550;
+Skeleton.MH_L_Elbow = 22711;
+Skeleton.SKEL_Spine0 = 23553;
+Skeleton.RB_L_ThighRoll = 23639;
+Skeleton.PH_R_Foot = 24806;
+Skeleton.SKEL_Spine1 = 24816;
+Skeleton.SKEL_Spine2 = 24817;
+Skeleton.SKEL_Spine3 = 24818;
+Skeleton.FB_L_Eye_000 = 25260;
+Skeleton.SKEL_L_Finger00 = 26610;
+Skeleton.SKEL_L_Finger10 = 26611;
+Skeleton.SKEL_L_Finger20 = 26612;
+Skeleton.SKEL_L_Finger30 = 26613;
+Skeleton.SKEL_L_Finger40 = 26614;
+Skeleton.FB_R_Eye_000 = 27474;
+Skeleton.SKEL_R_Forearm = 28252;
+Skeleton.PH_R_Hand = 28422;
+Skeleton.FB_L_Lip_Corner_000 = 29868;
+Skeleton.SKEL_Head = 31086;
+Skeleton.IK_R_Foot = 35502;
+Skeleton.RB_Neck_1 = 35731;
+Skeleton.IK_L_Hand = 36029;
+Skeleton.SKEL_R_Calf = 36864;
+Skeleton.RB_R_ArmRoll = 37119;
+Skeleton.FB_Brow_Centre_000 = 37193;
+Skeleton.SKEL_Neck_1 = 39317;
+Skeleton.SKEL_R_UpperArm = 40269;
+Skeleton.FB_R_Lid_Upper_000 = 43536;
+Skeleton.RB_R_ForeArmRoll = 43810;
+Skeleton.SKEL_L_UpperArm = 45509;
+Skeleton.FB_L_Lid_Upper_000 = 45750;
+Skeleton.MH_L_Knee = 46078;
+Skeleton.FB_Jaw_000 = 46240;
+Skeleton.FB_L_Lip_Bot_000 = 47419;
+Skeleton.FB_Tongue_000 = 47495;
+Skeleton.FB_R_Lip_Bot_000 = 49979;
+Skeleton.SKEL_R_Thigh = 51826;
+Skeleton.SKEL_R_Foot = 52301;
+Skeleton.IK_Root = 56604;
+Skeleton.SKEL_R_Hand = 57005;
+Skeleton.SKEL_Spine_Root = 57597;
+Skeleton.PH_L_Foot = 57717;
+Skeleton.SKEL_L_Thigh = 58271;
+Skeleton.FB_L_Brow_Out_000 = 58331;
+Skeleton.SKEL_R_Finger00 = 58866;
+Skeleton.SKEL_R_Finger10 = 58867;
+Skeleton.SKEL_R_Finger20 = 58868;
+Skeleton.SKEL_R_Finger30 = 58869;
+Skeleton.SKEL_R_Finger40 = 58870;
+Skeleton.PH_L_Hand = 60309;
+Skeleton.RB_L_ForeArmRoll = 61007;
+Skeleton.SKEL_L_Forearm = 61163;
+Skeleton.FB_UpperLip_000 = 61839;
+Skeleton.SKEL_L_Calf = 63931;
+Skeleton.SKEL_R_Finger01 = 64016;
+Skeleton.SKEL_R_Finger02 = 64017;
+Skeleton.SKEL_R_Finger31 = 64064;
+Skeleton.SKEL_R_Finger32 = 64065;
+Skeleton.SKEL_R_Finger41 = 64080;
+Skeleton.SKEL_R_Finger42 = 64081;
+Skeleton.SKEL_R_Finger11 = 64096;
+Skeleton.SKEL_R_Finger12 = 64097;
+Skeleton.SKEL_R_Finger21 = 64112;
+Skeleton.SKEL_R_Finger22 = 64113;
+Skeleton.SKEL_L_Clavicle = 64729;
+Skeleton.FACIAL_facialRoot = 65068;
+Skeleton.IK_L_Foot = 65245;
+module.exports = Skeleton;
+},{}],18:[function(require,module,exports){
 module.exports={
   "2725352035": {
     "HashKey": "WEAPON_UNARMED",
@@ -11118,7 +11223,7 @@ module.exports={
     "DLC": "spupgrade"
   }
 }
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 const weaponData = require("./weaponData");
 
 const PistolAttachmentPos = new mp.Vector3(0.02, 0.06, 0.1);
@@ -11203,7 +11308,7 @@ for (let weapon in weaponAttachmentData) {
 }
 
 
-},{"./weaponData":17}],19:[function(require,module,exports){
+},{"./weaponData":18}],20:[function(require,module,exports){
 //1868.765869140625, 3710.90283203125, 113.74462127685547
 var natives = require("./natives.js")
 var CEFInterface = require("./browser.js").interface;
@@ -11317,7 +11422,7 @@ function startMakingItems() {
         mp.game.graphics.drawBox(1000, 500, 550, 1000, 1500, 1550, 0, 255, 0, 255);
     });
 }*/
-},{"./browser.js":3,"./natives.js":21}],20:[function(require,module,exports){
+},{"./browser.js":3,"./natives.js":22}],21:[function(require,module,exports){
 var materials = {};
 
 materials[2379541433] = 1;
@@ -11327,7 +11432,7 @@ materials[581794674] = 3;
 //materials[581794674] = true;
 
 module.exports = materials;
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 var natives = {};
 mp.game.vehicle.getVehicleSeats = (veh) => mp.game.invoke("0xA7C4F2C6E744A550", veh.handle);
 mp.game.graphics.clearDrawOrigin = () => mp.game.invoke('0xFF0B610F6BE0D7AF'); // 26.07.2018 // GTA 1.44 
@@ -11360,7 +11465,7 @@ natives.SET_ENTITY_COORDS = ( entity,  xPos,  yPos,  zPos,  xAxis,  yAxis,  zAxi
 natives.SET_ENTITY_ROTATION = (  entity,  pitch,  roll,  yaw,  rotationOrder,  p5) => mp.game.invoke("0x8524A8B0171D5E07", entity,  pitch,  roll,  yaw,  rotationOrder,  p5); // SET_ENTITY_ROTATION
 natives.GET_ENTITY_HEIGHT_ABOVE_GROUND = (  entity) => mp.game.invoke("0x1DD55701034110E5", entity); // GET_ENTITY_HEIGHT_ABOVE_GROUND
 module.exports = natives;
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 var Notifications = new class {
     constructor() {
         let self = this;
@@ -11405,7 +11510,7 @@ var Notifications = new class {
 }
 module.exports = Notifications;
 
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 (function (setImmediate){
 //object.js
 var ObjectManager = new class {
@@ -11490,7 +11595,7 @@ class ObjectStreamer {
 }
 module.exports = ObjectStreamer;
 }).call(this,require("timers").setImmediate)
-},{"timers":2}],24:[function(require,module,exports){
+},{"timers":2}],25:[function(require,module,exports){
 var offsets = {
 	"sr_prop_sr_boxwood_01": {
 		pos: new mp.Vector3(0, 0, 0),
@@ -11502,7 +11607,7 @@ var offsets = {
 	}
 }
 module.exports = offsets;
-},{}],25:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 var Peds = [];
 class Ped {
     constructor(id, model, pos) {
@@ -11592,7 +11697,7 @@ mp.events.add("Ped:DoTask", (id, task, param = null) => {
         Peds[id].doTask(task, param);
     }
 });
-},{}],26:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 let utils = require("./utils.js");
 var CEFHud = require("./browser.js").hud;
 var initDone = false;
@@ -11680,7 +11785,7 @@ mp.events.add("render", () => {
 		}
 	}
 });
-},{"./browser.js":3,"./utils.js":33}],27:[function(require,module,exports){
+},{"./browser.js":3,"./utils.js":34}],28:[function(require,module,exports){
 var messageScaleform = require("./Scaleform.js");
 let bigMessageScaleform = null;
 let bigMsgInit = 0;
@@ -11731,7 +11836,7 @@ mp.events.add("render", () => {
         }
     }
 });
-},{"./Scaleform.js":30}],28:[function(require,module,exports){
+},{"./Scaleform.js":31}],29:[function(require,module,exports){
 class InstructionButtons {
     constructor() {
         this.handle = mp.game.graphics.requestScaleformMovie("instructional_buttons");
@@ -11777,7 +11882,7 @@ class InstructionButtons {
     }
 }
 module.exports = new InstructionButtons();
-},{}],29:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 var messageScaleform = require("./Scaleform.js");
 let midsizedMessageScaleform = null;
 let msgInit = 0;
@@ -11821,7 +11926,7 @@ mp.events.add("render", () => {
         }
     }
 });
-},{"./Scaleform.js":30}],30:[function(require,module,exports){
+},{"./Scaleform.js":31}],31:[function(require,module,exports){
 class BasicScaleform {
     constructor(scaleformName) {
         this.handle = mp.game.graphics.requestScaleformMovie(scaleformName);
@@ -11867,7 +11972,7 @@ class BasicScaleform {
 }
 
 module.exports = BasicScaleform;
-},{}],31:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 var messageScaleform = require("./Scaleform.js");
 require("./BigMessage.js");
 require("./MidsizedMessage.js");
@@ -11882,7 +11987,7 @@ mp.game.ui.messages = {
 };
 
 
-},{"./BigMessage.js":27,"./InstructionButtons.js":28,"./MidsizedMessage.js":29,"./Scaleform.js":30}],32:[function(require,module,exports){
+},{"./BigMessage.js":28,"./InstructionButtons.js":29,"./MidsizedMessage.js":30,"./Scaleform.js":31}],33:[function(require,module,exports){
 var cell_size = 40;
 var padding = 5;
 var inv_cells = 6;
@@ -11937,7 +12042,6 @@ mp.events.add("Inventory:Ready", (data) => {
 var windowsOpen = [];
 
 function toggleInventory() {
-	
 	console.log("toggle inventory", JSON.stringify(windowsOpen));
 	console.log("mp.gui.chat.enabled", mp.gui.chat.enabled);
 	console.log("mp.ui.ready", mp.ui.ready);
@@ -12082,15 +12186,33 @@ mp.events.add("Inventory:Update", (inventory) => {
 		CEFStorage.call("addItem", "inventory", tempSettings.cell || 0, tempSettings.row || 0, citem.width, citem.height, JSON.stringify(gData), tempSettings.flipped || false)
 	})
 });
-mp.events.add("Inventory:EditItem", (citem) => {
-	console.log("Inventory:EditItem item", citem);
+mp.events.add("Inventory:EditItem", (citem_id, nMapData) => {
+	console.log("Inventory:EditItem item", citem_id, nMapData);
+	if (TempStorage["inventory"]) {
+		let index = TempStorage["inventory"].findIndex((e) => {
+			return e.id == citem_id;
+		})
+		console.log("index in temp inv", index);
+		if (index > -1) {
+			//CEFStorage.call("removeItemByID", "inventory", id);
+			mp.rpc.callBrowser(CEFStorage.browser, 'editItemByID', {
+				selector: "inventory",
+				id: citem_id,
+				overwrite_data: nMapData
+			}).then(value => {
+				console.log("editItemByID", value);
+			}).catch(err => {
+				console.log("error", err);
+			});
+		}
+	}
 });
 mp.events.add("Inventory:RemoveItem", (id) => {
 	if (TempStorage["inventory"]) {
 		let index = TempStorage["inventory"].findIndex((e) => {
 			return e.id == id;
 		})
-		console.log("index in temp inv",index);
+		console.log("index in temp inv", index);
 		if (index > -1) {
 			//CEFStorage.call("removeItemByID", "inventory", id);
 			mp.rpc.callBrowser(CEFStorage.browser, 'removeItemByID', {
@@ -12103,7 +12225,7 @@ mp.events.add("Inventory:RemoveItem", (id) => {
 			});
 			TempStorage["inventory"][index] = null;
 			delete TempStorage["inventory"][index];
-            TempStorage["inventory"].splice(index,1)
+			TempStorage["inventory"].splice(index, 1)
 		}
 	}
 });
@@ -12147,9 +12269,9 @@ mp.events.add("Storage:Interact", (item) => {
 	console.log("Item use", item);
 	mp.events.callRemote("Storage:Interact", item);
 });
-mp.events.add("Storage:Action", (action,source,item_id) => {
-	console.log("Action on Item", action,source,item_id);
-	mp.events.callRemote("Storage:Action", source.replace("#",""),action,item_id);
+mp.events.add("Storage:Action", (action, source, item_id) => {
+	console.log("Action on Item", action, source, item_id);
+	mp.events.callRemote("Storage:Action", source.replace("#", ""), action, item_id);
 });
 mp.events.add("Storage:Drag", (positions) => {
 	positions = JSON.parse(positions);
@@ -12429,7 +12551,7 @@ var StorageSystem = new class {
 	}
 }
 module.exports = StorageSystem;
-},{"../../server/world/items.js":39,"./browser.js":3}],33:[function(require,module,exports){
+},{"../../server/world/items.js":40,"./browser.js":3}],34:[function(require,module,exports){
 // https://github.com/glitchdetector/fivem-minimap-anchor
 function getMinimapAnchor() {
     let sfX = 1.0 / 20.0;
@@ -12454,7 +12576,7 @@ function getMinimapAnchor() {
 module.exports = {
     minimap_anchor: getMinimapAnchor
 }
-},{}],34:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 mp.Vector3.prototype.findRot = function(rz, dist, rot) {
     let nVector = new mp.Vector3(this.x, this.y, this.z);
     let degrees = (rz + rot) * (Math.PI / 180);
@@ -12595,7 +12717,7 @@ Array.prototype.shuffle = function() {
     }
     return this;
 }
-},{}],35:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 var materials = require("./materials.js")
 var temp_materials = {
 	"Default": -1775485061,
@@ -12840,7 +12962,7 @@ mp.events.add("render", () => {
 		}
 	}
 });*/
-},{"./materials.js":20}],36:[function(require,module,exports){
+},{"./materials.js":21}],37:[function(require,module,exports){
 const toSync = ["health", "running", "engine", "wheel_fl", "wheel_fr", "wheel_rl", "wheel_rr", "fuel", "spark_plugs", "battery"]
 
 function syncVehicle(type, vehicle, value) {
@@ -13082,7 +13204,7 @@ mp.keys.bind(0x47, false, () => {
         }
     }
 });
-},{}],37:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 require("./vector.js");
 mp.game.audio.startAudioScene("FBI_HEIST_H5_MUTE_AMBIENCE_SCENE");
 mp.game.audio.startAudioScene("MIC1_RADIO_DISABLE");
@@ -13155,7 +13277,7 @@ var Weather = new class {
     }
 }
 module.exports = Weather;
-},{"./vector.js":34}],38:[function(require,module,exports){
+},{"./vector.js":35}],39:[function(require,module,exports){
 var Zombie = class {
     constructor() {
         this._setup();
@@ -13257,7 +13379,7 @@ mp.events.add("render", e => {
     new Zombie();
 });
 */
-},{}],39:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 "use strict";
 function getRandomInt(min, max) {
     min = Math.ceil(min);
@@ -13428,8 +13550,9 @@ var items = {
         type: "Food",
         model: "ng_proc_sodacan_01a",
         thickness: 0.25,
-        mask: "Food",
+        mask: "Drink",
         usable:true,
+        thirst:20,
         amount: function() {
             return 1;
         },
@@ -13445,8 +13568,9 @@ var items = {
         name: 'Beer',
         image: 'https://via.placeholder.com/40x80',
         type: "Food",
-        mask: "Food",
+        mask: "Drink",
         model: "prop_cs_beer_bot_03",
+        thirst:20,
         usable:true,
         thickness: 0.15,
         amount: function() {
@@ -13466,7 +13590,9 @@ var items = {
         type: "Food",
         model: "ng_proc_ojbot_01a",
         usable:true,
-        mask: "Food",
+        mask: "Drink",
+        thirst:20,
+        animation:"testanim",
         thickness: 0.2,
         amount: function() {
             return 1;
@@ -13486,6 +13612,7 @@ var items = {
         model: "ng_proc_food_nana1a",
         usable:true,
         mask: "Food",
+        hunger:20,
         thickness: 0.15,
         amount: function() {
             return 1;
@@ -13504,6 +13631,7 @@ var items = {
         type: "Food",
         model: "ng_proc_food_ornge1a",
         mask: "Food",
+        hunger:20,
         usable:true,
         thickness: 0.15,
         amount: function() {
@@ -13523,6 +13651,7 @@ var items = {
         type: "Food",
         model: "v_res_tt_cereal02",
         mask: "Food",
+        hunger:20,
         usable:true,
         thickness: 0.2,
         amount: function() {
@@ -13542,6 +13671,7 @@ var items = {
         type: "Food",
         model: "v_res_fa_cereal01",
         mask: "Food",
+        hunger:20,
         usable:true,
         thickness: 0.2,
         amount: function() {
@@ -13559,6 +13689,7 @@ var items = {
         name: "Chicken Noodles",
         image: 'https://via.placeholder.com/40x80',
         type: "Food",
+        hunger:20,
         mask: "Food",
         usable:true,
         model: "v_res_fa_potnoodle",
@@ -13579,6 +13710,7 @@ var items = {
         image: 'https://via.placeholder.com/40x80',
         type: "Food",
         mask: "Food",
+        hunger:20,
         usable:true,
         model: "v_res_fa_bread01",
         thickness: 0.25,

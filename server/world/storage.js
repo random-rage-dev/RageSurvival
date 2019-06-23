@@ -8,6 +8,7 @@ var Storage = new class {
 		let self = this;
 		this._tempStorage = [];
 		this._interactionOpen = [];
+		this._movementTimeout = 0;
 		console.log("New Storage Class");
 		mp.events.add("Storage:Interact", function(player, item) {
 			player.class.useItem(item);
@@ -89,7 +90,7 @@ var Storage = new class {
 		}
 	}
 	async isOpen(id) {
-		return this._interactionOpen[id] != undefined || id == "inventory" || id == "equipment"
+		return this._interactionOpen[id] != undefined || id == "inventory" || id == "equipment" || (Date.now() - this._movementTimeout) > 200
 	}
 	async validateSlots(player, sStorage, tSlots) {
 		let self = this;
@@ -238,6 +239,7 @@ var Storage = new class {
 						})
 					})
 					console.log("saving done", tSlots.items);
+					self._movementTimeout = Date.now();
 					player.class.setInventory(sStorage.items);
 					if (tSlots.id == "equipment") {
 						player.class.setEquipment(tSlots.items);
@@ -249,6 +251,7 @@ var Storage = new class {
 				}
 			} else {
 				console.log("reloadInventory");
+				self._movementTimeout
 				player.class.reloadInventory();
 			}
 		}
@@ -403,6 +406,7 @@ var Storage = new class {
 				self._tempStorage[sStorage.id] = sStorage.items;
 				self._tempStorage[tStorage.id] = tStorage.items;
 				self.tempStorage = self._tempStorage;
+				self._movementTimeout = Date.now();
 				if ((sStorage_Type == "player") || (tStorage_Type == "player")) {
 					let storage = (sStorage_Type == "player") ? sStorage.items : tStorage.items;
 					console.log("set inventory");
@@ -414,6 +418,7 @@ var Storage = new class {
 					console.log("reloadInventory");
 					player.class.reloadInventory();
 				}
+				self._movementTimeout = Date.now();
 			}
 		}
 	}

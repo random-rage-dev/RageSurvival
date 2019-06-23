@@ -1,6 +1,6 @@
 var Equipment = require("./equipment.js")
 var MongoDB = require("../libs/mongodb.js")
-var animations = require("../libs/animations.js")
+var Animations = require("./animations.js")
 var Storage = require("../world/storage.js")
 var PlayerSpawns = require("../world/playerspawns.js")
 var Building = require("../world/building.js")
@@ -381,13 +381,12 @@ var Player = class {
 			}
 			let attachments = ""
 			if (Materials[material] == "Tree") {
-				//self._player.playAnimation(animations.gather.wood.dict, animations.gather.wood.anim, 2.0, (1))
-				self.playAnimSync("amb@world_human_hammering@male@base", "base", 16.0, 1, -1, 1, 1.0, false, false, false, 1000);
+				self.playAnimSync(Animations.getAnim("Mining").dict, Animations.getAnim("Mining").name, 16.0, 1, -1, 1, 1.0, false, false, false, 1000);
 				attachments = "lumberjack"
 			}
 			if ((Materials[material] == "Stone") || (Materials[material] == "Mineral Stone")) {
 				//self._player.playAnimation(animations.gather.stone.dict, animations.gather.stone.anim, 2.0, (1))
-				self.playAnimSync("amb@world_human_hammering@male@base", "base", 16.0, 1, -1, 1, 1.0, false, false, false, 1000);
+				self.playAnimSync(Animations.getAnim("Mining").dict, Animations.getAnim("Mining").name, 16.0, 1, -1, 1, 1.0, false, false, false, 1000);
 				attachments = "mining"
 			}
 			if (attachments != "") {
@@ -627,7 +626,7 @@ var Player = class {
 						close: false
 					}])
 					Pickups.dropItem(item, pos.x, pos.y, pos.z);
-					self.playAnimSync("pickup_object", "putdown_low", 8.0, 1, -1, 49, 1.0, false, false, false, 1000);
+					self.playAnimSync(Animations.getAnim("Drop").dict, Animations.getAnim("Drop").name, 8.0, 1, -1, 49, 1.0, false, false, false, 1000);
 					break;
 				case "build":
 					//let pos = this._player.position;
@@ -637,7 +636,7 @@ var Player = class {
 				case "eat":
 					//let pos = this._player.position;
 					self._player.addAttachment("eat_burger", false);
-					self.playAnimSync("mp_player_inteat@burger", "mp_player_int_eat_burger", 8.0, 1, -1, 49, 1.0, false, false, false, 5000);
+					self.playAnimSync(Animations.getAnim("Eating").dict, Animations.getAnim("Eating").name, 8.0, 1, -1, 49, 1.0, false, false, false, 5000);
 					setTimeout(function() {
 						self._player.addAttachment("eat_burger", true);
 						self.hunger += iData.hunger;
@@ -646,7 +645,7 @@ var Player = class {
 					break;
 				case "drink":
 					self._player.addAttachment("drink_beer", false);
-					self.playAnimSync("mp_player_intdrink", "loop_bottle", 8.0, 1, -1, 49, 1.0, false, false, false, 5000);
+					self.playAnimSync(Animations.getAnim("Drinking").dict, Animations.getAnim("Drinking").name, 8.0, 1, -1, 49, 1.0, false, false, false, 5000);
 					setTimeout(function() {
 						self._player.addAttachment("drink_beer", true);
 						self.thirst += iData.thirst;
@@ -917,12 +916,12 @@ var Player = class {
 					self.thirst = cUser.thirst || 100;
 					self.health = cUser.health || 100;
 
-
 					self._player.setVariable("user_id", self._userId);
 					self._player.setVariable("loggedIn", true);
 					self._player.setVariable("spawned", false);
 					self._player.call("Account:LoginDone");
 					WeatherManager.call(self._player);
+					Animations.send(self._player);
 					self.log("loaded player data for", self._player.name)
 					console.log(self._player)
 					mp.events.call("Player:Loaded", self._player)

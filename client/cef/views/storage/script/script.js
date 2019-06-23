@@ -7,6 +7,9 @@ const padding = parseInt(style.getPropertyValue('--padding').replace("px", ""));
 var mouseDown = 0;
 var shiftDown = 0;
 var controlDown = 0;
+
+
+var lastInteraction = 0;
 document.body.onmousedown = function(e) {
 	if (e.which == 1) {
 		mouseDown = 1;
@@ -39,7 +42,6 @@ var ContextHandler = new class {
 		self._busy = false;
 		self._contextItemData = {};
 		self._origin = "";
-
 		$(window).on("click",function(event) {
 			if (event.which != 1) return;
 			if (self.busy != true) return;
@@ -72,6 +74,7 @@ var ContextHandler = new class {
 			left: -1000
 		})
 		this._busy = false;
+		lastInteraction = Date.now();
 	}
 	closeOutOfBounds(event) {
 		console.log("event", event);
@@ -261,6 +264,7 @@ var DragHandler = new class {
 		self._lastTarget = null;
 		self._originSource = null;
 		self._dragSource = null;
+		self._inTimeout = false;
 		$(window).mousemove(function(event) {
 			if (toggledInto.length == 0) return;
 			window.requestAnimationFrame(function() {
@@ -281,6 +285,8 @@ var DragHandler = new class {
 	clear() {
 		var self = this;
 		self._dragging = false;
+		self._inTimeout = true;
+
 		$(self._sampleItem).css({
 			'width': "0px",
 			'height': "0px",
@@ -302,6 +308,10 @@ var DragHandler = new class {
 			'opacity': 0
 		});
 		$(self._sampleItem).removeClass("smooth");
+		setTimeout(function() {
+			self._inTimeout = false;
+			lastInteraction = Date.now();
+		},200)
 	}
 	refreshStorages() {
 		let self = this;
@@ -597,13 +607,13 @@ var DragHandler = new class {
 		}
 	}
 	get busy() {
-		return this._dragging;
+		return this._dragging && this._inTimeout;
 	}
 	isDragging() {
-		return this._dragging;
+		return this._dragging && this._inTimeout;
 	}
 	isDraggable(item) {
-		if (!self._dragging) {
+		if (!this._dragging && !this._inTimeout) {
 			return true;
 		}
 		return false;
@@ -803,6 +813,8 @@ var DragHandler = new class {
 		}
 	}
 }
+
+
 var Storage = class {
 	constructor(selector, options) {
 		let self = this;
@@ -834,6 +846,7 @@ var Storage = class {
 			if (self.isToggled == false) return;
 			if (ContextHandler.busy == true) return;
 			if (DragHandler.busy == true) return;
+			if ((Date.now() - lastInteraction) < 200) return;
 			console.log(self._rawSelector);
 			if (self._rawSelector == "#inventory") {
 				event.preventDefault();
@@ -880,6 +893,7 @@ var Storage = class {
 			if (self.isToggled == false) return;
 			if (ContextHandler.busy == true) return;
 			if (DragHandler.busy == true) return;
+			if ((Date.now() - lastInteraction) < 200) return;
 			console.log("mousedown check2");
 			event.preventDefault();
 			console.log("mousedown check3");
@@ -1391,6 +1405,7 @@ var CustomSlots = class {
 			if (self.isToggled == false) return;
 			if (ContextHandler.busy == true) return;
 			if (DragHandler.busy == true) return;
+			if ((Date.now() - lastInteraction) < 200) return;
 			event.preventDefault();
 			let cTarget = event.currentTarget;
 			if ($(event.currentTarget).hasClass("item") == false) {

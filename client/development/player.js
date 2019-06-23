@@ -24,31 +24,7 @@ mp.events.add("HUD:Ready", () => {
 	CEFHud.call("init", anchor);
 	initDone = true;
 });
-mp.events.add("Sync:StopAnimSync", (tID, dict, name) => {
-	var player = mp.players.atRemoteId(tID);
-	if (player) {
-		player.stopAnimTask(dict, name, 1);
-	}
-});
-mp.events.add("Sync:PlayAnimation", (tID, dict, name, speed, speedMultiplier, duration, flag, playbackRate, lockX, lockY, lockZ, timeout) => {
-	var player = mp.players.atRemoteId(tID);
-	if (player) {
-		if (mp.game.streaming.doesAnimDictExist(dict)) {
-			mp.game.streaming.requestAnimDict(dict);
-			while (mp.game.streaming.hasAnimDictLoaded(dict)) {
-				break;
-			}
-			console.log("sync play started for", player.name, dict, name);
-			console.log(dict, name, speed, speedMultiplier, duration, flag, playbackRate, lockX, lockY, lockZ,timeout);
-			player.taskPlayAnim(dict, name, speed, speedMultiplier, duration, flag, playbackRate, lockX, lockY, lockZ);
-			if (timeout != 0) {
-				setTimeout(function() {
-					player.stopAnimTask(dict, name, 1);
-				}, timeout)
-			}
-		}
-	}
-});
+
 const statNames = ["SP0_STAMINA﻿", "SP0_STRENGTH", "SP0_LUNG_CAPACITY", "SP0_WHEELIE_ABILITY", "SP0_FLYING_ABILITY", "SP0_SHOOTING_ABILITY", "SP0_STEALTH_ABILITY"];
 // maybe playerReady can be used instead, haven't tested
 mp.events.add("playerSpawn", () => {

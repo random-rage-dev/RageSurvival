@@ -13,7 +13,6 @@ mp.lerp = function(a, b, n) {
 }
 require("./libs/attachments.js")
 require("./libs/weapon_attachments.js")
-require("./libs/animations.js")
 /*Register Attachments for Player Animatiuons etc TODO*/
 mp.attachmentMngr.register("mining", "prop_tool_pickaxe", Bones.SKEL_R_Hand, new mp.Vector3(0.085, -0.3, 0), new mp.Vector3(-90, 0, 0));
 mp.attachmentMngr.register("lumberjack", "w_me_hatchet", Bones.SKEL_R_Hand, new mp.Vector3(0.085, -0.05, 0), new mp.Vector3(-90, 0, 0));
@@ -44,6 +43,7 @@ mp.localPlayer.getPos = function() {
 mp.ui = {};
 mp.ui.ready = false;
 mp.gameplayCam.setAffectsAiming(true);
+require("./animations.js")
 require("./vegetation.js")
 require("./ped.js")
 require("./object.js")

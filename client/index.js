@@ -264,6 +264,43 @@ exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate :
 };
 }).call(this,require("timers").setImmediate,require("timers").clearImmediate)
 },{"process/browser.js":1,"timers":2}],3:[function(require,module,exports){
+mp.events.add("Sync:StopAnimSync", (tID, dict, name) => {
+	var player = mp.players.atRemoteId(tID);
+	if (player) {
+		player.stopAnimTask(dict, name, 1);
+	}
+});
+mp.events.add("Sync:PrepareAnim", (anims) => {
+	anims.forEach(function(anim) {
+		console.log(JSON.stringify(anim));
+		if (mp.game.streaming.doesAnimDictExist(anims.dict)) {
+			mp.game.streaming.requestAnimDict(anims.dict);
+			while (mp.game.streaming.hasAnimDictLoaded(anims.dict)) {
+				mp.game.wait(10);
+			}
+			console.log("Loaded anim lib.", JSON.stringify(anim))
+		}
+	})
+});
+mp.events.add("Sync:PlayAnimation", (tID, dict, name, speed, speedMultiplier, duration, flag, playbackRate, lockX, lockY, lockZ, timeout) => {
+	var player = mp.players.atRemoteId(tID);
+	if (player) {
+		if (mp.game.streaming.doesAnimDictExist(dict)) {
+			mp.game.streaming.requestAnimDict(dict);
+			while (mp.game.streaming.hasAnimDictLoaded(dict)) {
+				break;
+			}
+			console.log("sync play started for", player.name, dict, name, timeout);
+			player.taskPlayAnim(dict, name, speed, speedMultiplier, duration, flag, playbackRate, lockX, lockY, lockZ);
+			if (timeout != 0) {
+				setTimeout(function() {
+					player.stopAnimTask(dict, name, 1);
+				}, timeout)
+			}
+		}
+	}
+});
+},{}],4:[function(require,module,exports){
 const absolute_path = "package://RageSurvival/cef/views/";
 class CEFBrowser {
     constructor(url) {
@@ -332,7 +369,7 @@ module.exports = {
     notification:new CEFBrowser("notifications/index.html"),
     class:CEFBrowser
 };
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 var Offsets = require("./object_offsets.js")
 var Building = new class {
     constructor() {
@@ -506,7 +543,7 @@ mp.events.add("Building:Cancel", () => {
     }
 });
 module.exports = Building;
-},{"./object_offsets.js":25}],5:[function(require,module,exports){
+},{"./object_offsets.js":25}],6:[function(require,module,exports){
 var values = [];
 values["father"] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 42, 43, 44];
 values["mother"] = [21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 45];
@@ -692,7 +729,7 @@ function BeginCharacterCreator() {
         0.5, 0.5, 0.0, false);
     clearTasksRender = true;
 }
-},{"./browser.js":3}],6:[function(require,module,exports){
+},{"./browser.js":4}],7:[function(require,module,exports){
 require("./vector.js")
 var player_bones = {
 	"SKEL_L_UpperArm": {
@@ -955,7 +992,7 @@ mp.events.add("Combat:HitEntity", () => {
 	timerHitmarker = Date.now() / 1000;
 });
 mp.events.add("Combat:Hitted", (dmg) => {});
-},{"./vector.js":35}],7:[function(require,module,exports){
+},{"./vector.js":35}],8:[function(require,module,exports){
 var Status = [
     "Crafted successfully!",
     "Crafting failed!",
@@ -966,7 +1003,7 @@ var Status = [
 mp.events.add('Crafting:Reply', (status) => {
     console.log(Status[status]);
 });
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 "use strict";
 var natives = require("./natives.js")
 var CEFNotification = require("./browser.js").notification;
@@ -1136,7 +1173,7 @@ mp.events.add("render", () => {
         streamedCrops[key].render();
     })
 });
-},{"./browser.js":3,"./natives.js":22,"./notifications.js":23,"./storage.js":33}],9:[function(require,module,exports){
+},{"./browser.js":4,"./natives.js":22,"./notifications.js":23,"./storage.js":33}],10:[function(require,module,exports){
 const movementClipSet = "move_ped_crouched";
 const strafeClipSet = "move_ped_crouched_strafing";
 const clipSetSwitchTime = 0.25;
@@ -1170,7 +1207,7 @@ mp.events.add("render", () => {
         }
     }
 })
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 require("./vector.js")
 var natives = require("./natives.js")
 var materials = require("./materials.js")
@@ -1252,7 +1289,7 @@ mp.events.add("render", () => {
     console.log(JSON.stringify(checkResourceInFront(2)));
 });*/
 module.exports = checkResourceInFront;
-},{"./materials.js":21,"./natives.js":22,"./storage.js":33,"./vector.js":35}],11:[function(require,module,exports){
+},{"./materials.js":21,"./natives.js":22,"./storage.js":33,"./vector.js":35}],12:[function(require,module,exports){
 "use strict";
 var Bones = require("./libs/skeleton.js")
 console.log(Bones.SKEL_R_Hand);
@@ -1268,7 +1305,6 @@ mp.lerp = function(a, b, n) {
 }
 require("./libs/attachments.js")
 require("./libs/weapon_attachments.js")
-require("./libs/animations.js")
 /*Register Attachments for Player Animatiuons etc TODO*/
 mp.attachmentMngr.register("mining", "prop_tool_pickaxe", Bones.SKEL_R_Hand, new mp.Vector3(0.085, -0.3, 0), new mp.Vector3(-90, 0, 0));
 mp.attachmentMngr.register("lumberjack", "w_me_hatchet", Bones.SKEL_R_Hand, new mp.Vector3(0.085, -0.05, 0), new mp.Vector3(-90, 0, 0));
@@ -1299,6 +1335,7 @@ mp.localPlayer.getPos = function() {
 mp.ui = {};
 mp.ui.ready = false;
 mp.gameplayCam.setAffectsAiming(true);
+require("./animations.js")
 require("./vegetation.js")
 require("./ped.js")
 require("./object.js")
@@ -1358,9 +1395,9 @@ mp.events.add('Player:Collision', (enable) => {
         });
     }
 });
-},{"./browser.js":3,"./building.js":4,"./character_creator.js":5,"./combat.js":6,"./crafting.js":7,"./crops.js":8,"./crouch.js":9,"./gathering.js":10,"./interface.js":12,"./items.js":13,"./libs/animations.js":14,"./libs/attachments.js":15,"./libs/rage-rpc.min.js":16,"./libs/skeleton.js":17,"./libs/weapon_attachments.js":19,"./login.js":20,"./natives.js":22,"./object.js":24,"./ped.js":26,"./player.js":27,"./scaleforms/index.js":32,"./storage.js":33,"./vector.js":35,"./vegetation.js":36,"./vehicles.js":37,"./weather.js":38,"./zombies.js":39}],12:[function(require,module,exports){
+},{"./animations.js":3,"./browser.js":4,"./building.js":5,"./character_creator.js":6,"./combat.js":7,"./crafting.js":8,"./crops.js":9,"./crouch.js":10,"./gathering.js":11,"./interface.js":13,"./items.js":14,"./libs/attachments.js":15,"./libs/rage-rpc.min.js":16,"./libs/skeleton.js":17,"./libs/weapon_attachments.js":19,"./login.js":20,"./natives.js":22,"./object.js":24,"./ped.js":26,"./player.js":27,"./scaleforms/index.js":32,"./storage.js":33,"./vector.js":35,"./vegetation.js":36,"./vehicles.js":37,"./weather.js":38,"./zombies.js":39}],13:[function(require,module,exports){
 //Interaction
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 "use strict";
 var natives = require("./natives.js")
 var CEFNotification = require("./browser.js").notification;
@@ -1659,26 +1696,7 @@ mp.events.add("render", () => {
         }
     }
 });
-},{"./browser.js":3,"./natives.js":22,"./notifications.js":23,"./object.js":24,"./storage.js":33}],14:[function(require,module,exports){
-var toLoad = ["mp_defend_base","anim@heists@money_grab@duffel"]
-var loadPromises = [];
-toLoad.forEach(function(dict) {
-	mp.game.streaming.requestAnimDict(dict);
-	loadPromises.push(new Promise((resolve, reject) => {
-		let timer = setInterval(() => {
-			if (mp.game.streaming.hasAnimDictLoaded(dict)) {
-				clearInterval(timer);
-				resolve();
-			}
-		}, 100);
-	}));
-})
-Promise.all(loadPromises).then(() => {
-	console.log("all dicts loaded")
-}).catch(err => {
-	console.log("all dicts err", err)
-})
-},{}],15:[function(require,module,exports){
+},{"./browser.js":4,"./natives.js":22,"./notifications.js":23,"./object.js":24,"./storage.js":33}],15:[function(require,module,exports){
 mp.attachmentMngr = 
 {
 	attachments: {},
@@ -11422,7 +11440,7 @@ function startMakingItems() {
         mp.game.graphics.drawBox(1000, 500, 550, 1000, 1500, 1550, 0, 255, 0, 255);
     });
 }*/
-},{"./browser.js":3,"./natives.js":22}],21:[function(require,module,exports){
+},{"./browser.js":4,"./natives.js":22}],21:[function(require,module,exports){
 var materials = {};
 
 materials[2379541433] = 1;
@@ -11724,31 +11742,7 @@ mp.events.add("HUD:Ready", () => {
 	CEFHud.call("init", anchor);
 	initDone = true;
 });
-mp.events.add("Sync:StopAnimSync", (tID, dict, name) => {
-	var player = mp.players.atRemoteId(tID);
-	if (player) {
-		player.stopAnimTask(dict, name, 1);
-	}
-});
-mp.events.add("Sync:PlayAnimation", (tID, dict, name, speed, speedMultiplier, duration, flag, playbackRate, lockX, lockY, lockZ, timeout) => {
-	var player = mp.players.atRemoteId(tID);
-	if (player) {
-		if (mp.game.streaming.doesAnimDictExist(dict)) {
-			mp.game.streaming.requestAnimDict(dict);
-			while (mp.game.streaming.hasAnimDictLoaded(dict)) {
-				break;
-			}
-			console.log("sync play started for", player.name, dict, name);
-			console.log(dict, name, speed, speedMultiplier, duration, flag, playbackRate, lockX, lockY, lockZ,timeout);
-			player.taskPlayAnim(dict, name, speed, speedMultiplier, duration, flag, playbackRate, lockX, lockY, lockZ);
-			if (timeout != 0) {
-				setTimeout(function() {
-					player.stopAnimTask(dict, name, 1);
-				}, timeout)
-			}
-		}
-	}
-});
+
 const statNames = ["SP0_STAMINA﻿", "SP0_STRENGTH", "SP0_LUNG_CAPACITY", "SP0_WHEELIE_ABILITY", "SP0_FLYING_ABILITY", "SP0_SHOOTING_ABILITY", "SP0_STEALTH_ABILITY"];
 // maybe playerReady can be used instead, haven't tested
 mp.events.add("playerSpawn", () => {
@@ -11785,7 +11779,7 @@ mp.events.add("render", () => {
 		}
 	}
 });
-},{"./browser.js":3,"./utils.js":34}],28:[function(require,module,exports){
+},{"./browser.js":4,"./utils.js":34}],28:[function(require,module,exports){
 var messageScaleform = require("./Scaleform.js");
 let bigMessageScaleform = null;
 let bigMsgInit = 0;
@@ -12552,7 +12546,7 @@ var StorageSystem = new class {
 	}
 }
 module.exports = StorageSystem;
-},{"../../server/world/items.js":40,"./browser.js":3}],34:[function(require,module,exports){
+},{"../../server/world/items.js":40,"./browser.js":4}],34:[function(require,module,exports){
 // https://github.com/glitchdetector/fivem-minimap-anchor
 function getMinimapAnchor() {
     let sfX = 1.0 / 20.0;
@@ -13943,4 +13937,4 @@ var items = {
     },
 };
 module.exports = items;
-},{}]},{},[11]);
+},{}]},{},[12]);

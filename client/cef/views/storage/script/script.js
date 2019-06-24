@@ -7,8 +7,6 @@ const padding = parseInt(style.getPropertyValue('--padding').replace("px", ""));
 var mouseDown = 0;
 var shiftDown = 0;
 var controlDown = 0;
-
-
 var lastInteraction = 0;
 document.body.onmousedown = function(e) {
 	if (e.which == 1) {
@@ -42,7 +40,7 @@ var ContextHandler = new class {
 		self._busy = false;
 		self._contextItemData = {};
 		self._origin = "";
-		$(window).on("click",function(event) {
+		$(window).on("click", function(event) {
 			if (event.which != 1) return;
 			if (self.busy != true) return;
 			event.preventDefault();
@@ -61,7 +59,7 @@ var ContextHandler = new class {
 		let item = this._contextItemData;
 		if (item) {
 			console.log("item", item);
-			mp.trigger("Storage:Action",what,this._origin,item.id)
+			mp.trigger("Storage:Action", what, this._origin, item.id)
 			this._busy = false;
 			this.close();
 		}
@@ -286,7 +284,6 @@ var DragHandler = new class {
 		var self = this;
 		self._dragging = false;
 		self._inTimeout = true;
-
 		$(self._sampleItem).css({
 			'width': "0px",
 			'height': "0px",
@@ -311,7 +308,7 @@ var DragHandler = new class {
 		setTimeout(function() {
 			self._inTimeout = false;
 			lastInteraction = Date.now();
-		},200)
+		}, 200)
 	}
 	refreshStorages() {
 		let self = this;
@@ -813,8 +810,6 @@ var DragHandler = new class {
 		}
 	}
 }
-
-
 var Storage = class {
 	constructor(selector, options) {
 		let self = this;
@@ -857,8 +852,11 @@ var Storage = class {
 					cTarget = $(event.currentTarget).parents(".item")[0];
 				}
 				if (cTarget) {
-				console.log("f");
-					ContextHandler.open(event, cTarget, self._rawSelector);
+					console.log("f");
+					let data = $(cTarget).data("item");
+					if (data.item.id != "NEW") {
+						ContextHandler.open(event, cTarget, self._rawSelector);
+					}
 				}
 			}
 		});
@@ -906,8 +904,10 @@ var Storage = class {
 					if (mouseDown == 1) {
 						if (DragHandler.isDraggable(cTarget) == true) {
 							let data = $(cTarget).data("item");
-							DragHandler.Handle(event, cTarget, self);
-							self.removeItemBySlot(data.cell, data.row);
+							if (data.item.id != "NEW") {
+								DragHandler.Handle(event, cTarget, self);
+								self.removeItemBySlot(data.cell, data.row);
+							}
 							self.render()
 							$(window).unbind("mousemove", mEvent)
 							$(window).unbind("mouseup", uEvent)

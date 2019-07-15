@@ -11,6 +11,7 @@ var Building = class {
 			this._id = data._id;
 			this.health = data.health;
 			this.model = data.model;
+			this._dim = data.dim;
 			this.pos = {
 				x: data.x,
 				y: data.y,
@@ -112,7 +113,8 @@ var BuildingManager = new class {
 				rot_y: rot.y,
 				rot_z: rot.z,
 				data: data,
-				owner_id: player.class.id
+				owner_id: player.class.id,
+				dim:player.dim
 			}).save();
 			self._allObjects[dbObject._id] = new Building(dbObject);
 			console.log("Saving..:", dbObject);

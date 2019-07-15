@@ -170,6 +170,7 @@ var buildings = mongoose.Schema({
     rot_x: Number,
     rot_y: Number,
     rot_z: Number,
+    dim:Number,
     placed: {
         type: Number,
         default: Date.now()

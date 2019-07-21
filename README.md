@@ -65,9 +65,11 @@ If you feel like contacting me for whatever reason
 
 
 
-
 ### RageMP Resource Credits
 - Thanks to [RageMPDev](https://rage.mp/profile/1-ragempdev/) for his  [Attachment System](https://rage.mp/files/file/144-efficient-attachment-sync/)
 - Thanks to [rootcause](https://rage.mp/profile/17917-rootcause/) for his [Crouch System](https://rage.mp/files/file/79-crouch/) and his [Scaleform Messages Script](https://rage.mp/files/file/26-scaleform-messages/)
 - Thanks to Larsf96 for this CEFBrowser Class.
 
+----
+
+[Discord](https://discord.gg/SkqSTTM)

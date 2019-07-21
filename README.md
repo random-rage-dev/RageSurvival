@@ -1,5 +1,5 @@
 # RageZombies
-Zombie Survival Gamemode for RageMP [RageMp](https://rage.mp/)
+Zombie Survival Gamemode for [RageMp](https://rage.mp/)
 
 ### Installation!
 

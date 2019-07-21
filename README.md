@@ -3,7 +3,7 @@ Zombie Survival Gamemode for [RageMp](https://rage.mp/)
 
 ### Installation!
 
-  Prerequisites: `MongoDB, NodeJS > 8.0.0`
+  Prerequisites: `MongoDB, NodeJS > 8.0.0, Intermediate JS Knowledge`
   - install all needed packages using `npm i`
   - compile "compile" clientside code using `watchify client/development/index.js -o client/index.js`
   - edit app.js to fit your environment

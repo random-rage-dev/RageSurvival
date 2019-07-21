@@ -7,7 +7,6 @@ class CEFBrowser {
         let self = this;
         self.browser = mp.browsers.new(absolute_path + url);
         self.cursorState = false;
-       // console.log("new instance");
 
     }
     call() {

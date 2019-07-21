@@ -60,8 +60,7 @@ Please visit [License](https://github.com/Z8pn/RageSurvival/blob/master/LICENSE)
 ### Contact
 If you feel like contacting me for whatever reason
 - [Steam](https://steamcommunity.com/id/z8pn/)
-- [Discord: Z8pn#1337](Z8pn#1337)
-- 
+- [Discord](Z8pn#1337)
 
 
 
